@@ -35,6 +35,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "63BD58A21C35C1F8D8E86FB5"
+               BuildableName = "paybakTests.xctest"
+               BlueprintName = "paybakTests"
+               ReferencedContainer = "container:paybak.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "E8107936F7C9F6B1A171C767"
                BuildableName = "paybakUITests.xctest"
                BlueprintName = "paybakUITests"

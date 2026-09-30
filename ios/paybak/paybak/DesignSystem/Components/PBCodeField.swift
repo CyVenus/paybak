@@ -4,6 +4,7 @@ import SwiftUI
 /// field with the one-time-code content type, so SMS codes autofill. Typing fills left to right, the
 /// next empty box shows the caret, Backspace clears the last digit, and tapping the row focuses it.
 /// `onComplete` runs when the sixth digit is entered; the screen decides whether the code is right.
+/// In the error state, typing a digit starts over from the first box.
 ///
 /// The row fills the width with space-between (362 pt → 14.8 pt gaps, boxes at 0, 62.8, …, 314).
 /// On narrow screens the boxes shrink to keep a 12 pt minimum gap.
@@ -51,8 +52,13 @@ struct PBCodeField: View {
         }
         .contentShape(.rect)
         .onTapGesture { focus.wrappedValue = true }
-        .onChange(of: code) { _, newValue in
-            let digits = String(newValue.filter(\.isWholeNumber).prefix(Self.length))
+        .onChange(of: code) { oldValue, newValue in
+            var digits = newValue.filter(\.isWholeNumber)
+            if isError, newValue.count > oldValue.count, newValue.hasPrefix(oldValue) {
+                // Typing after a wrong code starts over with what was just typed.
+                digits = String(newValue.dropFirst(oldValue.count)).filter(\.isWholeNumber)
+            }
+            digits = String(digits.prefix(Self.length))
             if digits != newValue {
                 code = digits
             } else if digits.count == Self.length {
