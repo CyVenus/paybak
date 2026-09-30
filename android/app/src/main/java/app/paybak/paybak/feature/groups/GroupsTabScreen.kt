@@ -57,7 +57,8 @@ fun GroupsTabScreen(route: Route.Groups) {
     val summary = remember(snapshot) { view.friendsSummary(snapshot.friends) }
     val state =
         when {
-            segment == GroupsSegment.Friends -> if (friends.isEmpty()) "friendsEmpty" else "friendsList"
+            segment == GroupsSegment.Friends ->
+                if (friends.isEmpty()) "friendsEmpty" else "friendsList"
             groups.rows.isEmpty() && groups.archived.isEmpty() -> "groupsEmpty"
             else -> "groupsList"
         }
@@ -112,7 +113,10 @@ fun GroupsTabScreen(route: Route.Groups) {
                 GroupsSegment.Friends -> FriendsSegmentContent(friends, summary)
             }
         }
-        PbNavHeaderInline(stringResource(R.string.groups_title), visible = scroll.value > titleHeight)
+        PbNavHeaderInline(
+            stringResource(R.string.groups_title),
+            visible = scroll.value > titleHeight,
+        )
         Box(Modifier.testTag("groups.state.$state"))
     }
 }

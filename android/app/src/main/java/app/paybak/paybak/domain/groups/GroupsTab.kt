@@ -161,7 +161,12 @@ fun LedgerView.friendListRow(balance: FriendBalance): FriendListRow {
                 else -> null
             },
         overdue = balance.badge?.takeIf { net > 0 && balance.overdue },
-        status = if (net != 0L) null else if (sharesAnything(balance.person.id)) "Settled" else "No balance",
+        status =
+            when {
+                net != 0L -> null
+                sharesAnything(balance.person.id) -> "Settled"
+                else -> "No balance"
+            },
     )
 }
 

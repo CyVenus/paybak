@@ -91,13 +91,17 @@ fun GroupSettingsScreen(route: Route.GroupSettings) {
     val peopleRequest = rememberSaveable { newId() }
     val currencyRequest = rememberSaveable { newId() }
     RouteResultEffect(dateRequest) { result ->
-        if (result is RouteResult.Day) ledger.updateGroup(groupId) { it.copy(settleBy = result.day) }
+        if (result is RouteResult.Day) {
+            ledger.updateGroup(groupId) { it.copy(settleBy = result.day) }
+        }
     }
     RouteResultEffect(peopleRequest) { result ->
         if (result is RouteResult.People) ledger.addMembers(groupId, result.personIds - ME)
     }
     RouteResultEffect(currencyRequest) { result ->
-        if (result is RouteResult.Currency) ledger.updateGroup(groupId) { it.copy(currency = result.code) }
+        if (result is RouteResult.Currency) {
+            ledger.updateGroup(groupId) { it.copy(currency = result.code) }
+        }
     }
 
     PbPushedPage(
@@ -198,38 +202,36 @@ fun GroupSettingsScreen(route: Route.GroupSettings) {
         )
     }
 
-    if (leaving) {
-        when (val check = view.leaveCheck(groupId)) {
-            is LeaveCheck.Blocked ->
-                PbAlert(
-                    title = stringResource(R.string.groups_leave_blocked_title),
-                    message = check.message,
-                    cancelLabel = stringResource(R.string.groups_not_now),
-                    actionLabel = stringResource(R.string.pb_settle_up),
-                    onCancel = { leaving = false },
-                    onAction = {
-                        leaving = false
-                        navigator.settle(view, check.settle)
-                    },
-                    action = PbAlertAction.Primary,
-                    testTag = "groupSettings.leaveBlocked",
-                )
-            is LeaveCheck.Confirm ->
-                PbAlert(
-                    title = check.title,
-                    message = check.message,
-                    cancelLabel = stringResource(R.string.groups_cancel),
-                    actionLabel = stringResource(R.string.groups_leave_action),
-                    onCancel = { leaving = false },
-                    onAction = {
-                        leaving = false
-                        ledger.leaveGroup(groupId)
-                        navigator.popToRoot()
-                    },
-                    testTag = "groupSettings.leaveConfirm",
-                )
-            null -> leaving = false
-        }
+    when (val check = if (leaving) view.leaveCheck(groupId) else null) {
+        is LeaveCheck.Blocked ->
+            PbAlert(
+                title = stringResource(R.string.groups_leave_blocked_title),
+                message = check.message,
+                cancelLabel = stringResource(R.string.groups_not_now),
+                actionLabel = stringResource(R.string.pb_settle_up),
+                onCancel = { leaving = false },
+                onAction = {
+                    leaving = false
+                    navigator.settle(view, check.settle)
+                },
+                action = PbAlertAction.Primary,
+                testTag = "groupSettings.leaveBlocked",
+            )
+        is LeaveCheck.Confirm ->
+            PbAlert(
+                title = check.title,
+                message = check.message,
+                cancelLabel = stringResource(R.string.groups_cancel),
+                actionLabel = stringResource(R.string.groups_leave_action),
+                onCancel = { leaving = false },
+                onAction = {
+                    leaving = false
+                    ledger.leaveGroup(groupId)
+                    navigator.popToRoot()
+                },
+                testTag = "groupSettings.leaveConfirm",
+            )
+        null -> Unit
     }
 }
 

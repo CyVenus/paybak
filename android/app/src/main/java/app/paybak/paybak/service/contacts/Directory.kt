@@ -94,7 +94,8 @@ fun Directory.addFriendLists(contacts: List<DeviceContact>, query: String): AddF
     val q = fold(query)
     if (q.isEmpty()) return AddFriendLists(onPaybak.values.toList(), invite.values.toList())
     val found = onPaybak.values.filter { it.person.matches(q) }.toMutableList()
-    val invites = invite.values.filter { fold(it.name).contains(q) || contactMatches(it.contact, q) }
+    val invites =
+        invite.values.filter { fold(it.name).contains(q) || contactMatches(it.contact, q) }
     if (query.trim().startsWith("@")) {
         byUsername(query)?.takeIf { !it.isGuest && found.none { row -> row.person.id == it.id } }
             ?.let { found += OnPaybakRow(it, isFriend(it)) }
@@ -104,7 +105,8 @@ fun Directory.addFriendLists(contacts: List<DeviceContact>, query: String): AddF
         return if (person != null && !person.isGuest) {
             AddFriendLists(listOf(OnPaybakRow(person, isFriend(person))), emptyList())
         } else {
-            AddFriendLists(emptyList(), listOf(InviteRow(person?.name ?: query.trim(), query.trim())))
+            val contact = query.trim()
+            AddFriendLists(emptyList(), listOf(InviteRow(person?.name ?: contact, contact)))
         }
     }
     return AddFriendLists(found, invites)

@@ -124,7 +124,8 @@ private fun LedgerView.groupPage(subtitle: String, sheet: GroupSheet): GroupPage
                 .map { (date, expenses) ->
                     ExpenseDay(
                         date,
-                        if (date.year == today.year) Dates.day(date) else "${Dates.day(date)} ${date.year}",
+                        if (date.year == today.year) Dates.day(date)
+                        else "${Dates.day(date)} ${date.year}",
                         expenses.sortedByDescending { it.createdAt }.map { expense ->
                             GroupExpenseRow(
                                 expense = expense,
@@ -272,7 +273,8 @@ fun LedgerView.groupSettingsPage(groupId: String, me: MemberIdentity): GroupSett
         members =
             group.membersYouFirst().map { id ->
                 if (id == ME) {
-                    SettingsMember(ME, "${me.name} (you)", me.upi ?: me.username?.let { "@$it" }, false)
+                    val handle = me.upi ?: me.username?.let { "@$it" }
+                    SettingsMember(ME, "${me.name} (you)", handle, guest = false)
                 } else {
                     val person = person(id)
                     SettingsMember(

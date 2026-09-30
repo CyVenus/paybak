@@ -88,7 +88,9 @@ fun LedgerView.friendPageModel(personId: String, summaries: List<GroupSummary>):
     return FriendPageModel(
         person = person,
         subtitle = if (person.isGuest) null else person.upi ?: person.username?.let { "@$it" },
-        balance = if (shared) friendBalanceCard(person, net, lead, balance.overdue, balance.badge) else null,
+        balance =
+            if (shared) friendBalanceCard(person, net, lead, balance.overdue, balance.badge)
+            else null,
         net = net,
         remindContext = lead?.reminderContext(),
         paymentContext = balance.items.singleOrNull()?.paymentContext() ?: PaymentContext(),
@@ -110,7 +112,10 @@ private fun LedgerView.friendBalanceCard(
     badge: String?,
 ): FriendBalanceCard {
     val amount = Money.format(net, defaultCurrency, MoneySign.Signed)
-    val caption = lead?.let { item -> item.due?.let { "${item.title} · ${Dates.dueLabel(it)}" } ?: item.title }
+    val caption =
+        lead?.let { item ->
+            item.due?.let { "${item.title} · ${Dates.dueLabel(it)}" } ?: item.title
+        }
     return when {
         net > 0 ->
             FriendBalanceCard(
@@ -180,7 +185,8 @@ private fun LedgerView.historyRow(item: FriendHistoryItem, person: Person): Frie
                 }
             FriendHistoryRow(
                 item,
-                title = if (toMe) "${person.firstName} paid you" else "You paid ${person.firstName}",
+                title =
+                    if (toMe) "${person.firstName} paid you" else "You paid ${person.firstName}",
                 subtitle = "${paymentFor(payment)} · ${payment.method.label}$state",
                 amount = Money.format(payment.amount, payment.currency),
                 open = toMe,
@@ -227,7 +233,10 @@ private fun LedgerView.expenseRow(
             when {
                 square -> "${group.name} · Settled" to false
                 expense.payerId == ME -> "${group.name} · You paid" to true
-                else -> "${group.name} · Your share ${Money.format(myShare(expense), expense.currency)}" to true
+                else -> {
+                    val share = Money.format(myShare(expense), expense.currency)
+                    "${group.name} · Your share $share" to true
+                }
             }
         } else {
             val openItem =

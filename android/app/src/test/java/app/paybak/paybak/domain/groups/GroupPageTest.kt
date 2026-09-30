@@ -64,18 +64,36 @@ class GroupPageTest {
             assertNull(settle)
         }
         assertEquals(
-            listOf("Paid AED 540 · Share AED 600", "Paid AED 960 · Share AED 600", "Paid AED 300 · Share AED 600"),
+            listOf(
+                "Paid AED 540 · Share AED 600",
+                "Paid AED 960 · Share AED 600",
+                "Paid AED 300 · Share AED 600",
+            ),
             page.members.map { it.subtitle },
         )
         assertTrue(page.members.all { it.standing == Standing.Settled })
         assertEquals(listOf("Total AED 1,800 · ≈ ₹41,118 at saved rates"), page.notes)
+        val rows = page.days.flatMap { it.rows }
+        assertEquals(
+            listOf("Dinner at the Marina", "Desert safari", "Hotel"),
+            rows.map { it.expense.title },
+        )
         assertEquals(
             listOf(
-                listOf("Dinner at the Marina", "Meera paid · Your share AED 100", "AED 300", "≈ ₹6,870 · ₹22.90 per AED"),
-                listOf("Desert safari", "You paid · Your share AED 180", "AED 540", "≈ ₹12,312 · ₹22.80 per AED"),
-                listOf("Hotel", "Kabir paid · Your share AED 320", "AED 960", "≈ ₹21,936 · ₹22.85 per AED"),
+                "Meera paid · Your share AED 100",
+                "You paid · Your share AED 180",
+                "Kabir paid · Your share AED 320",
             ),
-            page.days.flatMap { it.rows }.map { listOf(it.expense.title, it.subtitle, it.amount, it.detail) },
+            rows.map { it.subtitle },
+        )
+        assertEquals(listOf("AED 300", "AED 540", "AED 960"), rows.map { it.amount })
+        assertEquals(
+            listOf(
+                "≈ ₹6,870 · ₹22.90 per AED",
+                "≈ ₹12,312 · ₹22.80 per AED",
+                "≈ ₹21,936 · ₹22.85 per AED",
+            ),
+            rows.map { it.detail },
         )
     }
 

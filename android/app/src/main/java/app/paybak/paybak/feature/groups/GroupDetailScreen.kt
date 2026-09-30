@@ -78,7 +78,10 @@ fun GroupDetailScreen(route: Route.Group) {
             memberAvatars = rememberAvatars(view, page.memberIds.take(4)),
         )
         Spacer(Modifier.height(PbSpace.S16))
-        BalanceCard(page.balance, onSettle = { page.balance.settle?.let { navigator.settle(view, it) } })
+        BalanceCard(
+            page.balance,
+            onSettle = { page.balance.settle?.let { navigator.settle(view, it) } },
+        )
         Spacer(Modifier.height(PbSpace.S24))
         if (page.isEmpty) {
             PbEmptyState(
@@ -183,7 +186,9 @@ private fun Expenses(days: List<ExpenseDay>) {
                         day.rows.forEach { row ->
                             PbActivityRow(
                                 leading =
-                                    PbAvatarContent.Symbol(Category.of(row.expense.category).pbIcon),
+                                    PbAvatarContent.Symbol(
+                                        Category.of(row.expense.category).pbIcon
+                                    ),
                                 title = row.expense.title,
                                 subtitle = row.subtitle,
                                 detail = row.detail,

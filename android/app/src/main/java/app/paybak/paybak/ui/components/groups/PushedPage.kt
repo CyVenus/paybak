@@ -40,10 +40,11 @@ import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
 
 /**
- * A pushed page as screens-groups §1.6 builds it: the Push Header pinned over a white band that runs
- * from the top edge to its bottom, and the content scrolling under the band, starting 16 dp below
- * the header. The root is tagged `screen.[id]`; the header's parts "[id].back" and "[id].action".
- * The keyboard lifts the end of the content, so a focused field can scroll into view.
+ * A pushed page as screens-groups §1.6 builds it: the Push Header pinned over a white band that
+ * runs from the top edge to its bottom, and the content scrolling under the band, starting 16 dp
+ * below the header. The root is tagged `screen.[id]`; the header's parts "[id].back" and
+ * "[id].action". The keyboard lifts the end of the content, so a focused field can scroll into
+ * view.
  *
  * @param overlay Drawn over everything, e.g. a local sheet.
  */
