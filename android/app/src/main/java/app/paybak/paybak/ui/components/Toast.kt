@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
@@ -85,7 +86,7 @@ class PbToastState {
 
 /**
  * Shows [state]'s toast: it fades in rising 8 dp (0.2 s), stays 2 s and fades out (0.2 s). A new
- * message restarts the 2 s. TalkBack announces it.
+ * message restarts the 2 s. TalkBack announces it; UI tests find it by the tag `toast`.
  */
 @Composable
 fun PbToastHost(state: PbToastState, modifier: Modifier = Modifier) {
@@ -110,7 +111,10 @@ fun PbToastHost(state: PbToastState, modifier: Modifier = Modifier) {
         label = "PbToastHost",
     ) { shown ->
         if (shown != null) {
-            PbToast(shown.text, Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            PbToast(
+                shown.text,
+                Modifier.testTag("toast").semantics { liveRegion = LiveRegionMode.Polite },
+            )
         }
     }
 }

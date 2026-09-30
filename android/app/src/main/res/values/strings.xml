@@ -35,6 +35,28 @@
     <string name="pb_view">View</string>
     <string name="pb_qr_code">QR code for %1$s</string>
     <string name="pb_take_photo">Take photo</string>
+    <string name="pb_settle_up">Settle up</string>
+    <string name="pb_all_settled">All settled</string>
+
+    <!-- App shell: tab bar, Add sheet, Activity header (app-architecture §2.3) -->
+    <string name="shell_tab_home">Home</string>
+    <string name="shell_tab_groups">Groups</string>
+    <string name="shell_tab_activity">Activity</string>
+    <string name="shell_tab_profile">Profile</string>
+    <string name="shell_add_title">Add</string>
+    <string name="shell_add_expense">Add expense</string>
+    <string name="shell_add_expense_subtitle">Split a bill with friends or a group</string>
+    <string name="shell_add_payment">Record payment</string>
+    <string name="shell_add_payment_subtitle">Log money you paid or received</string>
+    <string name="shell_add_lend">Lend money (IOU)</string>
+    <string name="shell_add_lend_subtitle">Track a loan and when it’s due</string>
+    <string name="shell_add_group">New group</string>
+    <string name="shell_add_group_subtitle">Flatmates, a trip or a project</string>
+    <string name="shell_activity_title">Activity</string>
+    <string name="shell_recently_deleted">Recently deleted</string>
+    <string name="shell_timeline">Timeline</string>
+    <string name="shell_insights">Insights</string>
+    <string name="shell_payment_confirmed">Payment confirmed</string>
 
     <!-- Welcome (screens-launch.md §2.4). Headline 1 breaks where Figma wraps it: kerned, the
          whole line would just fit in the 362 dp measure. The others wrap by themselves, and a hard

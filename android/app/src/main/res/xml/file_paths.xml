@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files the app shares through the system share sheet (SystemShare): CSV and PDF exports. -->
+<paths>
+    <cache-path name="exports" path="exports/" />
+</paths>

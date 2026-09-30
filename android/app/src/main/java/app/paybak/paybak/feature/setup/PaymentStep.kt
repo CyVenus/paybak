@@ -33,7 +33,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import app.paybak.paybak.R
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.isPlausibleUpiId
-import app.paybak.paybak.feature.profile.rememberProfileAvatar
 import app.paybak.paybak.ui.components.PbButton
 import app.paybak.paybak.ui.components.PbPaymentPreview
 import app.paybak.paybak.ui.components.PbScreenBody
@@ -41,6 +40,7 @@ import app.paybak.paybak.ui.components.PbTextField
 import app.paybak.paybak.ui.components.PbTitleBlock
 import app.paybak.paybak.ui.components.PbToastHost
 import app.paybak.paybak.ui.components.rememberPbToastState
+import app.paybak.paybak.ui.components.rememberUserAvatar
 import app.paybak.paybak.ui.theme.PbLayout
 import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
@@ -129,7 +129,7 @@ internal fun PaymentStep(profileStore: ProfileStore, onContinue: () -> Unit) {
             PbPaymentPreview(
                 name = profile.name,
                 upiId = trimmed,
-                avatar = rememberProfileAvatar(profile, profileStore),
+                avatar = rememberUserAvatar(profile, profileStore),
                 onCopy = copy,
                 placeholder = stringResource(R.string.setup3_placeholder),
                 copyButtonModifier = Modifier.testTag("setup3.copy"),

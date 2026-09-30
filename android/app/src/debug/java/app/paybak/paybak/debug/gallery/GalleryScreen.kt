@@ -38,6 +38,7 @@ private enum class GalleryPageId(val title: String) {
     Lists("Lists and detail"),
     Charts("Progress and charts"),
     Assistant("Assistant and scan"),
+    Shell("Tab bar, Add sheet, Home cards"),
     Rive("Rive"),
 }
 
@@ -99,6 +100,7 @@ fun GalleryScreen(initialPage: Int) {
                 GalleryPageId.Lists -> ListsPage()
                 GalleryPageId.Charts -> ChartsPage()
                 GalleryPageId.Assistant -> AssistantPage()
+                GalleryPageId.Shell -> ShellPage()
                 GalleryPageId.Rive -> RivePage()
             }
         }

@@ -8,25 +8,40 @@ import androidx.test.core.app.ApplicationProvider
 import app.paybak.paybak.data.UserProfile
 
 /**
- * Launches [MainActivity] like `adb shell am start` with the flow.md debug extras. Close the
- * scenario when done, e.g. `launchPaybak().use { … }`.
+ * Launches [MainActivity] like `adb shell am start` with the debug extras (flow.md,
+ * app-architecture §3.10). Close the scenario when done, e.g. `launchPaybak().use { … }`.
  *
- * @param startScreen A flow.md screen id; null starts normally, at Splash.
- * @param resetOnboarding Clears the saved profile first, as after a fresh install.
+ * @param startScreen A screen id of app-architecture §1; null starts normally, at Splash.
+ * @param resetOnboarding Clears the saved profile and ledger first, as after a fresh install.
+ * @param demoData Loads the demo at Figma parity without changing the start screen.
+ * @param scenarios Seed scenarios applied after the demo loads.
+ * @param now Pins the clock (`yyyy-MM-ddTHH:mm`, local).
+ * @param pro Overrides the plan last.
+ * @param link Opens an internal link as a notification tap would.
  */
 fun launchPaybak(
     startScreen: String? = null,
     resetOnboarding: Boolean = true,
+    demoData: Boolean = false,
+    scenarios: List<String> = emptyList(),
+    now: String? = null,
+    pro: Boolean? = null,
+    link: String? = null,
 ): ActivityScenario<MainActivity> {
     val intent =
         Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
             .putExtra("resetOnboarding", resetOnboarding)
+            .putExtra("demoData", demoData)
     startScreen?.let { intent.putExtra("startScreen", it) }
+    if (scenarios.isNotEmpty()) intent.putExtra("scenario", scenarios.joinToString(","))
+    now?.let { intent.putExtra("now", it) }
+    pro?.let { intent.putExtra("pro", it) }
+    link?.let { intent.putExtra("link", it) }
     return ActivityScenario.launch(intent)
 }
 
 /** Waits until the flow.md screen [id] (its `screen.<id>` root) is the only one of its kind. */
-fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 10_000) {
+fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 15_000) {
     waitUntil(timeoutMillis) {
         onAllNodes(hasTestTag("screen.$id")).fetchSemanticsNodes().size == 1
     }
@@ -39,6 +54,10 @@ fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 10_000) {
 fun ComposeTestRule.awaitTag(tag: String, timeoutMillis: Long = 5_000) {
     waitUntil(timeoutMillis) { onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty() }
 }
+
+/** The app's stores. */
+val paybakApp: PaybakApplication
+    get() = ApplicationProvider.getApplicationContext()
 
 /** The profile as the app has saved it. */
 val savedProfile: UserProfile

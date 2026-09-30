@@ -69,6 +69,8 @@ fun PbSegment(
 /**
  * `Control / Segmented` (`PBSegmentedControl`): 2–4 equal segments on a #F5F5F5 pill, single
  * selection. Figma widths: 240 (2 options), 330 (3), 362 (4); pass the width through [modifier].
+ *
+ * @param segmentTags One UI-test tag per option, e.g. "activity.segment.timeline".
  */
 @Composable
 fun PbSegmentedControl(
@@ -76,6 +78,7 @@ fun PbSegmentedControl(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    segmentTags: List<String>? = null,
 ) {
     Row(
         modifier =
@@ -90,7 +93,7 @@ fun PbSegmentedControl(
                 label = option,
                 selected = index == selectedIndex,
                 onClick = { onSelect(index) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).partTag(segmentTags?.getOrNull(index)),
             )
         }
     }

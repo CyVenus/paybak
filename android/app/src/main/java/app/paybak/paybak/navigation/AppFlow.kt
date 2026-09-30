@@ -10,13 +10,18 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.SignInMethod
-import app.paybak.paybak.feature.home.HomeScreen
+import app.paybak.paybak.data.ledger.LedgerRepository
+import app.paybak.paybak.data.ledger.isPro
 import app.paybak.paybak.feature.launch.GetStartedScreen
 import app.paybak.paybak.feature.launch.SplashScreen
 import app.paybak.paybak.feature.launch.WelcomeScreen
@@ -26,7 +31,7 @@ import app.paybak.paybak.feature.signin.SignInScreen
 import app.paybak.paybak.feature.signin.VerifyScreen
 import app.paybak.paybak.navigation.Destination.AllSet
 import app.paybak.paybak.navigation.Destination.GetStarted
-import app.paybak.paybak.navigation.Destination.Home
+import app.paybak.paybak.navigation.Destination.Main
 import app.paybak.paybak.navigation.Destination.Setup
 import app.paybak.paybak.navigation.Destination.SignIn
 import app.paybak.paybak.navigation.Destination.Splash
@@ -37,10 +42,20 @@ import app.paybak.paybak.ui.theme.PbMotion
 
 /**
  * The root flow: shows the top of [navigator]'s stack and wires every screen's navigation to the
- * flow.md table. Splash goes to Home when onboarding is complete, otherwise to Welcome.
+ * flow.md table. Splash goes to the app ([Main]) when onboarding is complete, otherwise to Welcome.
+ *
+ * @param mainStart Where the app opens (Home, or a debug start screen's stack).
+ * @param links Internal links from notifications, opened once the app shows.
+ * @param ledger The ledger store, first needed when the app shows.
  */
 @Composable
-fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
+fun AppFlow(
+    navigator: AppNavigator,
+    profileStore: ProfileStore,
+    mainStart: MainState,
+    links: DeepLinkInbox,
+    ledger: () -> LedgerRepository,
+) {
     val profile by profileStore.profile.collectAsState()
     BackHandler(enabled = navigator.handlesBack, onBack = navigator::back)
 
@@ -59,12 +74,7 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
                 SplashScreen(
                     onFinished = {
                         navigate {
-                            val next =
-                                if (profile.onboardingComplete) {
-                                    Home(HomeState.FirstDay)
-                                } else {
-                                    Welcome(1)
-                                }
+                            val next = if (profile.onboardingComplete) Main else Welcome(1)
                             resetTo(next, NavTransition.Dissolve)
                         }
                     }
@@ -137,19 +147,12 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
                 AllSetScreen(
                     firstName = profile.firstName,
                     onGoHome = {
-                        navigate { resetTo(Home(HomeState.FirstDay), NavTransition.Dissolve) }
+                        navigate { resetTo(Main, NavTransition.Dissolve) }
                     },
                 )
             }
 
-            is Home ->
-                HomeScreen(
-                    state = destination.state,
-                    addSheetOpen = destination.addSheetOpen,
-                    onAddSheetOpenChange = { open ->
-                        navigate { replace(destination.copy(addSheetOpen = open)) }
-                    },
-                )
+            Main -> MainRoot(mainStart, links, remember { ledger() })
         }
     }
 }
@@ -168,3 +171,28 @@ private fun transitionFor(transition: NavTransition): ContentTransform =
             fadeIn(tween(PbMotion.SKIP_MILLIS, easing = PbMotion.EaseInOut)) togetherWith
                 fadeOut(tween(PbMotion.SKIP_MILLIS, easing = PbMotion.EaseInOut))
     }
+
+/** The app after onboarding, with its navigator saved across recreation and process death. */
+@Composable
+private fun MainRoot(start: MainState, links: DeepLinkInbox, ledger: LedgerRepository) {
+    val isPro = { ledger.isPro }
+    val navigator =
+        rememberSaveable(
+            saver =
+                Saver(
+                    save = { it.state.encode() },
+                    restore = { MainNavigator(MainState.decode(it) ?: start, isPro) },
+                )
+        ) {
+            MainNavigator(start, isPro)
+        }
+    LaunchedEffect(navigator) {
+        links.pending.collect { link ->
+            DeepLink.parse(link)?.let(navigator::open)
+            links.consume(link)
+        }
+    }
+    CompositionLocalProvider(LocalLedger provides ledger, LocalMainNavigator provides navigator) {
+        MainHost(navigator)
+    }
+}

@@ -5,12 +5,17 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.content.edit
+import app.paybak.paybak.domain.model.AvatarLook
+import app.paybak.paybak.domain.model.LedgerJson
+import app.paybak.paybak.domain.model.Pronoun
+import app.paybak.paybak.domain.model.SavedPaymentMethod
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 
 /**
  * The saved [UserProfile], kept in the `profile` SharedPreferences; a custom photo lives in the
@@ -22,14 +27,17 @@ class ProfileStore(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val resolver = context.contentResolver
     private val photoDir = File(context.filesDir, PHOTO_DIR).apply { mkdirs() }
-    private val state = MutableStateFlow(read())
+    private val state = MutableStateFlow(read().normalized())
 
     val profile: StateFlow<UserProfile> = state.asStateFlow()
 
-    /** Saves the profile [transform] returns. A photo the new avatar no longer uses is deleted. */
+    /**
+     * Saves the profile [transform] returns, with its derived fields kept in step
+     * ([UserProfile.normalized]). A photo the new avatar no longer uses is deleted.
+     */
     fun update(transform: (UserProfile) -> UserProfile) {
         val previous = state.value
-        val next = transform(previous)
+        val next = transform(previous).normalized(previous)
         write(next)
         state.value = next
         if (next.avatar != previous.avatar) deletePhotos(except = next.avatar)
@@ -85,9 +93,30 @@ class ProfileStore(context: Context) {
                 },
             contact = prefs.getString(KEY_CONTACT, null).orEmpty(),
             onboardingComplete = prefs.getBoolean(KEY_ONBOARDING_COMPLETE, false),
+            username = prefs.getString(KEY_USERNAME, null).orEmpty(),
+            pronoun =
+                prefs.getString(KEY_PRONOUN, null)?.let { saved ->
+                    Pronoun.entries.firstOrNull { it.name == saved }
+                } ?: Pronoun.They,
+            paymentMethods =
+                prefs
+                    .getString(KEY_PAYMENT_METHODS, null)
+                    ?.let {
+                        runCatching { LedgerJson.decodeFromString(methodsSerializer, it) }
+                            .getOrNull()
+                    }
+                    .orEmpty(),
+            showPaymentToFriends = prefs.getBoolean(KEY_SHOW_PAYMENT_TO_FRIENDS, true),
         )
 
     private fun readAvatar(): AvatarChoice {
+        prefs.getString(KEY_AVATAR_CHARACTER, null)?.let { saved ->
+            runCatching { LedgerJson.decodeFromString(AvatarLook.serializer(), saved) }
+                .getOrNull()
+                ?.let {
+                    return AvatarChoice.Character(it)
+                }
+        }
         prefs.getString(KEY_AVATAR_PHOTO, null)?.let {
             return AvatarChoice.Photo(it)
         }
@@ -97,12 +126,16 @@ class ProfileStore(context: Context) {
 
     private fun write(profile: UserProfile) = prefs.edit {
         putString(KEY_NAME, profile.name)
+        remove(KEY_AVATAR_PRESET).remove(KEY_AVATAR_PHOTO).remove(KEY_AVATAR_CHARACTER)
         when (val avatar = profile.avatar) {
-            AvatarChoice.None -> remove(KEY_AVATAR_PRESET).remove(KEY_AVATAR_PHOTO)
-            is AvatarChoice.Preset ->
-                putInt(KEY_AVATAR_PRESET, avatar.index).remove(KEY_AVATAR_PHOTO)
-            is AvatarChoice.Photo ->
-                putString(KEY_AVATAR_PHOTO, avatar.fileName).remove(KEY_AVATAR_PRESET)
+            AvatarChoice.None -> Unit
+            is AvatarChoice.Preset -> putInt(KEY_AVATAR_PRESET, avatar.index)
+            is AvatarChoice.Photo -> putString(KEY_AVATAR_PHOTO, avatar.fileName)
+            is AvatarChoice.Character ->
+                putString(
+                    KEY_AVATAR_CHARACTER,
+                    LedgerJson.encodeToString(AvatarLook.serializer(), avatar.look),
+                )
         }
         putString(KEY_CURRENCY, profile.currencyCode)
         putString(KEY_UPI, profile.upiId)
@@ -110,6 +143,13 @@ class ProfileStore(context: Context) {
         putString(KEY_SIGN_IN_METHOD, profile.signInMethod?.name)
         putString(KEY_CONTACT, profile.contact)
         putBoolean(KEY_ONBOARDING_COMPLETE, profile.onboardingComplete)
+        putString(KEY_USERNAME, profile.username)
+        putString(KEY_PRONOUN, profile.pronoun.name)
+        putString(
+            KEY_PAYMENT_METHODS,
+            LedgerJson.encodeToString(methodsSerializer, profile.paymentMethods),
+        )
+        putBoolean(KEY_SHOW_PAYMENT_TO_FRIENDS, profile.showPaymentToFriends)
     }
 
     private companion object {
@@ -126,5 +166,11 @@ class ProfileStore(context: Context) {
         const val KEY_SIGN_IN_METHOD = "sign_in_method"
         const val KEY_CONTACT = "contact"
         const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
+        const val KEY_AVATAR_CHARACTER = "avatar_character"
+        const val KEY_USERNAME = "username"
+        const val KEY_PRONOUN = "pronoun"
+        const val KEY_PAYMENT_METHODS = "payment_methods"
+        const val KEY_SHOW_PAYMENT_TO_FRIENDS = "show_payment_to_friends"
+        val methodsSerializer = ListSerializer(SavedPaymentMethod.serializer())
     }
 }

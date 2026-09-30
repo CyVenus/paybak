@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.coerceAtMost
 import app.paybak.paybak.R
 import app.paybak.paybak.data.AvatarChoice
 import app.paybak.paybak.data.ProfileStore
-import app.paybak.paybak.feature.profile.rememberPhotoImage
+import app.paybak.paybak.domain.model.AvatarLook
+import app.paybak.paybak.domain.model.LedgerJson
 import app.paybak.paybak.ui.components.PbAvatarContent
 import app.paybak.paybak.ui.components.PbAvatarOption
 import app.paybak.paybak.ui.components.PbButton
@@ -50,6 +51,7 @@ import app.paybak.paybak.ui.components.PbScreenBody
 import app.paybak.paybak.ui.components.PbTextField
 import app.paybak.paybak.ui.components.PbTitleBlock
 import app.paybak.paybak.ui.components.keyboardWithGap
+import app.paybak.paybak.ui.components.rememberPhotoImage
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbLayout
 import app.paybak.paybak.ui.theme.PbSize
@@ -201,7 +203,9 @@ private fun AvatarPicker(
     }
 }
 
-/** Saves an [AvatarChoice] as "none", "preset:<index>" or "photo:<file name>". */
+/**
+ * Saves an [AvatarChoice] as "none", "preset:<index>", "photo:<file name>" or "character:<json>".
+ */
 private val AvatarChoiceSaver =
     Saver<AvatarChoice, String>(
         save = { choice ->
@@ -209,6 +213,8 @@ private val AvatarChoiceSaver =
                 AvatarChoice.None -> "none"
                 is AvatarChoice.Preset -> "preset:${choice.index}"
                 is AvatarChoice.Photo -> "photo:${choice.fileName}"
+                is AvatarChoice.Character ->
+                    "character:${LedgerJson.encodeToString(AvatarLook.serializer(), choice.look)}"
             }
         },
         restore = { saved ->
@@ -216,6 +222,12 @@ private val AvatarChoiceSaver =
             when (kind) {
                 "preset" -> value?.toIntOrNull()?.let(AvatarChoice::Preset)
                 "photo" -> value?.let(AvatarChoice::Photo)
+                "character" ->
+                    value?.let {
+                        AvatarChoice.Character(
+                            LedgerJson.decodeFromString(AvatarLook.serializer(), it)
+                        )
+                    }
                 else -> null
             } ?: AvatarChoice.None
         },

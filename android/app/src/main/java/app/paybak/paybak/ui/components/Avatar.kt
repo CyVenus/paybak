@@ -26,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.R
+import app.paybak.paybak.domain.model.AvatarLook
+import app.paybak.paybak.ui.components.avatar.AvatarCharacterHead
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.icons.PbIconImage
 import app.paybak.paybak.ui.theme.PbColors
@@ -65,6 +67,9 @@ sealed interface PbAvatarContent {
 
     /** A category or group icon; archived rows grey it with `icon/tertiary`. */
     data class Symbol(val icon: PbIcon, val tint: Color = PbColors.Icon.Primary) : PbAvatarContent
+
+    /** The user's custom character (Head crop); [initials] while it can't be drawn. */
+    data class Character(val look: AvatarLook, val initials: String) : PbAvatarContent
 }
 
 /** `Size` of `Avatar / Circle`, with the initials style and icon size Figma pairs with it. */
@@ -150,6 +155,14 @@ internal fun AvatarCircle(
                     contentDescription = null,
                     size = iconSize,
                     tint = content.tint,
+                )
+
+            is PbAvatarContent.Character ->
+                AvatarCharacterHead(
+                    content.look,
+                    content.initials,
+                    initialsStyle,
+                    Modifier.fillMaxSize(),
                 )
         }
     }

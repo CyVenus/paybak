@@ -3,6 +3,26 @@
 
     <!-- Reminders; asked for on Setup 4 (Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- The receipt camera (lane C). -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Friends already on Paybak, from Privacy › Contacts sync (lanes B and C). -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Reschedules the reminder notifications after a reboot (lane A). -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <queries>
+        <!-- Help › Contact us. -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+        <!-- Ask Paybak's mic. -->
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
+    </queries>
 
     <application
         android:name=".PaybakApplication"
@@ -16,6 +36,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -24,6 +45,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Local notifications (lane A fills these in; app-architecture §4). -->
+        <receiver
+            android:name=".service.NotificationActionReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".service.ReminderAlarmReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".service.BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Exports and shared files (cache/exports). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="app.paybak.paybak.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

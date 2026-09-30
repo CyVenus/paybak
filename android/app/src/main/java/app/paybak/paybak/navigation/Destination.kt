@@ -1,18 +1,13 @@
 package app.paybak.paybak.navigation
 
-/** Home's three designed states (flow.md). */
-enum class HomeState(val id: String) {
-    FirstDay("homeFirstDay"),
-    Active("homeActive"),
-    AllSettled("homeAllSettled"),
-}
-
 /**
- * Every screen in flow.md. [id] is the flow.md screen id (also the debug start-screen id), and
- * [savedKey] encodes the whole destination, so the back stack can be saved as a list of keys.
+ * The app's roots: splash, the onboarding screens of flow.md and [Main] (the tab shell with every
+ * app screen, navigated by [MainNavigator]). [id] is the flow.md screen id (also the debug
+ * start-screen id), and [savedKey] encodes the whole destination, so the back stack can be saved as
+ * a list of keys.
  *
- * Welcome, Verify, Setup and Home are each ONE screen with a state (step, error, sheet), so moving
- * between their states is not a push: they share a [screenKey].
+ * Welcome, Verify and Setup are each ONE screen with a state (step, error), so moving between their
+ * states is not a push: they share a [screenKey].
  */
 sealed interface Destination {
     /** The flow.md screen id. */
@@ -71,21 +66,16 @@ sealed interface Destination {
         override val id = "allSet"
     }
 
-    /** The Add sheet can open over any [state]; flow.md's `homeAddSheet` is the sheet itself. */
-    data class Home(val state: HomeState, val addSheetOpen: Boolean = false) : Destination {
-        override val id
-            get() = if (addSheetOpen) "homeAddSheet" else state.id
-
-        /** Unlike [id], this keeps the state under the sheet. */
-        override val savedKey
-            get() = if (addSheetOpen) "${state.id}+addSheet" else state.id
+    /** The app after onboarding: the tab shell and everything above it. */
+    data object Main : Destination {
+        override val id = "main"
     }
 
     companion object {
         const val WELCOME_STEPS = 3
         const val SETUP_STEPS = 4
 
-        /** Every flow.md screen id, in flow order. */
+        /** Every root, in flow order. */
         val all: List<Destination> = buildList {
             add(Splash)
             (1..WELCOME_STEPS).forEach { add(Welcome(it)) }
@@ -95,21 +85,13 @@ sealed interface Destination {
             add(Verify(rejectedCode = Verify.FIGMA_WRONG_CODE))
             (1..SETUP_STEPS).forEach { add(Setup(it)) }
             add(AllSet)
-            add(Home(HomeState.FirstDay))
-            add(Home(HomeState.Active))
-            add(Home(HomeState.AllSettled))
-            // The Add sheet is drawn over Home — Active in Figma.
-            add(Home(HomeState.Active, addSheetOpen = true))
+            add(Main)
         }
-
-        /** [all], plus the Add sheet over the other Home states. */
-        private val saveable: List<Destination> =
-            (all + HomeState.entries.map { Home(it, addSheetOpen = true) }).distinct()
 
         fun fromId(id: String): Destination? = all.firstOrNull { it.id == id }
 
         fun fromSavedKey(key: String): Destination? =
-            saveable.firstOrNull { it.savedKey == key } ?: Verify.fromSavedKey(key)
+            all.firstOrNull { it.savedKey == key } ?: Verify.fromSavedKey(key)
     }
 }
 
@@ -125,7 +107,7 @@ fun canonicalBackStack(destination: Destination): List<Destination> {
         Destination.Splash,
         is Destination.Welcome,
         Destination.AllSet,
-        is Destination.Home -> listOf(destination)
+        Destination.Main -> listOf(destination)
         Destination.GetStarted -> toGetStarted
         Destination.SignIn -> toGetStarted + Destination.SignIn
         is Destination.Verify -> toGetStarted + Destination.SignIn + destination

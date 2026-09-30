@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Backups on Android 11 and lower. Keep in step with data_extraction_rules.xml.
-    Only the saved profile is copied (ProfileStore: the "profile" preferences and photo folder).
+    The profile (ProfileStore: the "profile" preferences and photo folder) and the ledger
+    (LedgerRepository: ledger.json and the photos folder) are copied.
     With no account backend it is all the user has, and it moves to a new phone the way iOS
     backs up UserDefaults and Application Support.
 -->
 <full-backup-content>
     <include domain="sharedpref" path="profile.xml" />
     <include domain="file" path="profile/" />
+    <include domain="file" path="ledger.json" />
+    <include domain="file" path="photos/" />
 </full-backup-content>

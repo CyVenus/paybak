@@ -65,12 +65,15 @@ class AppNavigator(initialStack: List<Destination>) {
         if (current == screen) navigation()
     }
 
-    /** False where system back should leave the app: Welcome step 1, Home, or an empty stack. */
+    /**
+     * False where system back should leave the app (Welcome step 1, an empty stack) or where the
+     * screen handles it itself (Main, through its own navigator).
+     */
     val handlesBack: Boolean
         get() =
             when (val top = current) {
                 is Destination.Welcome -> top.step > 1 || stack.size > 1
-                is Destination.Home -> top.addSheetOpen
+                Destination.Main -> false
                 Destination.AllSet -> true
                 else -> stack.size > 1
             }
@@ -80,9 +83,9 @@ class AppNavigator(initialStack: List<Destination>) {
         when (val top = current) {
             is Destination.Welcome if top.step > 1 -> replace(top.copy(step = top.step - 1))
             is Destination.Setup if top.step > 1 -> replace(top.copy(step = top.step - 1))
-            is Destination.Home if top.addSheetOpen -> replace(top.copy(addSheetOpen = false))
-            // All set can't go back into onboarding.
-            Destination.AllSet -> Unit
+            // Neither All set nor the app go back into onboarding.
+            Destination.AllSet,
+            Destination.Main -> Unit
             else ->
                 if (stack.size > 1) {
                     lastTransition = NavTransition.Pop

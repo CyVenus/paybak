@@ -3,7 +3,6 @@ package app.paybak.paybak.navigation
 import androidx.compose.runtime.saveable.SaverScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AppNavigatorTest {
@@ -24,10 +23,7 @@ class AppNavigatorTest {
                 "setup3",
                 "setup4",
                 "allSet",
-                "homeFirstDay",
-                "homeActive",
-                "homeAllSettled",
-                "homeAddSheet",
+                "main",
             )
         assertEquals(ids, Destination.all.map(Destination::id))
         ids.forEach { id -> assertEquals(id, Destination.fromId(id)?.id) }
@@ -35,9 +31,7 @@ class AppNavigatorTest {
 
     @Test
     fun aSavedStackRestoresEveryDestinationExactly() {
-        val destinations =
-            Destination.all + HomeState.entries.map { Destination.Home(it, addSheetOpen = true) }
-        destinations.forEach { destination ->
+        Destination.all.forEach { destination ->
             assertEquals(destination, AppNavigator(listOf(destination)).savedAndRestored().current)
         }
     }
@@ -97,22 +91,16 @@ class AppNavigatorTest {
     }
 
     @Test
-    fun allSetAndHomeDoNotGoBackIntoOnboarding() {
+    fun allSetAndTheAppDoNotGoBackIntoOnboarding() {
         val navigator = AppNavigator(canonicalBackStack(Destination.Setup(4)))
         navigator.push(Destination.AllSet)
         navigator.back()
         assertEquals(Destination.AllSet, navigator.current)
-        navigator.resetTo(Destination.Home(HomeState.FirstDay), NavTransition.Dissolve)
+        navigator.resetTo(Destination.Main, NavTransition.Dissolve)
+        // The app handles back with its own navigator; the root never pops out of it.
         assertFalse(navigator.handlesBack)
-    }
-
-    @Test
-    fun backClosesTheAddSheetFirst() {
-        val navigator =
-            AppNavigator(listOf(Destination.Home(HomeState.Active, addSheetOpen = true)))
-        assertTrue(navigator.handlesBack)
         navigator.back()
-        assertEquals(Destination.Home(HomeState.Active), navigator.current)
+        assertEquals(Destination.Main, navigator.current)
     }
 }
 

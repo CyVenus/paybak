@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Cloud backup and device transfer on Android 12 and higher. Keep in step with backup_rules.xml.
-    Only the saved profile is copied (ProfileStore: the "profile" preferences and photo folder).
+    The profile (ProfileStore: the "profile" preferences and photo folder) and the ledger
+    (LedgerRepository: ledger.json and the photos folder) are copied.
     With no account backend it is all the user has, and it moves to a new phone the way iOS
     backs up UserDefaults and Application Support.
 -->
@@ -9,9 +10,17 @@
     <cloud-backup>
         <include domain="sharedpref" path="profile.xml" />
         <include domain="file" path="profile/" />
+        <include domain="file" path="ledger.json" />
+        <include domain="file" path="photos/" />
+    <include domain="file" path="ledger.json" />
+    <include domain="file" path="photos/" />
     </cloud-backup>
     <device-transfer>
         <include domain="sharedpref" path="profile.xml" />
         <include domain="file" path="profile/" />
+        <include domain="file" path="ledger.json" />
+        <include domain="file" path="photos/" />
+    <include domain="file" path="ledger.json" />
+    <include domain="file" path="photos/" />
     </device-transfer>
 </data-extraction-rules>
