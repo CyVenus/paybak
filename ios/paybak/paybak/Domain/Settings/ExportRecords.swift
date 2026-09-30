@@ -85,7 +85,7 @@ nonisolated extension Books {
         let groups = ledger.groups
             .filter { $0.memberIds.contains(Person.me) || $0.createdBy == Person.me }
             .map { ExportGroupRow(id: $0.id, name: $0.name, hasRecords: inRange.contains($0.id)) }
-        let direct = ExportGroupRow(id: ExportGroupRow.withoutGroupID, name: "Without a group",
+        let direct = ExportGroupRow(id: ExportGroupRow.withoutGroupID, name: Self.withoutAGroup,
                                     hasRecords: inRange.contains(ExportGroupRow.withoutGroupID))
         return groups + [direct]
     }
@@ -143,7 +143,7 @@ nonisolated extension Books {
         ExportRecord(
             date: date,
             groupKey: group ?? ExportGroupRow.withoutGroupID,
-            groupName: group.map { groupName($0) } ?? "Without a group",
+            groupName: group.map { groupName($0) } ?? Self.withoutAGroup,
             kind: kind, title: title, category: category, paidBy: paidBy,
             amount: amount, currency: currency, rate: rate,
             defaultAmount: toDefault(amount, currency: currency, rate: rate),
