@@ -88,6 +88,8 @@ struct PeoplePickRequest: Hashable, Codable {
     var selected: [PersonID] = []
     var title = "Split with"
     var allowsGuests = true
+    /// Lists you too (Split with, Record payment's From / To); off for Lend money and New group.
+    var showsYou = true
 }
 
 struct CurrencyPickRequest: Hashable, Codable {

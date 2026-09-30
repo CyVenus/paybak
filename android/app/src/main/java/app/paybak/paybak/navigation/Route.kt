@@ -139,6 +139,7 @@ sealed interface Route {
             get() = push("activityLog", Owner.LaneA, "screens-activity §3.9")
     }
 
+    /** [includesYou] lists "You" (Split with, Record payment); off where you're always in. */
     @Serializable
     @SerialName("pickPeople")
     data class PickPeople(
@@ -147,6 +148,7 @@ sealed interface Route {
         val selected: List<String> = emptyList(),
         val title: String? = null,
         val allowsGuests: Boolean = true,
+        val includesYou: Boolean = true,
     ) : Route {
         override val info
             get() = push("pickPeople", Owner.LaneA, "add-expense §5")
@@ -177,9 +179,17 @@ sealed interface Route {
             get() = sheet("pickDate", Owner.LaneA, "add-expense §10")
     }
 
+    /**
+     * With [personId] (Record payment's For) it lists what you share with them: "None", your groups
+     * with them and your open loans with them; a loan answers with its id.
+     */
     @Serializable
     @SerialName("pickGroup")
-    data class PickGroup(val request: PickRequest, val selected: String? = null) : Route {
+    data class PickGroup(
+        val request: PickRequest,
+        val selected: String? = null,
+        val personId: String? = null,
+    ) : Route {
         override val info
             get() = sheet("pickGroup", Owner.LaneA, "record-lend-group §2 (For)")
     }

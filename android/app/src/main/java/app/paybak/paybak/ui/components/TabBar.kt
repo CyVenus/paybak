@@ -110,7 +110,7 @@ fun PbTabBar(
                 .fillMaxWidth()
                 .height(PbSize.TabBar)
                 .pbMaterial(PbMaterial.Glass, PbShapes.Pill)
-                .padding(TabBarPadding)
+                .padding(horizontal = TabBarPaddingX, vertical = TabBarPaddingY)
                 .selectableGroup(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
@@ -132,8 +132,9 @@ fun PbTabBar(
     }
 }
 
-/** 5 dp of padding plus the 1 dp inside stroke. */
-private val TabBarPadding = 6.dp
+/** The items sit 6 dp from the ends (5 dp padding + the 1 dp stroke) and 5 dp from the edges. */
+private val TabBarPaddingX = 6.dp
+private val TabBarPaddingY = 5.dp
 
 @Preview(showBackground = true, widthDp = 402, backgroundColor = 0xFFF5F5F5)
 @Composable
