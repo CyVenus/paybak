@@ -5,12 +5,12 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.paybak.paybak.PaybakApplication
 import app.paybak.paybak.awaitScreen
 import app.paybak.paybak.data.SignInMethod
 import app.paybak.paybak.launchPaybak
+import app.paybak.paybak.pressSystemBack
 import app.paybak.paybak.tapTwiceQuickly
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -53,10 +53,10 @@ class GetStartedTest {
 
     @Test
     fun aQuickSecondTapOnAppleOpensSetupOnce() {
-        launchPaybak("getStarted").use {
+        launchPaybak("getStarted").use { scenario ->
             compose.onNodeWithTag("getStarted.apple").tapTwiceQuickly()
             compose.awaitScreen("setup1")
-            Espresso.pressBack()
+            scenario.pressSystemBack()
             compose.awaitScreen("getStarted")
         }
     }

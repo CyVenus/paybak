@@ -57,7 +57,8 @@ object Currencies {
     fun suggested(locale: Locale = Locale.getDefault()): SuggestedCurrency {
         val regionCode = runCatching {
             java.util.Currency.getInstance(locale)?.currencyCode
-        }.getOrNull()
+        }
+            .getOrNull()
         return if (regionCode != null) {
             SuggestedCurrency(currency(regionCode, locale), fromRegion = true)
         } else {
@@ -68,7 +69,8 @@ object Currencies {
     fun popular(excludingCode: String, locale: Locale = Locale.getDefault()): List<Currency> =
         PopularCodes.filter { it != excludingCode }.map { currency(it, locale) }
 
-    private fun currency(code: String, locale: Locale): Currency {
+    /** The currency with the ISO [code], with Figma's name and symbol for the designed six. */
+    fun currency(code: String, locale: Locale = Locale.getDefault()): Currency {
         Designed[code]?.let { (name, symbol) ->
             return Currency(code, name, symbol)
         }

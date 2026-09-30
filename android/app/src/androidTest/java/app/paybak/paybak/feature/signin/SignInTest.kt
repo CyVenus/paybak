@@ -9,11 +9,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.paybak.paybak.awaitScreen
 import app.paybak.paybak.data.SignInMethod
 import app.paybak.paybak.launchPaybak
+import app.paybak.paybak.pressSystemBack
 import app.paybak.paybak.savedProfile
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -62,9 +62,8 @@ class SignInTest {
 
     @Test
     fun backReturnsToGetStarted() {
-        launchPaybak("signIn").use {
-            Espresso.closeSoftKeyboard()
-            Espresso.pressBack()
+        launchPaybak("signIn").use { scenario ->
+            scenario.pressSystemBack()
             compose.awaitScreen("getStarted")
         }
     }

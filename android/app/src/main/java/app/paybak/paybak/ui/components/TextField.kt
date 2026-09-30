@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -26,10 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.icons.PbIconImage
 import app.paybak.paybak.ui.theme.PbColors
@@ -47,9 +54,10 @@ internal val FieldRingWidth = 1.5.dp
  * helper below. States follow Figma: Default (placeholder), Focused (black ring), Filled, Error
  * (red ring and red helper) and Disabled. The ring is drawn inside the field as an overlay, so the
  * text stays 16 dp from the edge in every state (README rule 6). Text set from outside, such as a
- * prefilled value, puts the cursor at its end.
+ * prefilled value or Clear, puts the cursor at its end.
  *
  * @param helper Helper text; in the error state it carries the error message.
+ * @param onClear Shows a trailing clear button while there is text (the currency search).
  * @param fieldModifier Applied to the editable field itself: its test tag, a focus requester or
  *   autofill semantics.
  */
@@ -63,6 +71,7 @@ fun PbTextField(
     helper: String? = null,
     isError: Boolean = false,
     leadingIcon: PbIcon? = null,
+    onClear: (() -> Unit)? = null,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -143,6 +152,9 @@ fun PbTextField(
                         }
                         innerTextField()
                     }
+                    if (onClear != null && enabled && value.isNotEmpty()) {
+                        ClearButton(onClear)
+                    }
                 }
             },
         )
@@ -156,6 +168,30 @@ fun PbTextField(
                         isError -> PbColors.Text.Destructive
                         else -> PbColors.Text.Tertiary
                     },
+            )
+        }
+    }
+}
+
+/** `Icon / Close` at 20 dp in `icon/secondary`, with a 44 dp tap target that overhangs it. */
+@Composable
+private fun ClearButton(onClick: () -> Unit) {
+    val press = rememberPressState(interactionSource = null)
+    val description = stringResource(R.string.pb_clear)
+    Box(Modifier.size(PbSize.IconMd), contentAlignment = Alignment.Center) {
+        Box(
+            modifier =
+                Modifier.requiredSize(PbSize.Tap)
+                    .graphicsLayer { alpha = if (press.isPressed) 0.5f else 1f }
+                    .pressable(press, enabled = true, onClick = onClick)
+                    .semantics { contentDescription = description },
+            contentAlignment = Alignment.Center,
+        ) {
+            PbIconImage(
+                PbIcon.Close,
+                contentDescription = null,
+                size = PbSize.IconMd,
+                tint = PbColors.Icon.Secondary,
             )
         }
     }
@@ -184,6 +220,12 @@ private fun PbTextFieldPreview() {
             onValueChange = {},
             placeholder = "Search currencies",
             leadingIcon = PbIcon.Search,
+        )
+        PbTextField(
+            value = "yen",
+            onValueChange = {},
+            leadingIcon = PbIcon.Search,
+            onClear = {},
         )
     }
 }

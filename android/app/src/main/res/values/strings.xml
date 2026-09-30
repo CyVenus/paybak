@@ -8,6 +8,9 @@
     <string name="pb_page_of">Page %1$d of %2$d</string>
     <string name="pb_setup_step">Step %1$d of %2$d</string>
     <string name="pb_code_field">Verification code</string>
+    <string name="pb_clear">Clear</string>
+    <string name="pb_payment_preview_caption">What friends see</string>
+    <string name="pb_copy_upi_id">Copy UPI ID</string>
 
     <!-- Welcome (screens-launch.md §2.4). Headline 1 breaks where Figma wraps it: kerned, the
          whole line would just fit in the 362 dp measure. The others wrap by themselves, and a hard
@@ -46,4 +49,36 @@
     <string name="verify_wrong_code">That code didn’t match. Check it and try again.</string>
     <string name="verify_resend_in">Resend code in %1$s</string>
     <string name="verify_resend">Resend code</string>
+
+    <!-- Setup (screens-setup.md §1–4) -->
+    <string name="setup_continue">Continue</string>
+    <string name="setup1_headline">What’s your name?</string>
+    <string name="setup1_body">Friends see your name and picture on shared expenses.</string>
+    <string name="setup1_avatar">Avatar %1$d</string>
+    <string name="setup1_photo">Choose a photo</string>
+    <string name="setup1_name_label">Name</string>
+    <string name="setup1_name_placeholder">Your name</string>
+    <string name="setup2_headline">Pick your currency</string>
+    <string name="setup2_body">Totals show in this currency. You can still add expenses in others.</string>
+    <string name="setup2_search">Search currencies</string>
+    <string name="setup2_suggested">Suggested</string>
+    <string name="setup2_popular">Popular</string>
+    <string name="setup2_region">%1$s · Based on your region</string>
+    <string name="setup2_no_match">No currencies match “%1$s”</string>
+    <string name="setup3_headline">How should friends\npay you?</string>
+    <string name="setup3_body">Add your UPI ID. Friends see it when they settle up — Paybak never moves money.</string>
+    <string name="setup3_label">UPI ID</string>
+    <string name="setup3_placeholder">yourname@bank</string>
+    <string name="setup3_helper">Only people you share expenses with can see it.</string>
+    <string name="setup3_invalid">Enter a UPI ID like name@bank.</string>
+    <string name="setup3_copied">UPI ID copied</string>
+    <string name="setup4_headline">Get gentle reminders</string>
+    <string name="setup4_body">We’ll nudge you before something’s due and tell you when a friend pays you back.</string>
+    <string name="setup4_turn_on">Turn on notifications</string>
+    <string name="setup4_not_now">Not now</string>
+
+    <!-- All set (screens-setup.md §5) -->
+    <string name="all_set_headline">You’re all set, %1$s.</string>
+    <string name="all_set_body">Add your first expense or\ninvite friends to start splitting.</string>
+    <string name="all_set_go_home">Go to Home</string>
 </resources>

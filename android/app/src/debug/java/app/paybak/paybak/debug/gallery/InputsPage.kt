@@ -1,9 +1,11 @@
 package app.paybak.paybak.debug.gallery
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,10 +28,16 @@ import app.paybak.paybak.ui.components.PbCodeDigitState
 import app.paybak.paybak.ui.components.PbCodeField
 import app.paybak.paybak.ui.components.PbCurrencyRow
 import app.paybak.paybak.ui.components.PbOnboardingTopBar
+import app.paybak.paybak.ui.components.PbPaymentPreview
 import app.paybak.paybak.ui.components.PbPeepHead
+import app.paybak.paybak.ui.components.PbSectionHeader
 import app.paybak.paybak.ui.components.PbSetupHeader
 import app.paybak.paybak.ui.components.PbTextField
+import app.paybak.paybak.ui.components.PbToast
+import app.paybak.paybak.ui.components.PbToastHost
+import app.paybak.paybak.ui.components.rememberPbToastState
 import app.paybak.paybak.ui.icons.PbIcon
+import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 
 private const val EMAIL_HELPER = "We’ll send a 6-digit code."
@@ -55,6 +63,7 @@ internal fun InputsPage() {
         GallerySection("Navigation / Setup Header") { SetupHeaders() }
         GallerySection("Control / Avatar Option (tap to select)") { AvatarOptions() }
         GallerySection("Row / Currency (tap to select)") { CurrencyRows() }
+        GallerySection("Card / Payment Preview · Overlay / Toast") { PaymentPreviews() }
     }
 }
 
@@ -176,13 +185,36 @@ private fun AvatarOptions() {
 }
 
 @Composable
+private fun PaymentPreviews() {
+    val toast = rememberPbToastState()
+    PbPaymentPreview(
+        name = "Arjun Mehta",
+        upiId = "arjun@okaxis",
+        avatar = PbAvatarContent.Art(PbPeepHead.Arjun),
+        onCopy = { toast.show("UPI ID copied") },
+    )
+    PbPaymentPreview(
+        name = "Arjun Mehta",
+        upiId = "",
+        avatar = PbAvatarContent.Initials("AM"),
+        onCopy = {},
+        placeholder = "yourname@bank",
+    )
+    GalleryLabel("Copy shows the toast for 2 s")
+    Box(Modifier.fillMaxWidth().height(PbSize.Tap), contentAlignment = Alignment.Center) {
+        PbToastHost(toast)
+    }
+    PbToast("UPI ID copied")
+}
+
+@Composable
 private fun CurrencyRows() {
     val suggested = remember { Currencies.suggested() }
     val popular = remember { Currencies.popular(excludingCode = suggested.currency.code) }
     val available = remember { Currencies.all().size }
     var selected by remember { mutableStateOf(suggested.currency.code) }
     Column {
-        GalleryLabel("Suggested")
+        PbSectionHeader("Suggested")
         val region = if (suggested.fromRegion) " · Based on your region" else ""
         PbCurrencyRow(
             symbol = suggested.currency.tileSymbol,
@@ -191,7 +223,7 @@ private fun CurrencyRows() {
             selected = selected == suggested.currency.code,
             onClick = { selected = suggested.currency.code },
         )
-        GalleryLabel("Popular")
+        PbSectionHeader("Popular")
         popular.forEach { currency ->
             PbCurrencyRow(
                 symbol = currency.tileSymbol,

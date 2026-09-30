@@ -18,6 +18,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbColors
@@ -26,14 +27,16 @@ import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
 
-private val InnerDiameter = 46.dp
+/** The ring plus the white gap inside it: the avatar is 5 dp in from the option's edge. */
 private val SelectedRingWidth = 2.5.dp
+private val AvatarInset = 5.dp
 
 /**
  * `Control / Avatar Option` (`PBAvatarOption`): a 56 dp choice in the Setup 1 picker. The avatar
  * sits in a 46 dp #F5F5F5 circle; selected adds a 2.5 dp black ring with a white gap.
  *
  * @param content A head, the user's photo, or `Symbol(PbIcon.Camera)` for the Upload option.
+ * @param size Narrow screens shrink the option; the ring and the gap keep their widths.
  */
 @Composable
 fun PbAvatarOption(
@@ -42,6 +45,7 @@ fun PbAvatarOption(
     onClick: () -> Unit,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    size: Dp = PbSize.AvatarLg,
 ) {
     val ring by
         animateColorAsState(
@@ -52,7 +56,7 @@ fun PbAvatarOption(
     Box(
         modifier =
             modifier
-                .size(PbSize.AvatarLg)
+                .size(size)
                 .border(SelectedRingWidth, ring, CircleShape)
                 .selectable(
                     selected = selected,
@@ -66,7 +70,7 @@ fun PbAvatarOption(
     ) {
         AvatarCircle(
             content = content,
-            diameter = InnerDiameter,
+            diameter = size - AvatarInset * 2,
             fill = PbColors.Bg.Card,
             initialsStyle = PbTextStyles.Headline,
             iconSize = PbSize.IconLg,
@@ -95,6 +99,13 @@ private fun PbAvatarOptionPreview() {
             selected = false,
             onClick = {},
             "Choose a photo",
+        )
+        PbAvatarOption(
+            PbAvatarContent.Art(PbPeepHead.Dev),
+            selected = true,
+            onClick = {},
+            "Dev, narrow",
+            size = 48.dp,
         )
     }
 }

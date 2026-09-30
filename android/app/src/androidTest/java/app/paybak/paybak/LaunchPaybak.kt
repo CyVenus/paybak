@@ -36,3 +36,11 @@ fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 10_000) {
 val savedProfile: UserProfile
     get() =
         ApplicationProvider.getApplicationContext<PaybakApplication>().profileStore.profile.value
+
+/**
+ * System back as the app receives it. A real key press would only hide the keyboard while it's up,
+ * and screens that focus a field on arrival raise it at an unpredictable moment.
+ */
+fun ActivityScenario<MainActivity>.pressSystemBack() {
+    onActivity { it.onBackPressedDispatcher.onBackPressed() }
+}

@@ -2,13 +2,10 @@ package app.paybak.paybak.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.IntOffset
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.SignInMethod
 import app.paybak.paybak.feature.home.HomeScreen
@@ -123,7 +119,8 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
             is Setup ->
                 SetupScreen(
                     step = destination.step,
-                    onContinue = {
+                    profileStore = profileStore,
+                    onNext = {
                         navigate {
                             if (destination.step < Destination.SETUP_STEPS) {
                                 replace(Setup(destination.step + 1))
@@ -138,9 +135,10 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
             AllSet -> {
                 LaunchedEffect(Unit) { profileStore.update { it.copy(onboardingComplete = true) } }
                 AllSetScreen(
+                    firstName = profile.firstName,
                     onGoHome = {
                         navigate { resetTo(Home(HomeState.FirstDay), NavTransition.Dissolve) }
-                    }
+                    },
                 )
             }
 
@@ -156,17 +154,11 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
     }
 }
 
-private fun AnimatedContentTransitionScope<Destination>.transitionFor(
-    transition: NavTransition
-): ContentTransform {
-    val slide = tween<IntOffset>(PbMotion.PUSH_MILLIS, easing = PbMotion.EaseInOut)
-    return when (transition) {
-        NavTransition.Push ->
-            slideInHorizontally(slide) { it } togetherWith slideOutHorizontally(slide) { -it / 3 }
+private fun transitionFor(transition: NavTransition): ContentTransform =
+    when (transition) {
+        NavTransition.Push -> pushTransition()
 
-        NavTransition.Pop ->
-            (slideInHorizontally(slide) { -it / 3 } togetherWith slideOutHorizontally(slide) { it })
-                .apply { targetContentZIndex = -1f }
+        NavTransition.Pop -> popTransition()
 
         NavTransition.Dissolve ->
             fadeIn(tween(PbMotion.DISSOLVE_MILLIS, easing = PbMotion.EaseOut)) togetherWith
@@ -176,4 +168,3 @@ private fun AnimatedContentTransitionScope<Destination>.transitionFor(
             fadeIn(tween(PbMotion.SKIP_MILLIS, easing = PbMotion.EaseInOut)) togetherWith
                 fadeOut(tween(PbMotion.SKIP_MILLIS, easing = PbMotion.EaseInOut))
     }
-}

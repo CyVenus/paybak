@@ -62,11 +62,12 @@ internal fun NavigationRow(
 
 /** `Button / Icon` Plain with the chevron: the in-app back button. */
 @Composable
-internal fun PbBackButton(onClick: () -> Unit) {
+internal fun PbBackButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     PbIconButton(
         PbIcon.ChevronLeft,
         contentDescription = stringResource(R.string.pb_back),
         onClick = onClick,
+        modifier = modifier,
     )
 }
 

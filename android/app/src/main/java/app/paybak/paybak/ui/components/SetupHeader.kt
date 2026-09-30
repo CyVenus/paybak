@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,6 +42,7 @@ const val SetupStepCount = 4
  * `Navigation / Setup Header` (`PBSetupHeader`): back, optional Skip, a 4-segment progress bar and
  * "Step N of 4". When [step] changes, the next segment fills from its leading edge (0.35 s), the
  * number slides, and Skip fades, so keeping one header across the setup steps animates in place.
+ * Its parts carry the flow.md test tags `setup.back`, `setup.skip` and `setup.progress`.
  */
 @Composable
 fun PbSetupHeader(
@@ -52,12 +54,16 @@ fun PbSetupHeader(
 ) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
         NavigationRow {
-            PbBackButton(onBack)
+            PbBackButton(onBack, Modifier.testTag("setup.back"))
             Spacer(Modifier.weight(1f))
-            SkipButton(visible = showSkip, onClick = onSkip)
+            SkipButton(visible = showSkip, onClick = onSkip, Modifier.testTag("setup.skip"))
         }
         Row(
-            modifier = Modifier.fillMaxWidth().height(4.dp).clearAndSetSemantics {},
+            modifier =
+                Modifier.fillMaxWidth()
+                    .height(4.dp)
+                    .testTag("setup.progress")
+                    .clearAndSetSemantics {},
             horizontalArrangement = Arrangement.spacedBy(PbSpace.S4),
         ) {
             repeat(SetupStepCount) { index ->
