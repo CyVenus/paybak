@@ -1,11 +1,112 @@
 import SwiftUI
+import UIKit
 
-// PLACEHOLDER (app-architecture §2.2): Lane C replaces this file with the real screen and keeps
-// this initializer.
-/// Payment methods and what friends see.
+/// Payment details (screens-settings §4): the user's methods (the primary one marked), Show to friends,
+/// a preview of what friends see and the "never moves money" line. Add payment method opens the local
+/// sheet (§5); tapping a method offers Make primary, Copy and Remove.
 struct PaymentDetailsScreen: View {
+    @Environment(AppRouter.self) private var router
+    @Environment(ProfileStore.self) private var profileStore
+
+    @State private var addSheet: AddPaymentMethodSheet.Start?
+    @State private var actionsFor: PaymentMethod?
+    @State private var removing: PaymentMethod?
+
+    private var profile: UserProfile { profileStore.profile }
 
     var body: some View {
-        RoutePlaceholder(route: .paymentDetails, title: "Payment details", owner: .c, spec: "screens-settings §4–5")
+        SettingsScaffold(title: "Payment details", testIDPrefix: "paymentDetails") {
+            VStack(alignment: .leading, spacing: PBSpace.s8) {
+                PBSectionHeader("Your methods")
+                VStack(spacing: 0) {
+                    ForEach(Array(profile.paymentMethods.enumerated()), id: \.element.id) { index, method in
+                        PBSheetRow(title: method.title, subtitle: method.subtitle, icon: method.kind == .upi ? .wallet : .bank,
+                                   height: 64, horizontalPadding: 0) { actionsFor = method }
+                            .accessibilityIdentifier("paymentDetails.method.\(index)")
+                    }
+                    PBSheetRow(title: "Add payment method", subtitle: "UPI ID or bank account", icon: .plus,
+                               height: 64, horizontalPadding: 0) { addSheet = AddPaymentMethodSheet.Start(profile: profile) }
+                        .accessibilityIdentifier("paymentDetails.add")
+                }
+            }
+            PBSettingRow(
+                "Show to friends",
+                subtitle: "Friends see your primary method when they settle up with you.",
+                trailing: .toggle(Binding { profile.showPaymentToFriends } set: { profileStore.setShowPaymentToFriends($0) }),
+                showsDivider: false
+            )
+            .pbCard(padding: 0)
+            .accessibilityIdentifier("paymentDetails.showToFriends")
+            VStack(alignment: .leading, spacing: PBSpace.s8) {
+                PBSectionHeader("What friends see")
+                preview
+            }
+            SettingsInfoLine(icon: .lock, text: "Paybak never moves money. Friends copy these details and pay you in their own app.")
+        }
+        .confirmationDialog(actionsFor?.title ?? "", isPresented: isPresented($actionsFor), titleVisibility: .visible,
+                            presenting: actionsFor) { method in
+            if !method.primary {
+                Button("Make primary") { profileStore.makePrimary(method.id) }
+            }
+            Button("Copy") { copy(method) }
+            Button("Remove", role: .destructive) { removing = method }
+        }
+        .pbAlert(
+            isPresented: isPresented($removing),
+            title: "Remove payment method?",
+            message: "Friends won’t see it any more.",
+            cancelLabel: "Cancel",
+            actionLabel: "Remove",
+            testIDPrefix: "paymentDetails.removeAlert"
+        ) {
+            if let removing { profileStore.removePaymentMethod(removing.id) }
+        }
+        .pbSheet(isPresented: isPresented($addSheet)) {
+            if let addSheet {
+                AddPaymentMethodSheet(start: addSheet) { self.addSheet = nil }
+            }
+        }
+        .onStartScreen([.paymentAddUpi, .paymentAddUpiError]) { screen in
+            var start = AddPaymentMethodSheet.Start(profile: profile)
+            if screen == .paymentAddUpiError {
+                start.upiID = "arjunokhdfcbank"
+                start.showsError = true
+            }
+            addSheet = start
+        }
     }
+
+    /// The primary method with the user's avatar and name, while Show to friends is on.
+    @ViewBuilder
+    private var preview: some View {
+        if let primary = profile.primaryPaymentMethod, profile.showPaymentToFriends {
+            PBPaymentPreview(avatar: profileStore.avatarContent, name: profile.name, upiID: primary.title,
+                             onCopy: { copy(primary) }, testIDPrefix: "paymentDetails", showsCaption: false)
+                .accessibilityIdentifier("paymentDetails.preview")
+        } else {
+            Text(profile.paymentMethods.isEmpty
+                 ? "Add a payment method so friends know how to pay you."
+                 : "Friends don’t see a payment method while this is off.")
+                .textStyle(.footnote)
+                .foregroundStyle(PBColor.textSecondary)
+                .accessibilityIdentifier("paymentDetails.preview")
+        }
+    }
+
+    private func copy(_ method: PaymentMethod) {
+        UIPasteboard.general.string = method.title
+        router.toast(method.kind == .upi ? "UPI ID copied" : "Bank details copied")
+    }
+
+    private func isPresented<Value>(_ item: Binding<Value?>) -> Binding<Bool> {
+        Binding { item.wrappedValue != nil } set: { if !$0 { item.wrappedValue = nil } }
+    }
+}
+
+#Preview("PaymentDetailsScreen") {
+    let profileStore = ProfileStore(defaults: UserDefaults(suiteName: "preview-payment")!)
+    profileStore.replace(with: .sample)
+    return PaymentDetailsScreen()
+        .environment(AppRouter())
+        .environment(profileStore)
 }
