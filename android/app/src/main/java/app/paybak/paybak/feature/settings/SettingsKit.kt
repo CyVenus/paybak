@@ -1,5 +1,6 @@
 package app.paybak.paybak.feature.settings
 
+import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,13 +15,18 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.navigation.LocalMainNavigator
+import app.paybak.paybak.service.HapticKind
+import app.paybak.paybak.service.rememberHaptics
 import app.paybak.paybak.ui.components.PbCard
 import app.paybak.paybak.ui.components.PbPushHeader
 import app.paybak.paybak.ui.components.PbScreenFrame
@@ -39,6 +45,7 @@ import app.paybak.paybak.ui.theme.PbShapes
 import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
+import kotlinx.coroutines.launch
 
 /**
  * A pushed settings page (screens-settings §0): the push header stays put on white while the
@@ -203,6 +210,23 @@ internal fun TileRow(
                 tint = PbColors.Icon.Tertiary,
             )
         }
+    }
+}
+
+/**
+ * Copies text to the clipboard with a success haptic and the app toast ([toast], e.g. "UPI ID
+ * copied").
+ */
+@Composable
+internal fun rememberCopier(): (text: String, toast: String) -> Unit {
+    val clipboard = LocalClipboard.current
+    val navigator = LocalMainNavigator.current
+    val haptics = rememberHaptics()
+    val scope = rememberCoroutineScope()
+    return { text, toast ->
+        scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(toast, text))) }
+        haptics.perform(HapticKind.Success)
+        navigator.toast(toast)
     }
 }
 
