@@ -1,0 +1,16 @@
+{
+  "_comment": "Debug only: the simulated Paybak directory (accounts other people own) and the demo phone's address book (screens-groups §7.4). Ids match the demo so its friends show as Added.",
+  "accounts": [
+    {"id": "p-rohan", "name": "Rohan Verma", "username": "rohan", "contact": "+91 98100 22301", "avatar": "avatar-3", "upi": "rohan@ybl"},
+    {"id": "p-priya", "name": "Priya Sharma", "username": "priya", "contact": "+91 98100 22302", "avatar": "avatar-2", "upi": "priya@okhdfcbank"},
+    {"id": "p-esha", "name": "Esha Kapoor", "username": "esha", "contact": "+91 98100 22303", "avatar": "avatar-4", "upi": "esha@okicici"},
+    {"id": "p-dev", "name": "Dev Malhotra", "username": "dev", "contact": "+91 98100 22304", "avatar": "avatar-5", "upi": "dev@oksbi"},
+    {"id": "p-kabir", "name": "Kabir Singh", "username": "kabir", "contact": "+91 98100 22305", "avatar": "avatar-6", "upi": "kabir@okaxis"},
+    {"id": "p-meera", "name": "Meera Iyer", "username": "meera", "contact": "+91 98100 22306", "avatar": "avatar-7", "upi": "meera@okhdfcbank"}
+  ],
+  "contacts": [
+    {"name": "Kabir Singh", "contact": "+91 98100 22305"},
+    {"name": "Meera Iyer", "contact": "+91 98100 22306"},
+    {"name": "Ananya Rao", "contact": "+91 98765 43210"}
+  ]
+}

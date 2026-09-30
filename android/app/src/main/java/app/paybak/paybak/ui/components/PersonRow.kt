@@ -76,6 +76,8 @@ sealed interface PbPersonTrailing {
  * @param onCard The row sits in a #F5F5F5 card: white avatar circle, tag and pill, and the 6 %
  *   pressed overlay. Compact rows are always drawn for cards.
  * @param onClick The whole row: open the person, or pick them (Check / Select).
+ * @param sidePadding Space before the avatar and after the trailing element. 0 puts a Regular row
+ *   placed in the screen margins on the content edges, as the Friends and Add friend lists draw it.
  */
 @Composable
 fun PbPersonRow(
@@ -89,6 +91,7 @@ fun PbPersonRow(
     onCard: Boolean = size == PbPersonRowSize.Compact,
     onClick: (() -> Unit)? = null,
     showDivider: Boolean = true,
+    sidePadding: Dp = PbSpace.S16,
 ) {
     val press = rememberPressState(interactionSource = null)
     val tap =
@@ -117,7 +120,7 @@ fun PbPersonRow(
             modifier =
                 Modifier.fillMaxWidth()
                     .heightIn(min = size.minHeight)
-                    .padding(horizontal = PbSpace.S16, vertical = size.verticalPadding),
+                    .padding(horizontal = sidePadding, vertical = size.verticalPadding),
             horizontalArrangement = Arrangement.spacedBy(PbSpace.S12),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -157,7 +160,7 @@ fun PbPersonRow(
         if (showDivider) {
             PbDivider(
                 Modifier.align(Alignment.BottomStart)
-                    .padding(start = PbSpace.S16 + size.avatar.diameter + PbSpace.S12)
+                    .padding(start = sidePadding + size.avatar.diameter + PbSpace.S12)
             )
         }
     }
