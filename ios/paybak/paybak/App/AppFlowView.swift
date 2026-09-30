@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The root: Splash, the onboarding stack, Home, or (debug builds) the design-system gallery.
+/// The root: Splash, the onboarding stack, the main app, or (debug builds) the design-system gallery.
 /// Root changes cross-dissolve. It fills the whole screen; each screen centres its own content with
 /// `phoneContentWidth()`, so full-bleed layers still reach the edges on wider screens.
 struct AppFlowView: View {
@@ -15,8 +15,8 @@ struct AppFlowView: View {
             case .onboarding:
                 OnboardingFlow()
                     .transition(.opacity)
-            case .home:
-                HomeScreen()
+            case .main:
+                MainView()
                     .transition(.opacity)
             #if DEBUG
             case .gallery(let page):

@@ -37,7 +37,11 @@ final class ProfileStore {
     /// user's picture doesn't stay on the device once nothing shows it.
     func update(_ change: (inout UserProfile) -> Void) {
         let hadPhoto = profile.avatar == .photo
+        let oldUPI = profile.upiID
         change(&profile)
+        if profile.upiID != oldUPI {
+            profile.syncPrimaryUPI()
+        }
         if hadPhoto, profile.avatar != .photo {
             photo = nil
             try? FileManager.default.removeItem(at: photoURL)

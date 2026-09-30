@@ -92,6 +92,8 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
     case assistant
     case scan
     case sheetToast
+    case shellNavigation
+    case shellCards
 
     var id: Int { rawValue }
 
@@ -134,6 +136,8 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .assistant: "Chat bubble, draft expense"
         case .scan: "Receipt, assign, shutter"
         case .sheetToast: "Toast, sheet container"
+        case .shellNavigation: "Tab bar, Add sheet, nav headers"
+        case .shellCards: "Balance, activity rows, empty states"
         }
     }
 
@@ -177,6 +181,8 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .assistant: GalleryAssistantPage()
         case .scan: GalleryScanPage()
         case .sheetToast: GallerySheetToastPage()
+        case .shellNavigation: GalleryShellNavigationPage()
+        case .shellCards: GalleryShellCardsPage()
         }
     }
 }

@@ -1,0 +1,4748 @@
+{
+ "schemaVersion": 1,
+ "anchor": {
+  "figmaDate": "2026-09-30",
+  "pinnedTime": "21:15",
+  "note": "D±n = the load day ± n days (local). Pin the clock to D0T21:15 to match Figma."
+ },
+ "profile": {
+  "name": "Arjun Mehta",
+  "avatar": {
+   "kind": "preset",
+   "index": 0
+  },
+  "currencyCode": "INR",
+  "upiID": "arjun@okaxis",
+  "username": "arjun",
+  "pronoun": "he",
+  "signInMethod": "email",
+  "contact": "arjun@example.com",
+  "onboardingComplete": true,
+  "showPaymentToFriends": true,
+  "paymentMethods": [
+   {
+    "id": "pm-upi",
+    "kind": "upi",
+    "value": "arjun@okaxis",
+    "primary": true
+   },
+   {
+    "id": "pm-hdfc",
+    "kind": "bank",
+    "bankName": "HDFC Bank",
+    "last4": "4821",
+    "primary": false
+   }
+  ]
+ },
+ "settings": {
+  "keepBalancesPerCurrency": false,
+  "push": {
+   "addedToExpense": true,
+   "paymentsToConfirm": true,
+   "reminders": true,
+   "overdueAlerts": true,
+   "projectUpdates": true,
+   "monthlySummary": true
+  },
+  "reminderSchedule": {
+   "twoDaysBefore": true,
+   "onDueDate": true,
+   "overdueEvery3Days": true,
+   "time": "21:00"
+  },
+  "discovery": {
+   "findMeByContact": true,
+   "contactsSync": true
+  },
+  "entitlement": {
+   "plan": "free",
+   "period": null,
+   "trialEndsAt": null,
+   "since": null
+  }
+ },
+ "people": [
+  {
+   "id": "p-rohan",
+   "name": "Rohan Verma",
+   "avatar": "avatar-3",
+   "upi": "rohan@ybl",
+   "username": "rohan",
+   "pronoun": "he",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:00"
+  },
+  {
+   "id": "p-priya",
+   "name": "Priya Sharma",
+   "avatar": "avatar-2",
+   "upi": "priya@okhdfcbank",
+   "username": "priya",
+   "pronoun": "she",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:01"
+  },
+  {
+   "id": "p-esha",
+   "name": "Esha Kapoor",
+   "avatar": "avatar-4",
+   "upi": "esha@okicici",
+   "username": "esha",
+   "pronoun": "she",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:02"
+  },
+  {
+   "id": "p-dev",
+   "name": "Dev Malhotra",
+   "avatar": "avatar-5",
+   "upi": "dev@oksbi",
+   "username": "dev",
+   "pronoun": "he",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:03"
+  },
+  {
+   "id": "p-kabir",
+   "name": "Kabir Singh",
+   "avatar": "avatar-6",
+   "upi": "kabir@okaxis",
+   "username": "kabir",
+   "pronoun": "he",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:04"
+  },
+  {
+   "id": "p-meera",
+   "name": "Meera Iyer",
+   "avatar": "avatar-7",
+   "upi": "meera@okhdfcbank",
+   "username": "meera",
+   "pronoun": "she",
+   "isGuest": false,
+   "contact": null,
+   "remindersMuted": false,
+   "addedAt": "D-241T10:05"
+  },
+  {
+   "id": "p-ananya",
+   "name": "Ananya Rao",
+   "avatar": null,
+   "upi": null,
+   "username": null,
+   "pronoun": "she",
+   "isGuest": true,
+   "contact": "+91 98765 43210",
+   "remindersMuted": false,
+   "addedAt": "D-4T12:00"
+  }
+ ],
+ "groups": [
+  {
+   "id": "g-goa",
+   "kind": "group",
+   "type": "trip",
+   "icon": "plane",
+   "name": "Goa Trip",
+   "currency": "INR",
+   "memberIds": [
+    "me",
+    "p-kabir",
+    "p-priya",
+    "p-esha",
+    "p-dev"
+   ],
+   "simplifyDebts": true,
+   "settleBy": "D+2",
+   "createdAt": "D-20T20:00",
+   "createdBy": "p-kabir",
+   "project": null
+  },
+  {
+   "id": "g-flat302",
+   "kind": "group",
+   "type": "home",
+   "icon": "home",
+   "name": "Flat 302",
+   "currency": "INR",
+   "memberIds": [
+    "me",
+    "p-meera",
+    "p-kabir"
+   ],
+   "simplifyDebts": true,
+   "settleBy": "D+5",
+   "createdAt": "D-186T19:00",
+   "createdBy": "me",
+   "project": null
+  },
+  {
+   "id": "g-college",
+   "kind": "group",
+   "type": "friends",
+   "icon": "people",
+   "name": "College Gang",
+   "currency": "INR",
+   "memberIds": [
+    "me",
+    "p-rohan",
+    "p-priya",
+    "p-esha",
+    "p-dev",
+    "p-kabir"
+   ],
+   "simplifyDebts": true,
+   "settleBy": null,
+   "createdAt": "D-213T18:00",
+   "createdBy": "p-kabir",
+   "project": null
+  },
+  {
+   "id": "g-dubai",
+   "kind": "group",
+   "type": "trip",
+   "icon": "plane",
+   "name": "Dubai Weekend",
+   "currency": "AED",
+   "memberIds": [
+    "me",
+    "p-kabir",
+    "p-meera"
+   ],
+   "simplifyDebts": true,
+   "settleBy": null,
+   "createdAt": "D-213T12:00",
+   "createdBy": "me",
+   "project": null
+  },
+  {
+   "id": "pj-drone",
+   "kind": "project",
+   "type": null,
+   "icon": "drone",
+   "name": "Build a Drone",
+   "currency": "INR",
+   "memberIds": [
+    "me",
+    "p-dev",
+    "p-priya",
+    "p-rohan"
+   ],
+   "simplifyDebts": true,
+   "settleBy": null,
+   "createdAt": "D-51T11:00",
+   "createdBy": "me",
+   "project": {
+    "description": null,
+    "budget": 6000000,
+    "contribution": {
+     "rule": "equal",
+     "values": {}
+    },
+    "pool": false,
+    "status": "active",
+    "closedAt": null,
+    "archivedAt": null
+   }
+  },
+  {
+   "id": "pj-hackathon",
+   "kind": "project",
+   "type": null,
+   "icon": "package",
+   "name": "Hackathon Kit",
+   "currency": "INR",
+   "memberIds": [
+    "me",
+    "p-esha",
+    "p-dev",
+    "p-kabir"
+   ],
+   "simplifyDebts": true,
+   "settleBy": null,
+   "createdAt": "D-60T10:00",
+   "createdBy": "p-esha",
+   "project": {
+    "description": null,
+    "budget": 2000000,
+    "contribution": {
+     "rule": "equal",
+     "values": {}
+    },
+    "pool": false,
+    "status": "archived",
+    "closedAt": "D-31T18:00",
+    "archivedAt": "D-31T18:00"
+   }
+  }
+ ],
+ "expenses": [
+  {
+   "id": "e-goa-villa",
+   "groupId": "g-goa",
+   "title": "Villa (3 nights)",
+   "category": "stays",
+   "amount": 1800000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-9",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 1800000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 360000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 360000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 360000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 360000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 360000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": {
+    "asset": "receipt-thumb",
+    "addedBy": "p-kabir",
+    "addedAt": "D-9T15:30"
+   },
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-9T15:30",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-9T15:30",
+     "by": "p-kabir"
+    },
+    {
+     "kind": "amountChanged",
+     "at": "D-2T18:20",
+     "by": "p-kabir",
+     "old": 1750000,
+     "new": 1800000
+    }
+   ],
+   "comments": [
+    {
+     "id": "cm-villa-1",
+     "by": "p-priya",
+     "at": "D-3T10:15",
+     "text": "Was breakfast included?"
+    },
+    {
+     "id": "cm-villa-2",
+     "by": "p-kabir",
+     "at": "D-2T18:25",
+     "text": "Yes, all three days. Updated the total."
+    }
+   ],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-goa-scooter",
+   "groupId": "g-goa",
+   "title": "Scooter rentals",
+   "category": "travel",
+   "amount": 350000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-9",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-priya",
+     "amount": 350000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 70000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-9T11:00",
+   "createdBy": "p-priya",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-9T11:00",
+     "by": "p-priya"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-goa-seafood",
+   "groupId": "g-goa",
+   "title": "Seafood dinner at Britto’s",
+   "category": "food",
+   "amount": 650000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-8",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 650000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 130000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 130000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 130000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 130000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 130000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-8T22:10",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-8T22:10",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-goa-parasailing",
+   "groupId": "g-goa",
+   "title": "Parasailing",
+   "category": "fun",
+   "amount": 500000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-7",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-esha",
+     "amount": 500000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 100000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 100000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 100000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 100000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 100000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-7T17:00",
+   "createdBy": "p-esha",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-7T17:00",
+     "by": "p-esha"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-goa-snacks",
+   "groupId": "g-goa",
+   "title": "Snacks",
+   "category": "food",
+   "amount": 30000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-7",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-priya",
+     "amount": 30000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 6000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 6000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 6000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 6000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 6000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-7T19:30",
+   "createdBy": "p-priya",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-7T19:30",
+     "by": "p-priya"
+    },
+    {
+     "kind": "deleted",
+     "at": "D-6T10:00",
+     "by": "p-priya"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": "D-6T10:00",
+   "deletedBy": "p-priya"
+  },
+  {
+   "id": "e-goa-lunch",
+   "groupId": "g-goa",
+   "title": "Beach shack lunch",
+   "category": "food",
+   "amount": 400000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-6",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-dev",
+     "amount": 400000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 80000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-6T14:30",
+   "createdBy": "p-dev",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-6T14:30",
+     "by": "p-dev"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-goa-fuel",
+   "groupId": "g-goa",
+   "title": "Fuel",
+   "category": "travel",
+   "amount": 250000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-5",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-dev",
+     "amount": 250000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 50000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-5T17:30",
+   "createdBy": "p-dev",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-5T17:30",
+     "by": "p-dev"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-groceries",
+   "groupId": null,
+   "title": "Weekend groceries",
+   "category": "food",
+   "amount": 210000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-11",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 210000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 105000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 105000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-11T13:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-11T13:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-movie",
+   "groupId": null,
+   "title": "Movie tickets",
+   "category": "fun",
+   "amount": 160000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-10",
+   "dueDate": "D-3",
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 160000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-rohan",
+      "included": true,
+      "value": null,
+      "share": 80000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-10T22:30",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-10T22:30",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-olive",
+   "groupId": null,
+   "title": "Dinner at Olive Garden",
+   "category": "food",
+   "amount": 280000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D0",
+   "dueDate": "D+4",
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 280000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 70000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D0T19:40",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D0T19:40",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-college-farewell",
+   "groupId": "g-college",
+   "title": "Farewell dinner",
+   "category": "food",
+   "amount": 900000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-202",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 900000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-rohan",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 150000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-202T23:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-202T23:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-dubai-hotel",
+   "groupId": "g-dubai",
+   "title": "Hotel",
+   "category": "stays",
+   "amount": 96000,
+   "currency": "AED",
+   "rate": {
+    "value": "22.85",
+    "to": "INR"
+   },
+   "date": "D-208",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 96000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 32000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 32000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 32000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-208T22:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-208T22:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-dubai-safari",
+   "groupId": "g-dubai",
+   "title": "Desert safari",
+   "category": "fun",
+   "amount": 54000,
+   "currency": "AED",
+   "rate": {
+    "value": "22.80",
+    "to": "INR"
+   },
+   "date": "D-207",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 54000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 18000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 18000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 18000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-207T21:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-207T21:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-dubai-dinner",
+   "groupId": "g-dubai",
+   "title": "Dinner at the Marina",
+   "category": "food",
+   "amount": 30000,
+   "currency": "AED",
+   "rate": {
+    "value": "22.90",
+    "to": "INR"
+   },
+   "date": "D-206",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 30000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 10000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 10000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 10000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-206T23:00",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-206T23:00",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-04",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-182",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-182",
+   "createdAt": "D-182T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-182T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-04",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-178",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-178",
+   "createdAt": "D-178T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-178T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-04",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-157",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 150000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 50000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 50000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-157T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-157T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-05",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-152",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-152",
+   "createdAt": "D-152T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-152T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-05",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-148",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-148",
+   "createdAt": "D-148T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-148T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-05",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 210000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-127",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 210000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 70000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 70000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-127T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-127T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-06",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-121",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-121",
+   "createdAt": "D-121T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-121T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-06",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-117",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-117",
+   "createdAt": "D-117T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-117T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-06",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 240000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-96",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 240000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 80000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 80000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-96T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-96T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-07",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-91",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-91",
+   "createdAt": "D-91T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-91T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-07",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-87",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-87",
+   "createdAt": "D-87T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-87T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-07",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 195000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-66",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 195000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 65000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 65000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 65000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-66T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-66T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-08",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-60",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-60",
+   "createdAt": "D-60T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-60T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-08",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-56",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-56",
+   "createdAt": "D-56T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-56T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-08",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 165000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-35",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 165000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 55000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 55000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 55000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-35T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-35T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-rent-09",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-29",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 3600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 1200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-rent",
+   "occurrenceDate": "D-29",
+   "createdAt": "D-29T09:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-29T09:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-wifi-09",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-25",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-kabir",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": "r-wifi",
+   "occurrenceDate": "D-25",
+   "createdAt": "D-25T09:00",
+   "createdBy": "p-kabir",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-25T09:00",
+     "by": "p-kabir"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-flat-elec-09",
+   "groupId": "g-flat302",
+   "title": "Electricity bill",
+   "category": "bills",
+   "amount": 135000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-4",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-meera",
+     "amount": 135000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 45000
+     },
+     {
+      "personId": "p-meera",
+      "included": true,
+      "value": null,
+      "share": 45000
+     },
+     {
+      "personId": "p-kabir",
+      "included": true,
+      "value": null,
+      "share": 45000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-4T20:15",
+   "createdBy": "p-meera",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-4T20:15",
+     "by": "p-meera"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-apr-canteen",
+   "groupId": null,
+   "title": "Dinner at Bombay Canteen",
+   "category": "food",
+   "amount": 600000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-172",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 600000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 150000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 150000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-172T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-172T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-apr-ipl",
+   "groupId": null,
+   "title": "IPL match tickets",
+   "category": "fun",
+   "amount": 800000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-165",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-dev",
+     "amount": 800000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 400000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 400000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-165T22:00",
+   "createdBy": "p-dev",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-165T22:00",
+     "by": "p-dev"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-may-concert",
+   "groupId": null,
+   "title": "Concert tickets",
+   "category": "fun",
+   "amount": 800000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-144",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 800000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 400000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 400000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-144T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-144T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-may-lonavala",
+   "groupId": null,
+   "title": "Lonavala villa",
+   "category": "stays",
+   "amount": 1400000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-137",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 1400000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 350000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 350000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 350000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 350000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-137T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-137T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-may-brunch",
+   "groupId": null,
+   "title": "Brunch at Farmers’ Café",
+   "category": "food",
+   "amount": 270000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-129",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-priya",
+     "amount": 270000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 135000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 135000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-129T22:00",
+   "createdBy": "p-priya",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-129T22:00",
+     "by": "p-priya"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-jun-toit",
+   "groupId": null,
+   "title": "Dinner at Toit",
+   "category": "food",
+   "amount": 800000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-109",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 800000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 200000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 200000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 200000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 200000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-109T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-109T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-jun-cricket",
+   "groupId": null,
+   "title": "Cricket match tickets",
+   "category": "fun",
+   "amount": 880000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-101",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-dev",
+     "amount": 880000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 440000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 440000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-101T22:00",
+   "createdBy": "p-dev",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-101T22:00",
+     "by": "p-dev"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-jul-pizza",
+   "groupId": null,
+   "title": "Pizza night",
+   "category": "food",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-88",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-esha",
+     "amount": 120000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 60000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 60000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-88T22:00",
+   "createdBy": "p-esha",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-88T22:00",
+     "by": "p-esha"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-jul-standup",
+   "groupId": null,
+   "title": "Stand-up show tickets",
+   "category": "fun",
+   "amount": 360000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-74",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 360000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 120000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 120000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 120000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-74T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-74T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-jul-alibaug",
+   "groupId": null,
+   "title": "Alibaug stay",
+   "category": "stays",
+   "amount": 2300000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-67",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 2300000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 575000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 575000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 575000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 575000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-67T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-67T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-aug-bastian",
+   "groupId": null,
+   "title": "Dinner at Bastian",
+   "category": "food",
+   "amount": 900000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-53",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 900000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 225000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 225000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 225000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 225000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-53T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-53T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-aug-movie",
+   "groupId": null,
+   "title": "Movie night",
+   "category": "fun",
+   "amount": 80000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-46",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "p-esha",
+     "amount": 80000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 40000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 40000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-46T22:00",
+   "createdBy": "p-esha",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-46T22:00",
+     "by": "p-esha"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  },
+  {
+   "id": "e-aug-coorg",
+   "groupId": null,
+   "title": "Coorg homestay",
+   "category": "stays",
+   "amount": 2640000,
+   "currency": "INR",
+   "rate": null,
+   "date": "D-39",
+   "dueDate": null,
+   "payers": [
+    {
+     "personId": "me",
+     "amount": 2640000
+    }
+   ],
+   "split": {
+    "mode": "equal",
+    "rows": [
+     {
+      "personId": "me",
+      "included": true,
+      "value": null,
+      "share": 660000
+     },
+     {
+      "personId": "p-priya",
+      "included": true,
+      "value": null,
+      "share": 660000
+     },
+     {
+      "personId": "p-esha",
+      "included": true,
+      "value": null,
+      "share": 660000
+     },
+     {
+      "personId": "p-dev",
+      "included": true,
+      "value": null,
+      "share": 660000
+     }
+    ]
+   },
+   "itemized": null,
+   "notes": null,
+   "receipt": null,
+   "recurringRuleId": null,
+   "occurrenceDate": null,
+   "createdAt": "D-39T22:00",
+   "createdBy": "me",
+   "history": [
+    {
+     "kind": "created",
+     "at": "D-39T22:00",
+     "by": "me"
+    }
+   ],
+   "comments": [],
+   "flag": null,
+   "deletedAt": null,
+   "deletedBy": null
+  }
+ ],
+ "payments": [
+  {
+   "id": "pay-priya-groceries",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 105000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-1",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": "e-groceries",
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-1T18:40",
+   "confirmedAt": "D-1T19:02",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-college-rohan",
+   "fromId": "p-rohan",
+   "toId": "p-kabir",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-college",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-rohan",
+   "createdAt": "D-200T10:00",
+   "confirmedAt": "D-200T10:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-college-priya",
+   "fromId": "p-priya",
+   "toId": "p-kabir",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-college",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-200T11:00",
+   "confirmedAt": "D-200T11:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-college-esha",
+   "fromId": "p-esha",
+   "toId": "p-kabir",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-college",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-200T12:00",
+   "confirmedAt": "D-200T12:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-college-dev",
+   "fromId": "p-dev",
+   "toId": "p-kabir",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-college",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-dev",
+   "createdAt": "D-200T13:00",
+   "confirmedAt": "D-200T13:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-college-me",
+   "fromId": "me",
+   "toId": "p-kabir",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-college",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "me",
+   "createdAt": "D-200T14:00",
+   "confirmedAt": "D-200T14:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-dubai-me",
+   "fromId": "me",
+   "toId": "p-kabir",
+   "amount": 6000,
+   "currency": "AED",
+   "rate": {
+    "value": "22.90",
+    "to": "INR"
+   },
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-dubai",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "me",
+   "createdAt": "D-200T18:00",
+   "confirmedAt": "D-200T18:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-dubai-meera",
+   "fromId": "p-meera",
+   "toId": "p-kabir",
+   "amount": 30000,
+   "currency": "AED",
+   "rate": {
+    "value": "22.90",
+    "to": "INR"
+   },
+   "method": "upi",
+   "date": "D-200",
+   "groupId": "g-dubai",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-200T18:30",
+   "confirmedAt": "D-200T18:45",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-hackathon-me",
+   "fromId": "me",
+   "toId": "p-esha",
+   "amount": 120000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-32",
+   "groupId": "pj-hackathon",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "me",
+   "createdAt": "D-32T12:00",
+   "confirmedAt": "D-32T12:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-hackathon-kabir",
+   "fromId": "p-kabir",
+   "toId": "p-esha",
+   "amount": 140000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-31",
+   "groupId": "pj-hackathon",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-31T12:00",
+   "confirmedAt": "D-31T12:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-loan-kabir-1",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-82",
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-82T11:00",
+   "confirmedAt": "D-82T11:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-loan-kabir-2",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-49",
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-49T11:00",
+   "confirmedAt": "D-49T11:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-loan-kabir-3",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-16",
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-16T11:00",
+   "confirmedAt": "D-16T11:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-04-priya",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-155",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-155T20:00",
+   "confirmedAt": "D-155T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-04-esha",
+   "fromId": "p-esha",
+   "toId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-155",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-155T20:00",
+   "confirmedAt": "D-155T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-04-dev",
+   "fromId": "me",
+   "toId": "p-dev",
+   "amount": 250000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-155",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "me",
+   "createdAt": "D-155T20:00",
+   "confirmedAt": "D-155T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-05-priya",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 615000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-125",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-125T20:00",
+   "confirmedAt": "D-125T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-05-esha",
+   "fromId": "p-esha",
+   "toId": "me",
+   "amount": 350000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-125",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-125T20:00",
+   "confirmedAt": "D-125T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-05-dev",
+   "fromId": "p-dev",
+   "toId": "me",
+   "amount": 350000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-125",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-dev",
+   "createdAt": "D-125T20:00",
+   "confirmedAt": "D-125T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-06-priya",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 200000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-94",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-94T20:00",
+   "confirmedAt": "D-94T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-06-esha",
+   "fromId": "p-esha",
+   "toId": "me",
+   "amount": 200000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-94",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-94T20:00",
+   "confirmedAt": "D-94T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-06-dev",
+   "fromId": "me",
+   "toId": "p-dev",
+   "amount": 240000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-94",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "me",
+   "createdAt": "D-94T20:00",
+   "confirmedAt": "D-94T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-07-esha",
+   "fromId": "p-esha",
+   "toId": "me",
+   "amount": 635000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-64",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-64T20:00",
+   "confirmedAt": "D-64T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-07-priya",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 695000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-64",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-64T20:00",
+   "confirmedAt": "D-64T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-07-dev",
+   "fromId": "p-dev",
+   "toId": "me",
+   "amount": 575000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-64",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-dev",
+   "createdAt": "D-64T20:00",
+   "confirmedAt": "D-64T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-08-priya",
+   "fromId": "p-priya",
+   "toId": "me",
+   "amount": 885000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-33",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-priya",
+   "createdAt": "D-33T20:00",
+   "confirmedAt": "D-33T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-08-esha",
+   "fromId": "p-esha",
+   "toId": "me",
+   "amount": 845000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-33",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-esha",
+   "createdAt": "D-33T20:00",
+   "confirmedAt": "D-33T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-08-dev",
+   "fromId": "p-dev",
+   "toId": "me",
+   "amount": 885000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-33",
+   "groupId": null,
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-dev",
+   "createdAt": "D-33T20:00",
+   "confirmedAt": "D-33T20:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-04-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1240000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-176",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-176T19:00",
+   "confirmedAt": "D-176T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-04-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1120000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-176",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-176T19:00",
+   "confirmedAt": "D-176T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-05-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1170000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-146",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-146T19:00",
+   "confirmedAt": "D-146T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-05-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1140000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-146",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-146T19:00",
+   "confirmedAt": "D-146T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-06-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1190000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-115",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-115T19:00",
+   "confirmedAt": "D-115T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-06-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1100000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-115",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-115T19:00",
+   "confirmedAt": "D-115T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-07-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1200000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-85",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-85T19:00",
+   "confirmedAt": "D-85T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-07-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1080000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-85",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-85T19:00",
+   "confirmedAt": "D-85T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-08-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1185000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-54",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-54T19:00",
+   "confirmedAt": "D-54T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-08-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1110000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-54",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-54T19:00",
+   "confirmedAt": "D-54T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-09-kabir",
+   "fromId": "p-kabir",
+   "toId": "me",
+   "amount": 1175000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-23",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-kabir",
+   "createdAt": "D-23T19:00",
+   "confirmedAt": "D-23T19:15",
+   "notReceivedNote": null
+  },
+  {
+   "id": "pay-flat-09-meera",
+   "fromId": "p-meera",
+   "toId": "me",
+   "amount": 1130000,
+   "currency": "INR",
+   "rate": null,
+   "method": "upi",
+   "date": "D-23",
+   "groupId": "g-flat302",
+   "loanId": null,
+   "expenseId": null,
+   "note": null,
+   "proof": null,
+   "status": "confirmed",
+   "recordedBy": "p-meera",
+   "createdAt": "D-23T19:00",
+   "confirmedAt": "D-23T19:15",
+   "notReceivedNote": null
+  }
+ ],
+ "loans": [
+  {
+   "id": "l-kabir-bike",
+   "lenderId": "me",
+   "borrowerId": "p-kabir",
+   "amount": 450000,
+   "currency": "INR",
+   "rate": null,
+   "reason": "Bike service",
+   "date": "D-110",
+   "installments": {
+    "count": 3,
+    "frequency": "monthly",
+    "firstDue": "D-80"
+   },
+   "dueDate": null,
+   "createdAt": "D-110T19:00",
+   "createdBy": "me"
+  }
+ ],
+ "components": [
+  {
+   "id": "c-drone-gps",
+   "projectId": "pj-drone",
+   "name": "GPS module",
+   "status": "planned",
+   "estimatedCost": 600000,
+   "actualCost": null,
+   "paidBy": "me",
+   "receipt": null,
+   "createdAt": "D-10T10:00",
+   "statusChangedAt": "D-10T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-10T10:00",
+     "by": "me"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-camera",
+   "projectId": "pj-drone",
+   "name": "Camera",
+   "status": "bought",
+   "estimatedCost": null,
+   "actualCost": 750000,
+   "paidBy": "p-dev",
+   "receipt": null,
+   "createdAt": "D-12T10:00",
+   "statusChangedAt": "D-12T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-12T10:00",
+     "by": "p-dev"
+    },
+    {
+     "kind": "bought",
+     "at": "D-12T18:00",
+     "by": "p-dev"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-transmitter",
+   "projectId": "pj-drone",
+   "name": "Transmitter",
+   "status": "bought",
+   "estimatedCost": 500000,
+   "actualCost": 500000,
+   "paidBy": "me",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-21T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "me"
+    },
+    {
+     "kind": "bought",
+     "at": "D-21T18:00",
+     "by": "me"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-escs",
+   "projectId": "pj-drone",
+   "name": "ESCs and propellers",
+   "status": "bought",
+   "estimatedCost": 800000,
+   "actualCost": 800000,
+   "paidBy": "me",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-28T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "me"
+    },
+    {
+     "kind": "bought",
+     "at": "D-28T18:00",
+     "by": "me"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-battery",
+   "projectId": "pj-drone",
+   "name": "Battery",
+   "status": "bought",
+   "estimatedCost": 500000,
+   "actualCost": 450000,
+   "paidBy": "p-rohan",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-34T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "p-rohan"
+    },
+    {
+     "kind": "bought",
+     "at": "D-34T18:00",
+     "by": "p-rohan"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-fc",
+   "projectId": "pj-drone",
+   "name": "Flight controller",
+   "status": "bought",
+   "estimatedCost": 900000,
+   "actualCost": 900000,
+   "paidBy": "p-priya",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-40T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "p-priya"
+    },
+    {
+     "kind": "bought",
+     "at": "D-40T18:00",
+     "by": "p-priya"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-motors",
+   "projectId": "pj-drone",
+   "name": "Motors ×4",
+   "status": "done",
+   "estimatedCost": 1200000,
+   "actualCost": 1200000,
+   "paidBy": "p-dev",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-45T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "p-dev"
+    },
+    {
+     "kind": "done",
+     "at": "D-45T18:00",
+     "by": "p-dev"
+    }
+   ]
+  },
+  {
+   "id": "c-drone-frame",
+   "projectId": "pj-drone",
+   "name": "Frame",
+   "status": "done",
+   "estimatedCost": 600000,
+   "actualCost": 600000,
+   "paidBy": "p-dev",
+   "receipt": null,
+   "createdAt": "D-51T12:00",
+   "statusChangedAt": "D-49T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-51T12:00",
+     "by": "p-dev"
+    },
+    {
+     "kind": "done",
+     "at": "D-49T18:00",
+     "by": "p-dev"
+    }
+   ]
+  },
+  {
+   "id": "c-hack-pi",
+   "projectId": "pj-hackathon",
+   "name": "Raspberry Pi kits",
+   "status": "done",
+   "estimatedCost": 700000,
+   "actualCost": 720000,
+   "paidBy": "p-esha",
+   "receipt": null,
+   "createdAt": "D-60T11:00",
+   "statusChangedAt": "D-56T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-60T11:00",
+     "by": "p-esha"
+    },
+    {
+     "kind": "done",
+     "at": "D-56T18:00",
+     "by": "p-esha"
+    }
+   ]
+  },
+  {
+   "id": "c-hack-sensors",
+   "projectId": "pj-hackathon",
+   "name": "Sensors",
+   "status": "done",
+   "estimatedCost": 500000,
+   "actualCost": 460000,
+   "paidBy": "p-dev",
+   "receipt": null,
+   "createdAt": "D-60T11:00",
+   "statusChangedAt": "D-53T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-60T11:00",
+     "by": "p-dev"
+    },
+    {
+     "kind": "done",
+     "at": "D-53T18:00",
+     "by": "p-dev"
+    }
+   ]
+  },
+  {
+   "id": "c-hack-display",
+   "projectId": "pj-hackathon",
+   "name": "Display",
+   "status": "done",
+   "estimatedCost": 350000,
+   "actualCost": 340000,
+   "paidBy": "me",
+   "receipt": null,
+   "createdAt": "D-60T11:00",
+   "statusChangedAt": "D-49T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-60T11:00",
+     "by": "me"
+    },
+    {
+     "kind": "done",
+     "at": "D-49T18:00",
+     "by": "me"
+    }
+   ]
+  },
+  {
+   "id": "c-hack-cables",
+   "projectId": "pj-hackathon",
+   "name": "Cables and adapters",
+   "status": "done",
+   "estimatedCost": 300000,
+   "actualCost": 320000,
+   "paidBy": "p-kabir",
+   "receipt": null,
+   "createdAt": "D-60T11:00",
+   "statusChangedAt": "D-46T18:00",
+   "history": [
+    {
+     "kind": "added",
+     "at": "D-60T11:00",
+     "by": "p-kabir"
+    },
+    {
+     "kind": "done",
+     "at": "D-46T18:00",
+     "by": "p-kabir"
+    }
+   ]
+  }
+ ],
+ "recurringRules": [
+  {
+   "id": "r-rent",
+   "groupId": "g-flat302",
+   "title": "Rent",
+   "category": "rent",
+   "amount": 3600000,
+   "currency": "INR",
+   "variable": false,
+   "frequency": "monthly",
+   "anchorDate": "D-29",
+   "startDate": "D-182",
+   "lastOccurrence": "D-29",
+   "payerId": "me",
+   "split": {
+    "mode": "equal",
+    "personIds": [
+     "me",
+     "p-meera",
+     "p-kabir"
+    ]
+   },
+   "createdAt": "D-186T19:10",
+   "createdBy": "me",
+   "active": true
+  },
+  {
+   "id": "r-wifi",
+   "groupId": "g-flat302",
+   "title": "Wi-Fi",
+   "category": "bills",
+   "amount": 120000,
+   "currency": "INR",
+   "variable": false,
+   "frequency": "monthly",
+   "anchorDate": "D-25",
+   "startDate": "D-178",
+   "lastOccurrence": "D-25",
+   "payerId": "p-kabir",
+   "split": {
+    "mode": "equal",
+    "personIds": [
+     "me",
+     "p-meera",
+     "p-kabir"
+    ]
+   },
+   "createdAt": "D-186T19:15",
+   "createdBy": "p-kabir",
+   "active": true
+  },
+  {
+   "id": "r-gas",
+   "groupId": "g-flat302",
+   "title": "Cooking gas",
+   "category": "bills",
+   "amount": null,
+   "currency": "INR",
+   "variable": true,
+   "frequency": "monthly",
+   "anchorDate": "D-2",
+   "startDate": "D-2",
+   "lastOccurrence": "D-2",
+   "payerId": "me",
+   "split": {
+    "mode": "equal",
+    "personIds": [
+     "me",
+     "p-meera",
+     "p-kabir"
+    ]
+   },
+   "createdAt": "D-20T21:00",
+   "createdBy": "me",
+   "active": true
+  }
+ ],
+ "drafts": [
+  {
+   "id": "d-gas-09",
+   "ruleId": "r-gas",
+   "occurrenceDate": "D-2",
+   "createdAt": "D-2T09:00",
+   "expenseId": null
+  }
+ ],
+ "reminders": [
+  {
+   "id": "rem-kabir-loan-1",
+   "toId": "p-kabir",
+   "fromId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "expenseId": null,
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "installment": 2,
+   "sentAt": "D-51T21:00",
+   "automatic": true,
+   "message": null
+  },
+  {
+   "id": "rem-kabir-loan-2",
+   "toId": "p-kabir",
+   "fromId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "expenseId": null,
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "installment": 3,
+   "sentAt": "D-20T21:00",
+   "automatic": true,
+   "message": null
+  },
+  {
+   "id": "rem-kabir-loan-3",
+   "toId": "p-kabir",
+   "fromId": "me",
+   "amount": 150000,
+   "currency": "INR",
+   "expenseId": null,
+   "groupId": null,
+   "loanId": "l-kabir-bike",
+   "installment": 3,
+   "sentAt": "D-18T21:00",
+   "automatic": true,
+   "message": null
+  },
+  {
+   "id": "rem-rohan-1",
+   "toId": "p-rohan",
+   "fromId": "me",
+   "amount": 80000,
+   "currency": "INR",
+   "expenseId": "e-movie",
+   "groupId": null,
+   "loanId": null,
+   "installment": null,
+   "sentAt": "D-5T21:00",
+   "automatic": true,
+   "message": null
+  },
+  {
+   "id": "rem-rohan-2",
+   "toId": "p-rohan",
+   "fromId": "me",
+   "amount": 80000,
+   "currency": "INR",
+   "expenseId": "e-movie",
+   "groupId": null,
+   "loanId": null,
+   "installment": null,
+   "sentAt": "D-3T21:00",
+   "automatic": true,
+   "message": null
+  }
+ ],
+ "inbox": [
+  {
+   "id": "n-new-goa-scooter",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-9T11:00",
+   "read": true,
+   "params": {
+    "expenseId": "e-goa-scooter",
+    "groupId": "g-goa",
+    "actorId": "p-priya",
+    "title": "Scooter rentals",
+    "total": 350000,
+    "share": 70000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-new-goa-villa",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-9T15:30",
+   "read": true,
+   "params": {
+    "expenseId": "e-goa-villa",
+    "groupId": "g-goa",
+    "actorId": "p-kabir",
+    "title": "Villa (3 nights)",
+    "total": 1750000,
+    "share": 350000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-new-goa-parasailing",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-7T17:00",
+   "read": true,
+   "params": {
+    "expenseId": "e-goa-parasailing",
+    "groupId": "g-goa",
+    "actorId": "p-esha",
+    "title": "Parasailing",
+    "total": 500000,
+    "share": 100000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-new-goa-lunch",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-6T14:30",
+   "read": true,
+   "params": {
+    "expenseId": "e-goa-lunch",
+    "groupId": "g-goa",
+    "actorId": "p-dev",
+    "title": "Beach shack lunch",
+    "total": 400000,
+    "share": 80000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-new-goa-fuel",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-5T17:30",
+   "read": true,
+   "params": {
+    "expenseId": "e-goa-fuel",
+    "groupId": "g-goa",
+    "actorId": "p-dev",
+    "title": "Fuel",
+    "total": 250000,
+    "share": 50000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-new-flat-elec-09",
+   "type": "newExpenseInGroup",
+   "createdAt": "D-4T20:15",
+   "read": true,
+   "params": {
+    "expenseId": "e-flat-elec-09",
+    "groupId": "g-flat302",
+    "actorId": "p-meera",
+    "title": "Electricity bill",
+    "total": 135000,
+    "share": 45000,
+    "currency": "INR"
+   }
+  },
+  {
+   "id": "n-overdue-rohan-movie",
+   "type": "paymentOverdue",
+   "createdAt": "D-2T09:00",
+   "read": true,
+   "params": {
+    "personId": "p-rohan",
+    "amount": 80000,
+    "currency": "INR",
+    "title": "Movie tickets",
+    "expenseId": "e-movie",
+    "groupId": null,
+    "loanId": null,
+    "dueDate": "D-3"
+   }
+  },
+  {
+   "id": "n-confirmed-priya",
+   "type": "paymentConfirmed",
+   "createdAt": "D-1T19:02",
+   "read": true,
+   "params": {
+    "paymentId": "pay-priya-groceries",
+    "personId": "p-priya",
+    "amount": 105000,
+    "currency": "INR",
+    "title": "Weekend groceries",
+    "method": "upi"
+   }
+  }
+ ],
+ "rotation": {},
+ "scheduler": {
+  "cursor": "D0T00:00"
+ },
+ "scenarios": {
+  "empty": [
+   {
+    "action": "clearLedger"
+   }
+  ],
+  "eshaClaimsPayment": [
+   {
+    "action": "recordPayment",
+    "at": "D0T21:12",
+    "payment": {
+     "id": "pay-esha-olive",
+     "fromId": "p-esha",
+     "toId": "me",
+     "amount": 70000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": null,
+     "loanId": null,
+     "expenseId": "e-olive",
+     "recordedBy": "p-esha"
+    }
+   }
+  ],
+  "eshaPaymentConfirmed": [
+   {
+    "use": "eshaClaimsPayment"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:15",
+    "paymentId": "pay-esha-olive"
+   }
+  ],
+  "eshaPaymentNotReceived": [
+   {
+    "use": "eshaClaimsPayment"
+   },
+   {
+    "action": "markNotReceived",
+    "at": "D0T21:15",
+    "paymentId": "pay-esha-olive",
+    "note": "Hi Esha, I haven’t received ₹700 for Dinner at Olive Garden yet. Could you check your UPI app?"
+   }
+  ],
+  "paymentToMeeraPending": [
+   {
+    "action": "recordPayment",
+    "at": "D0T21:14",
+    "payment": {
+     "id": "pay-me-meera",
+     "fromId": "me",
+     "toId": "p-meera",
+     "amount": 45000,
+     "currency": "INR",
+     "method": "cash",
+     "date": "D0",
+     "groupId": "g-flat302",
+     "loanId": null,
+     "expenseId": null,
+     "recordedBy": "me"
+    }
+   }
+  ],
+  "paymentToMeeraConfirmed": [
+   {
+    "use": "paymentToMeeraPending"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:15",
+    "paymentId": "pay-me-meera"
+   }
+  ],
+  "paymentToKabirPending": [
+   {
+    "action": "recordPayment",
+    "at": "D0T21:14",
+    "payment": {
+     "id": "pay-me-kabir",
+     "fromId": "me",
+     "toId": "p-kabir",
+     "amount": 140000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": "g-goa",
+     "loanId": null,
+     "expenseId": null,
+     "recordedBy": "me"
+    }
+   }
+  ],
+  "eshaFlagsSeafood": [
+   {
+    "action": "flagExpense",
+    "at": "D0T20:30",
+    "expenseId": "e-goa-seafood",
+    "by": "p-esha",
+    "note": "I left before dessert. Can we check the bill?"
+   }
+  ],
+  "lendDev": [
+   {
+    "action": "addLoan",
+    "at": "D0T21:14",
+    "loan": {
+     "id": "l-dev-laptop",
+     "lenderId": "me",
+     "borrowerId": "p-dev",
+     "amount": 600000,
+     "currency": "INR",
+     "reason": "Laptop repair",
+     "date": "D0",
+     "installments": {
+      "count": 3,
+      "frequency": "monthly",
+      "firstDue": "D+30"
+     },
+     "dueDate": null
+    }
+   }
+  ],
+  "lendDevOverdue": [
+   {
+    "use": "lendDev"
+   },
+   {
+    "action": "setClock",
+    "at": "D+34T10:00"
+   }
+  ],
+  "devBuysGps": [
+   {
+    "action": "updateComponent",
+    "at": "D0T21:00",
+    "componentId": "c-drone-gps",
+    "status": "bought",
+    "actualCost": 950000,
+    "paidBy": "p-dev"
+   }
+  ],
+  "closeDrone": [
+   {
+    "action": "closeProject",
+    "at": "D0T21:10",
+    "projectId": "pj-drone"
+   }
+  ],
+  "weekendTrek": [
+   {
+    "action": "createGroup",
+    "at": "D0T21:14",
+    "group": {
+     "id": "g-trek",
+     "kind": "group",
+     "type": "trip",
+     "icon": "plane",
+     "name": "Weekend Trek",
+     "currency": "INR",
+     "memberIds": [
+      "me",
+      "p-esha",
+      "p-dev",
+      "p-kabir"
+     ],
+     "simplifyDebts": true,
+     "settleBy": null
+    }
+   }
+  ],
+  "allSettled": [
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-kabir",
+     "fromId": "me",
+     "toId": "p-kabir",
+     "amount": 140000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": "g-goa",
+     "loanId": null,
+     "expenseId": null,
+     "recordedBy": "me"
+    }
+   },
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-meera",
+     "fromId": "me",
+     "toId": "p-meera",
+     "amount": 45000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": "g-flat302",
+     "loanId": null,
+     "expenseId": null,
+     "recordedBy": "me"
+    }
+   },
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-rohan",
+     "fromId": "p-rohan",
+     "toId": "me",
+     "amount": 80000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": null,
+     "loanId": null,
+     "expenseId": "e-movie",
+     "recordedBy": "p-rohan"
+    }
+   },
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-priya",
+     "fromId": "p-priya",
+     "toId": "me",
+     "amount": 70000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": null,
+     "loanId": null,
+     "expenseId": "e-olive",
+     "recordedBy": "p-priya"
+    }
+   },
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-esha",
+     "fromId": "p-esha",
+     "toId": "me",
+     "amount": 70000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": null,
+     "loanId": null,
+     "expenseId": "e-olive",
+     "recordedBy": "p-esha"
+    }
+   },
+   {
+    "action": "recordPayment",
+    "at": "D0T21:13",
+    "payment": {
+     "id": "pay-settle-dev",
+     "fromId": "p-dev",
+     "toId": "me",
+     "amount": 70000,
+     "currency": "INR",
+     "method": "upi",
+     "date": "D0",
+     "groupId": null,
+     "loanId": null,
+     "expenseId": "e-olive",
+     "recordedBy": "p-dev"
+    }
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-kabir"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-meera"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-rohan"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-priya"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-esha"
+   },
+   {
+    "action": "confirmPayment",
+    "at": "D0T21:14",
+    "paymentId": "pay-settle-dev"
+   }
+  ],
+  "pro": [
+   {
+    "action": "setEntitlement",
+    "plan": "pro",
+    "period": "yearly",
+    "trialEndsAt": "D+7"
+   }
+  ]
+ }
+}

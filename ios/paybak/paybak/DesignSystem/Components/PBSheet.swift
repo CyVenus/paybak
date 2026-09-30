@@ -66,28 +66,33 @@ extension View {
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         sheet(isPresented: isPresented) {
-            SheetBody(detent: detent, content: content)
+            PBSheetPresentation(detent: detent, content: content)
         }
     }
 }
 
-private struct SheetBody<Content: View>: View {
+/// The system sheet's look for a `.pbSheet`: the detent (fitted to the content, or large), the
+/// grabber, white fill and 40 pt corners. Route sheets use it directly inside `.sheet(item:)`.
+struct PBSheetPresentation<Content: View>: View {
     let detent: PBSheetDetent
     let content: () -> Content
 
     /// The fitted height, measured from the content; a sensible start before the first layout.
     @State private var height: CGFloat = 320
+    /// The floating sheet's own bottom inset (the home-indicator area it keeps clear below the
+    /// detent). Medium sheets end 28 pt below their content, counting this inset.
+    @State private var bottomInset: CGFloat = 0
 
     var body: some View {
         Group {
             switch detent {
             case .fitted:
                 content()
-                    // Medium sheets hug their content plus the 28 pt bottom padding.
-                    .padding(.bottom, PBSpace.s28)
+                    .padding(.bottom, max(0, PBSpace.s28 - bottomInset))
                     .fixedSize(horizontal: false, vertical: true)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
                     .frame(maxHeight: .infinity, alignment: .top)
+                    .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
                     .presentationDetents([.height(height)])
             case .large:
                 content()

@@ -14,21 +14,16 @@ enum OnboardingRoute: Hashable {
     case allSet
 }
 
-enum HomeState {
-    case firstDay
-    case active
-    case allSettled
-}
-
-/// The app's navigation state: which flow is on screen, the onboarding stack, and the state kept
-/// across pushes (the Welcome step, the Home state).
+/// The app's navigation state: which flow is on screen, the onboarding stack, and the main app's
+/// tabs, stacks, modal layers and sheets (app-architecture §2). The main-app helpers are in
+/// `Navigation/AppRouter+Main.swift`.
 @Observable
 final class AppRouter {
     enum Root: Equatable {
         case splash
         case onboarding
-        /// Home is the task root: back never returns into onboarding.
-        case home
+        /// The tab shell and everything over it. It's the task root: back never returns into onboarding.
+        case main
         #if DEBUG
         case gallery(page: Int)
         #endif
@@ -38,8 +33,33 @@ final class AppRouter {
     var path: [OnboardingRoute] = []
     /// Welcome's step (1…3). Kept here so Back from Get Started returns to the step the user left.
     var welcomeStep = 1
-    var homeState: HomeState = .firstDay
-    var isAddSheetPresented = false
+
+    // MARK: Main
+
+    var selectedTab: Tab = .home
+    var groupsSegment: GroupsSegment = .groups
+    var activitySegment: ActivitySegment = .timeline
+    /// The Insights month; nil = the clock's current month.
+    var insightsMonth: YearMonth?
+    /// Pushes over the tab shell (the tab bar hides while anything is pushed).
+    var mainPath: [Route] = []
+    /// The main stack's route sheet.
+    var mainSheet: Route?
+    /// Full-screen modal layers, bottom first; each has its own stack and sheet.
+    var modals: [ModalLayer] = []
+    /// Picker results waiting for the screen that asked (`onRouteResult`).
+    var results: [String: RouteResult] = [:]
+    var toast: PBToastMessage?
+    /// Opened once the current sheet has gone (`replaceSheet(with:)`).
+    @ObservationIgnored var routeAfterSheet: Route?
+    /// Whether the user has Pro (`requirePro`); set by the app from the ledger store.
+    @ObservationIgnored var isPro: () -> Bool = { false }
+    /// A deep link to open once the main app shows (the debug `-link` argument).
+    @ObservationIgnored var pendingLink: DeepLink?
+    #if DEBUG
+    /// The debug start screen whose in-screen state its owner hasn't applied yet (`onStartScreen`).
+    @ObservationIgnored var startScreen: ScreenID?
+    #endif
 
     /// The 0.4 s ease-out dissolve used by Splash → next and All set → Home.
     private static let dissolve = Animation.easeOut(duration: 0.4)
@@ -47,7 +67,7 @@ final class AppRouter {
     /// Splash → Home if onboarding is complete, otherwise Welcome step 1.
     func finishSplash(onboardingComplete: Bool) {
         withAnimation(Self.dissolve) {
-            root = onboardingComplete ? .home : .onboarding
+            root = onboardingComplete ? .main : .onboarding
         }
     }
 
@@ -65,29 +85,73 @@ final class AppRouter {
 
     /// All set → Home (first day), replacing the whole onboarding stack.
     func finishOnboarding() {
+        resetMain()
         withAnimation(Self.dissolve) {
-            homeState = .firstDay
-            isAddSheetPresented = false
-            root = .home
+            root = .main
         }
         path = []
     }
 
     /// Back to a fresh Welcome step 1 (after the profile was cleared).
     func restartOnboarding() {
+        resetMain()
         path = []
         welcomeStep = 1
-        isAddSheetPresented = false
         root = .onboarding
     }
+
+    /// Back to Get Started (Sign out keeps the data on the device).
+    func signOut() {
+        resetMain()
+        welcomeStep = 3
+        path = [.getStarted]
+        root = .onboarding
+    }
+
+    /// Home, with nothing pushed or presented.
+    func resetMain() {
+        modals = []
+        mainSheet = nil
+        mainPath = []
+        selectedTab = .home
+        groupsSegment = .groups
+        activitySegment = .timeline
+        insightsMonth = nil
+        results = [:]
+        routeAfterSheet = nil
+    }
+
+    /// Shows the main app on its current state (debug start screens, deep links).
+    func showMain() {
+        path = []
+        root = .main
+    }
+}
+
+enum GroupsSegment: String, Codable {
+    case groups
+    case friends
+}
+
+enum ActivitySegment: String, Codable {
+    case timeline
+    case insights
+}
+
+/// A full-screen modal with its own push stack and route sheet.
+struct ModalLayer: Identifiable, Hashable {
+    let id = UUID()
+    var root: Route
+    var path: [Route] = []
+    var sheet: Route?
 }
 
 #if DEBUG
 // Debug start screens (DebugLaunchOptions); compiled out of release builds.
 extension AppRouter {
-    /// Jumps straight to a screen with a plausible back stack (debug start screens).
-    func show(_ screen: ScreenID) {
-        isAddSheetPresented = false
+    /// Jumps straight to an onboarding screen with a plausible back stack (debug start screens).
+    func showOnboarding(_ screen: ScreenID) {
+        resetMain()
         switch screen {
         case .splash:
             root = .splash
@@ -95,19 +159,18 @@ extension AppRouter {
             welcomeStep = screen == .welcome1 ? 1 : screen == .welcome2 ? 2 : 3
             path = []
             root = .onboarding
-        case .homeFirstDay, .homeActive, .homeAllSettled, .homeAddSheet:
-            homeState = switch screen {
-            case .homeFirstDay: .firstDay
-            case .homeAllSettled: .allSettled
-            default: .active
-            }
-            isAddSheetPresented = screen == .homeAddSheet
-            root = .home
         default:
             welcomeStep = 3
             path = Self.emailSignInPath(to: screen)
             root = .onboarding
         }
+    }
+
+    /// Hands the start screen to the first screen that owns it, once.
+    func takeStartScreen(in screens: Set<ScreenID>) -> ScreenID? {
+        guard let screen = startScreen, screens.contains(screen) else { return nil }
+        startScreen = nil
+        return screen
     }
 
     func showGallery(page: Int) {

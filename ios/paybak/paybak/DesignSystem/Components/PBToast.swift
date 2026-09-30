@@ -64,6 +64,7 @@ private struct ToastPresenter: ViewModifier {
             ZStack {
                 if let toast {
                     PBToast(toast.text)
+                        .accessibilityIdentifier("toast")
                         .id(toast.id)
                         .transition(.opacity.combined(with: .offset(y: reduceMotion ? 0 : 8)))
                 }

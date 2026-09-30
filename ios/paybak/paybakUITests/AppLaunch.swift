@@ -1,9 +1,9 @@
 import UIKit
 import XCTest
 
-/// The flow.md screen ids: the values of the debug `-startScreen` argument and of the
-/// `screen.<id>` identifiers on each screen's root container.
-enum ScreenID: String {
+/// Every screen id (app-architecture §1): the values of the debug `-startScreen` argument. Keep in
+/// step with the app's `ScreenID`.
+enum ScreenID: String, CaseIterable {
     case splash
     case welcome1
     case welcome2
@@ -20,17 +20,123 @@ enum ScreenID: String {
     case homeFirstDay
     case homeActive
     case homeAllSettled
+    case homeConfirmPayment
+    case settlePaymentConfirmed
     case homeAddSheet
+    case debugMenu
+    case addExpenseEmpty
+    case addExpenseFilled
+    case addExpenseSplitWith
+    case addExpensePaidBy
+    case addExpensePayers
+    case addExpenseSplitEqually
+    case addExpenseSplitExactError
+    case addExpenseCategory
+    case addExpenseCurrency
+    case addExpenseDueDate
+    case addExpenseDate
+    case addExpenseDiscard
+    case expenseAdded
+    case recordPayment
+    case settleRecordKabir
+    case paymentRecorded
+    case settlePaymentPending
+    case paymentCancelAlert
+    case lendMoney
+    case loanAdded
+    case loanPaidBack
+    case loanOverdue
+    case newGroup
+    case newGroupProject
+    case newGroupCreated
+    case groupsList
+    case friendsList
+    case groupsEmpty
+    case friendsEmpty
+    case groupGoaTrip
+    case groupDubaiWeekend
+    case groupSettings
+    case groupLeaveBlocked
+    case friendRohan
+    case friendAnanyaGuest
+    case addFriend
+    case myQrCode
+    case settleOwedBreakdown
+    case settleOweBreakdown
+    case settleUp
+    case settleRemind
+    case settleRemindShare
+    case settleNotReceived
+    case activityTimeline
+    case activityEmpty
+    case expenseVilla
+    case expenseComment
+    case expenseDelete
+    case expenseDisputed
+    case recentlyDeleted
+    case notifications
+    case activityLog
+    case lockConfirmRequest
+    case lockReminder
+    case projectDrone
+    case projectOverBudget
+    case projectAddComponent
+    case projectSettings
+    case projectCloseAlert
+    case projectClosed
+    case projectArchived
+    case profile
+    case profileSignOut
+    case editAvatarBoyHair
+    case editAvatarBoyBeard
+    case editAvatarBoyEyewear
+    case editAvatarBoyOutfit
+    case editAvatarGirlHair
+    case editAvatarGirlAccessory
+    case editAvatarGirlOutfit
+    case editAvatarDiscard
+    case paywall
+    case proWelcome
+    case paymentDetails
+    case paymentAddUpi
+    case paymentAddUpiError
+    case settingsCurrency
+    case settingsNotifications
+    case mutedFriends
+    case privacyData
+    case privacyExport
+    case privacyDeleteBlocked
+    case helpFeedback
+    case helpAnswer
+    case insightsSeptember
+    case insightsScrolled
+    case insightsLocked
+    case askStart
+    case askAnswer
+    case askConfirm
+    case scanCamera
+    case scanReview
+    case scanAssign
+    case scanAddExpense
+    case recurringFlat302
+    case recurringRepeat
+    case recurringEnterAmount
 }
 
 extension XCUIApplication {
-    /// Launches Paybak with its debug launch hooks (flow.md "Debug-only hooks"): `-resetOnboarding`
-    /// clears the saved profile, and `-startScreen` opens a screen directly instead of the splash.
-    /// `textSize` sets the app's Dynamic Type size without touching the device's settings.
+    /// Launches Paybak with its debug launch hooks (flow.md "Debug-only hooks", app-architecture
+    /// §3.10): `-resetOnboarding` clears the profile and ledger, `-startScreen` opens a screen with
+    /// its demo scenario, `-now` pins the clock, `-pro` overrides the plan, `-scenario` applies seed
+    /// scenarios and `-link` opens a deep link. `textSize` sets the app's Dynamic Type size without
+    /// touching the device's settings.
     static func launchPaybak(
         startScreen: ScreenID? = nil,
         resetOnboarding: Bool = true,
-        textSize: UIContentSizeCategory? = nil
+        textSize: UIContentSizeCategory? = nil,
+        now: String? = nil,
+        pro: Bool? = nil,
+        scenarios: [String] = [],
+        link: String? = nil
     ) -> XCUIApplication {
         let app = XCUIApplication()
         if resetOnboarding {
@@ -41,6 +147,18 @@ extension XCUIApplication {
         }
         if let textSize {
             app.launchArguments += ["-UIPreferredContentSizeCategoryName", textSize.rawValue]
+        }
+        if let now {
+            app.launchArguments += ["-now", now]
+        }
+        if let pro {
+            app.launchArguments += ["-pro", pro ? "YES" : "NO"]
+        }
+        if !scenarios.isEmpty {
+            app.launchArguments += ["-scenario", scenarios.joined(separator: ",")]
+        }
+        if let link {
+            app.launchArguments += ["-link", link]
         }
         app.launch()
         return app

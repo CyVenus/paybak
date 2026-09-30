@@ -7,6 +7,8 @@ struct UserProfile: Codable, Equatable {
         case preset(Int)
         /// The photo saved by `ProfileStore.savePhoto(_:)`.
         case photo
+        /// The custom character saved from Edit avatar.
+        case character(AvatarLook)
     }
 
     enum SignInMethod: String, Codable {
@@ -28,14 +30,27 @@ struct UserProfile: Codable, Equatable {
     var name = ""
     /// nil: no choice yet; initials are the fallback everywhere an avatar shows.
     var avatar: Avatar?
-    /// ISO 4217 code, e.g. "INR".
+    /// ISO 4217 code, e.g. "INR": the default currency for totals, new groups and new expenses.
     var currencyCode: String?
+    /// Mirrors the primary UPI method (Setup 3 writes it; `paymentMethods` is the source from M2 on).
     var upiID = ""
     var notifications: NotificationsChoice?
     var signInMethod: SignInMethod?
     /// The email or phone number for the email/phone sign-in.
     var contact: String?
     var onboardingComplete = false
+    /// Without "@" ("arjun"); the invite link is `https://paybak.app/i/{username}`.
+    var username: String?
+    /// For copy about the user on friends' devices (simulated).
+    var pronoun: Pronoun?
+    var paymentMethods: [PaymentMethod] = []
+    /// Friends see the primary method only while this is on.
+    var showPaymentToFriends = true
+
+    /// The default currency, INR until onboarding picks one.
+    var defaultCurrency: String { currencyCode ?? Currency.fallbackCode }
+
+    var primaryPaymentMethod: PaymentMethod? { paymentMethods.first(where: \.primary) ?? paymentMethods.first }
 
     /// The first whitespace-separated word of the trimmed name ("Arjun Mehta" → "Arjun").
     var firstName: String {
@@ -53,6 +68,58 @@ struct UserProfile: Codable, Equatable {
 }
 
 extension UserProfile {
+    private enum CodingKeys: String, CodingKey {
+        case name, avatar, currencyCode, upiID, notifications, signInMethod, contact, onboardingComplete, username,
+             pronoun, paymentMethods, showPaymentToFriends
+    }
+
+    /// Tolerates profiles saved before a field existed (every key is optional), and migrates an M1
+    /// profile: a UPI ID with no payment methods becomes the primary method.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
+        avatar = try c.decodeIfPresent(Avatar.self, forKey: .avatar)
+        currencyCode = try c.decodeIfPresent(String.self, forKey: .currencyCode)
+        upiID = try c.decodeIfPresent(String.self, forKey: .upiID) ?? ""
+        notifications = try c.decodeIfPresent(NotificationsChoice.self, forKey: .notifications)
+        signInMethod = try c.decodeIfPresent(SignInMethod.self, forKey: .signInMethod)
+        contact = try c.decodeIfPresent(String.self, forKey: .contact)
+        onboardingComplete = try c.decodeIfPresent(Bool.self, forKey: .onboardingComplete) ?? false
+        username = try c.decodeIfPresent(String.self, forKey: .username)
+        pronoun = try c.decodeIfPresent(Pronoun.self, forKey: .pronoun)
+        paymentMethods = try c.decodeIfPresent([PaymentMethod].self, forKey: .paymentMethods) ?? []
+        showPaymentToFriends = try c.decodeIfPresent(Bool.self, forKey: .showPaymentToFriends) ?? true
+        migrateUPI()
+    }
+
+    /// A UPI ID with no payment methods becomes the primary UPI method.
+    mutating func migrateUPI() {
+        let upi = upiID.trimmingCharacters(in: .whitespaces)
+        if paymentMethods.isEmpty, !upi.isEmpty {
+            paymentMethods = [PaymentMethod(id: "pm-upi", kind: .upi, value: upi, primary: true)]
+        }
+    }
+
+    /// Setup 3 edits `upiID`: the primary UPI method follows it (or becomes it when there's none).
+    mutating func syncPrimaryUPI() {
+        let upi = upiID.trimmingCharacters(in: .whitespaces)
+        if let index = paymentMethods.firstIndex(where: { $0.primary && $0.kind == .upi }) {
+            if upi.isEmpty {
+                paymentMethods.remove(at: index)
+            } else {
+                paymentMethods[index].value = upi
+            }
+        } else {
+            migrateUPI()
+        }
+    }
+
+    /// The default username: the lowercase first name ("arjun").
+    static func defaultUsername(for name: String) -> String {
+        let first = name.split(whereSeparator: \.isWhitespace).first.map(String.init) ?? ""
+        return first.lowercased().filter { $0.isLetter || $0.isNumber }
+    }
+
     /// The debug seed that makes mid-flow screens render like Figma (flow.md "Debug-only hooks").
     static let sample = UserProfile(
         name: "Arjun Mehta",
@@ -60,6 +127,9 @@ extension UserProfile {
         currencyCode: "INR",
         upiID: "arjun@okaxis",
         signInMethod: .email,
-        contact: "arjun@example.com"
+        contact: "arjun@example.com",
+        username: "arjun",
+        pronoun: .he,
+        paymentMethods: [PaymentMethod(id: "pm-upi", kind: .upi, value: "arjun@okaxis", primary: true)]
     )
 }
