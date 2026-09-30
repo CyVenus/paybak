@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the insights module (app-architecture §7.1): names start with "insights_". Only its lane edits this file. -->
 <resources>
+    <!-- Insights (screens-insights-ai §2) -->
+    <string name="insights_previous_month">Previous month</string>
+    <string name="insights_next_month">Next month</string>
+    <string name="insights_your_share">Your share of shared expenses</string>
+    <string name="insights_by_category">By category</string>
+    <string name="insights_no_expenses">No shared expenses in %1$s.</string>
+    <string name="insights_who_you_spent_with">Who you spent with</string>
+    <string name="insights_groups">Groups</string>
+    <string name="insights_friends">Friends</string>
+    <string name="insights_lent">Lent</string>
+    <string name="insights_borrowed">Borrowed</string>
+    <string name="insights_paid_back">Paid back</string>
+    <string name="insights_overdue">Overdue</string>
+    <string name="insights_due">Due %1$s</string>
+    <string name="insights_footnote">Totals are your share of expenses in groups and with friends. Projects, payments and loans aren’t counted.</string>
+    <string name="insights_pro">Pro</string>
+    <string name="insights_locked_title">Insights are part of Paybak Pro</string>
+    <string name="insights_locked_body">See monthly trends, spending by category, group and friend, and lent vs borrowed.</string>
+    <string name="insights_see_pro">See Pro</string>
 </resources>
