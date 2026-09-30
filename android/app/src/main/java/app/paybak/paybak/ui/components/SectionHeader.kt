@@ -24,7 +24,7 @@ private val SectionHeaderHeight = 32.dp
 /**
  * `Row / Section Header` (`PBSectionHeader`): a Title/3 section title with an optional secondary
  * text action ("See all") on the right. The row is 32 dp tall; the action's 44 dp tap target
- * overhangs it above and below.
+ * overhangs it above and below. [actionTestTag] tags the action for UI tests.
  */
 @Composable
 fun PbSectionHeader(
@@ -32,6 +32,7 @@ fun PbSectionHeader(
     modifier: Modifier = Modifier,
     action: String? = null,
     onAction: () -> Unit = {},
+    actionTestTag: String? = null,
 ) {
     Row(
         modifier = modifier.fillMaxWidth().height(SectionHeaderHeight),
@@ -49,7 +50,7 @@ fun PbSectionHeader(
             PbTextButton(
                 label = action,
                 onClick = onAction,
-                modifier = Modifier.wrapContentHeight(unbounded = true),
+                modifier = Modifier.wrapContentHeight(unbounded = true).partTag(actionTestTag),
                 style = PbTextButtonStyle.Secondary,
             )
         }
