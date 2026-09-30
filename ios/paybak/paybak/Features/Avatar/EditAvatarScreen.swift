@@ -37,7 +37,8 @@ struct EditAvatarScreen: View {
             testIDPrefix: "editAvatar.discard",
             onAction: router.back
         )
-        .sensoryFeedback(.selection, trigger: draft?.look)
+        // A tick for each pick or shuffle, not for the draft appearing.
+        .sensoryFeedback(.selection, trigger: draft?.look) { old, _ in old != nil }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.editAvatar")
         .onAppear(perform: openDraft)
