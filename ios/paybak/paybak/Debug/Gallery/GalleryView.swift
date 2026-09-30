@@ -3,7 +3,7 @@ import SwiftUI
 
 /// Debug-only design-system gallery for checking the foundations against Figma:
 /// `-startScreen gallery -galleryPage <n>` (0-based). Swipe or use the chevrons to change pages.
-/// Each page fits one iPhone 18 Pro screen, so every page can be screenshotted as is.
+/// Most pages fit one iPhone 18 Pro screen; the longer component pages scroll.
 struct GalleryView: View {
     @State private var page: GalleryPage
 
@@ -75,6 +75,23 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
     case riveSetup
     case riveHome
     case feedback
+    // components-app.md: the shared components of the full app.
+    case chipsSettings
+    case headersAlert
+    case textInputs
+    case amountEntry
+    case splitRows
+    case planPairs
+    case personRows
+    case transferHeaders
+    case notices
+    case confirmQR
+    case groupRows
+    case progress
+    case chartCards
+    case assistant
+    case scan
+    case sheetToast
 
     var id: Int { rawValue }
 
@@ -101,6 +118,22 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .riveSetup: "Rive: Setup 4, All set"
         case .riveHome: "Rive: Home empty states"
         case .feedback: "Section header, preview, toast"
+        case .chipsSettings: "Category chip, setting row"
+        case .headersAlert: "Push, modal header, alert"
+        case .textInputs: "Text area, composer"
+        case .amountEntry: "Amount, parties, split total"
+        case .splitRows: "Split person rows"
+        case .planPairs: "Plan, pair, comment, history"
+        case .personRows: "Person rows"
+        case .transferHeaders: "Transfer, title, amount hero"
+        case .notices: "Notice cards"
+        case .confirmQR: "Confirm payment, QR code"
+        case .groupRows: "Group rows"
+        case .progress: "Progress bars, bar rows"
+        case .chartCards: "Chart, budget, loan"
+        case .assistant: "Chat bubble, draft expense"
+        case .scan: "Receipt, assign, shutter"
+        case .sheetToast: "Toast, sheet container"
         }
     }
 
@@ -128,6 +161,22 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .riveSetup: GalleryRivePage(assets: [.notifications, .allSet])
         case .riveHome: GalleryRivePage(assets: [.homeFirstDay, .homeAllSquare])
         case .feedback: GalleryFeedbackPage()
+        case .chipsSettings: GalleryChipsSettingsPage()
+        case .headersAlert: GalleryHeadersAlertPage()
+        case .textInputs: GalleryTextInputsPage()
+        case .amountEntry: GalleryAmountEntryPage()
+        case .splitRows: GallerySplitRowsPage()
+        case .planPairs: GalleryPlanPairsPage()
+        case .personRows: GalleryPersonRowsPage()
+        case .transferHeaders: GalleryTransferHeadersPage()
+        case .notices: GalleryNoticesPage()
+        case .confirmQR: GalleryConfirmQRPage()
+        case .groupRows: GalleryGroupRowsPage()
+        case .progress: GalleryProgressPage()
+        case .chartCards: GalleryChartCardsPage()
+        case .assistant: GalleryAssistantPage()
+        case .scan: GalleryScanPage()
+        case .sheetToast: GallerySheetToastPage()
         }
     }
 }

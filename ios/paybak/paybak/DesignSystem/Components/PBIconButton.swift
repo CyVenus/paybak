@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Button / Icon (Figma 10:79): a circular 44 pt icon button with a 24 pt icon and an optional
-/// unread badge. Glass is Liquid Glass for floating toolbar buttons (the Home bell).
+/// unread badge. Glass is Liquid Glass for floating toolbar buttons (the Home bell). Some components
+/// resize it (the composer's 36 pt send button); the icon stays 24 pt.
 struct PBIconButton: View {
     enum Style {
         /// No fill; pressed fills the circle with `bg/selected`.
@@ -19,6 +20,7 @@ struct PBIconButton: View {
     let accessibilityLabel: String
     var style: Style = .plain
     var showsBadge = false
+    var diameter: CGFloat = PBSize.tap
     let action: () -> Void
 
     init(
@@ -26,19 +28,21 @@ struct PBIconButton: View {
         accessibilityLabel: String,
         style: Style = .plain,
         showsBadge: Bool = false,
+        diameter: CGFloat = PBSize.tap,
         action: @escaping () -> Void
     ) {
         self.icon = icon
         self.accessibilityLabel = accessibilityLabel
         self.style = style
         self.showsBadge = showsBadge
+        self.diameter = diameter
         self.action = action
     }
 
     var body: some View {
         Button(action: action) {
             PBIconView(icon)
-                .frame(width: PBSize.tap, height: PBSize.tap)
+                .frame(width: diameter, height: diameter)
                 .overlay(alignment: .topLeading) {
                     if showsBadge {
                         badge

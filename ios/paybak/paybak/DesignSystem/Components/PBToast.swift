@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Overlay / Toast (Figma 118:965): a short confirmation after an action ("UPI ID copied"). A 44 pt
-/// black capsule that hugs an optional 20 pt icon and its label. No shadow, never a link.
-/// Show it with `.pbToast(_:bottomPadding:)`.
+/// Overlay / Toast (Figma 118:965): a short confirmation after a save ("Expense added", "Payment
+/// recorded", "UPI ID copied"). A 44 pt black capsule that hugs an optional 20 pt icon and its label.
+/// No shadow, never a link. Show it with `.pbToast(_:bottomPadding:)`: 50 pt above the bottom edge,
+/// 16 above the tab bar on tab screens, or 16 above a pinned CTA.
 struct PBToast: View {
     let message: String
     var icon: PBIcon? = .checkCircle
@@ -23,7 +24,8 @@ struct PBToast: View {
                 .foregroundStyle(PBColor.textInverse)
                 .lineLimit(1)
         }
-        .padding(.leading, icon == nil ? PBSpace.s20 : PBSpace.s16)
+        // 16 pt before the icon or the label (Figma keeps it when Show icon is off), 20 pt after.
+        .padding(.leading, PBSpace.s16)
         .padding(.trailing, PBSpace.s20)
         .frame(height: PBSize.tap)
         .background(PBColor.bgInverse, in: .capsule)

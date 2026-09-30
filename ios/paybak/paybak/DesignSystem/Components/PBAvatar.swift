@@ -15,11 +15,14 @@ struct PBAvatar: View {
     var diameter: CGFloat = PBSize.avatarMd
     /// "On a card, nested avatars turn white": `bg/primary` instead of `bg/card` inside #F5F5F5 cards.
     var isOnCard = false
+    /// The icon colour (`.icon` content only); archived groups use `icon/tertiary`.
+    var iconTint = PBColor.iconPrimary
 
-    init(_ content: Content, diameter: CGFloat = PBSize.avatarMd, isOnCard: Bool = false) {
+    init(_ content: Content, diameter: CGFloat = PBSize.avatarMd, isOnCard: Bool = false, iconTint: Color = PBColor.iconPrimary) {
         self.content = content
         self.diameter = diameter
         self.isOnCard = isOnCard
+        self.iconTint = iconTint
     }
 
     var body: some View {
@@ -38,7 +41,7 @@ struct PBAvatar: View {
                     .lineLimit(1)
             case .icon(let icon):
                 PBIconView(icon, size: iconSize)
-                    .foregroundStyle(PBColor.iconPrimary)
+                    .foregroundStyle(iconTint)
             }
         }
         .frame(width: diameter, height: diameter)
