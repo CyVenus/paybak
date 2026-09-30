@@ -76,7 +76,7 @@ struct GroupDetailScreen: View {
 
     private func settle(_ target: SettleTarget?) {
         guard let target else { return }
-        router.open(target.route)
+        router.open(target.route(in: ledgerStore.ledger))
     }
 
     private func addExpense(_ group: LedgerGroup) {
@@ -172,9 +172,12 @@ struct GroupDetailScreen: View {
 }
 
 extension SettleTarget {
-    /// Record payment prefilled with the one transfer, or the group's Settle up plan.
-    var route: Route {
+    /// Record payment prefilled with the one transfer (by UPI when you pay someone with an ID), or the
+    /// group's Settle up plan.
+    func route(in ledger: Ledger) -> Route {
         switch self {
+        case .pay(let transfer, let currency, let groupId) where transfer.from == Person.me:
+            .recordPayment(.paying(transfer.to, amount: transfer.amount, currency: currency, context: .group(groupId), in: ledger))
         case .pay(let transfer, let currency, let groupId):
             .recordPayment(RecordPaymentArgs(from: transfer.from, to: transfer.to, amount: transfer.amount, currency: currency,
                                              context: .group(groupId)))

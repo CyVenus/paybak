@@ -34,7 +34,7 @@ struct GroupSettingsScreen: View {
         }
         .pbAlert(isPresented: $isBlockShown, title: "You can’t leave yet", message: block?.message, cancelLabel: "Not now",
                  actionLabel: "Settle up", role: .primary, testIDPrefix: "groupSettings.leaveBlocked") {
-            if let settle = block?.settle { router.open(settle.route) }
+            if let settle = block?.settle { router.open(settle.route(in: ledgerStore.ledger)) }
         }
         .pbAlert(isPresented: $isLeaveConfirmShown, title: "Leave \(ledgerStore.ledger.group(groupId)?.name ?? "group")?",
                  message: "You’ll stop seeing this group. Its history stays with the other members.",

@@ -47,42 +47,31 @@ struct SettleUpScreen: View {
         }
     }
 
+    /// Row / Attention with the person's art: Settle for a payment you make (none while yours is
+    /// pending), Remind for someone who owes you; the row opens the person, or your pending payment.
     private func planRow(_ row: PlanRowCopy) -> some View {
         let person = ledgerStore.ledger.person(row.friend)
-        let action: SettlePlanRow.Action? = switch (row.pays, row.pendingPayment) {
-        case (true, nil): .init(title: "Settle", testID: "settleUp.pay.\(row.friend)") { settle(row, payeeHasUPI: person?.upi != nil) }
-        case (true, _): nil
-        case (false, _): .init(title: "Remind", testID: "settleUp.remind.\(row.friend)") {
-            router.open(.remind(personId: row.friend, context: row.item.map(reminderContext)))
-        }
-        }
-        return SettlePlanRow(avatar: person?.avatarContent ?? .icon(.profile), title: row.name, detail: row.context, amount: row.amount,
-                             badge: row.badge, isOverdue: row.isOverdue, action: action, testID: "settleUp.row.\(row.friend)") {
-            router.open(row.pendingPayment.map(Route.payment) ?? .friend(row.friend))
-        }
-    }
-
-    /// Record payment prefilled from the suggestion: you pay them the amount, by UPI when they have an
-    /// ID, for the group or expense (settle §4.2).
-    private func settle(_ row: PlanRowCopy, payeeHasUPI: Bool) {
-        router.open(.recordPayment(RecordPaymentArgs(from: Person.me, to: row.friend, amount: row.amountMinor, currency: row.currency,
-                                                     method: payeeHasUPI ? .upi : .cash, context: row.item.map(paymentContext))))
-    }
-
-    private func reminderContext(_ item: Obligation) -> ReminderContext {
-        switch item.kind {
-        case .direct: .expense(item.ref)
-        case .group, .project: .group(item.ref)
-        case .loan: .loan(item.ref)
-        }
-    }
-
-    private func paymentContext(_ item: Obligation) -> PaymentContext {
-        switch item.kind {
-        case .direct: .expense(item.ref)
-        case .group, .project: .group(item.ref)
-        case .loan: .loan(item.ref)
-        }
+        let isPending = row.pendingPayment != nil
+        return PBAttentionRow(
+            avatar: person?.avatarContent ?? .icon(.profile),
+            title: row.name,
+            detail: row.context,
+            amount: row.amount,
+            badge: row.badge,
+            isOverdue: row.isOverdue,
+            actionTitle: row.pays ? (isPending ? nil : "Settle") : "Remind",
+            testID: "settleUp.row.\(row.friend)",
+            actionTestID: "settleUp.\(row.pays ? "pay" : "remind").\(row.friend)",
+            onAction: {
+                if row.pays {
+                    router.open(.recordPayment(.paying(row.friend, amount: row.amountMinor, currency: row.currency,
+                                                       context: row.item?.paymentContext, in: ledgerStore.ledger)))
+                } else {
+                    router.open(.remind(personId: row.friend, context: row.item?.reminderContext))
+                }
+            },
+            onTap: { router.open(row.pendingPayment.map(Route.payment) ?? .friend(row.friend)) }
+        )
     }
 }
 

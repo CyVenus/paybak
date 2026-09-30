@@ -97,19 +97,19 @@ struct FriendScreen: View {
         case .owed:
             HStack(spacing: PBSpace.s12) {
                 PBButton("Remind", icon: .bell, fillsWidth: true) {
-                    router.open(.remind(personId: person.id, context: copy.lead.map(reminderContext)))
+                    router.open(.remind(personId: person.id, context: copy.lead?.reminderContext))
                 }
                 .accessibilityIdentifier("friend.remind")
                 PBButton("Record payment", style: .secondary, fillsWidth: true) {
                     router.open(.recordPayment(RecordPaymentArgs(from: person.id, to: Person.me, amount: amount,
-                                                                 currency: currency, context: copy.lead.map(paymentContext))))
+                                                                 currency: currency, context: copy.lead?.paymentContext)))
                 }
                 .accessibilityIdentifier("friend.recordPayment")
             }
         case .owe:
             PBButton("Settle up", fillsWidth: true) {
-                router.open(.recordPayment(RecordPaymentArgs(from: Person.me, to: person.id, amount: amount,
-                                                             currency: currency, context: copy.lead.map(paymentContext))))
+                router.open(.recordPayment(.paying(person.id, amount: amount, currency: currency, context: copy.lead?.paymentContext,
+                                                   in: ledgerStore.ledger)))
             }
             .accessibilityIdentifier("friend.settleUp")
         case .settled:
@@ -118,22 +118,6 @@ struct FriendScreen: View {
     }
 
     private var currency: String { profileStore.profile.defaultCurrency }
-
-    private func reminderContext(_ item: Obligation) -> ReminderContext {
-        switch item.kind {
-        case .direct: .expense(item.ref)
-        case .group, .project: .group(item.ref)
-        case .loan: .loan(item.ref)
-        }
-    }
-
-    private func paymentContext(_ item: Obligation) -> PaymentContext {
-        switch item.kind {
-        case .direct: .expense(item.ref)
-        case .group, .project: .group(item.ref)
-        case .loan: .loan(item.ref)
-        }
-    }
 
     // MARK: Guest and no balance
 
