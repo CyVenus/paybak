@@ -48,9 +48,17 @@ enum class PbLogoLayout {
 /**
  * `Brand / Logo`: mark + live "Paybak" wordmark. Horizontal (104 × 28) for Get Started and the Home
  * header; Stacked (135 × 156) for Splash. TalkBack reads it as "Paybak".
+ *
+ * @param markModifier Applied to the mark alone, e.g. to animate it separately.
+ * @param wordmarkModifier Applied to the wordmark alone.
  */
 @Composable
-fun PbLogo(layout: PbLogoLayout, modifier: Modifier = Modifier) {
+fun PbLogo(
+    layout: PbLogoLayout,
+    modifier: Modifier = Modifier,
+    markModifier: Modifier = Modifier,
+    wordmarkModifier: Modifier = Modifier,
+) {
     when (layout) {
         PbLogoLayout.Horizontal ->
             Row(
@@ -58,8 +66,8 @@ fun PbLogo(layout: PbLogoLayout, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(PbSpace.S8),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PbAppMark(PbAppMarkSize.Header)
-                Wordmark(large = false)
+                PbAppMark(PbAppMarkSize.Header, markModifier)
+                Wordmark(large = false, wordmarkModifier)
             }
 
         PbLogoLayout.Stacked ->
@@ -68,16 +76,17 @@ fun PbLogo(layout: PbLogoLayout, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(PbSpace.S16),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                PbAppMark(PbAppMarkSize.Splash)
-                Wordmark(large = true)
+                PbAppMark(PbAppMarkSize.Splash, markModifier)
+                Wordmark(large = true, wordmarkModifier)
             }
     }
 }
 
 @Composable
-private fun Wordmark(large: Boolean) {
+private fun Wordmark(large: Boolean, modifier: Modifier) {
     Text(
         text = stringResource(R.string.app_name),
+        modifier = modifier,
         style = if (large) PbTextStyles.BrandWordmarkL else PbTextStyles.BrandWordmarkS,
         color = PbColors.Text.Primary,
         maxLines = 1,
