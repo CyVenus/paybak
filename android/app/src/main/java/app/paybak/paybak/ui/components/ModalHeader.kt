@@ -18,9 +18,10 @@ import app.paybak.paybak.ui.theme.PbSpace
  * `Navigation / Modal Header` (`PBModalHeader`): the 44 dp toolbar of a full-screen modal (Add
  * expense, Record payment, New group, Ask Paybak, the paywall): the glass ✕ on the left, a centred
  * Headline title and a black Small pill on the right ("Save", "Create", "Add"), disabled until the
- * form is valid. No fill. Parts are tagged "[testTag].close" and "[testTag].action".
+ * form is valid. No fill. Parts are tagged "[testTag].close" and "[testTag].[actionTag]".
  *
  * @param action The pill's label; null for no pill (Ask Paybak, the paywall).
+ * @param actionTag The pill's part tag, e.g. "save" or "create".
  */
 @Composable
 fun PbModalHeader(
@@ -31,6 +32,7 @@ fun PbModalHeader(
     actionEnabled: Boolean = true,
     onAction: () -> Unit = {},
     testTag: String? = null,
+    actionTag: String = "action",
 ) {
     Box(modifier.fillMaxWidth().height(PbSize.Tap).partTag(testTag)) {
         PbGlassCloseButton(
@@ -43,7 +45,7 @@ fun PbModalHeader(
             PbButton(
                 label = action,
                 onClick = onAction,
-                modifier = Modifier.align(Alignment.CenterEnd).partTag(testTag, "action"),
+                modifier = Modifier.align(Alignment.CenterEnd).partTag(testTag, actionTag),
                 size = PbButtonSize.Small,
                 enabled = actionEnabled,
             )

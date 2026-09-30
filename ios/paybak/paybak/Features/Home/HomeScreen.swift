@@ -1,64 +1,118 @@
 import SwiftUI
 
-// PLACEHOLDER (app-architecture §2.2): Lane D replaces this file with the real Home and keeps this
-// initializer. It already derives its state from the ledger, so onboarding's UI tests find
-// `screen.homeFirstDay` after All set.
-/// Home: First day, Active, All settled, and pending claims above the balances (screens-home-v2).
+/// Home, the first tab (screens-home, screens-home-v2): the header and greeting, then what the ledger
+/// calls for. First day (a new account), Active (balances, Due soon, Recent activity, with a Confirm
+/// card on top for each payment a friend says they made), or All settled. Content scrolls under the
+/// glass tab bar and its fade.
 struct HomeScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(LedgerStore.self) private var ledgerStore
     @Environment(ProfileStore.self) private var profileStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// After Confirm, Home keeps showing the summary from before the confirm while the card plays
+    /// its Confirmed state, then collapses into the new numbers (home-v2 §3.9).
+    @State private var heldSummary: HomeSummary?
+    /// The latest hold: a second Confirm during a hold restarts it.
+    @State private var holdID = UUID()
+
+    /// The last row scrolls fully above the tab bar: its top (21 + 62 from the bottom) plus 24.
+    private static let bottomInset = PBTabBar.bottomOffset + PBSize.tabbar + PBLayout.sectionGap
 
     var body: some View {
-        let home = ledgerStore.snapshot.home
-        RoutePlaceholder(
-            route: .home,
-            title: Greeting.text(firstName: profileStore.profile.firstName, at: ledgerStore.clock.now, calendar: ledgerStore.clock.calendar),
-            owner: .d,
-            spec: "screens-home-v2 §2–3, screens-home §2–4",
-            screenID: "screen.\(screenID)",
-            details: [
-                "You’re owed \(Money.format(home.totals.owed, sign: .signed)) \(home.totals.owedCaption)",
-                "You owe \(Money.format(-home.totals.owe, sign: .signed)) \(home.totals.oweCaption)",
-                "Due soon: " + home.dueSoon.map { "\($0.title) \(Money.format($0.amount)) \($0.badge)" }.joined(separator: " · "),
-                "Recent: " + home.recent.map(\.title).joined(separator: " · "),
-                "Claims: " + home.pendingClaims.map(\.title).joined(separator: " · "),
-            ],
-            accessory: AnyView(logo)
-        )
+        let home = heldSummary ?? ledgerStore.snapshot.home
+        ScrollView {
+            VStack(alignment: .leading, spacing: PBLayout.sectionGap) {
+                header(home)
+                content(home)
+            }
+            .padding(.horizontal, PBLayout.screenMargin)
+            .padding(.bottom, Self.bottomInset)
+            .phoneContentWidth()
+        }
+        .scrollIndicators(.hidden)
+        .ignoresSafeArea(.container, edges: .bottom)
+        .overlay(alignment: .bottom) {
+            if home.state == .active {
+                PBScrollEdgeFade(height: home.pendingClaims.isEmpty ? 150 : 118)
+                    .ignoresSafeArea(.container, edges: .bottom)
+            }
+        }
+        .overlay(alignment: .top) {
+            // Scrolled rows pass under a solid status bar, not the clock.
+            Color.clear
+                .frame(height: 0)
+                .background(PBColor.bgPrimary, ignoresSafeAreaEdges: .top)
+        }
+        .background(PBColor.bgPrimary)
+        .screenIdentifier(home.screen)
         .overlay(alignment: .topLeading) {
             Color.clear
                 .frame(width: 1, height: 1)
                 .accessibilityElement()
-                .accessibilityLabel(stateID)
-                .accessibilityIdentifier("home.state.\(stateID)")
+                .accessibilityLabel(home.stateID)
+                .accessibilityIdentifier("home.state.\(home.stateID)")
         }
     }
 
-    /// Long-press the logo for the debug menu (debug builds).
-    private var logo: some View {
-        PBLogo()
-            .frame(height: PBSize.tap)
-            .accessibilityIdentifier("home.logo")
-            .onLongPressGesture {
-                #if DEBUG
-                router.open(.debugMenu)
-                #endif
+    private func header(_ home: HomeSummary) -> some View {
+        TimelineView(.everyMinute) { _ in
+            PBHomeHeader(
+                greeting: Greeting.text(firstName: profileStore.profile.firstName, at: ledgerStore.clock.now,
+                                        calendar: ledgerStore.clock.calendar),
+                hasUnread: home.hasUnread,
+                onAssistant: { router.requirePro(.ask) },
+                onBell: { router.open(.notifications) },
+                onLogoLongPress: debugMenu
+            )
+        }
+    }
+
+    @ViewBuilder
+    private func content(_ home: HomeSummary) -> some View {
+        switch home.state {
+        case .firstDay:
+            PBEmptyState(
+                primary: .init(title: "Add expense", icon: .plus, testID: "home.firstDay.addExpense") {
+                    router.open(.addExpense(.new))
+                },
+                secondary: .init(title: "Invite friends", icon: .userAdd, testID: "home.firstDay.invite") {
+                    router.open(.addFriend)
+                }
+            )
+        case .allSettled:
+            PBEmptyState.allSettled
+        case .active:
+            HomeActiveContent(home: home) {
+                hold(home)
             }
-    }
-
-    private var stateID: String {
-        let home = ledgerStore.snapshot.home
-        if !home.pendingClaims.isEmpty { return "confirmPayment" }
-        return home.state.rawValue
-    }
-
-    private var screenID: String {
-        switch stateID {
-        case "firstDay": "homeFirstDay"
-        case "allSettled": "homeAllSettled"
-        case "confirmPayment": "homeConfirmPayment"
-        default: "homeActive"
         }
+    }
+
+    /// Holds `before` (the summary the card was confirmed on) through the Confirmed state and a short
+    /// read, then lets the card collapse and the new balances and activity row in.
+    private func hold(_ before: HomeSummary) {
+        let id = UUID()
+        holdID = id
+        heldSummary = before
+        Task {
+            // The card's 250 ms Confirmed animation, then 0.8 s to read it.
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 800 : 1050))
+            guard holdID == id else { return }
+            var transaction = Transaction(animation: reduceMotion ? nil : .easeOut(duration: 0.25))
+            transaction.disablesAnimations = reduceMotion
+            withTransaction(transaction) {
+                heldSummary = nil
+            }
+        }
+    }
+
+    /// Long-pressing the logo opens the debug menu in debug builds.
+    private var debugMenu: (() -> Void)? {
+        #if DEBUG
+        { router.open(.debugMenu) }
+        #else
+        nil
+        #endif
     }
 }

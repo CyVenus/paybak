@@ -38,6 +38,7 @@ private const val MODAL_MILLIS = 300
 /** Toasts sit 16 dp above the tab bar on tab roots and 50 dp above the bottom elsewhere. */
 private val ToastAboveTabBar = 16.dp
 private val ToastAboveBottom = 50.dp
+private val ToastAbovePinnedFooter = 12.dp
 
 /**
  * The main root (app-architecture §2.8): the top screen of [navigator]'s stack with its push or
@@ -68,8 +69,12 @@ fun MainHost(navigator: MainNavigator) {
             stateHolder.SaveableStateProvider(sheet.key) { RouteContent(sheet.route) }
         }
         val bottom =
-            if (navigator.onTabRoot) tabBarBottomOffset() + PbSize.TabBar + ToastAboveTabBar
-            else ToastAboveBottom
+            when {
+                navigator.onTabRoot -> tabBarBottomOffset() + PbSize.TabBar + ToastAboveTabBar
+                navigator.pinnedFooterHeight > 0.dp ->
+                    navigator.pinnedFooterHeight + ToastAbovePinnedFooter
+                else -> ToastAboveBottom
+            }
         PbToastHost(
             navigator.toasts,
             Modifier.align(Alignment.BottomCenter)

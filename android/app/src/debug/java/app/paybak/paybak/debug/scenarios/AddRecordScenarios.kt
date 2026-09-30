@@ -1,5 +1,7 @@
 package app.paybak.paybak.debug.scenarios
 
+import app.paybak.paybak.domain.model.Category
+import app.paybak.paybak.domain.model.ExpenseDraft
 import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.domain.model.PaymentMethod
 import app.paybak.paybak.navigation.AddExpenseArgs
@@ -15,7 +17,19 @@ import java.time.LocalDate
 internal val DebugRequest = PickRequest("debug")
 
 private val addExpense = Route.AddExpense()
-private val addExpenseFilled = Route.AddExpense(AddExpenseArgs(focusAmount = false))
+
+/** The Olive Garden bill as 06-02 shows it, ready to save (add-expense §12). */
+private val oliveGarden =
+    ExpenseDraft.equal(listOf(ME, "p-priya", "p-esha", "p-dev"))
+        .copy(
+            title = "Dinner at Olive Garden",
+            amount = 280_000,
+            category = Category.Food.id,
+            dueDate = LocalDate.of(2026, 10, 4),
+        )
+
+private val addExpenseFilled =
+    Route.AddExpense(AddExpenseArgs(draft = oliveGarden, focusAmount = false))
 
 /** Add & Record (lane A, M3; app-architecture §1.3). */
 internal val AddRecordScenarios: Map<String, Scenario> =
@@ -30,7 +44,7 @@ internal val AddRecordScenarios: Map<String, Scenario> =
                         addExpenseFilled,
                         Route.PickPeople(
                             DebugRequest,
-                            selected = listOf("p-priya", "p-esha", "p-dev"),
+                            selected = listOf(ME, "p-priya", "p-esha", "p-dev"),
                         ),
                     ),
             ),
