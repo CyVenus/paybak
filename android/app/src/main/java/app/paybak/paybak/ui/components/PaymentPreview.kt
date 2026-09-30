@@ -32,6 +32,8 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  *
  * @param avatar Drawn on a white circle, as avatars on #F5F5F5 cards are.
  * @param copyButtonModifier Applied to the copy button, e.g. its test tag.
+ * @param showCaption False where a section header above the card says "What friends see"
+ *   (Payment details).
  */
 @Composable
 fun PbPaymentPreview(
@@ -42,6 +44,7 @@ fun PbPaymentPreview(
     modifier: Modifier = Modifier,
     placeholder: String = "",
     copyButtonModifier: Modifier = Modifier,
+    showCaption: Boolean = true,
 ) {
     Column(
         modifier =
@@ -51,11 +54,13 @@ fun PbPaymentPreview(
                 .padding(PbLayout.CardPadding),
         verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
     ) {
-        Text(
-            text = stringResource(R.string.pb_payment_preview_caption),
-            style = PbTextStyles.Footnote,
-            color = PbColors.Text.Tertiary,
-        )
+        if (showCaption) {
+            Text(
+                text = stringResource(R.string.pb_payment_preview_caption),
+                style = PbTextStyles.Footnote,
+                color = PbColors.Text.Tertiary,
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = PbSize.Tap),
             horizontalArrangement = Arrangement.spacedBy(PbSpace.S12),

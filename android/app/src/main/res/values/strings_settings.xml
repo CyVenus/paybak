@@ -1,4 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the settings module (app-architecture §7.1): names start with "settings_". Only its lane edits this file. -->
 <resources>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_ok">OK</string>
+
+    <!-- Paybak Pro: paywall and welcome (screens-settings §2–3) -->
+    <string name="settings_pro_title">Paybak Pro</string>
+    <string name="settings_pro_subtitle">Smart tools on top of your free ledger.</string>
+    <string name="settings_pro_ai">AI assistant</string>
+    <string name="settings_pro_ai_detail">Ask about balances or add expenses by chat</string>
+    <string name="settings_pro_scan">Receipt scanning</string>
+    <string name="settings_pro_scan_detail">Snap a bill and split it item by item</string>
+    <string name="settings_pro_insights">Insights</string>
+    <string name="settings_pro_insights_detail">See where shared money goes each month</string>
+    <string name="settings_pro_recurring">Recurring expenses</string>
+    <string name="settings_pro_recurring_detail">Rent and bills that add themselves</string>
+    <string name="settings_pro_export">PDF/CSV export</string>
+    <string name="settings_pro_export_detail">Keep a clean copy of your records</string>
+    <string name="settings_plan_yearly">Yearly</string>
+    <string name="settings_plan_yearly_price">₹799/year</string>
+    <string name="settings_plan_yearly_detail">₹67/month</string>
+    <string name="settings_plan_yearly_badge">Save 33%</string>
+    <string name="settings_plan_monthly">Monthly</string>
+    <string name="settings_plan_monthly_price">₹99/month</string>
+    <string name="settings_plan_monthly_detail">Billed monthly</string>
+    <string name="settings_pro_start_trial">Start 7-day free trial</string>
+    <string name="settings_pro_subscribe_monthly">Subscribe for ₹99/month</string>
+    <string name="settings_pro_yearly_small_print">Then ₹799/year. Cancel anytime in Settings.</string>
+    <string name="settings_pro_monthly_small_print">Billed monthly. Cancel anytime in Settings.</string>
+    <string name="settings_pro_restore">Restore purchases</string>
+    <string name="settings_pro_terms">Terms</string>
+    <string name="settings_pro_privacy">Privacy</string>
+    <string name="settings_pro_nothing_to_restore">No purchases to restore.</string>
+    <string name="settings_pro_welcome_title">You’re on Paybak Pro</string>
+    <string name="settings_pro_trial_ends">Your free trial ends %1$s. Then ₹799/year.</string>
+    <string name="settings_pro_renews_yearly">Renews %1$s. ₹799/year.</string>
+    <string name="settings_pro_renews_monthly">Your subscription renews %1$s. ₹99/month.</string>
+    <string name="settings_pro_unlocked">Now unlocked</string>
+    <string name="settings_done">Done</string>
+
+    <!-- Payment details and the Add payment method sheet (screens-settings §4–5) -->
+    <string name="settings_payment_title">Payment details</string>
+    <string name="settings_payment_methods">Your methods</string>
+    <string name="settings_payment_upi">UPI</string>
+    <string name="settings_payment_bank">Bank transfer</string>
+    <string name="settings_payment_primary">%1$s · Primary</string>
+    <string name="settings_payment_bank_title">%1$s ···· %2$s</string>
+    <string name="settings_payment_add">Add payment method</string>
+    <string name="settings_payment_add_detail">UPI ID or bank account</string>
+    <string name="settings_payment_show">Show to friends</string>
+    <string name="settings_payment_show_detail">Friends see your primary method when they settle up with you.</string>
+    <string name="settings_payment_preview">What friends see</string>
+    <string name="settings_payment_hidden">Friends don’t see a payment method while this is off.</string>
+    <string name="settings_payment_none">Add a payment method so friends know how to pay you.</string>
+    <string name="settings_payment_info">Paybak never moves money. Friends copy these details and pay you in their own app.</string>
+    <string name="settings_payment_make_primary">Make primary</string>
+    <string name="settings_payment_copy">Copy</string>
+    <string name="settings_payment_remove">Remove</string>
+    <string name="settings_payment_remove_title">Remove payment method?</string>
+    <string name="settings_payment_remove_message">Friends won’t see it any more.</string>
+    <string name="settings_upi_copied">UPI ID copied</string>
+    <string name="settings_details_copied">Details copied</string>
+    <string name="settings_upi_added">UPI ID added</string>
+    <string name="settings_bank_added">Bank account added</string>
+    <string name="settings_add_upi_tab">UPI ID</string>
+    <string name="settings_add_bank_tab">Bank account</string>
+    <string name="settings_add_upi_label">UPI ID</string>
+    <string name="settings_add_upi_placeholder">yourname@bank</string>
+    <string name="settings_add_upi_helper">Friends copy this to pay you in their UPI app.</string>
+    <string name="settings_add_upi_error">Enter a UPI ID like name@bank</string>
+    <string name="settings_add_upi_duplicate">You’ve already added this UPI ID</string>
+    <string name="settings_add_bank_name">Bank name</string>
+    <string name="settings_add_bank_name_placeholder">HDFC Bank</string>
+    <string name="settings_add_bank_account">Account number</string>
+    <string name="settings_add_bank_account_helper">Friends see the bank and the last 4 digits.</string>
+    <string name="settings_add_bank_error">Enter the bank name and at least 4 digits</string>
+
+    <!-- Currency (screens-settings §6) -->
+    <string name="settings_currency_title">Currency</string>
+    <string name="settings_currency_default">Default currency</string>
+    <string name="settings_currency_default_footer">Home totals and new groups use this currency.</string>
+    <string name="settings_currency_balances">Balances</string>
+    <string name="settings_currency_per_currency">Keep balances per currency</string>
+    <string name="settings_currency_per_currency_footer">Show what you owe in each currency instead of converting it.\ne.g. You owe Kabir AED 60 and ₹1,400</string>
+    <string name="settings_currency_rates">Exchange rates</string>
+    <string name="settings_currency_rates_info">Rates are saved when an expense is added. Balances don’t change when rates move.</string>
+
+    <!-- Notifications & reminders, Muted friends (screens-settings §7) -->
+    <string name="settings_notifications_title">Notifications</string>
+    <string name="settings_notifications_push">Push notifications</string>
+    <string name="settings_push_added">Added to an expense</string>
+    <string name="settings_push_confirm">Payments to confirm</string>
+    <string name="settings_push_reminders">Reminders</string>
+    <string name="settings_push_overdue">Overdue alerts</string>
+    <string name="settings_push_projects">Project updates</string>
+    <string name="settings_push_summary">Monthly summary</string>
+    <string name="settings_schedule">Reminder schedule</string>
+    <string name="settings_schedule_two_days">2 days before</string>
+    <string name="settings_schedule_due_date">On the due date</string>
+    <string name="settings_schedule_overdue">When overdue, every 3 days</string>
+    <string name="settings_schedule_footer">For anything with a due date. Friends who owe you get a gentle push.</string>
+    <string name="settings_muted">Muted friends</string>
+    <string name="settings_muted_none">None</string>
+    <plurals name="settings_muted_count">
+        <item quantity="one">%d friend</item>
+        <item quantity="other">%d friends</item>
+    </plurals>
+    <string name="settings_muted_footer">Muted friends don’t get automatic reminders.</string>
+    <string name="settings_muted_empty">No muted friends. Mute a friend from their page.</string>
+    <string name="settings_muted_detail">Turn off to send automatic reminders again.</string>
+
+    <!-- Privacy & data, Delete account (screens-settings §8, §10) -->
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_discovery">Discovery</string>
+    <string name="settings_find_me">Find me by phone or email</string>
+    <string name="settings_contacts_sync">Contacts sync</string>
+    <string name="settings_discovery_footer">Contacts are only used to find friends already on Paybak.</string>
+    <string name="settings_contacts_denied_title">Contacts are off</string>
+    <string name="settings_contacts_denied_message">Allow Paybak to read your contacts in Settings to turn on Contacts sync.</string>
+    <string name="settings_open_settings">Open Settings</string>
+    <string name="settings_your_data">Your data</string>
+    <string name="settings_export_records">Export records</string>
+    <string name="settings_pro_badge">Pro</string>
+    <string name="settings_recently_deleted">Recently deleted</string>
+    <plurals name="settings_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="settings_your_data_footer">Deleted items can be restored for 30 days.</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_footer">Your past records stay in friends’ groups, shown as a former member.</string>
+    <string name="settings_delete_blocked_title">Settle up first</string>
+    <string name="settings_delete_blocked_both">You still owe %1$s and are owed %2$s. Settle every balance before deleting your account.</string>
+    <string name="settings_delete_blocked_owe">You still owe %1$s. Settle every balance before deleting your account.</string>
+    <string name="settings_delete_blocked_owed">You’re still owed %1$s. Settle every balance before deleting your account.</string>
+    <string name="settings_not_now">Not now</string>
+    <string name="settings_settle_up">Settle up</string>
+    <string name="settings_delete_title">Delete account?</string>
+    <string name="settings_delete_message">This removes your profile and settings from this device. Your past records stay in friends’ groups, shown as a former member.</string>
+    <string name="settings_delete">Delete</string>
+
+    <!-- Export records (screens-settings §9) -->
+    <string name="settings_export_title">Export records</string>
+    <string name="settings_export_format">Format</string>
+    <string name="settings_export_pdf">PDF</string>
+    <string name="settings_export_csv">CSV</string>
+    <string name="settings_export_range">Range</string>
+    <string name="settings_export_this_month">This month</string>
+    <string name="settings_export_last_3_months">Last 3 months</string>
+    <string name="settings_export_all_time">All time</string>
+    <string name="settings_export_groups">Groups</string>
+    <string name="settings_export_select_all">Select all</string>
+    <string name="settings_export_deselect_all">Deselect all</string>
+    <string name="settings_export_note">Includes expenses, payments and loans, with each person’s share.</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_export_failed">Couldn’t export your records</string>
+
+    <!-- Help & feedback (screens-settings §11) -->
+    <string name="settings_help_title">Help &amp; feedback</string>
+    <string name="settings_help_questions">Common questions</string>
+    <string name="settings_help_touch">Get in touch</string>
+    <string name="settings_help_contact">Contact us</string>
+    <string name="settings_help_rate">Rate Paybak</string>
+    <string name="settings_help_version">Paybak %1$s (%2$d)</string>
+    <string name="settings_help_mail_subject">Paybak feedback</string>
+    <string name="settings_help_no_mail">Couldn’t open Mail.</string>
+    <string-array name="settings_faq_questions">
+        <item>Does Paybak move money?</item>
+        <item>How do payment confirmations work?</item>
+        <item>How does simplify debts work?</item>
+        <item>Can I track more than one currency?</item>
+        <item>Why can’t I leave a group?</item>
+    </string-array>
+    <string-array name="settings_faq_answers">
+        <item>No. Paybak only records who paid and who owes. Friends pay each other in their own apps, by UPI, bank transfer or cash, and Paybak keeps the ledger.</item>
+        <item>When a friend records a payment to you, it stays pending until you confirm you got it. Confirm it and the balance updates, or mark it Not received and nothing changes.</item>
+        <item>Paybak nets out the balances in a group so fewer payments settle everyone. Nobody pays or gets more in total; only who pays whom changes.</item>
+        <item>Yes. Each expense can use its own currency, and the rate is saved with it. By default everything converts to your default currency; turn on Keep balances per currency in Currency to see each currency separately.</item>
+        <item>You can leave a group once your balance in it is settled. Settle up first, then leave.</item>
+    </string-array>
 </resources>
