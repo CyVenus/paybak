@@ -3,9 +3,11 @@ import SwiftUI
 /// Control / Segmented (Figma 12:249): a 36 pt `bg/card` pill with 3 pt padding and equal-width
 /// Control / Segment items (12:236). The selected segment is a black pill that slides between items.
 /// Figma widths: 2 options 240, 3 options 330, 4 options 362; set them with `.frame(width:)`.
+/// `testIDs` names the segments for UI tests, one per option.
 struct PBSegmentedControl: View {
     let options: [String]
     @Binding var selection: Int
+    var testIDs: [String] = []
 
     @Namespace private var selectedPill
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -16,6 +18,7 @@ struct PBSegmentedControl: View {
                 PBSegment(title: options[index], isSelected: index == selection) {
                     selection = index
                 }
+                .accessibilityIdentifier(testIDs.indices.contains(index) ? testIDs[index] : "")
                 .background {
                     if index == selection {
                         Capsule()
