@@ -37,12 +37,16 @@ enum class PbBalanceType(val icon: PbIcon, @param:StringRes val label: Int) {
  * `Card / Balance` (`PBBalanceCard`): a total on a #F5F5F5 card. Owed is black, Owe grey (with
  * U+2212), Settled light grey. A tap opens its breakdown. [badge] (top right, instead of the
  * chevron) and [action] ("Settle up") are off by default. Fill the width with [modifier].
+ *
+ * @param caption The Footnote line under the amount; null hides it (`Show caption` off, 96 dp).
+ * @param actionEnabled False greys [action] out (a new group's Settle up, nothing to settle yet).
+ *   The action is tagged "[testTag].action".
  */
 @Composable
 fun PbBalanceCard(
     type: PbBalanceType,
     amount: String,
-    caption: String,
+    caption: String?,
     modifier: Modifier = Modifier,
     label: String = stringResource(type.label),
     onClick: (() -> Unit)? = null,
@@ -50,6 +54,7 @@ fun PbBalanceCard(
     badge: String? = null,
     action: String? = null,
     onAction: () -> Unit = {},
+    actionEnabled: Boolean = true,
     testTag: String? = null,
 ) {
     val press = rememberPressState(null)
@@ -110,13 +115,15 @@ fun PbBalanceCard(
                         },
                     maxLines = 1,
                 )
-                Text(
-                    caption,
-                    style = PbTextStyles.Footnote,
-                    color = PbColors.Text.Tertiary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (caption != null) {
+                    Text(
+                        caption,
+                        style = PbTextStyles.Footnote,
+                        color = PbColors.Text.Tertiary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
         if (badge != null)
@@ -125,8 +132,12 @@ fun PbBalanceCard(
             PbButton(
                 action,
                 onClick = onAction,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = PbSpace.S8),
+                modifier =
+                    Modifier.align(Alignment.BottomEnd)
+                        .padding(bottom = PbSpace.S8)
+                        .partTag(testTag, "action"),
                 size = PbButtonSize.Small,
+                enabled = actionEnabled,
             )
         }
     }
@@ -191,6 +202,15 @@ private fun PbBalanceSummaryPreview() {
             onSettleUp = {},
         )
         PbBalanceCard(PbBalanceType.Settled, "₹0", "Nothing pending", Modifier.fillMaxWidth())
+        PbBalanceCard(
+            PbBalanceType.Settled,
+            "₹0",
+            caption = null,
+            Modifier.fillMaxWidth(),
+            label = "Your balance",
+            action = "Settle up",
+            actionEnabled = false,
+        )
         PbBalanceCard(
             PbBalanceType.Owed,
             "+₹800",
