@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Paybak</string>
+
+    <!-- Design-system components -->
+    <string name="pb_back">Back</string>
+    <string name="pb_skip">Skip</string>
+    <string name="pb_add">Add</string>
+    <string name="pb_page_of">Page %1$d of %2$d</string>
+    <string name="pb_setup_step">Step %1$d of %2$d</string>
+    <string name="pb_code_field">Verification code</string>
 </resources>
