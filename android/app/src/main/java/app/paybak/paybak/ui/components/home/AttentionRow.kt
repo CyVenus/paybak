@@ -37,22 +37,23 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * [overdue] shows the red badge (money owed to you, Remind); otherwise the badge is white (Due Fri,
  * Settle). The [detail] after the title truncates so the row keeps its height (components-app
  * §8.2). A tap on the card opens the person or group; the button runs [onAction]. The button is
- * tagged "[testTag].[actionTag]".
+ * tagged "[testTag].[actionTag]". Settle up leaves out the [badge] of a debt with no due date and
+ * the [action] of a payment waiting for its confirmation.
  */
 @Composable
 fun PbAttentionRow(
     avatar: PbAvatarContent,
     title: String,
     detail: String,
-    badge: String,
+    badge: String?,
     overdue: Boolean,
     amount: String,
-    action: String,
+    action: String?,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     testTag: String? = null,
-    actionTag: String = action.lowercase(),
+    actionTag: String? = action?.lowercase(),
 ) {
     val press = rememberPressState(null)
     val fill =
@@ -97,7 +98,9 @@ fun PbAttentionRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            PbBadge(badge, style = if (overdue) PbBadgeStyle.Overdue else PbBadgeStyle.OnCard)
+            if (badge != null) {
+                PbBadge(badge, style = if (overdue) PbBadgeStyle.Overdue else PbBadgeStyle.OnCard)
+            }
         }
         Column(
             horizontalAlignment = Alignment.End,
@@ -109,13 +112,15 @@ fun PbAttentionRow(
                 color = PbColors.Text.Primary,
                 maxLines = 1,
             )
-            PbButton(
-                action,
-                onClick = onAction,
-                modifier = Modifier.partTag(testTag, actionTag),
-                style = PbButtonStyle.OnCard,
-                size = PbButtonSize.Small,
-            )
+            if (action != null) {
+                PbButton(
+                    action,
+                    onClick = onAction,
+                    modifier = Modifier.partTag(testTag, actionTag),
+                    style = PbButtonStyle.OnCard,
+                    size = PbButtonSize.Small,
+                )
+            }
         }
     }
 }
@@ -152,6 +157,16 @@ private fun PbAttentionRowPreview() {
             overdue = false,
             amount = "₹700",
             action = "Remind",
+            onAction = {},
+        )
+        PbAttentionRow(
+            PbAvatarContent.Art(PbPeepHead.Kabir),
+            "Kabir",
+            "Goa Trip",
+            "Pending",
+            overdue = false,
+            amount = "₹1,400",
+            action = null,
             onAction = {},
         )
     }
