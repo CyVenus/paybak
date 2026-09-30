@@ -28,6 +28,8 @@ struct PaywallScreen: View {
         .phoneContentWidth()
         .background(PBColor.bgPrimary)
         .sensoryFeedback(.success, trigger: showsWelcome) { _, shows in shows == true }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("screen.paywall")
         .alert("No purchases to restore.", isPresented: $isNothingToRestorePresented) {
             Button("OK", role: .cancel) {}
         }
@@ -52,8 +54,6 @@ struct PaywallScreen: View {
             }
             .scrollBounceBehavior(.basedOnSize)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("screen.paywall")
     }
 
     private var hero: some View {

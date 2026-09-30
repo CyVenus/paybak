@@ -19,7 +19,7 @@ final class SettingsUITests: XCTestCase {
         app.buttons["paywall.plan.yearly"].tap()
         XCTAssertEqual(app.buttons["paywall.cta"].label, "Start 7-day free trial")
         app.buttons["paywall.cta"].tap()
-        XCTAssertTrue(app.element("screen.proWelcome").waitForExistence(timeout: 3))
+        XCTAssertTrue(app.element("paywall.state.welcome").waitForExistence(timeout: 3))
         XCTAssertEqual(app.element("proWelcome.body").label, "Your free trial ends Wed 7 Oct. Then ₹799/year.")
         app.buttons["proWelcome.done"].tap()
         XCTAssertTrue(app.element("screen.privacyExport").waitForExistence(timeout: 3))

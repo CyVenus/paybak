@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Paybak Pro — Welcome (screens-settings §3): the All set art at 2/3 scale, "You’re on Paybak Pro",
 /// the trial or renewal line, and what's now unlocked. Done is the only way out (no close, no swipe).
+/// It's a state of the paywall route (`screen.paywall`), marked by the hidden `paywall.state.welcome`.
 struct ProWelcomeView: View {
     let statusLine: String
     let onDone: () -> Void
@@ -46,8 +47,13 @@ struct ProWelcomeView: View {
                 .padding(.bottom, PBSpace.s16)
                 .background(PBColor.bgPrimary)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("screen.proWelcome")
+        .overlay(alignment: .topLeading) {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel("welcome")
+                .accessibilityIdentifier("paywall.state.welcome")
+        }
     }
 }
 
