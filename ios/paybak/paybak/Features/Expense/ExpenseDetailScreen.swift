@@ -17,6 +17,7 @@ struct ExpenseDetailScreen: View {
     @State private var showsPhotoPicker = false
     @State private var pickedPhoto: PhotosPickerItem?
     @State private var receiptRequest = RecordID.make()
+    @State private var didShowToast = false
 
     var body: some View {
         Group {
@@ -31,7 +32,9 @@ struct ExpenseDetailScreen: View {
         }
         .background(PBColor.bgPrimary)
         .task {
-            if let toast { router.toast(toast) }
+            // A toast handed over with the route shows once, not again after a push comes back.
+            if let toast, !didShowToast { router.toast(toast) }
+            didShowToast = true
         }
         .routeTestRoot("expense")
     }

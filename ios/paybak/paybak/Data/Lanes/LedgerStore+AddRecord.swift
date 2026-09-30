@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-/// Add & Record's reads on the store (lane A, M3): today's exchange rates and the people and
+/// Add & Record's reads on the store (lane A, M3): today's exchange rates, and the groups and
 /// currencies the forms offer.
 extension LedgerStore {
     /// The bundled "today's rate" from `code` to the default currency; nil for the default itself.
@@ -9,10 +9,7 @@ extension LedgerStore {
         RateTable.bundled.rate(from: code, to: books.defaultCurrency)
     }
 
-    /// Friends in the order they were added, guests included (pickers list them like this).
-    var friends: [Person] { ledger.people }
-
-    /// Groups (not projects, not archived) you're in, for the expense Group picker.
+    /// Groups (not projects) you’re in, for the expense Group picker.
     var expenseGroups: [LedgerGroup] {
         ledger.groups.filter { !$0.isProject && $0.memberIds.contains(Person.me) }
     }
