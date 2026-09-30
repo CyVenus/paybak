@@ -46,6 +46,12 @@ extension XCUIApplication {
     func element(_ identifier: String) -> XCUIElement {
         descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
+
+    /// The iOS back gesture: a drag from the left screen edge (onboarding screens have no nav bar).
+    func swipeBackFromLeftEdge() {
+        let start = coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))
+        start.press(forDuration: 0.05, thenDragTo: coordinate(withNormalizedOffset: CGVector(dx: 0.8, dy: 0.5)))
+    }
 }
 
 extension XCUIElement {

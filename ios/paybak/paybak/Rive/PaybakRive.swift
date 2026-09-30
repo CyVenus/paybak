@@ -165,6 +165,7 @@ final class PaybakRiveController: ObservableObject {
     private func handleTrigger(_ name: String) {
         if name == asset.tapTrigger {
             tapCount += 1
+            Self.log.debug("\(self.asset.fileName, privacy: .public): \(name, privacy: .public) fired (tap \(self.tapCount))")
         }
         triggerHandlers[name]?()
     }

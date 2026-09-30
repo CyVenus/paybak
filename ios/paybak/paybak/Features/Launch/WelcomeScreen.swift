@@ -1,22 +1,173 @@
 import SwiftUI
 
-// TODO(Launch phase): replace this placeholder with the real Welcome pager (screens-launch.md §2).
-/// Welcome 1–3: one screen with a step. Continue → next step; step 3 "Get started" and Skip →
-/// Get Started; Back → previous step.
+/// Welcome 1–3 (screens-launch.md §2): one screen whose step drives the onboarding Rive, the copy,
+/// the page dots and the CTA. Continue or a left swipe goes to the next step, a right swipe back to
+/// the previous one; "Get started" (step 3) and Skip (steps 1–2) go to Get Started. The step lives
+/// in the router, so Back from Get Started returns to the step the user left from.
 struct WelcomeScreen: View {
     @Environment(AppRouter.self) private var router
 
+    /// One artboard for all three steps: setting `step` plays the file's own slide transition.
+    @StateObject private var illustration = PaybakRiveController(.onboarding)
+    /// When the step last changed. Taps and swipes that land mid-transition are ignored, so a double
+    /// tap can't skip a step.
+    @State private var lastStepChange = Date.distantPast
+
+    private var step: Int { router.welcomeStep }
+
     var body: some View {
-        let step = router.welcomeStep
-        ScreenPlaceholder(
-            screen: [.welcome1, .welcome2, .welcome3][step - 1],
-            spec: "screens-launch.md §2",
-            onSkip: step < 3 ? { router.push(.getStarted) } : nil,
-            actions: [
-                .init(step < 3 ? "Continue" : "Get started") {
-                    if step < 3 { router.welcomeStep += 1 } else { router.push(.getStarted) }
-                },
-            ] + (step > 1 ? [.init("Back") { router.welcomeStep -= 1 }] : [])
-        )
+        VStack(alignment: .leading, spacing: 0) {
+            PBOnboardingTopBar(onSkip: isLastStep ? nil : { skip() }, testIDPrefix: "welcome")
+            PaybakRiveView(controller: illustration)
+                .padding(.top, PBSpace.s8)
+            WelcomeText(step: step)
+                .padding(.top, PBSpace.s32)
+            Spacer(minLength: PBSpace.s24)
+            footer
+        }
+        .padding(.horizontal, PBLayout.screenMargin)
+        .padding(.bottom, PBSpace.s16)
+        .phoneContentWidth()
+        .background(PBColor.bgPrimary)
+        .contentShape(.rect)
+        .gesture(swipe)
+        .screenIdentifier(screenID)
+        .onChange(of: step, initial: true) {
+            illustration.setNumber("step", to: Float(step))
+        }
     }
+
+    /// Page dots over the CTA, whose label crossfades to "Get started" on the last step.
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: PBSpace.s24) {
+            PBPageDots(count: WelcomeCopy.all.count, active: step)
+            PBButton(isLastStep ? "Get started" : "Continue", fillsWidth: true, action: next)
+                .contentTransition(.opacity)
+                .animation(.easeInOut(duration: 0.2), value: isLastStep)
+                .accessibilityIdentifier("welcome.continue")
+        }
+    }
+
+    private var screenID: ScreenID {
+        [.welcome1, .welcome2, .welcome3][step - 1]
+    }
+
+    private var isLastStep: Bool { step == WelcomeCopy.all.count }
+
+    /// Horizontal swipes change the step, like the CTA: left = next, right = previous. Step 3 ignores
+    /// the forward swipe, so only "Get started" leaves the pager. The art can't be scrubbed, so the
+    /// content doesn't follow the finger; the step changes when the swipe ends.
+    private var swipe: some Gesture {
+        DragGesture(minimumDistance: 20)
+            .onEnded { value in
+                let dx = value.translation.width
+                guard abs(dx) > abs(value.translation.height),
+                      abs(dx) > 50 || abs(value.velocity.width) > 300
+                else { return }
+                if dx < 0, !isLastStep {
+                    changeStep(to: step + 1)
+                } else if dx > 0, step > 1 {
+                    changeStep(to: step - 1)
+                }
+            }
+    }
+
+    private func next() {
+        if isLastStep {
+            guard isSettled else { return }
+            router.push(.getStarted)
+        } else {
+            changeStep(to: step + 1)
+        }
+    }
+
+    /// Skip dissolves to Get Started (300 ms); "Get started" pushes it.
+    private func skip() {
+        withDissolve(duration: 0.3) {
+            router.push(.getStarted)
+        }
+    }
+
+    private func changeStep(to newStep: Int) {
+        guard isSettled else { return }
+        lastStepChange = .now
+        router.welcomeStep = newStep
+    }
+
+    /// The text and the Rive take about 0.3 s to change steps; input during that is ignored.
+    private var isSettled: Bool {
+        Date.now.timeIntervalSince(lastStepChange) >= 0.3
+    }
+}
+
+/// The headline and body of each step, verbatim from Figma. Headlines break where Figma wraps them
+/// at 362 pt, so every step's text block is two lines tall: the first one measures 361.3 pt and
+/// would otherwise just fit on one line, and the body would jump between steps.
+private struct WelcomeCopy {
+    let headline: String
+    let body: String
+
+    static let all = [
+        WelcomeCopy(headline: "Split any bill in\nseconds.", body: "Add it once. Paybak does the math for everyone."),
+        WelcomeCopy(headline: "Know who owes what,\nand by when.", body: "Clear balances and due dates, all in one place."),
+        WelcomeCopy(headline: "Settle up without the\nawkward chat.", body: "Record payments and send gentle reminders."),
+    ]
+}
+
+/// The step's headline and body. When the step changes, the old copy slides 24 pt out and fades
+/// (150 ms, ease-in), then the new copy slides in from the other side (300 ms, ease-out), in time
+/// with the Rive's exit and enter. With Reduce Motion the copy fades out and in without sliding.
+private struct WelcomeText: View {
+    let step: Int
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shownStep: Int
+    @State private var shift: CGFloat = 0
+    @State private var opacity: Double = 1
+
+    init(step: Int) {
+        self.step = step
+        _shownStep = State(initialValue: step)
+    }
+
+    var body: some View {
+        let copy = WelcomeCopy.all[shownStep - 1]
+        VStack(alignment: .leading, spacing: PBSpace.s12) {
+            Text(copy.headline)
+                .textStyle(.title1)
+                .foregroundStyle(PBColor.textPrimary)
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityIdentifier("welcome.headline")
+            Text(copy.body)
+                .textStyle(.body)
+                .foregroundStyle(PBColor.textSecondary)
+                .accessibilityIdentifier("welcome.body")
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .offset(x: shift)
+        .opacity(opacity)
+        .onChange(of: step) { oldStep, newStep in
+            transition(to: newStep, forward: newStep > oldStep)
+        }
+    }
+
+    private func transition(to newStep: Int, forward: Bool) {
+        let distance: CGFloat = reduceMotion ? 0 : (forward ? 24 : -24)
+        withAnimation(.easeIn(duration: reduceMotion ? 0.1 : 0.15)) {
+            shift = -distance
+            opacity = 0
+        } completion: {
+            shownStep = newStep
+            shift = distance
+            withAnimation(reduceMotion ? .easeOut(duration: 0.1) : .timingCurve(0.2, 0, 0, 1, duration: 0.3)) {
+                shift = 0
+                opacity = 1
+            }
+        }
+    }
+}
+
+#Preview("WelcomeScreen") {
+    WelcomeScreen()
+        .environment(AppRouter())
 }

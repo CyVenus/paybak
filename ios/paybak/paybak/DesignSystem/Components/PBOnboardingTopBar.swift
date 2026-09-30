@@ -6,6 +6,8 @@ import SwiftUI
 struct PBOnboardingTopBar: View {
     var onBack: (() -> Void)?
     var onSkip: (() -> Void)?
+    /// The screen part of the buttons' test ids (flow.md): `<prefix>.back` and `<prefix>.skip`.
+    var testIDPrefix: String?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -13,15 +15,21 @@ struct PBOnboardingTopBar: View {
         HStack(spacing: 0) {
             if let onBack {
                 PBIconButton(.chevronLeft, accessibilityLabel: "Back", action: onBack)
+                    .accessibilityIdentifier(testID("back"))
             }
             Spacer(minLength: 0)
             if let onSkip {
                 PBTextButton("Skip", style: .secondary, action: onSkip)
+                    .accessibilityIdentifier(testID("skip"))
                     .transition(.opacity)
             }
         }
         .frame(height: PBSize.tap)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: onSkip == nil)
+    }
+
+    private func testID(_ element: String) -> String {
+        testIDPrefix.map { "\($0).\(element)" } ?? ""
     }
 }
 
