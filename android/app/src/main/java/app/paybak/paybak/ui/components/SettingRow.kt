@@ -64,6 +64,7 @@ enum class PbSettingTone {
  *
  * @param onClick Chevron, Check and None rows; Toggle rows flip their switch instead.
  * @param badge An Inverse `Badge / Pill` before the value ("Pro", "Try free").
+ * @param titleMaxLines 2 where a long title wraps instead of truncating (Help's questions).
  */
 @Composable
 fun PbSettingRow(
@@ -77,6 +78,7 @@ fun PbSettingRow(
     badge: String? = null,
     tone: PbSettingTone = PbSettingTone.Default,
     showDivider: Boolean = true,
+    titleMaxLines: Int = 1,
 ) {
     val destructive = tone == PbSettingTone.Destructive
     val press = rememberPressState(interactionSource = null)
@@ -124,7 +126,7 @@ fun PbSettingRow(
                     text = title,
                     style = PbTextStyles.Headline,
                     color = if (destructive) PbColors.Text.Destructive else PbColors.Text.Primary,
-                    maxLines = 1,
+                    maxLines = titleMaxLines,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (subtitle != null) {
