@@ -73,6 +73,7 @@ struct VerifyScreen: View {
                     .textStyle(.footnote)
                     .foregroundStyle(PBColor.textTertiary)
                     .padding(.top, PBSpace.s16)
+                    .accessibilityAddTraits(.updatesFrequently)
                     .accessibilityIdentifier("verify.countdown")
             } else {
                 PBTextButton("Resend code", action: resend)

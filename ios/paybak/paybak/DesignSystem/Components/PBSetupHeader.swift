@@ -40,12 +40,10 @@ struct PBSetupHeader: View {
             .accessibilityIdentifier("setup.progress")
         }
         .animation(fillAnimation, value: step)
-        .task {
-            // Only the first appearance animates; coming back to the screen finds it filled.
+        .onAppear {
+            // Runs as the push starts. Only the first appearance animates; coming back to the
+            // screen finds the segment filled.
             guard filledSegments != step else { return }
-            if !reduceMotion {
-                try? await Task.sleep(for: .seconds(0.1))
-            }
             withAnimation(fillAnimation) { filledSegments = step }
         }
         .onChange(of: step) {
