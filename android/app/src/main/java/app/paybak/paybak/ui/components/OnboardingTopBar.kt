@@ -28,6 +28,8 @@ import app.paybak.paybak.ui.theme.PbSpace
  * `Navigation / Onboarding Top Bar` (`PBOnboardingTopBar`): an optional back chevron on the left
  * and an optional Skip on the right. It keeps its 44 dp height when both are hidden, so nothing
  * below moves when Skip disappears on the last Welcome step.
+ *
+ * @param skipModifier Applied to the Skip button, e.g. its test tag.
  */
 @Composable
 fun PbOnboardingTopBar(
@@ -36,11 +38,12 @@ fun PbOnboardingTopBar(
     showSkip: Boolean = false,
     onBack: () -> Unit = {},
     onSkip: () -> Unit = {},
+    skipModifier: Modifier = Modifier,
 ) {
     NavigationRow(modifier) {
         if (showBack) PbBackButton(onBack)
         Spacer(Modifier.weight(1f))
-        SkipButton(visible = showSkip, onClick = onSkip)
+        SkipButton(visible = showSkip, onClick = onSkip, modifier = skipModifier)
     }
 }
 
@@ -67,9 +70,12 @@ internal fun PbBackButton(onClick: () -> Unit) {
     )
 }
 
-/** Secondary text button "Skip" that fades in and out in place. */
+/**
+ * Secondary text button "Skip" that fades in and out in place. It stops taking taps as soon as it
+ * starts to hide.
+ */
 @Composable
-internal fun SkipButton(visible: Boolean, onClick: () -> Unit) {
+internal fun SkipButton(visible: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(PbMotion.SWAP_MILLIS)),
@@ -77,7 +83,8 @@ internal fun SkipButton(visible: Boolean, onClick: () -> Unit) {
     ) {
         PbTextButton(
             stringResource(R.string.pb_skip),
-            onClick = onClick,
+            onClick = { if (visible) onClick() },
+            modifier = modifier,
             style = PbTextButtonStyle.Secondary,
         )
     }

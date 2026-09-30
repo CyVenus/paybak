@@ -1,5 +1,11 @@
 package app.paybak.paybak.ui.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.icons.PbIconImage
 import app.paybak.paybak.ui.theme.PbColors
+import app.paybak.paybak.ui.theme.PbMotion
 import app.paybak.paybak.ui.theme.PbShapes
 import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
@@ -58,9 +65,9 @@ enum class PbButtonSize(
 
 /**
  * Paybak pill button (`PBButton`). Hugs its label unless the caller stretches it (screens use
- * `Modifier.fillMaxWidth()`); the icon and label stay centred as a group. Pressed swaps only the
- * fill. A Small button's touch target still reaches the 44 dp minimum through Compose's
- * minimum-touch-target expansion.
+ * `Modifier.fillMaxWidth()`); the icon and label stay centred as a group, and a new label
+ * crossfades in place. Pressed swaps only the fill. A Small button's touch target still reaches the
+ * 44 dp minimum through Compose's minimum-touch-target expansion.
  *
  * @param leadingIcon Tinted with the label colour, except brand logos that keep their colours.
  */
@@ -97,7 +104,18 @@ fun PbButton(
                 tint = colors.content,
             )
         }
-        Text(text = label, style = size.textStyle, color = colors.content, maxLines = 1)
+        AnimatedContent(
+            targetState = label,
+            transitionSpec = {
+                fadeIn(tween(PbMotion.SWAP_MILLIS)) togetherWith
+                    fadeOut(tween(PbMotion.SWAP_MILLIS)) using
+                    SizeTransform(clip = false)
+            },
+            contentAlignment = Alignment.Center,
+            label = "PbButton label",
+        ) { shownLabel ->
+            Text(text = shownLabel, style = size.textStyle, color = colors.content, maxLines = 1)
+        }
     }
 }
 

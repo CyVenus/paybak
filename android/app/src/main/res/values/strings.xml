@@ -8,4 +8,24 @@
     <string name="pb_page_of">Page %1$d of %2$d</string>
     <string name="pb_setup_step">Step %1$d of %2$d</string>
     <string name="pb_code_field">Verification code</string>
+
+    <!-- Welcome (screens-launch.md §2.4) -->
+    <string name="welcome_headline_1">Split any bill in seconds.</string>
+    <string name="welcome_body_1">Add it once. Paybak does the math for everyone.</string>
+    <string name="welcome_headline_2">Know who owes what, and by when.</string>
+    <string name="welcome_body_2">Clear balances and due dates, all in one place.</string>
+    <string name="welcome_headline_3">Settle up without the awkward chat.</string>
+    <string name="welcome_body_3">Record payments and send gentle reminders.</string>
+    <string name="welcome_continue">Continue</string>
+    <string name="welcome_get_started">Get started</string>
+
+    <!-- Get Started (screens-launch.md §3.3) -->
+    <string name="get_started_headline">Shared money,\nkept clear.</string>
+    <string name="get_started_body">Paybak keeps the record.\nYou pay however you like.</string>
+    <string name="get_started_apple">Continue with Apple</string>
+    <string name="get_started_google">Continue with Google</string>
+    <string name="get_started_email_or_phone">Continue with email or phone</string>
+    <string name="get_started_legal">By continuing, you agree to our %1$s and %2$s.</string>
+    <string name="get_started_terms">Terms</string>
+    <string name="get_started_privacy">Privacy Policy</string>
 </resources>

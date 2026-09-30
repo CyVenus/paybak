@@ -34,8 +34,8 @@ object PbMotion {
     /** Skip → Get Started crossfade. */
     const val SKIP_MILLIS = 300
 
-    /** Page-dot width and colour change between Welcome steps. */
-    const val PAGE_DOTS_MILLIS = 250
+    /** Page-dot width and colour change between Welcome steps (screens-launch.md §2.5). */
+    const val PAGE_DOTS_MILLIS = 300
 
     /** Pressed-state fill swap (≤ 100 ms, README rule 11). */
     const val PRESS_MILLIS = 100
@@ -43,7 +43,7 @@ object PbMotion {
     /** Small state fades: rings, radios, the avatar-option ring. */
     const val FADE_MILLIS = 150
 
-    /** Skip appearing or hiding, and the "Step N of 4" number change. */
+    /** Skip appearing or hiding, a button's label change and the "Step N of 4" number change. */
     const val SWAP_MILLIS = 200
 
     /** Text-field and code-digit caret blink half-period. */

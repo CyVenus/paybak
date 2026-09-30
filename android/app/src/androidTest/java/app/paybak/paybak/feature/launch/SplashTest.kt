@@ -21,4 +21,14 @@ class SplashTest {
             compose.onNodeWithTag("screen.splash").assertDoesNotExist()
         }
     }
+
+    @Test
+    fun onboardedLaunchGoesFromSplashToHome() {
+        // Starting at Home saves a finished onboarding; the next plain launch keeps it.
+        launchPaybak("homeFirstDay").close()
+        launchPaybak(resetOnboarding = false).use {
+            compose.onNodeWithTag("screen.splash").assertExists()
+            compose.awaitScreen("homeFirstDay")
+        }
+    }
 }

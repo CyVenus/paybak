@@ -9,10 +9,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.InfiniteAnimationPolicy
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import app.paybak.paybak.ui.theme.LocalReduceMotion
@@ -30,6 +35,7 @@ import app.rive.ViewModelSource
 import app.rive.core.RiveWorker
 import app.rive.rememberRiveWorkerOrNull
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.launch
@@ -89,7 +95,8 @@ class PaybakRiveController internal constructor(private val instance: ViewModelI
  * Renders the [artboard] of the raw `.riv` [resId], driven by its [stateMachine], with the
  * artboard's default view-model instance bound (auto-bind). Loading, binding and the first values
  * all happen before the first frame, and everything is closed when it leaves composition. It draws
- * only while the Activity is resumed. Decorative for TalkBack.
+ * only while the Activity is resumed, and pauses where infinite animations are paused (see
+ * [rememberInfinitePlayback]). Decorative for TalkBack.
  *
  * @param modifier Size it to the artboard (see [PaybakRiveAsset.viewSize]).
  * @param pointerInputMode Touches always reach the file's listeners. [RivePointerInputMode.Consume]
@@ -119,6 +126,7 @@ fun PaybakRive(
         return
     }
 
+    val playing = rememberInfinitePlayback()
     val currentReduceMotion by rememberUpdatedState(reduceMotion)
     val currentNumbers by rememberUpdatedState(numbers)
     val currentOnReady by rememberUpdatedState(onReady)
@@ -153,12 +161,33 @@ fun PaybakRive(
     Rive(
         file = scene.file,
         modifier = decorative,
+        playing = playing,
         artboard = scene.artboard,
         stateMachine = scene.stateMachine,
         viewModelInstance = scene.viewModelInstance,
         fit = Fit.Contain(),
         pointerInputMode = pointerInputMode,
     )
+}
+
+/**
+ * Whether Rive may advance with time. Its idle loops never settle, so they follow the composition's
+ * [InfiniteAnimationPolicy] like Compose's own infinite animations: Compose UI tests install one
+ * that pauses them, so the UI can go idle. The app has none and always plays.
+ */
+@Composable
+private fun rememberInfinitePlayback(): Boolean {
+    val policy = rememberCoroutineScope().coroutineContext[InfiniteAnimationPolicy]
+    var playing by remember { mutableStateOf(policy == null) }
+    if (policy != null) {
+        LaunchedEffect(policy) {
+            policy.onInfiniteOperation {
+                playing = true
+                awaitCancellation()
+            }
+        }
+    }
+    return playing
 }
 
 /** Everything one [PaybakRive] owns; closed together when it leaves composition. */

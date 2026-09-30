@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import app.paybak.paybak.data.ProfileStore
+import app.paybak.paybak.data.SignInMethod
 import app.paybak.paybak.feature.home.HomeScreen
 import app.paybak.paybak.feature.launch.GetStartedScreen
 import app.paybak.paybak.feature.launch.SplashScreen
@@ -72,12 +73,18 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
                     onGetStarted = { navigator.push(GetStarted) },
                 )
 
-            GetStarted ->
+            GetStarted -> {
+                // No real Apple or Google sign-in yet: record the choice and go straight to setup.
+                val continueWith = { method: SignInMethod ->
+                    profileStore.update { it.copy(signInMethod = method, contact = "") }
+                    navigator.push(Setup(1))
+                }
                 GetStartedScreen(
-                    onContinueWithApple = { navigator.push(Setup(1)) },
-                    onContinueWithGoogle = { navigator.push(Setup(1)) },
+                    onContinueWithApple = { continueWith(SignInMethod.Apple) },
+                    onContinueWithGoogle = { continueWith(SignInMethod.Google) },
                     onContinueWithEmailOrPhone = { navigator.push(SignIn) },
                 )
+            }
 
             SignIn ->
                 SignInScreen(
