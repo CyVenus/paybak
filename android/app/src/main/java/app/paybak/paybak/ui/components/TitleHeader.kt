@@ -28,6 +28,7 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * [members] stack 8 dp below. A title-only header centres on the circle.
  *
  * @param members 2–4 heads; fewer hides the stack, more shows the first four.
+ * @param memberAvatars The same for any avatars (the user's photo, a guest's initials).
  */
 @Composable
 fun PbTitleHeader(
@@ -37,6 +38,7 @@ fun PbTitleHeader(
     subtitle: String? = null,
     tag: String? = null,
     members: List<PbPeepHead> = emptyList(),
+    memberAvatars: List<PbAvatarContent> = members.map(PbAvatarContent::Art),
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -73,7 +75,7 @@ fun PbTitleHeader(
                     )
                 }
             }
-            if (members.size >= 2) PbAvatarStack(members.take(4))
+            if (memberAvatars.size >= 2) PbAvatarStack(memberAvatars.take(4))
         }
     }
 }

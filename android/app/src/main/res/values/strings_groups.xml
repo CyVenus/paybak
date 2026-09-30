@@ -1,4 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the groups module (app-architecture §7.1): names start with "groups_". Only its lane edits this file. -->
 <resources>
+    <!-- Groups tab (screens-groups §3) -->
+    <string name="groups_title">Groups</string>
+    <string name="groups_segment_groups">Groups</string>
+    <string name="groups_segment_friends">Friends</string>
+    <string name="groups_new_group">New group</string>
+    <string name="groups_add_friend">Add friend</string>
+    <string name="groups_archived">Archived</string>
+    <string name="groups_empty_title">No groups yet.</string>
+    <string name="groups_empty_body">Start one for a trip, your flat or a project.</string>
+    <string name="groups_invite_friends">Invite friends</string>
+    <string name="groups_friends_empty_title">No friends yet.</string>
+    <string name="groups_friends_empty_body">Add a friend to split with them.</string>
+    <string name="groups_summary_owed">You’re owed</string>
+    <string name="groups_summary_owe">You owe</string>
+    <string name="groups_guest">Guest</string>
+
+    <!-- Group detail (§4, record-lend-group §7) -->
+    <string name="groups_settings">Group settings</string>
+    <string name="groups_your_balance">Your balance</string>
+    <string name="groups_balances">Balances</string>
+    <string name="groups_expenses">Expenses</string>
+    <string name="groups_settled">Settled</string>
+    <string name="groups_no_expenses_title">No expenses yet.</string>
+    <string name="groups_no_expenses_body">Add the first expense and Paybak will split it for everyone.</string>
+    <string name="groups_add_expense">Add expense</string>
+
+    <!-- Group settings (§5) -->
+    <string name="groups_name">Name</string>
+    <string name="groups_settle_by">Settle by</string>
+    <string name="groups_members">Members</string>
+    <string name="groups_add_members">Add members</string>
+    <string name="groups_currency">Currency</string>
+    <string name="groups_group_currency">Group currency</string>
+    <string name="groups_simplify">Simplify debts</string>
+    <string name="groups_recurring">Recurring expenses</string>
+    <string name="groups_pro">Pro</string>
+    <string name="groups_simplify_helper">Fewer payments to settle. Totals stay the same.</string>
+    <string name="groups_leave">Leave group</string>
+    <string name="groups_leave_blocked_title">You can’t leave yet</string>
+    <string name="groups_not_now">Not now</string>
+    <string name="groups_cancel">Cancel</string>
+    <string name="groups_leave_action">Leave</string>
+    <string name="groups_rename_title">Group name</string>
+    <string name="groups_rename_placeholder">Goa Trip</string>
+
+    <!-- Friend page (§6) -->
+    <string name="groups_remind">Remind</string>
+    <string name="groups_record_payment">Record payment</string>
+    <string name="groups_history">History</string>
+    <string name="groups_see_all">See all</string>
+    <string name="groups_together">Groups together</string>
+    <string name="groups_auto_reminders">Automatic reminders</string>
+    <string name="groups_auto_reminders_note">Turn off to stop Paybak nudging %1$s.</string>
+    <string name="groups_send_invite">Send invite</string>
+    <string name="groups_no_balance_title">No balance yet</string>
+    <string name="groups_no_balance_body">Expenses you share with %1$s will show here.</string>
+    <string name="groups_invite_message">Join me on Paybak so we can split expenses: %1$s</string>
+
+    <!-- Add friend and My QR code (§7) -->
+    <string name="groups_search_placeholder">Name, phone, email or @username</string>
+    <string name="groups_invite_link">Invite with a link</string>
+    <string name="groups_scan_qr">Scan QR code</string>
+    <string name="groups_my_qr">My QR code</string>
+    <string name="groups_on_paybak">On Paybak</string>
+    <string name="groups_invite">Invite</string>
+    <string name="groups_added">Added</string>
+    <string name="groups_add">Add</string>
+    <string name="groups_not_on_paybak">Not on Paybak yet</string>
+    <string name="groups_guests_note">People who aren’t on Paybak join as guests. You can still split with them.</string>
+    <string name="groups_no_match">No one matches “%1$s”.</string>
+    <string name="groups_qr_helper">Friends can scan this to add you.</string>
+    <string name="groups_copy_link">Copy link</string>
+    <string name="groups_share_link">Share link</string>
+    <string name="groups_link_copied">Link copied</string>
+    <string name="groups_not_a_code">That isn’t a Paybak code</string>
+    <string name="groups_scan_unavailable">Scanning isn’t available on this device</string>
 </resources>
