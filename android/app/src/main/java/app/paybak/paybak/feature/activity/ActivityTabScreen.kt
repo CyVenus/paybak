@@ -1,6 +1,7 @@
 package app.paybak.paybak.feature.activity
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,37 +27,41 @@ import app.paybak.paybak.ui.theme.PbLayout
 import app.paybak.paybak.ui.theme.PbSpace
 
 /**
- * The `activity` tab root (M2's container, activity §3): the fixed [ActivityHeader] over the
- * selected segment's content: lane A's [ActivityTimelineView] or lane C's [InsightsView]. The
- * segment lives in the navigator, so it survives tab switches and deep links can set it.
+ * The `activity` tab root (M2's container, activity §3): the [ActivityHeader] over the selected
+ * segment's content. The timeline (lane A's [ActivityTimelineView]) keeps the header fixed while it
+ * scrolls; Insights (lane C's [InsightsView]) scrolls the header away and collapses it to its
+ * inline bar (insights §2.4), so it gets the header to place itself. The segment lives in the
+ * navigator, so it survives tab switches and deep links can set it.
  */
 @Composable
 fun ActivityTabScreen(route: Route.Activity) {
     val navigator = LocalMainNavigator.current
     val snapshot by LocalLedger.current.collectSnapshot()
     val segment = navigator.activitySegment
-    Column(
-        Modifier.fillMaxSize()
-            .background(PbColors.Bg.Primary)
-            .testTag("screen.activity")
-            .statusBarsPadding()
-            .padding(horizontal = PbLayout.ScreenMargin)
-    ) {
+    val header: @Composable () -> Unit = {
         ActivityHeader(
             segment = segment,
             onSegment = { navigator.activitySegment = it },
             showRestore = snapshot.recentlyDeleted.isNotEmpty(),
             onRestore = { navigator.open(Route.RecentlyDeleted) },
         )
-        Spacer(Modifier.height(PbSpace.S24))
-        val content =
-            Modifier.fillMaxWidth()
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(LocalTabBarPadding.current)
+    }
+    Box(Modifier.fillMaxSize().background(PbColors.Bg.Primary).testTag("screen.activity")) {
         when (segment) {
-            ActivitySegment.Timeline -> ActivityTimelineView(content)
-            ActivitySegment.Insights -> InsightsView(content)
+            ActivitySegment.Timeline ->
+                Column(
+                    Modifier.statusBarsPadding().padding(horizontal = PbLayout.ScreenMargin)
+                ) {
+                    header()
+                    Spacer(Modifier.height(PbSpace.S24))
+                    ActivityTimelineView(
+                        Modifier.fillMaxWidth()
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState())
+                            .padding(LocalTabBarPadding.current)
+                    )
+                }
+            ActivitySegment.Insights -> InsightsView(header = header)
         }
     }
 }
