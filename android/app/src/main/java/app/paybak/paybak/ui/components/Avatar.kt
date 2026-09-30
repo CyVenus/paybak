@@ -63,8 +63,8 @@ sealed interface PbAvatarContent {
     /** Fallback: the first letters of the first and last name. */
     data class Initials(val text: String) : PbAvatarContent
 
-    /** A category or group icon. */
-    data class Symbol(val icon: PbIcon) : PbAvatarContent
+    /** A category or group icon; archived rows grey it with `icon/tertiary`. */
+    data class Symbol(val icon: PbIcon, val tint: Color = PbColors.Icon.Primary) : PbAvatarContent
 }
 
 /** `Size` of `Avatar / Circle`, with the initials style and icon size Figma pairs with it. */
@@ -145,7 +145,12 @@ internal fun AvatarCircle(
                 )
 
             is PbAvatarContent.Symbol ->
-                PbIconImage(content.icon, contentDescription = null, size = iconSize)
+                PbIconImage(
+                    content.icon,
+                    contentDescription = null,
+                    size = iconSize,
+                    tint = content.tint,
+                )
         }
     }
 }

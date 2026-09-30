@@ -101,3 +101,13 @@ internal fun rememberPressedSource(): MutableInteractionSource = remember {
 internal fun rememberFocusedSource(): MutableInteractionSource = remember {
     StaticInteractionSource(FocusInteraction.Focus())
 }
+
+/** "2800" → "2,800", "100000" → "1,00,000": Indian digit grouping, for the gallery's samples. */
+internal fun groupIndian(digits: String): String {
+    val whole = digits.substringBefore('.').ifEmpty { "0" }
+    val fraction = digits.substringAfter('.', missingDelimiterValue = "")
+    val last3 = whole.takeLast(3)
+    val rest = whole.dropLast(3).reversed().chunked(2).joinToString(",").reversed()
+    val grouped = if (rest.isEmpty()) last3 else "$rest,$last3"
+    return if ('.' in digits) "$grouped.$fraction" else grouped
+}

@@ -19,11 +19,8 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
@@ -42,13 +39,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtMost
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.R
-import app.paybak.paybak.ui.theme.LocalReduceMotion
 import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbMotion
 import app.paybak.paybak.ui.theme.PbShapes
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
-import kotlinx.coroutines.delay
 
 /** Number of boxes in the verification code. */
 const val CodeLength = 6
@@ -100,7 +95,7 @@ fun PbCodeDigit(
             PbCodeDigitState.Empty -> Unit
             PbCodeDigitState.Focused ->
                 Box(
-                    Modifier.size(2.dp, 24.dp)
+                    Modifier.size(CaretWidth, 24.dp)
                         .alpha(if (caretVisible) 1f else 0f)
                         .background(PbColors.Bg.Inverse)
                 )
@@ -139,7 +134,7 @@ fun PbCodeField(
     val source = interactionSource ?: remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
     val focusedIndex = if (focused && !isError && code.length < CodeLength) code.length else null
-    val caretVisible = rememberCaretBlink(focusedIndex)
+    val caretVisible = rememberCaretBlink(active = focusedIndex != null, restartKey = focusedIndex)
     val description = stringResource(R.string.pb_code_field)
 
     // The hidden field's own cursor and handles stay invisible; the boxes draw the caret.
@@ -200,24 +195,6 @@ internal fun nextCode(code: String, input: String, isError: Boolean): String {
     val digits = input.filter(Char::isDigit)
     val startsOver = isError && digits.length > code.length
     return (if (startsOver) digits.drop(code.length) else digits).take(CodeLength)
-}
-
-/**
- * Blinks every 0.5 s, restarting (visible) whenever the caret moves; steady under reduce motion.
- */
-@Composable
-private fun rememberCaretBlink(focusedIndex: Int?): Boolean {
-    val reduceMotion = LocalReduceMotion.current
-    var visible by remember { mutableStateOf(true) }
-    LaunchedEffect(focusedIndex, reduceMotion) {
-        visible = true
-        if (focusedIndex == null || reduceMotion) return@LaunchedEffect
-        while (true) {
-            delay(PbMotion.CARET_BLINK_MILLIS.toLong())
-            visible = !visible
-        }
-    }
-    return visible
 }
 
 @Preview(showBackground = true, widthDp = 402)

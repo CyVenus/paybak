@@ -11,6 +11,30 @@
     <string name="pb_clear">Clear</string>
     <string name="pb_payment_preview_caption">What friends see</string>
     <string name="pb_copy_upi_id">Copy UPI ID</string>
+    <string name="pb_close">Close</string>
+    <string name="pb_remove">Remove %1$s</string>
+    <string name="pb_send">Send</string>
+    <string name="pb_dictate">Dictate</string>
+    <string name="pb_decrease">Decrease</string>
+    <string name="pb_increase">Increase</string>
+    <string name="pb_amount">Amount</string>
+    <string name="pb_from">From</string>
+    <string name="pb_to">To</string>
+    <string name="pb_you_owe">You owe</string>
+    <string name="pb_you_are_owed">You’re owed</string>
+    <string name="pb_read_only">Read-only</string>
+    <string name="pb_spent">Spent</string>
+    <string name="pb_original">Original</string>
+    <string name="pb_paid">Paid</string>
+    <string name="pb_remaining">Remaining</string>
+    <string name="pb_confirm">Confirm</string>
+    <string name="pb_not_received">Not received</string>
+    <string name="pb_save">Save</string>
+    <string name="pb_edit">Edit</string>
+    <string name="pb_expense_added">Expense added</string>
+    <string name="pb_view">View</string>
+    <string name="pb_qr_code">QR code for %1$s</string>
+    <string name="pb_take_photo">Take photo</string>
 
     <!-- Welcome (screens-launch.md §2.4). Headline 1 breaks where Figma wraps it: kerned, the
          whole line would just fit in the 362 dp measure. The others wrap by themselves, and a hard

@@ -33,6 +33,11 @@ private enum class GalleryPageId(val title: String) {
     Buttons("Buttons"),
     Controls("Badges, avatars, controls"),
     Inputs("Inputs and setup"),
+    Navigation("Headers, alerts, sheets, settings"),
+    Forms("Forms and money"),
+    Lists("Lists and detail"),
+    Charts("Progress and charts"),
+    Assistant("Assistant and scan"),
     Rive("Rive"),
 }
 
@@ -89,6 +94,11 @@ fun GalleryScreen(initialPage: Int) {
                 GalleryPageId.Buttons -> ButtonsPage()
                 GalleryPageId.Controls -> ControlsPage()
                 GalleryPageId.Inputs -> InputsPage()
+                GalleryPageId.Navigation -> NavigationPage()
+                GalleryPageId.Forms -> FormsPage()
+                GalleryPageId.Lists -> ListsPage()
+                GalleryPageId.Charts -> ChartsPage()
+                GalleryPageId.Assistant -> AssistantPage()
                 GalleryPageId.Rive -> RivePage()
             }
         }

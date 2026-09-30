@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbMotion
 
 /**
@@ -48,4 +49,14 @@ internal fun Modifier.pressable(
 internal fun animatePressColor(target: Color, label: String): Color {
     val color by animateColorAsState(target, tween(PbMotion.PRESS_MILLIS), label = label)
     return color
+}
+
+/**
+ * The pressed fill of a tappable row, tile or card (README rule 11): `bg/card-pressed` on white
+ * surfaces, a 6 % `bg/selected` overlay inside #F5F5F5 cards. Clear while not pressed.
+ */
+@Composable
+internal fun rowPressColor(pressed: Boolean, onCard: Boolean): Color {
+    val fill = if (onCard) PbColors.Bg.Selected else PbColors.Bg.CardPressed
+    return animatePressColor(if (pressed) fill else fill.copy(alpha = 0f), label = "Row press")
 }

@@ -7,15 +7,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.icons.PbIconImage
@@ -45,6 +48,8 @@ enum class PbIconButtonStyle {
  * unread dot at the top right.
  *
  * @param contentDescription Required: icon-only buttons must be labelled for TalkBack.
+ * @param diameter Figma resizes some instances, such as the 36 dp send button of the composer; the
+ *   [badge] dot is placed for the 44 dp size.
  */
 @Composable
 fun PbIconButton(
@@ -54,6 +59,7 @@ fun PbIconButton(
     modifier: Modifier = Modifier,
     style: PbIconButtonStyle = PbIconButtonStyle.Plain,
     badge: Boolean = false,
+    diameter: Dp = PbSize.Tap,
     interactionSource: MutableInteractionSource? = null,
 ) {
     val press = rememberPressState(interactionSource)
@@ -67,7 +73,7 @@ fun PbIconButton(
     Box(
         modifier =
             modifier
-                .size(PbSize.Tap)
+                .size(diameter)
                 .then(surface)
                 .pressable(press, enabled = true, onClick = onClick)
                 .semantics { this.contentDescription = contentDescription },
@@ -101,6 +107,34 @@ private fun BadgeDot(fill: Color, ring: Color, modifier: Modifier = Modifier) {
                 .padding(2.dp)
                 .background(fill, CircleShape)
     )
+}
+
+/**
+ * A bare 16–24 dp icon whose 44 dp tap target overhangs it, so it lays out at the icon's size: the
+ * clear ✕ of a field, a chip's remove ✕, a person row's ✕, the composer's mic. Pressed dims it.
+ */
+@Composable
+internal fun SmallIconButton(
+    icon: PbIcon,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = PbSize.IconMd,
+    tint: Color = PbColors.Icon.Secondary,
+) {
+    val press = rememberPressState(interactionSource = null)
+    Box(modifier.size(size), contentAlignment = Alignment.Center) {
+        Box(
+            modifier =
+                Modifier.requiredSize(PbSize.Tap)
+                    .graphicsLayer { alpha = if (press.isPressed) 0.5f else 1f }
+                    .pressable(press, enabled = true, onClick = onClick)
+                    .semantics { this.contentDescription = contentDescription },
+            contentAlignment = Alignment.Center,
+        ) {
+            PbIconImage(icon, contentDescription = null, size = size, tint = tint)
+        }
+    }
 }
 
 private fun PbIconButtonStyle.fill(pressed: Boolean): Color =

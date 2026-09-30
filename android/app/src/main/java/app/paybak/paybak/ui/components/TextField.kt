@@ -13,27 +13,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.R
@@ -92,10 +83,7 @@ fun PbTextField(
             animationSpec = tween(PbMotion.FADE_MILLIS),
             label = "PbTextField ring",
         )
-    // The String overload of BasicTextField would put the cursor of a prefilled value at its start.
-    var editing by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
-    val shown =
-        if (editing.text == value) editing else TextFieldValue(value, TextRange(value.length))
+    val text = rememberEndCursorText(value, onValueChange)
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
         if (label != null) {
             Text(
@@ -105,11 +93,8 @@ fun PbTextField(
             )
         }
         BasicTextField(
-            value = shown,
-            onValueChange = { edited ->
-                editing = edited
-                if (edited.text != value) onValueChange(edited.text)
-            },
+            value = text.value,
+            onValueChange = text.onValueChange,
             modifier = fieldModifier.fillMaxWidth(),
             enabled = enabled,
             textStyle =
@@ -153,7 +138,11 @@ fun PbTextField(
                         innerTextField()
                     }
                     if (onClear != null && enabled && value.isNotEmpty()) {
-                        ClearButton(onClear)
+                        SmallIconButton(
+                            PbIcon.Close,
+                            contentDescription = stringResource(R.string.pb_clear),
+                            onClick = onClear,
+                        )
                     }
                 }
             },
@@ -168,30 +157,6 @@ fun PbTextField(
                         isError -> PbColors.Text.Destructive
                         else -> PbColors.Text.Tertiary
                     },
-            )
-        }
-    }
-}
-
-/** `Icon / Close` at 20 dp in `icon/secondary`, with a 44 dp tap target that overhangs it. */
-@Composable
-private fun ClearButton(onClick: () -> Unit) {
-    val press = rememberPressState(interactionSource = null)
-    val description = stringResource(R.string.pb_clear)
-    Box(Modifier.size(PbSize.IconMd), contentAlignment = Alignment.Center) {
-        Box(
-            modifier =
-                Modifier.requiredSize(PbSize.Tap)
-                    .graphicsLayer { alpha = if (press.isPressed) 0.5f else 1f }
-                    .pressable(press, enabled = true, onClick = onClick)
-                    .semantics { contentDescription = description },
-            contentAlignment = Alignment.Center,
-        ) {
-            PbIconImage(
-                PbIcon.Close,
-                contentDescription = null,
-                size = PbSize.IconMd,
-                tint = PbColors.Icon.Secondary,
             )
         }
     }
