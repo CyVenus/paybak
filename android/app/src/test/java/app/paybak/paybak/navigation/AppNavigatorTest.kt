@@ -71,6 +71,16 @@ class AppNavigatorTest {
     }
 
     @Test
+    fun onlyTheScreenOnTopNavigates() {
+        val navigator = AppNavigator(listOf(Destination.Welcome(3)))
+        repeat(2) { navigator.from(Destination.Welcome(3)) { push(Destination.GetStarted) } }
+        navigator.from(Destination.Welcome(3)) { replace(Destination.Welcome(2)) }
+        assertEquals(Destination.GetStarted, navigator.current)
+        navigator.back()
+        assertEquals(Destination.Welcome(3), navigator.current)
+    }
+
+    @Test
     fun setupStepsGoBackOneAtATimeThenPop() {
         val navigator = AppNavigator(canonicalBackStack(Destination.Setup(2)))
         navigator.back()

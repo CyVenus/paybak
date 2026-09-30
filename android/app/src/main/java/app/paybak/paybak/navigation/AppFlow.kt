@@ -55,69 +55,82 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
         contentKey = { it.screenKey },
         label = "AppFlow",
     ) { destination ->
+        // Only the screen on top navigates, so a quick second tap on the outgoing one does nothing.
+        fun navigate(navigation: AppNavigator.() -> Unit) = navigator.from(destination, navigation)
+
         when (destination) {
             Splash ->
                 SplashScreen(
                     onFinished = {
-                        val next =
-                            if (profile.onboardingComplete) Home(HomeState.FirstDay) else Welcome(1)
-                        navigator.resetTo(next, NavTransition.Dissolve)
+                        navigate {
+                            val next =
+                                if (profile.onboardingComplete) {
+                                    Home(HomeState.FirstDay)
+                                } else {
+                                    Welcome(1)
+                                }
+                            resetTo(next, NavTransition.Dissolve)
+                        }
                     }
                 )
 
             is Welcome ->
                 WelcomeScreen(
                     step = destination.step,
-                    onStepChange = { navigator.replace(Welcome(it)) },
-                    onSkip = { navigator.push(GetStarted, NavTransition.Crossfade) },
-                    onGetStarted = { navigator.push(GetStarted) },
+                    onStepChange = { step -> navigate { replace(Welcome(step)) } },
+                    onSkip = { navigate { push(GetStarted, NavTransition.Crossfade) } },
+                    onGetStarted = { navigate { push(GetStarted) } },
                 )
 
             GetStarted -> {
                 // No real Apple or Google sign-in yet: record the choice and go straight to setup.
                 val continueWith = { method: SignInMethod ->
-                    profileStore.update { it.copy(signInMethod = method, contact = "") }
-                    navigator.push(Setup(1))
+                    navigate {
+                        profileStore.update { it.copy(signInMethod = method, contact = "") }
+                        push(Setup(1))
+                    }
                 }
                 GetStartedScreen(
                     onContinueWithApple = { continueWith(SignInMethod.Apple) },
                     onContinueWithGoogle = { continueWith(SignInMethod.Google) },
-                    onContinueWithEmailOrPhone = { navigator.push(SignIn) },
+                    onContinueWithEmailOrPhone = { navigate { push(SignIn) } },
                 )
             }
 
             SignIn ->
                 SignInScreen(
-                    onCodeSent = { navigator.push(Verify(wrongCode = false)) },
-                    onBack = navigator::back,
+                    onCodeSent = { navigate { push(Verify(wrongCode = false)) } },
+                    onBack = { navigate { back() } },
                 )
 
             is Verify ->
                 VerifyScreen(
                     wrongCode = destination.wrongCode,
-                    onWrongCodeChange = { navigator.replace(Verify(it)) },
-                    onVerified = { navigator.push(Setup(1)) },
-                    onBack = navigator::back,
+                    onWrongCodeChange = { wrongCode -> navigate { replace(Verify(wrongCode)) } },
+                    onVerified = { navigate { push(Setup(1)) } },
+                    onBack = { navigate { back() } },
                 )
 
             is Setup ->
                 SetupScreen(
                     step = destination.step,
                     onContinue = {
-                        if (destination.step < Destination.SETUP_STEPS) {
-                            navigator.replace(Setup(destination.step + 1))
-                        } else {
-                            navigator.push(AllSet)
+                        navigate {
+                            if (destination.step < Destination.SETUP_STEPS) {
+                                replace(Setup(destination.step + 1))
+                            } else {
+                                push(AllSet)
+                            }
                         }
                     },
-                    onBack = navigator::back,
+                    onBack = { navigate { back() } },
                 )
 
             AllSet -> {
                 LaunchedEffect(Unit) { profileStore.update { it.copy(onboardingComplete = true) } }
                 AllSetScreen(
                     onGoHome = {
-                        navigator.resetTo(Home(HomeState.FirstDay), NavTransition.Dissolve)
+                        navigate { resetTo(Home(HomeState.FirstDay), NavTransition.Dissolve) }
                     }
                 )
             }
@@ -126,8 +139,8 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
                 HomeScreen(
                     state = destination.state,
                     addSheetOpen = destination.addSheetOpen,
-                    onAddSheetOpenChange = {
-                        navigator.replace(destination.copy(addSheetOpen = it))
+                    onAddSheetOpenChange = { open ->
+                        navigate { replace(destination.copy(addSheetOpen = open)) }
                     },
                 )
         }

@@ -37,28 +37,33 @@ fun PlaceholderScreen(
     content: @Composable ColumnScope.() -> Unit = {},
     actions: @Composable ColumnScope.() -> Unit,
 ) {
-    PbScreen(id = id, modifier = modifier) {
-        header()
-        Spacer(Modifier.height(PbLayout.SectionGap))
-        PbBadge("Placeholder", style = PbBadgeStyle.Muted)
-        Spacer(Modifier.height(PbSpace.S12))
-        Text(id, style = PbTextStyles.Title1, color = PbColors.Text.Primary)
-        Spacer(Modifier.height(PbSpace.S8))
-        Text(
-            text = "The $phase phase builds this screen.",
-            style = PbTextStyles.Body,
-            color = PbColors.Text.Secondary,
-        )
-        Spacer(Modifier.height(PbLayout.SectionGap))
-        content()
-        Spacer(Modifier.weight(1f))
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            content = actions,
-        )
-    }
+    PbScreen(
+        id = id,
+        modifier = modifier,
+        content = {
+            header()
+            Spacer(Modifier.height(PbLayout.SectionGap))
+            PbBadge("Placeholder", style = PbBadgeStyle.Muted)
+            Spacer(Modifier.height(PbSpace.S12))
+            Text(id, style = PbTextStyles.Title1, color = PbColors.Text.Primary)
+            Spacer(Modifier.height(PbSpace.S8))
+            Text(
+                text = "The $phase phase builds this screen.",
+                style = PbTextStyles.Body,
+                color = PbColors.Text.Secondary,
+            )
+            Spacer(Modifier.height(PbLayout.SectionGap))
+            content()
+        },
+        footer = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                content = actions,
+            )
+        },
+    )
 }
 
 @Preview(showBackground = true, widthDp = 402, heightDp = 874)

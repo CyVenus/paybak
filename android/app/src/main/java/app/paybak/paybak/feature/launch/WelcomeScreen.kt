@@ -74,8 +74,9 @@ private val TextInEasing = CubicBezierEasing(0.2f, 0f, 0f, 1f)
 private val TextMeasure = 362.dp
 
 /**
- * Lines kept for every headline, so the body stays put between steps. (Step 1's headline fits on
- * one line once kerned, although Figma wraps it.)
+ * Lines kept for every headline, so the body stays put between steps even if one fits on a line (at
+ * a smaller font scale, say). Step 1 breaks where Figma does in the string itself: kerned, it would
+ * just fit on one line at 362 dp.
  */
 private const val HEADLINE_LINES = 2
 
@@ -130,42 +131,46 @@ fun WelcomeScreen(
                     if (swipe < 0) showStep(step + 1) else if (swipe > 0) showStep(step - 1)
                 },
             ),
-    ) {
-        PbOnboardingTopBar(
-            showSkip = !lastStep,
-            onSkip = onSkip,
-            skipModifier = Modifier.testTag("welcome.skip"),
-        )
-        Spacer(Modifier.height(PbSpace.S8))
-        PaybakRiveIllustration(
-            asset = PaybakRiveAsset.Onboarding,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            pointerInputMode = RivePointerInputMode.Observe,
-            numbers = mapOf(PaybakRiveAsset.STEP_PROPERTY to step.toFloat()),
-        )
-        Spacer(Modifier.height(PbSpace.S32))
-        stepTransition.AnimatedContent(transitionSpec = { textChange(reduceMotion, textShift) }) {
-            StepText(stepCopy[it - 1])
-        }
-        Spacer(Modifier.weight(1f))
-        PbPageDots(active = step, count = Destination.WELCOME_STEPS)
-        Spacer(Modifier.height(PbSpace.S24))
-        PbButton(
-            label =
-                stringResource(
-                    if (lastStep) R.string.welcome_get_started else R.string.welcome_continue
-                ),
-            onClick = {
-                when {
-                    !settled -> Unit
-                    lastStep -> onGetStarted()
-                    else -> showStep(step + 1)
-                }
-            },
-            modifier = Modifier.fillMaxWidth().testTag("welcome.continue"),
-        )
-        Spacer(Modifier.height(PbSpace.S16))
-    }
+        content = {
+            PbOnboardingTopBar(
+                showSkip = !lastStep,
+                onSkip = onSkip,
+                skipModifier = Modifier.testTag("welcome.skip"),
+            )
+            Spacer(Modifier.height(PbSpace.S8))
+            PaybakRiveIllustration(
+                asset = PaybakRiveAsset.Onboarding,
+                modifier = Modifier.align(Alignment.CenterHorizontally).weight(1f, fill = false),
+                pointerInputMode = RivePointerInputMode.Observe,
+                numbers = mapOf(PaybakRiveAsset.STEP_PROPERTY to step.toFloat()),
+            )
+            Spacer(Modifier.height(PbSpace.S32))
+            stepTransition.AnimatedContent(
+                transitionSpec = { textChange(reduceMotion, textShift) }
+            ) {
+                StepText(stepCopy[it - 1])
+            }
+        },
+        footer = {
+            PbPageDots(active = step, count = Destination.WELCOME_STEPS)
+            Spacer(Modifier.height(PbSpace.S24))
+            PbButton(
+                label =
+                    stringResource(
+                        if (lastStep) R.string.welcome_get_started else R.string.welcome_continue
+                    ),
+                onClick = {
+                    when {
+                        !settled -> Unit
+                        lastStep -> onGetStarted()
+                        else -> showStep(step + 1)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().testTag("welcome.continue"),
+            )
+            Spacer(Modifier.height(PbSpace.S16))
+        },
+    )
 }
 
 @Composable

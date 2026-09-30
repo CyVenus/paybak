@@ -1,17 +1,22 @@
 package app.paybak.paybak.feature.launch
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.TouchInjectionScope
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.paybak.paybak.awaitScreen
 import app.paybak.paybak.launchPaybak
+import app.paybak.paybak.tapTwiceQuickly
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +35,17 @@ class WelcomeTest {
             assertStep(3)
             continueButton().assertTextEquals("Get started").performClick()
             compose.awaitScreen("getStarted")
+        }
+    }
+
+    @Test
+    fun everyHeadlineWrapsToTwoLinesAsInFigma() {
+        launchPaybak("welcome1").use {
+            for (step in 1..3) {
+                assertStep(step)
+                assertEquals(2, headlineLineCount())
+                if (step < 3) continueButton().performClick()
+            }
         }
     }
 
@@ -67,6 +83,26 @@ class WelcomeTest {
     }
 
     @Test
+    fun aQuickSecondTapOnGetStartedOpensGetStartedOnce() {
+        launchPaybak("welcome3").use {
+            continueButton().tapTwiceQuickly()
+            compose.awaitScreen("getStarted")
+            Espresso.pressBack()
+            assertStep(3)
+        }
+    }
+
+    @Test
+    fun aQuickSecondTapOnSkipOpensGetStartedOnce() {
+        launchPaybak("welcome1").use {
+            compose.onNodeWithTag("welcome.skip").tapTwiceQuickly()
+            compose.awaitScreen("getStarted")
+            Espresso.pressBack()
+            assertStep(1)
+        }
+    }
+
+    @Test
     fun systemBackGoesToThePreviousStep() {
         launchPaybak("welcome2").use {
             assertStep(2)
@@ -100,6 +136,17 @@ class WelcomeTest {
         compose.onNodeWithTag("screen.welcome$step").performTouchInput(gesture)
     }
 
+    /** How many lines the headline takes up as laid out (not counting reserved empty lines). */
+    private fun headlineLineCount(): Int {
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithTag("welcome.headline").performSemanticsAction(
+            SemanticsActions.GetTextLayoutResult
+        ) {
+            it(layouts)
+        }
+        return layouts.single().lineCount
+    }
+
     /** The screen shows [step] with its headline. */
     private fun assertStep(step: Int) {
         compose.awaitScreen("welcome$step")
@@ -109,7 +156,7 @@ class WelcomeTest {
     private companion object {
         val headlines =
             listOf(
-                "Split any bill in seconds.",
+                "Split any bill in\nseconds.",
                 "Know who owes what, and by when.",
                 "Settle up without the awkward chat.",
             )

@@ -51,12 +51,16 @@ fun GetStartedScreen(
     onContinueWithGoogle: () -> Unit,
     onContinueWithEmailOrPhone: () -> Unit,
 ) {
-    PbScreen(id = "getStarted") {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    PbScreen(
+        id = "getStarted",
+        content = {
             Spacer(Modifier.height(PbSpace.S24))
-            PbLogo(PbLogoLayout.Horizontal)
+            PbLogo(PbLogoLayout.Horizontal, Modifier.align(Alignment.CenterHorizontally))
             Spacer(Modifier.height(PbSpace.S32))
-            PaybakRiveIllustration(PaybakRiveAsset.GetStarted)
+            PaybakRiveIllustration(
+                asset = PaybakRiveAsset.GetStarted,
+                modifier = Modifier.align(Alignment.CenterHorizontally).weight(1f, fill = false),
+            )
             Spacer(Modifier.height(PbSpace.S32))
             Text(
                 text = stringResource(R.string.get_started_headline),
@@ -76,34 +80,35 @@ fun GetStartedScreen(
                 color = PbColors.Text.Secondary,
                 textAlign = TextAlign.Center,
             )
-        }
-        Spacer(Modifier.weight(1f))
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            PbButton(
-                label = stringResource(R.string.get_started_apple),
-                onClick = onContinueWithApple,
-                modifier = Modifier.fillMaxWidth().testTag("getStarted.apple"),
-                leadingIcon = PbIcon.Apple,
-            )
-            PbButton(
-                label = stringResource(R.string.get_started_google),
-                onClick = onContinueWithGoogle,
-                modifier = Modifier.fillMaxWidth().testTag("getStarted.google"),
-                style = PbButtonStyle.Secondary,
-                leadingIcon = PbIcon.Google,
-            )
-            PbTextButton(
-                label = stringResource(R.string.get_started_email_or_phone),
-                onClick = onContinueWithEmailOrPhone,
-                modifier = Modifier.testTag("getStarted.email"),
-            )
-            LegalFootnote()
-        }
-    }
+        },
+        footer = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                PbButton(
+                    label = stringResource(R.string.get_started_apple),
+                    onClick = onContinueWithApple,
+                    modifier = Modifier.fillMaxWidth().testTag("getStarted.apple"),
+                    leadingIcon = PbIcon.Apple,
+                )
+                PbButton(
+                    label = stringResource(R.string.get_started_google),
+                    onClick = onContinueWithGoogle,
+                    modifier = Modifier.fillMaxWidth().testTag("getStarted.google"),
+                    style = PbButtonStyle.Secondary,
+                    leadingIcon = PbIcon.Google,
+                )
+                PbTextButton(
+                    label = stringResource(R.string.get_started_email_or_phone),
+                    onClick = onContinueWithEmailOrPhone,
+                    modifier = Modifier.testTag("getStarted.email"),
+                )
+                LegalFootnote()
+            }
+        },
+    )
 }
 
 /**

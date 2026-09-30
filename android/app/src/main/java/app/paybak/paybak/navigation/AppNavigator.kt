@@ -56,6 +56,15 @@ class AppNavigator(initialStack: List<Destination>) {
         stack.add(destination)
     }
 
+    /**
+     * Runs [navigation] only while [screen] is on top. A screen that is transitioning out stays
+     * composed, and tappable, until the transition ends, so a quick second tap on it must not
+     * navigate again (or, after a [replace], change the wrong screen).
+     */
+    fun from(screen: Destination, navigation: AppNavigator.() -> Unit) {
+        if (current == screen) navigation()
+    }
+
     /** False where system back should leave the app: Welcome step 1, Home, or an empty stack. */
     val handlesBack: Boolean
         get() =

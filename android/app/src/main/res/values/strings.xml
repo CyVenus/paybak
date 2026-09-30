@@ -9,8 +9,10 @@
     <string name="pb_setup_step">Step %1$d of %2$d</string>
     <string name="pb_code_field">Verification code</string>
 
-    <!-- Welcome (screens-launch.md §2.4) -->
-    <string name="welcome_headline_1">Split any bill in seconds.</string>
+    <!-- Welcome (screens-launch.md §2.4). Headline 1 breaks where Figma wraps it: kerned, the
+         whole line would just fit in the 362 dp measure. The others wrap by themselves, and a hard
+         break would give them three lines on 360 dp phones. -->
+    <string name="welcome_headline_1">Split any bill in\nseconds.</string>
     <string name="welcome_body_1">Add it once. Paybak does the math for everyone.</string>
     <string name="welcome_headline_2">Know who owes what, and by when.</string>
     <string name="welcome_body_2">Clear balances and due dates, all in one place.</string>
