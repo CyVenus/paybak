@@ -1,7 +1,6 @@
 package app.paybak.paybak.feature.home
 
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,6 +21,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/** The Confirmed animation, then the hold before the payment is confirmed (home-v2 §3.9). */
+private const val CONFIRMED_MILLIS = 300L
+private const val HOLD_MILLIS = 1_000L
+
 /** Home (app-architecture §6.5): its states and where every element leads. */
 @RunWith(AndroidJUnit4::class)
 class HomeTest {
@@ -32,11 +35,6 @@ class HomeTest {
     private fun awaitTag(tag: String, timeoutMillis: Long = 15_000) =
         compose.waitUntil(timeoutMillis) {
             compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty()
-        }
-
-    private fun awaitText(text: String, timeoutMillis: Long = 5_000) =
-        compose.waitUntil(timeoutMillis) {
-            compose.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
         }
 
     @Test
@@ -75,9 +73,14 @@ class HomeTest {
         launchPaybak("homeConfirmPayment").use {
             compose.awaitScreen("homeConfirmPayment")
             compose.onNodeWithText("Esha says she paid you ₹700").assertExists()
+            // The Confirmed card and the toast are timed: step the clock through them.
+            compose.mainClock.autoAdvance = false
             tag("claim.pay-esha-olive.confirm").performClick()
-            awaitText("Esha paid you ₹700")
-            awaitText("Payment confirmed")
+            compose.mainClock.advanceTimeBy(CONFIRMED_MILLIS)
+            compose.onNodeWithText("Esha paid you ₹700").assertExists()
+            compose.mainClock.advanceTimeBy(HOLD_MILLIS)
+            compose.onNodeWithText("Payment confirmed").assertExists()
+            compose.mainClock.autoAdvance = true
             compose.awaitScreen("homeActive")
             compose.onNodeWithText("+₹2,200").assertExists()
             compose.onNodeWithText("from 3 people").assertExists()
