@@ -30,6 +30,7 @@ import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentType
@@ -96,9 +97,12 @@ internal fun NameStep(profileStore: ProfileStore, onContinue: () -> Unit) {
     }
 
     val canContinue = name.isNotBlank()
+    val focusManager = LocalFocusManager.current
     val submit = {
         if (canContinue) {
             profileStore.update { it.copy(name = name.trim(), avatar = avatar) }
+            // The keyboard goes down while the next step slides in, not after.
+            focusManager.clearFocus()
             onContinue()
         }
     }
