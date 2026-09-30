@@ -1,6 +1,11 @@
 package app.paybak.paybak
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.navigation.AppFlow
 import app.paybak.paybak.navigation.Destination
@@ -16,14 +21,20 @@ sealed interface StartTarget {
     class Tool(val content: @Composable () -> Unit) : StartTarget
 }
 
+/**
+ * The app's root. Test tags are exposed as resource ids, so UI tests and uiautomator/adb find
+ * elements by the flow.md ids (`screen.welcome1`, `welcome.continue`, …).
+ */
 @Composable
 fun PaybakApp(profileStore: ProfileStore, start: StartTarget) {
-    when (start) {
-        is StartTarget.Tool -> start.content()
-        is StartTarget.Flow ->
-            AppFlow(
-                navigator = rememberAppNavigator(canonicalBackStack(start.destination)),
-                profileStore = profileStore,
-            )
+    Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
+        when (start) {
+            is StartTarget.Tool -> start.content()
+            is StartTarget.Flow ->
+                AppFlow(
+                    navigator = rememberAppNavigator(canonicalBackStack(start.destination)),
+                    profileStore = profileStore,
+                )
+        }
     }
 }
