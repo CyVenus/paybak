@@ -41,6 +41,7 @@ sealed interface PbChipLeading {
  *
  * @param onClick Null for a chip that only labels (none in Figma).
  * @param onRemove Shows a trailing ✕ that removes the chip.
+ * @param onCard Inside a #F5F5F5 card an unselected chip is white (the due-date quick chips).
  */
 @Composable
 fun PbCategoryChip(
@@ -50,6 +51,7 @@ fun PbCategoryChip(
     onClick: (() -> Unit)? = null,
     leading: PbChipLeading? = null,
     onRemove: (() -> Unit)? = null,
+    onCard: Boolean = false,
 ) {
     val press = rememberPressState(interactionSource = null)
     val fill =
@@ -58,6 +60,7 @@ fun PbCategoryChip(
                 selected && press.isPressed -> PbColors.Bg.InversePressed
                 selected -> PbColors.Bg.Inverse
                 press.isPressed -> PbColors.Bg.CardPressed
+                onCard -> PbColors.Bg.Primary
                 else -> PbColors.Bg.Card
             },
             label = "PbCategoryChip fill",
