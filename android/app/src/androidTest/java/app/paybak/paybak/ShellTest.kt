@@ -66,7 +66,7 @@ class ShellTest {
                     awaitTag("home.addSheet.$row")
                     tag("home.addSheet.$row").performClick()
                     compose.awaitScreen(modal)
-                    tag("$modal.header.close").performClick()
+                    tag("$modal.close").performClick()
                     awaitGone("screen.$modal")
                     awaitTag(rootOf(tab))
                 }
@@ -96,11 +96,7 @@ class ShellTest {
 
     @Test
     fun savingAModalShowsTheDetailWithAToast() {
-        launchPaybak("addExpenseEmpty").use {
-            compose.awaitScreen("addExpense")
-            tag("addExpense.people").performClick()
-            compose.awaitScreen("pickPeople")
-            tag("pickPeople.done").performClick()
+        launchPaybak("addExpenseFilled").use {
             compose.awaitScreen("addExpense")
             tag("addExpense.save").performClick()
             compose.awaitScreen("expense")
@@ -116,7 +112,7 @@ class ShellTest {
             tag("newGroup.create").performClick()
             compose.awaitScreen("group")
             compose.onNodeWithText("Group created").assertExists()
-            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "New group" })
+            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "Weekend Trek" })
         }
     }
 
