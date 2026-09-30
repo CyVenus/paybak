@@ -19,7 +19,7 @@ struct PendingClaimCard: View {
             title: claim.title,
             detail: claim.detail,
             confirmedTitle: "\(ledgerStore.books.firstName(claim.payment.fromId)) paid you \(Money.format(claim.payment.amount, claim.payment.currency))",
-            confirmedDetail: "Confirmed · \(claim.payment.method.label)",
+            confirmedDetail: "\(claim.purpose) · \(claim.payment.method.label) · Confirmed",
             isConfirmed: isConfirmed,
             testIDPrefix: testIDPrefix,
             onConfirm: confirm,
