@@ -84,12 +84,13 @@ final class ProfileUITests: XCTestCase {
         let app = XCUIApplication.launchPaybak(startScreen: .profile)
         XCTAssertTrue(app.screen(.profile).waitForExistence(timeout: 5))
         app.buttons["profile.signOut"].tap()
-        XCTAssertTrue(app.buttons["profile.signOutAlert.cancel"].waitForExistence(timeout: 2))
-        app.buttons["profile.signOutAlert.cancel"].tap()
-        XCTAssertTrue(app.buttons["profile.signOutAlert.cancel"].waitForNonExistence(timeout: 2))
+        let alert = app.alerts["Sign out?"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        alert.buttons["Cancel"].tap()
+        XCTAssertTrue(alert.waitForNonExistence(timeout: 2))
         app.buttons["profile.signOut"].tap()
-        XCTAssertTrue(app.buttons["profile.signOutAlert.action"].waitForExistence(timeout: 2))
-        app.buttons["profile.signOutAlert.action"].tap()
+        XCTAssertTrue(alert.waitForExistence(timeout: 2))
+        alert.buttons["Sign out"].tap()
         XCTAssertTrue(app.screen(.getStarted).waitForExistence(timeout: 3))
     }
 }
