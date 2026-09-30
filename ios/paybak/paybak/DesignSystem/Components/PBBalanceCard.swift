@@ -2,7 +2,9 @@ import SwiftUI
 
 /// Card / Balance (Figma 13:269, components-home §6): a balance total on a #F5F5F5 card. Owed = black
 /// +₹, Owe = gray −₹, Settled = gray ₹0. Tapping it opens the per-person breakdown. The top-right
-/// holds either the chevron or a badge; an optional small "Settle up" sits bottom-right.
+/// holds either the chevron or a badge; an optional small "Settle up" sits bottom-right, 24 pt above
+/// the card's bottom edge. Detail pages override the label ("Your balance", "Rohan owes you") and may
+/// drop the caption (a new group's 96 pt card).
 struct PBBalanceCard: View {
     enum Kind {
         case owed
@@ -35,14 +37,21 @@ struct PBBalanceCard: View {
     }
 
     let kind: Kind
+    /// Replaces the kind's label ("Your balance", "Rohan owes you").
+    var label: String?
     /// Formatted with its sign ("+₹2,900", "−₹1,850", "₹0").
     let amount: String
-    let caption: String
+    /// nil hides the caption line.
+    let caption: String?
     /// A status pill in the top-right instead of the chevron.
     var badge: (text: String, style: PBBadge.Style)?
     /// Shows the trailing small "Settle up".
     var onSettleUp: (() -> Void)?
+    /// A disabled "Settle up" (nothing to settle yet).
+    var isSettleUpEnabled = true
     var onTap: (() -> Void)?
+    /// Test ids `<prefix>.balance` (the card) and `<prefix>.settleUp`.
+    var testIDPrefix: String?
 
     var body: some View {
         Button {
@@ -52,7 +61,7 @@ struct PBBalanceCard: View {
                 HStack(spacing: PBSpace.s6) {
                     PBIconView(kind.icon, size: PBSize.iconSm)
                         .foregroundStyle(PBColor.iconSecondary)
-                    Text(kind.label)
+                    Text(label ?? kind.label)
                         .textStyle(.subheadline)
                         .foregroundStyle(PBColor.textSecondary)
                         .lineLimit(1)
@@ -64,22 +73,29 @@ struct PBBalanceCard: View {
                             .foregroundStyle(PBColor.iconTertiary)
                     }
                 }
-                .frame(height: PBSpace.s20)
+                // A badge (24 pt) makes the top row taller.
+                .frame(height: badge == nil ? PBSpace.s20 : PBSpace.s24)
                 HStack(alignment: .bottom, spacing: PBSpace.s12) {
                     VStack(alignment: .leading, spacing: PBSpace.s2) {
-                        // Full size whenever it fits; only very long amounts shrink.
-                        ViewThatFits(in: .horizontal) {
-                            amountText
-                            amountText.minimumScaleFactor(0.6)
-                        }
-                        Text(caption)
-                            .textStyle(.footnote)
-                            .foregroundStyle(PBColor.textTertiary)
+                        Text(amount)
+                            .textStyle(.amountLarge)
+                            .foregroundStyle(kind.amountColor)
                             .lineLimit(1)
+                            // The exact 32 pt line is shorter than the glyphs; without a fixed height the
+                            // text treats that as not fitting and shrinks or clips itself.
+                            .fixedSize(horizontal: false, vertical: true)
+                            .minimumScaleFactor(0.6)
+                        if let caption {
+                            Text(caption)
+                                .textStyle(.footnote)
+                                .foregroundStyle(PBColor.textTertiary)
+                                .lineLimit(1)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    if let onSettleUp {
-                        PBButton("Settle up", size: .small, action: onSettleUp)
+                    if onSettleUp != nil {
+                        // Keeps the text clear of the button, which floats over the card.
+                        settleUpButton.hidden().frame(height: 0)
                     }
                 }
             }
@@ -87,17 +103,23 @@ struct PBBalanceCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .buttonStyle(PBBalanceCardStyle())
-        .disabled(onTap == nil && onSettleUp == nil)
+        .disabled(onTap == nil)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(testIDPrefix.map { "\($0).balance" } ?? "")
+        // Figma pins "Settle up" 16 from the right and 24 from the bottom, over the layout.
+        .overlay(alignment: .bottomTrailing) {
+            if onSettleUp != nil {
+                settleUpButton
+                    .disabled(!isSettleUpEnabled)
+                    .padding(.trailing, PBLayout.cardPadding)
+                    .padding(.bottom, PBSpace.s24)
+                    .accessibilityIdentifier(testIDPrefix.map { "\($0).settleUp" } ?? "")
+            }
+        }
     }
-}
 
-extension PBBalanceCard {
-    private var amountText: some View {
-        Text(amount)
-            .textStyle(.amountLarge)
-            .foregroundStyle(kind.amountColor)
-            .lineLimit(1)
+    private var settleUpButton: some View {
+        PBButton("Settle up", size: .small) { onSettleUp?() }
     }
 }
 
@@ -135,6 +157,7 @@ struct PBBalanceSummary: View {
                               caption: totals.owe > 0 ? totals.oweCaption : "Nothing to pay", onTap: onOwe)
                     .accessibilityIdentifier("home.balance.owe")
             }
+            .fixedSize(horizontal: false, vertical: true)
             if let onSettleUp {
                 PBButton("Settle up", fillsWidth: true, action: onSettleUp)
                     .accessibilityIdentifier("home.settleUp")
@@ -149,6 +172,8 @@ struct PBBalanceSummary: View {
         PBBalanceCard(kind: .settled, amount: "₹0", caption: "Nothing pending")
         PBBalanceCard(kind: .owed, amount: "+₹800", caption: "Movie tickets", badge: ("Overdue 3 days", .overdue))
         PBBalanceCard(kind: .owe, amount: "−₹1,400", caption: "Goa Trip", onSettleUp: {}, onTap: {})
+        PBBalanceCard(kind: .owe, label: "Your balance", amount: "−₹1,400", caption: "You owe Kabir · Due Fri 2 Oct", onSettleUp: {})
+        PBBalanceCard(kind: .settled, label: "Your balance", amount: "₹0", caption: nil, onSettleUp: {}, isSettleUpEnabled: false)
     }
     .padding(PBLayout.screenMargin)
 }

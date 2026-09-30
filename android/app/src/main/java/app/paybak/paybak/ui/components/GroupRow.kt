@@ -35,8 +35,16 @@ sealed interface PbGroupBalance {
     data class Settled(val status: String) : PbGroupBalance
 }
 
-/** A project's budget line under a [PbGroupRow]: spent ÷ budget, and both captions. */
-data class PbGroupBudget(val progress: Float, val spent: String, val left: String)
+/**
+ * A project's budget line under a [PbGroupRow]: spent ÷ budget, and both captions. Over budget
+ * ([over]), [progress] is the budget point (budget ÷ spent) and the rest of the bar turns red.
+ */
+data class PbGroupBudget(
+    val progress: Float,
+    val spent: String,
+    val left: String,
+    val over: Boolean = false,
+)
 
 /**
  * `Row / Group` (`PBGroupRow`): a group or project in the Groups list and "Groups together", on
@@ -141,7 +149,7 @@ private fun BudgetLine(budget: PbGroupBudget) {
         modifier = Modifier.padding(start = PbSize.AvatarMd + PbSpace.S12),
         verticalArrangement = Arrangement.spacedBy(PbSpace.S8),
     ) {
-        PbProgressBar(budget.progress)
+        PbProgressBar(budget.progress, over = budget.over)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(budget.spent, style = PbTextStyles.Footnote, color = PbColors.Text.Secondary)
             Text(budget.left, style = PbTextStyles.Footnote, color = PbColors.Text.Secondary)
