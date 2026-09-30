@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import app.paybak.paybak.ui.components.rememberPressState
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbShapes
+import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
 
@@ -120,6 +123,9 @@ fun PbAttentionRow(
                     style = PbButtonStyle.OnCard,
                     size = PbButtonSize.Small,
                 )
+            } else {
+                // Keeps the row 88 tall, with the amount where it sits above a button.
+                Spacer(Modifier.height(PbSize.ButtonSm))
             }
         }
     }
