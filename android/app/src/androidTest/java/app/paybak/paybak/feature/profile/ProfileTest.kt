@@ -26,7 +26,9 @@ class ProfileTest {
     private fun tag(tag: String) = compose.onNodeWithTag(tag)
 
     private fun awaitGone(tag: String) =
-        compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isEmpty() }
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isEmpty()
+        }
 
     @Test
     fun editingTheAvatarKeepsEachGendersPicksAndSavesTheLook() {

@@ -119,11 +119,12 @@ fun LedgerView.exportRecords(period: ExportPeriod, selected: Set<String>): List<
             .filter { it.date in period && (it.groupId != null || ME in setOf(it.fromId, it.toId)) }
             .mapNotNull { payment ->
                 val group = rowOf(payment.groupId) ?: return@mapNotNull null
+                val payee = if (payment.toId == ME) "you" else name(payment.toId)
                 ExportRecord(
                     payment.date,
                     group,
                     ExportType.Payment,
-                    "${name(payment.fromId)} paid ${if (payment.toId == ME) "you" else name(payment.toId)}",
+                    "${name(payment.fromId)} paid $payee",
                     null,
                     name(payment.fromId),
                     payment.amount,

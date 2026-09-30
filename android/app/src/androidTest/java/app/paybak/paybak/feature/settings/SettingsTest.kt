@@ -30,7 +30,9 @@ class SettingsTest {
     private fun tag(tag: String) = compose.onNodeWithTag(tag)
 
     private fun awaitGone(tag: String) =
-        compose.waitUntil(10_000) { compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isEmpty() }
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isEmpty()
+        }
 
     @Test
     fun theTrialStartsAndDoneContinuesToExport() {
@@ -43,7 +45,8 @@ class SettingsTest {
             tag("paywall.plan.yearly").performClick()
             tag("paywall.cta").performClick()
             compose.awaitTag("proWelcome.body")
-            tag("proWelcome.body").assertTextContains("Your free trial ends Wed 7 Oct.", substring = true)
+            tag("proWelcome.body")
+                .assertTextContains("Your free trial ends Wed 7 Oct.", substring = true)
             tag("proWelcome.done").performClick()
             compose.awaitScreen("privacyExport")
             assertTrue(paybakApp.ledger.snapshot.value.isPro)
@@ -77,7 +80,10 @@ class SettingsTest {
             compose.awaitTag("paymentDetails.actions.primary")
             tag("paymentDetails.actions.primary").performClick()
             compose.waitUntil { savedProfile.primaryMethod?.id == "pm-hdfc" }
-            compose.onNode(hasTestTag("paymentDetails.method.1") and hasText("Bank transfer · Primary"))
+            compose
+                .onNode(
+                    hasTestTag("paymentDetails.method.1") and hasText("Bank transfer · Primary")
+                )
                 .assertExists()
             tag("paymentDetails.method.0").performClick()
             compose.awaitTag("paymentDetails.actions.remove")

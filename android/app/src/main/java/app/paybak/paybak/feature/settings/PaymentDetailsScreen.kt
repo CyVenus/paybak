@@ -65,12 +65,13 @@ fun PaymentDetailsScreen(route: Route.PaymentDetails) {
         }
     }
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_payment_title)) {
+    SettingsPage(route, stringResource(R.string.settings_payment_title)) {
         SettingsSection(stringResource(R.string.settings_payment_methods)) {
             Column {
                 profile.paymentMethods.forEachIndexed { index, method ->
                     TileRow(
-                        icon = if (method.kind == SavedMethodKind.Upi) PbIcon.Wallet else PbIcon.Bank,
+                        icon =
+                            if (method.kind == SavedMethodKind.Upi) PbIcon.Wallet else PbIcon.Bank,
                         title = method.title(),
                         subtitle = method.subtitle(),
                         modifier = Modifier.testTag("paymentDetails.method.$index"),

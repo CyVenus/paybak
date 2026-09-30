@@ -69,7 +69,8 @@ fun PaywallScreen(route: Route.Paywall) {
     var nothingToRestore by rememberSaveable { mutableStateOf(false) }
     BackHandler(enabled = welcome) { navigator.finishPaywall() }
 
-    Crossfade(welcome, animationSpec = tween(WELCOME_FADE_MILLIS), label = "Paywall") { showWelcome ->
+    Crossfade(welcome, animationSpec = tween(WELCOME_FADE_MILLIS), label = "Paywall") {
+        showWelcome ->
         if (showWelcome) {
             ProWelcome(
                 status = snapshot.ledger.settings.entitlement.status(

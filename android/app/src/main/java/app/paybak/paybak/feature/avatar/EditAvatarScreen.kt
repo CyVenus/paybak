@@ -39,6 +39,7 @@ import app.paybak.paybak.domain.avatar.pick
 import app.paybak.paybak.domain.avatar.with
 import app.paybak.paybak.domain.model.AvatarGender
 import app.paybak.paybak.domain.model.AvatarLook
+import app.paybak.paybak.feature.settings.leave
 import app.paybak.paybak.navigation.LocalMainNavigator
 import app.paybak.paybak.navigation.LocalProfileStore
 import app.paybak.paybak.navigation.Route
@@ -79,7 +80,7 @@ fun EditAvatarScreen(route: Route.EditAvatar) {
     val state = rememberAvatarEditorState(profile.avatar, designed)
     var discarding by rememberSaveable { mutableStateOf(designed == "editAvatarDiscard") }
     val back: () -> Unit = {
-        if (state.isDirty) discarding = true else navigator.back()
+        if (state.isDirty) discarding = true else navigator.leave(route)
     }
     BackHandler(enabled = state.isDirty, onBack = back)
 
@@ -87,8 +88,10 @@ fun EditAvatarScreen(route: Route.EditAvatar) {
         state = state,
         onBack = back,
         onSave = {
-            profileStore.update { it.copy(avatar = AvatarChoice.Character(state.draft)) }
-            navigator.back()
+            if (navigator.screen.route == route) {
+                profileStore.update { it.copy(avatar = AvatarChoice.Character(state.draft)) }
+                navigator.back()
+            }
         },
         routeId = route.info.id,
     )
@@ -101,7 +104,7 @@ fun EditAvatarScreen(route: Route.EditAvatar) {
             onCancel = { discarding = false },
             onAction = {
                 discarding = false
-                navigator.back()
+                navigator.leave(route)
             },
             testTag = "editAvatar.discard",
         )

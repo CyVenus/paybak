@@ -74,7 +74,7 @@ fun PrivacyScreen(route: Route.PrivacyData) {
             contactsDenied = !granted
         }
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_privacy_title)) {
+    SettingsPage(route, stringResource(R.string.settings_privacy_title)) {
         SettingsSection(
             stringResource(R.string.settings_discovery),
             footer = stringResource(R.string.settings_discovery_footer),
@@ -112,14 +112,15 @@ fun PrivacyScreen(route: Route.PrivacyData) {
                 PbSettingRow(
                     stringResource(R.string.settings_export_records),
                     modifier = Modifier.testTag("privacyData.export"),
-                    onClick = { navigator.requirePro(Route.PrivacyExport) },
+                    onClick = { navigator.openFrom(route, Route.PrivacyExport, pro = true) },
                     icon = PbIcon.Download,
-                    badge = if (snapshot.isPro) null else stringResource(R.string.settings_pro_badge),
+                    badge =
+                        if (snapshot.isPro) null else stringResource(R.string.settings_pro_badge),
                 )
                 PbSettingRow(
                     stringResource(R.string.settings_recently_deleted),
                     modifier = Modifier.testTag("privacyData.recentlyDeleted"),
-                    onClick = { navigator.open(Route.RecentlyDeleted) },
+                    onClick = { navigator.openFrom(route, Route.RecentlyDeleted) },
                     icon = PbIcon.Restore,
                     value =
                         if (deleted == 0) null
@@ -156,7 +157,7 @@ fun PrivacyScreen(route: Route.PrivacyData) {
                 onCancel = { deleting = null },
                 onAction = {
                     deleting = null
-                    navigator.open(Route.SettleUp())
+                    navigator.openFrom(route, Route.SettleUp())
                 },
                 action = PbAlertAction.Primary,
                 testTag = "privacyDeleteBlocked",
@@ -217,7 +218,10 @@ private fun Context.canReadContacts(): Boolean =
 
 private fun Context.openAppSettings() {
     startActivity(
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+        Intent(
+                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", packageName, null),
+            )
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     )
 }

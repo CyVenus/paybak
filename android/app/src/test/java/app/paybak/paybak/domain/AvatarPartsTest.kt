@@ -78,7 +78,7 @@ class AvatarPartsTest {
     @Test
     fun unknownOptionsFallBackToTheDefaults() {
         val look =
-            AvatarLook(gender = AvatarGender.Girl, boy = BoyLook(hair = "mohawk", beard = "stubble"))
+            AvatarLook(AvatarGender.Girl, BoyLook(hair = "mohawk", beard = "stubble"))
                 .with(AvatarSlot.Accessory, "crown")
                 .normalized()
         assertEquals("curly", look.boy.hair)

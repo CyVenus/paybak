@@ -25,6 +25,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.navigation.LocalMainNavigator
+import app.paybak.paybak.navigation.MainNavigator
+import app.paybak.paybak.navigation.Route
+import app.paybak.paybak.navigation.id
 import app.paybak.paybak.service.HapticKind
 import app.paybak.paybak.service.rememberHaptics
 import app.paybak.paybak.ui.components.PbCard
@@ -49,23 +52,23 @@ import kotlinx.coroutines.launch
 
 /**
  * A pushed settings page (screens-settings §0): the push header stays put on white while the
- * sections scroll under it, 24 dp apart. The root is tagged `screen.[id]` and the back button
- * "[id].back". [footer] is pinned below the scroll (Export's button).
+ * sections scroll under it, 24 dp apart. The root is tagged `screen.<routeId>` and the back button
+ * "<routeId>.back". [footer] is pinned below the scroll (Export's button).
  */
 @Composable
 internal fun SettingsPage(
-    id: String,
+    route: Route,
     title: String,
     footer: @Composable ColumnScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val navigator = LocalMainNavigator.current
-    PbScreenFrame(id = id) {
+    PbScreenFrame(id = route.id) {
         PbPushHeader(
             title,
-            onBack = { navigator.back() },
+            onBack = { navigator.leave(route) },
             modifier = Modifier.padding(horizontal = PbLayout.ScreenMargin),
-            testTag = id,
+            testTag = route.id,
         )
         Column(
             Modifier.fillMaxWidth()
@@ -78,6 +81,23 @@ internal fun SettingsPage(
         )
         footer()
     }
+}
+
+/**
+ * Goes back from [route] only while it is the screen on top, so a second tap on a back button that
+ * is sliding away doesn't go back again (to Home).
+ */
+internal fun MainNavigator.leave(route: Route) {
+    if (screen.route == route) back()
+}
+
+/**
+ * Opens [next] (through the paywall when [pro] and not entitled) only while [from] is the screen
+ * on top, so a double tap on a row opens one screen, not two.
+ */
+internal fun MainNavigator.openFrom(from: Route, next: Route, pro: Boolean = false) {
+    if (screen.route != from) return
+    if (pro) requirePro(next) else open(next)
 }
 
 /**
@@ -102,7 +122,12 @@ internal fun SettingsSection(
 /** Footnote text in `text/secondary`: section footers and notes. */
 @Composable
 internal fun SettingsFootnote(text: String, modifier: Modifier = Modifier) {
-    Text(text, modifier.fillMaxWidth(), style = PbTextStyles.Footnote, color = PbColors.Text.Secondary)
+    Text(
+        text,
+        modifier.fillMaxWidth(),
+        style = PbTextStyles.Footnote,
+        color = PbColors.Text.Secondary,
+    )
 }
 
 /** A 16 dp secondary icon beside a Footnote: the "Paybak never moves money" style info line. */

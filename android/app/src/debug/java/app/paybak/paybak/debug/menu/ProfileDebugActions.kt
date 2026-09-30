@@ -10,6 +10,8 @@ internal val ProfileDebugActions: List<DebugAction> =
             app.profileStore.update { it.copy(avatar = AvatarChoice.Preset(0)) }
         },
         DebugAction("Use the custom avatar", "The default Boy character") {
-            app.profileStore.update { it.copy(avatar = AvatarChoice.Character(AvatarLook.DefaultBoy)) }
+            app.profileStore.update {
+                it.copy(avatar = AvatarChoice.Character(AvatarLook.DefaultBoy))
+            }
         },
     )

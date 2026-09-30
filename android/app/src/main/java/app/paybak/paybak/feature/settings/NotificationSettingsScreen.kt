@@ -42,7 +42,9 @@ private val PushTypes =
         PushType(R.string.settings_push_overdue, "overdueAlerts", { it.overdueAlerts }) { p, on ->
             p.copy(overdueAlerts = on)
         },
-        PushType(R.string.settings_push_projects, "projectUpdates", { it.projectUpdates }) { p, on ->
+        PushType(R.string.settings_push_projects, "projectUpdates", { it.projectUpdates }) {
+            p,
+            on ->
             p.copy(projectUpdates = on)
         },
         PushType(R.string.settings_push_summary, "monthlySummary", { it.monthlySummary }) { p, on ->
@@ -90,7 +92,7 @@ fun NotificationSettingsScreen(route: Route.SettingsNotifications) {
     val settings = snapshot.ledger.settings
     val muted = snapshot.ledger.people.count { it.remindersMuted }
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_notifications_title)) {
+    SettingsPage(route, stringResource(R.string.settings_notifications_title)) {
         SettingsSection(stringResource(R.string.settings_notifications_push)) {
             PbCard {
                 PushTypes.forEach { type ->
@@ -132,7 +134,7 @@ fun NotificationSettingsScreen(route: Route.SettingsNotifications) {
                 PbSettingRow(
                     stringResource(R.string.settings_muted),
                     modifier = Modifier.testTag("settingsNotifications.muted"),
-                    onClick = { navigator.open(Route.MutedFriends) },
+                    onClick = { navigator.openFrom(route, Route.MutedFriends) },
                     icon = PbIcon.Bell,
                     value =
                         if (muted == 0) stringResource(R.string.settings_muted_none)

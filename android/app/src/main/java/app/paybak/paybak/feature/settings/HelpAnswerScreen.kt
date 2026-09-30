@@ -19,7 +19,7 @@ fun HelpAnswerScreen(route: Route.HelpAnswer) {
     val questions = stringArrayResource(R.array.settings_faq_questions)
     val answers = stringArrayResource(R.array.settings_faq_answers)
     val index = route.index.coerceIn(questions.indices)
-    SettingsPage(route.info.id, questions[index]) {
+    SettingsPage(route, questions[index]) {
         Text(
             answers[index],
             Modifier.testTag("helpAnswer.body"),

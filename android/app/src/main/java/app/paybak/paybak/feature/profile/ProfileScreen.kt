@@ -37,6 +37,7 @@ import app.paybak.paybak.R
 import app.paybak.paybak.data.Currencies
 import app.paybak.paybak.data.UserProfile
 import app.paybak.paybak.data.ledger.collectSnapshot
+import app.paybak.paybak.feature.settings.openFrom
 import app.paybak.paybak.domain.model.SavedMethodKind
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
@@ -99,9 +100,9 @@ fun ProfileScreen(route: Route.Profile) {
         ) {
             PbNavHeader(stringResource(R.string.profile_title))
             Spacer(Modifier.height(PbLayout.SectionGap))
-            ProfileHeader(profile, onEditAvatar = { navigator.open(Route.EditAvatar) })
+            ProfileHeader(profile) { navigator.openFrom(Route.Tabs, Route.EditAvatar) }
             Spacer(Modifier.height(PbLayout.SectionGap))
-            SettingsCard(profile, isPro, open = navigator::open)
+            SettingsCard(profile, isPro) { navigator.openFrom(Route.Tabs, it) }
             Spacer(Modifier.height(PbLayout.SectionGap))
             PbTextButton(
                 stringResource(R.string.profile_sign_out),

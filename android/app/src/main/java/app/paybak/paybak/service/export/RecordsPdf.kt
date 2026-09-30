@@ -118,8 +118,8 @@ internal class RecordsPdf(context: Context, private val defaultCurrency: String)
 
     private fun newPage() {
         val number = document.pages.size + 1
-        page =
-            document.startPage(PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create())
+        val info = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, number).create()
+        page = document.startPage(info)
         y = MARGIN
     }
 

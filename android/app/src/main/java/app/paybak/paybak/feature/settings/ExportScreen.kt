@@ -79,7 +79,7 @@ fun ExportScreen(route: Route.PrivacyExport) {
     val allSelected = groups.all { it.id in selected }
 
     SettingsPage(
-        route.info.id,
+        route,
         stringResource(R.string.settings_export_title),
         footer = {
             PbButton(
@@ -178,7 +178,8 @@ private fun GroupsHeader(allSelected: Boolean, onToggleAll: () -> Unit) {
                 else R.string.settings_export_select_all
             ),
             onClick = onToggleAll,
-            modifier = Modifier.wrapContentHeight(unbounded = true).testTag("privacyExport.selectAll"),
+            modifier =
+                Modifier.wrapContentHeight(unbounded = true).testTag("privacyExport.selectAll"),
             style = PbTextButtonStyle.Secondary,
         )
     }

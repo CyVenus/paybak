@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,8 +13,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.fillMaxWidth
 import app.paybak.paybak.BuildConfig
 import app.paybak.paybak.R
 import app.paybak.paybak.navigation.LocalMainNavigator
@@ -30,7 +29,8 @@ object SupportContact {
 }
 
 private const val PLAY_LISTING = "market://details?id=${BuildConfig.APPLICATION_ID}"
-private const val PLAY_WEB = "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
+private const val PLAY_WEB =
+    "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}"
 
 /**
  * The `helpFeedback` route (screens-settings §11): the five common questions (each opens its
@@ -42,18 +42,23 @@ fun HelpScreen(route: Route.HelpFeedback) {
     val navigator = LocalMainNavigator.current
     val context = LocalContext.current
     val questions = stringArrayResource(R.array.settings_faq_questions)
-    val version = stringResource(R.string.settings_help_version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE)
+    val version =
+        stringResource(
+            R.string.settings_help_version,
+            BuildConfig.VERSION_NAME,
+            BuildConfig.VERSION_CODE,
+        )
     val subject = stringResource(R.string.settings_help_mail_subject)
     val noMail = stringResource(R.string.settings_help_no_mail)
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_help_title)) {
+    SettingsPage(route, stringResource(R.string.settings_help_title)) {
         SettingsSection(stringResource(R.string.settings_help_questions)) {
             PbCard {
                 questions.forEachIndexed { index, question ->
                     PbSettingRow(
                         question,
                         modifier = Modifier.testTag("helpFeedback.faq.$index"),
-                        onClick = { navigator.open(Route.HelpAnswer(index)) },
+                        onClick = { navigator.openFrom(route, Route.HelpAnswer(index)) },
                         icon = PbIcon.Help,
                         showDivider = index != questions.lastIndex,
                         titleMaxLines = 2,

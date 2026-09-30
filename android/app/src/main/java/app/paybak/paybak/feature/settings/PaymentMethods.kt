@@ -11,19 +11,19 @@ import app.paybak.paybak.domain.model.newId
  * that one. The first method added becomes primary. [UserProfile.normalized] keeps `upiId` in step
  * with the primary UPI method whenever a new list is saved.
  */
-fun UserProfile.addingUpi(upi: String): UserProfile = adding(
-    SavedPaymentMethod(newId(), SavedMethodKind.Upi, value = upi.trim())
-)
+fun UserProfile.addingUpi(upi: String): UserProfile =
+    adding(SavedPaymentMethod(newId(), SavedMethodKind.Upi, value = upi.trim()))
 
 /** A bank account shown as "{bank} ···· {last 4 digits}". */
-fun UserProfile.addingBank(bankName: String, accountNumber: String): UserProfile = adding(
-    SavedPaymentMethod(
-        newId(),
-        SavedMethodKind.Bank,
-        bankName = bankName.trim(),
-        last4 = accountNumber.filter(Char::isDigit).takeLast(LAST_DIGITS),
+fun UserProfile.addingBank(bankName: String, accountNumber: String): UserProfile =
+    adding(
+        SavedPaymentMethod(
+            newId(),
+            SavedMethodKind.Bank,
+            bankName = bankName.trim(),
+            last4 = accountNumber.filter(Char::isDigit).takeLast(LAST_DIGITS),
+        )
     )
-)
 
 fun UserProfile.makingPrimary(id: String): UserProfile =
     copy(paymentMethods = paymentMethods.map { it.copy(primary = it.id == id) })
@@ -35,8 +35,10 @@ fun UserProfile.removingMethod(id: String): UserProfile {
     return copy(paymentMethods = left.map { it.copy(primary = it == primary) })
 }
 
-private fun UserProfile.adding(method: SavedPaymentMethod) =
-    copy(paymentMethods = paymentMethods + method.copy(primary = paymentMethods.none { it.primary }))
+private fun UserProfile.adding(method: SavedPaymentMethod): UserProfile {
+    val first = paymentMethods.none { it.primary }
+    return copy(paymentMethods = paymentMethods + method.copy(primary = first))
+}
 
 /** Why a UPI ID can't be saved, or null when it can. */
 enum class UpiProblem {

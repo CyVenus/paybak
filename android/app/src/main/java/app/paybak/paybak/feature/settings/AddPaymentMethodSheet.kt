@@ -75,10 +75,10 @@ internal fun AddPaymentMethodSheet(
         title = stringResource(R.string.settings_payment_add),
         testTag = "paymentAddUpi",
     ) { dismiss ->
-        AddPaymentMethodForm(profile, start, onSave = { updated, toast ->
+        AddPaymentMethodForm(profile, start) { updated, toast ->
             onAdded(updated, toast)
             dismiss()
-        })
+        }
     }
 }
 
@@ -93,7 +93,8 @@ private fun AddPaymentMethodForm(
     var upi by rememberSaveable { mutableStateOf(start.upi) }
     var bankName by rememberSaveable { mutableStateOf("") }
     var account by rememberSaveable { mutableStateOf("") }
-    var problem by rememberSaveable { mutableStateOf(if (start.showError) UpiProblem.Invalid else null) }
+    var problem by
+        rememberSaveable { mutableStateOf(if (start.showError) UpiProblem.Invalid else null) }
     var bankInvalid by rememberSaveable { mutableStateOf(false) }
     val upiAdded = stringResource(R.string.settings_upi_added)
     val bankAdded = stringResource(R.string.settings_bank_added)
@@ -182,7 +183,8 @@ private fun UpiField(
             onValueChange = onChange,
             label = stringResource(R.string.settings_add_upi_label),
             placeholder = stringResource(R.string.settings_add_upi_placeholder),
-            helper = if (problem == null) stringResource(R.string.settings_add_upi_helper) else null,
+            helper =
+                if (problem == null) stringResource(R.string.settings_add_upi_helper) else null,
             isError = problem != null,
             leadingIcon = PbIcon.Wallet,
             keyboardOptions =
@@ -227,7 +229,10 @@ private fun BankFields(
         placeholder = stringResource(R.string.settings_add_bank_name_placeholder),
         leadingIcon = PbIcon.Bank,
         keyboardOptions =
-            KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Next,
+            ),
         fieldModifier = Modifier.focusRequester(focus).testTag("paymentAddUpi.bankName"),
     )
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
@@ -240,7 +245,10 @@ private fun BankFields(
                 if (invalid) null else stringResource(R.string.settings_add_bank_account_helper),
             isError = invalid,
             keyboardOptions =
-                KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
+                KeyboardOptions(
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Done,
+                ),
             keyboardActions = actions,
             fieldModifier = Modifier.testTag("paymentAddUpi.account"),
         )

@@ -47,7 +47,9 @@ internal fun ProWelcome(status: ProStatus?, onDone: () -> Unit) {
                 stringResource(R.string.settings_done),
                 onClick = onDone,
                 modifier =
-                    Modifier.fillMaxWidth().padding(bottom = PbSpace.S16).testTag("proWelcome.done"),
+                    Modifier.fillMaxWidth()
+                        .padding(bottom = PbSpace.S16)
+                        .testTag("proWelcome.done"),
             )
         },
     ) {

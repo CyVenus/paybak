@@ -44,7 +44,7 @@ fun MutedFriendsScreen(route: Route.MutedFriends) {
     val shown = rememberSaveable { people.filter { it.remindersMuted }.map { it.id } }
     val rows = shown.mapNotNull { id -> people.firstOrNull { it.id == id } }
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_muted)) {
+    SettingsPage(route, stringResource(R.string.settings_muted)) {
         if (rows.isEmpty()) {
             SettingsFootnote(stringResource(R.string.settings_muted_empty))
         } else {

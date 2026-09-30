@@ -45,7 +45,7 @@ fun CurrencySettingsScreen(route: Route.SettingsCurrency) {
         }
     }
 
-    SettingsPage(route.info.id, stringResource(R.string.settings_currency_title)) {
+    SettingsPage(route, stringResource(R.string.settings_currency_title)) {
         SettingsSection(
             stringResource(R.string.settings_currency_default),
             footer = stringResource(R.string.settings_currency_default_footer),
@@ -58,7 +58,11 @@ fun CurrencySettingsScreen(route: Route.SettingsCurrency) {
                     selected = true,
                     onClick = {
                         navigator.open(
-                            Route.PickCurrency(picker, selected = currency.code, title = pickerTitle)
+                            Route.PickCurrency(
+                                picker,
+                                selected = currency.code,
+                                title = pickerTitle,
+                            )
                         )
                     },
                     modifier =
@@ -95,6 +99,10 @@ fun CurrencySettingsScreen(route: Route.SettingsCurrency) {
  * Dollar" → "US dollar". Acronyms stay upper case.
  */
 internal fun sentenceCase(name: String): String =
-    name.split(' ').mapIndexed { index, word ->
-        if (index == 0 || word.all { !it.isLetter() || it.isUpperCase() }) word else word.lowercase()
-    }.joinToString(" ")
+    name
+        .split(' ')
+        .mapIndexed { index, word ->
+            val acronym = word.all { !it.isLetter() || it.isUpperCase() }
+            if (index == 0 || acronym) word else word.lowercase()
+        }
+        .joinToString(" ")

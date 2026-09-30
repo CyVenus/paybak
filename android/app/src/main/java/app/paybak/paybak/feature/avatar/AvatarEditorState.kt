@@ -84,7 +84,9 @@ fun startingLook(avatar: AvatarChoice): AvatarLook =
     when (avatar) {
         is AvatarChoice.Character -> avatar.look.normalized()
         is AvatarChoice.Preset ->
-            AvatarLook(gender = if (avatar.index in GIRL_PRESETS) AvatarGender.Girl else AvatarGender.Boy)
+            AvatarLook(
+                gender = if (avatar.index in GIRL_PRESETS) AvatarGender.Girl else AvatarGender.Boy
+            )
         AvatarChoice.None,
         is AvatarChoice.Photo -> AvatarLook()
     }

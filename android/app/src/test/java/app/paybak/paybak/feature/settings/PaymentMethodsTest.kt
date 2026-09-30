@@ -18,7 +18,12 @@ class PaymentMethodsTest {
             username = "arjun",
             paymentMethods =
                 listOf(
-                    SavedPaymentMethod("pm-upi", SavedMethodKind.Upi, "arjun@okaxis", primary = true),
+                    SavedPaymentMethod(
+                        "pm-upi",
+                        SavedMethodKind.Upi,
+                        "arjun@okaxis",
+                        primary = true,
+                    ),
                     SavedPaymentMethod(
                         "pm-hdfc",
                         SavedMethodKind.Bank,
