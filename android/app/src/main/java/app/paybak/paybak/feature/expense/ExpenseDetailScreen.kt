@@ -14,8 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.testTag
 import app.paybak.paybak.data.ledger.actions.addComment
 import app.paybak.paybak.data.ledger.actions.deleteExpense
 import app.paybak.paybak.data.ledger.actions.resolveFlag
@@ -91,7 +91,9 @@ fun ExpenseDetailScreen(route: Route.Expense) {
         val expense = detail?.expense ?: return
         ledger.updateExpense(expense.id, ExpenseForm.of(expense).copy(receipt = receipt).toDraft())
     }
-    val pickPhoto = rememberPhotoPicker { attach(Receipt(photo = it, addedAt = ledger.clock.now())) }
+    val pickPhoto = rememberPhotoPicker {
+        attach(Receipt(photo = it, addedAt = ledger.clock.now()))
+    }
     RouteResultEffect(receiptRequest.id) { result ->
         (result as? RouteResult.Receipt)?.result?.photo?.let {
             attach(Receipt(photo = it, addedAt = ledger.clock.now()))
@@ -105,9 +107,11 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 "Expense",
                 onBack = { navigator.back() },
                 action =
-                    detail?.takeIf { it.expense.deletedAt == null }?.let {
-                        PbHeaderAction.Text("Edit", { edit(navigator::open, it) })
-                    },
+                    detail
+                        ?.takeIf { it.expense.deletedAt == null }
+                        ?.let {
+                            PbHeaderAction.Text("Edit", { edit(navigator::open, it) })
+                        },
                 testTag = "expense",
                 actionTag = "edit",
             )
@@ -137,9 +141,13 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                     detail.flagBody,
                     PbIcon.Flag,
                     title = detail.flagTitle,
-                    primaryAction = PbNoticeAction("Edit expense") { edit(navigator::open, detail) },
+                    primaryAction =
+                        PbNoticeAction("Edit expense", onClick = { edit(navigator::open, detail) }),
                     secondaryAction =
-                        PbNoticeAction("Resolve") { ledger.resolveFlag(detail.expense.id) },
+                        PbNoticeAction(
+                            "Resolve",
+                            onClick = { ledger.resolveFlag(detail.expense.id) },
+                        ),
                     testTag = "expense.dispute",
                 )
             }

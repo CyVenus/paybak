@@ -33,6 +33,8 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * `Row / Currency` (`PBCurrencyRow`): symbol tile, name and code, and a radio. The whole 56 dp row
  * is the tap target. Symbols of up to two characters use Headline; longer ones (a letter code such
  * as "AED") use Caption/1.
+ *
+ * @param onCard True inside a #F5F5F5 card: the symbol tile turns white (Settings › Currency).
  */
 @Composable
 fun PbCurrencyRow(
@@ -42,6 +44,7 @@ fun PbCurrencyRow(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onCard: Boolean = false,
 ) {
     Row(
         modifier =
@@ -59,7 +62,9 @@ fun PbCurrencyRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier.size(PbSize.AvatarMd).background(PbColors.Bg.Card, CircleShape),
+            modifier =
+                Modifier.size(PbSize.AvatarMd)
+                    .background(if (onCard) PbColors.Bg.Primary else PbColors.Bg.Card, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Text(

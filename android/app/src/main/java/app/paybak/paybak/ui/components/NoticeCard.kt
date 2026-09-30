@@ -27,8 +27,8 @@ enum class PbNoticeLayout {
     Centered,
 }
 
-/** A button of a [PbNoticeCard]. */
-data class PbNoticeAction(val label: String, val onClick: () -> Unit)
+/** A button of a [PbNoticeCard]; [icon] leads its label ("Send invite" with Share). */
+data class PbNoticeAction(val label: String, val onClick: () -> Unit, val icon: PbIcon? = null)
 
 /**
  * `Card / Notice` (`PBNoticeCard`): an in-flow notice on #F5F5F5 (pending confirmation, invite a
@@ -139,6 +139,7 @@ private fun NoticeActions(
             primary.label,
             onClick = primary.onClick,
             modifier = modifier.fillMaxWidth().partTag(testTag, "primary"),
+            leadingIcon = primary.icon,
         )
         return
     }
@@ -148,6 +149,7 @@ private fun NoticeActions(
             onClick = primary.onClick,
             modifier = Modifier.weight(1f).partTag(testTag, "primary"),
             size = PbButtonSize.Small,
+            leadingIcon = primary.icon,
         )
         PbButton(
             secondary.label,
@@ -155,6 +157,7 @@ private fun NoticeActions(
             modifier = Modifier.weight(1f).partTag(testTag, "secondary"),
             style = PbButtonStyle.OnCard,
             size = PbButtonSize.Small,
+            leadingIcon = secondary.icon,
         )
     }
 }
@@ -176,6 +179,12 @@ private fun PbNoticeCardPreview() {
             layout = PbNoticeLayout.Centered,
             primaryAction = PbNoticeAction("See Pro", onClick = {}),
             secondaryAction = PbNoticeAction("Not now", onClick = {}),
+        )
+        PbNoticeCard(
+            "Ananya isn’t on Paybak yet. You can still split with her.",
+            PbIcon.Mail,
+            title = "Invite Ananya to Paybak",
+            primaryAction = PbNoticeAction("Send invite", onClick = {}, icon = PbIcon.Share),
         )
     }
 }

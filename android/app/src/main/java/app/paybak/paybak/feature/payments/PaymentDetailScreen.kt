@@ -118,15 +118,21 @@ fun PaymentDetailScreen(route: Route.Payment) {
             title = detail.statusTitle,
             primaryAction =
                 if (receiving) {
-                    PbNoticeAction("Confirm") {
-                        ledger.confirmPayment(payment.id)
-                        haptics.perform(HapticKind.Success)
-                        navigator.toast("Payment confirmed")
-                    }
+                    PbNoticeAction(
+                        "Confirm",
+                        onClick = {
+                            ledger.confirmPayment(payment.id)
+                            haptics.perform(HapticKind.Success)
+                            navigator.toast("Payment confirmed")
+                        },
+                    )
                 } else null,
             secondaryAction =
                 if (receiving) {
-                    PbNoticeAction("Not received") { navigator.open(Route.NotReceived(payment.id)) }
+                    PbNoticeAction(
+                        "Not received",
+                        onClick = { navigator.open(Route.NotReceived(payment.id)) },
+                    )
                 } else null,
         )
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {

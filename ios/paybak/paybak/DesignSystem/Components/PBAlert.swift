@@ -92,7 +92,8 @@ extension View {
     }
 }
 
-/// Fades the scrim and pops the card in like a system alert (scale 1.1 → 1, 0.25 s).
+/// Fades the scrim and pops the card in like a system alert (scale 1.1 → 1, 0.25 s). The card is
+/// centred on the screen, not the safe area (Figma 102:1115 sits at y 356 of 874).
 private struct AlertPresenter<Alert: View>: View {
     @Binding var isPresented: Bool
     @ViewBuilder let alert: Alert
@@ -110,6 +111,8 @@ private struct AlertPresenter<Alert: View>: View {
                     .transition(.opacity.combined(with: .scale(scale: reduceMotion ? 1 : 1.1)))
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
         .animation(.easeOut(duration: 0.25), value: isPresented)
     }
 }

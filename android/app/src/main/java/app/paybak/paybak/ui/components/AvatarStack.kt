@@ -19,17 +19,25 @@ private val Step = 24.dp
  * white ring outside it. Later heads sit on top. Decorative for TalkBack.
  */
 @Composable
-fun PbAvatarStack(heads: List<PbPeepHead>, modifier: Modifier = Modifier) {
-    require(heads.size in 2..4) { "Avatar / Stack shows 2 to 4 heads" }
+@JvmName("PbAvatarStackOfHeads")
+fun PbAvatarStack(heads: List<PbPeepHead>, modifier: Modifier = Modifier) =
+    PbAvatarStack(heads.map(PbAvatarContent::Art), modifier)
+
+/**
+ * [PbAvatarStack] of any avatars: the user's photo or character, a guest's initials, a Peep head.
+ */
+@Composable
+fun PbAvatarStack(avatars: List<PbAvatarContent>, modifier: Modifier = Modifier) {
+    require(avatars.size in 2..4) { "Avatar / Stack shows 2 to 4 heads" }
     val diameter = PbAvatarSize.Sm.diameter
     Box(
         modifier
-            .size(width = diameter + Step * (heads.size - 1), height = diameter)
+            .size(width = diameter + Step * (avatars.size - 1), height = diameter)
             .clearAndSetSemantics {}
     ) {
-        heads.forEachIndexed { index, head ->
+        avatars.forEachIndexed { index, avatar ->
             PbAvatar(
-                content = PbAvatarContent.Art(head),
+                content = avatar,
                 size = PbAvatarSize.Sm,
                 modifier =
                     Modifier.offset(x = Step * index).drawBehind {

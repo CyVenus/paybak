@@ -118,11 +118,13 @@ class ShellTest {
 
     @Test
     fun proFeaturesGoThroughThePaywall() {
-        launchPaybak("profile").use {
-            compose.awaitScreen("profile")
-            tag("profile.export").performClick()
+        launchPaybak("privacyData").use {
+            compose.awaitScreen("privacyData")
+            tag("privacyData.export").performClick()
             compose.awaitScreen("paywall")
-            tag("paywall.trial").performClick()
+            tag("paywall.cta").performClick()
+            awaitTag("proWelcome.done")
+            tag("proWelcome.done").performClick()
             compose.awaitScreen("privacyExport")
             assertTrue(paybakApp.ledger.snapshot.value.isPro)
         }
