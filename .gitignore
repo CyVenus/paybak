@@ -1,0 +1,60 @@
+# Paybak monorepo: web/ (React + Vite), android/ (Kotlin + Compose), ios/ (SwiftUI)
+
+# --- OS & editors -------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+*.iml
+*.iws
+*.ipr
+.claude/settings.local.json
+
+# --- Secrets & machine-local config (never commit) ---------------------------
+.env
+.env.*
+!.env.example
+local.properties
+keystore.properties
+*.keystore
+*.jks
+*.p8
+*.p12
+*.pem
+*.mobileprovision
+
+# --- Web (web/) --------------------------------------------------------------
+node_modules/
+dist/
+.vite/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Android (android/) ------------------------------------------------------
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# --- iOS (ios/) --------------------------------------------------------------
+xcuserdata/
+*.xcuserstate
+DerivedData/
+.build/
+Pods/
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# --- Scratch files -----------------------------------------------------------
+clipboard_*.png

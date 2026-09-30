@@ -1,0 +1,255 @@
+/* ---------- loading intro ---------- */
+html.is-intro { overflow: hidden; }
+html.is-intro .rise,
+html.is-intro .nav { animation-play-state: paused; }
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--paper);
+  color: var(--ink);
+  will-change: transform;
+  transition: transform 600ms cubic-bezier(0.76, 0, 0.24, 1) 150ms;
+}
+.intro.is-leaving { transform: translateY(-100%); }
+.intro-stage { position: absolute; inset: 0; transition: opacity 250ms ease, transform 250ms ease; }
+.intro.is-leaving .intro-stage { opacity: 0; transform: scale(0.97); }
+
+.intro-skip {
+  position: absolute;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  opacity: 0;
+  animation: it-in 400ms ease 600ms forwards;
+}
+.intro-skip:hover { background: var(--ink); color: var(--paper); }
+
+/* tiles */
+.it, .it-seed, .it-receipt, .it-dust {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  will-change: transform, opacity;
+}
+.it {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 3px solid var(--ink);
+  border-radius: 11px;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.it--wide { width: 76px; margin-left: -38px; }
+.it--ghost { border-color: rgba(15, 15, 15, 0.16); color: rgba(15, 15, 15, 0.2); }
+.it svg, .it-seed svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.it--wide svg { width: 56px; }
+.it-fill {
+  position: absolute;
+  inset: -3px;
+  border-radius: 11px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+}
+.it--ring { animation: it-ring 3000ms linear both; }
+.it--outer { animation: it-outer 3000ms linear both; }
+
+@keyframes it-ring {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  13% { transform: translate(0, 0) scale(0.3); opacity: 0; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  30% { transform: translate(var(--x1), var(--y1)) scale(1); opacity: 1; }
+  42% { transform: translate(var(--x1), var(--y1)) scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  56% { transform: translate(var(--x2), var(--y2)) scale(1); opacity: 1; }
+  84% { transform: translate(var(--x2), var(--y2)) scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+  96%, 100% { transform: translate(0, 0) scale(0.25); opacity: 0; }
+}
+@keyframes it-outer {
+  0%, 44% { transform: translate(var(--x0), var(--y0)) scale(0); opacity: 0; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  58% { transform: translate(var(--x2), var(--y2)) scale(1); opacity: 1; }
+  81% { transform: translate(var(--x2), var(--y2)) scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+  94%, 100% { transform: translate(0, 0) scale(0.25); opacity: 0; }
+}
+@keyframes it-flash {
+  0% { opacity: 0; transform: scale(0.6); }
+  25% { opacity: 1; transform: scale(1); }
+  75% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1); }
+}
+@keyframes it-fill {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* seed: the first tile that pops in the middle */
+.it-seed {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 11px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  animation: it-seed 3000ms linear both;
+}
+@keyframes it-seed {
+  0%, 4% { transform: scale(0); opacity: 1; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  13% { transform: scale(1); opacity: 1; }
+  40% { transform: scale(1); opacity: 1; animation-timing-function: ease-in; }
+  47%, 100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* centre receipt the seed grows into */
+.it-receipt {
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  border: 3.5px solid var(--ink);
+  border-radius: 22px;
+  background: var(--paper);
+  animation: it-receipt 3000ms linear both;
+}
+.it-receipt svg { width: 100%; height: 100%; fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
+.it-receipt path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: it-draw 360ms ease forwards; }
+.it-receipt path:nth-child(1) { animation-delay: 1600ms; }
+.it-receipt path:nth-child(2) { animation-delay: 1700ms; }
+.it-receipt path:nth-child(3) { animation-delay: 1790ms; }
+.it-receipt path:nth-child(4) { animation-delay: 1880ms; }
+@keyframes it-receipt {
+  0%, 40% { transform: scale(0.4); opacity: 0; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  54% { transform: scale(1); opacity: 1; }
+  82% { transform: scale(1); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.4); }
+  95%, 100% { transform: scale(0.3); opacity: 0; }
+}
+@keyframes it-draw { to { stroke-dashoffset: 0; } }
+
+/* bracket lines that sketch around the cluster */
+.it-lines {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 400px;
+  height: 400px;
+  margin: -200px 0 0 -200px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  overflow: visible;
+  animation: it-lines-fade 3000ms linear both;
+}
+.it-lines path { stroke-dasharray: 360; stroke-dashoffset: 360; animation: it-lines 3000ms linear both; }
+@keyframes it-lines {
+  0%, 58% { stroke-dashoffset: 360; animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }
+  78%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes it-lines-fade {
+  0%, 82% { opacity: 1; }
+  91%, 100% { opacity: 0; }
+}
+
+/* dust specks in the opening burst */
+.it-dust {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  opacity: 0;
+  animation: it-dust 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.it-dust:nth-child(even) { background: var(--ink); }
+@keyframes it-dust {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  30% { opacity: 1; transform: translate(calc(var(--x) * 0.4), calc(var(--y) * 0.4)) scale(1); }
+  100% { transform: translate(var(--x), var(--y)) scale(0.6); opacity: 0; }
+}
+
+/* final lockup: wordmark + tagline */
+.intro-lockup {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.intro-word { display: grid; justify-items: center; gap: 20px; text-align: center; }
+.intro-name {
+  position: relative;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: clamp(64px, 14vw, 96px);
+  line-height: 0.9;
+  display: flex;
+}
+.intro-name span { display: inline-block; opacity: 0; animation: it-letter 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes it-letter {
+  from { opacity: 0; transform: translateY(18px) rotate(-8deg); }
+  to { opacity: 1; transform: none; }
+}
+
+/* the three flick marks off the "k", as in the app splash */
+.intro-sparks {
+  position: absolute;
+  top: -0.3em;
+  left: calc(100% - 0.02em);
+  width: 0.5em;
+  height: 0.56em;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 6.5;
+  stroke-linecap: round;
+}
+.intro-sparks path { stroke-dasharray: 40; stroke-dashoffset: 40; animation: it-draw 240ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+.intro-tag {
+  display: grid;
+  gap: 6px;
+  line-height: 1.35;
+}
+.intro-tag > span { opacity: 0; animation: it-in 520ms var(--ease) both; }
+.intro-tag-1 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+}
+.intro-tag-2 {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--grey);
+}
+@keyframes it-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 480px) {
+  .intro-stage { transform: scale(0.82); }
+  .intro.is-leaving .intro-stage { transform: scale(0.8); }
+  .intro-tag-1 { font-size: 0.95rem; }
+  .intro-tag-2 { font-size: 0.85rem; }
+}

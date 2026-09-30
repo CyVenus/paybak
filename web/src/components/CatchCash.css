@@ -1,0 +1,239 @@
+/* ---------- catch-the-cash scene ----------
+   Drawn on a fixed 400×520 stage and scaled to fit (--s is set from JS).
+   Every piece runs on the same 5000ms clock, so percentages line up:
+     2–70%   forearm slides straight up (it never tilts)
+     38–72%  wrist bends: palm goes from lying flat to upright
+     60–74%  bill drifts down into the palm
+     74–86%  fingers fold over it, thumb locks it in
+     84–96%  squeeze, sparks, caption                                   */
+
+.cc {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 400 / 520;
+  --s: 1;
+}
+.cc-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 400px;
+  height: 520px;
+  overflow: hidden;
+  transform: scale(var(--s));
+  transform-origin: 0 0;
+  transition: opacity 380ms ease;
+}
+.cc-stage.is-leaving { opacity: 0; }
+
+.cc-anim { animation-duration: 5000ms; animation-fill-mode: both; animation-timing-function: linear; }
+.cc--still .cc-anim { animation-delay: -4990ms !important; animation-play-state: paused !important; }
+
+/* shared ink */
+.cc-skin { fill: var(--paper); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.cc-stroke { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.cc-line { fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; opacity: 0.55; }
+.cc-nail { fill: var(--paper-2); stroke: var(--ink); stroke-width: 1.8; }
+
+/* rig: everything that squeezes together on the catch */
+.cc-rig {
+  position: absolute;
+  inset: 0;
+  transform-origin: 200px 300px;
+  animation-name: cc-pop;
+}
+@keyframes cc-pop {
+  0%, 84% { transform: none; animation-timing-function: cubic-bezier(0.3, 0, 0.4, 1); }
+  87% { transform: translateY(3px) scale(0.975); animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1); }
+  91% { transform: translateY(-5px) scale(1.015); animation-timing-function: ease-in-out; }
+  96%, 100% { transform: translateY(-2px); }
+}
+
+/* arm: straight up, slowly */
+.cc-arm {
+  position: absolute;
+  inset: 0;
+  animation-name: cc-rise;
+  will-change: transform;
+}
+@keyframes cc-rise {
+  0%, 2% { transform: translateY(300px); animation-timing-function: cubic-bezier(0.25, 0.1, 0.15, 1); }
+  70%, 100% { transform: translateY(0); }
+}
+.cc-forearm { position: absolute; left: 0; top: 0; width: 400px; height: 720px; overflow: visible; }
+
+/* hand: wrist at (200,330) on stage; bends back 72° → upright */
+.cc-hand {
+  position: absolute;
+  left: 120px;
+  top: 140px;
+  width: 160px;
+  height: 200px;
+  transform-origin: 80px 190px;
+  animation-name: cc-wrist;
+}
+.cc-hand svg { width: 100%; height: 100%; overflow: visible; display: block; }
+@keyframes cc-wrist {
+  0%, 38% { transform: perspective(600px) rotateX(68deg) rotateZ(-5deg); animation-timing-function: cubic-bezier(0.55, 0, 0.25, 1); }
+  65% { transform: perspective(600px) rotateX(-6deg) rotateZ(1deg); animation-timing-function: cubic-bezier(0.4, 0, 0.3, 1); }
+  72%, 100% { transform: perspective(600px) rotateX(0deg) rotateZ(0deg); }
+}
+}
+
+/* fingers: the straight one folds away at the knuckle as the curled one unrolls over the bill.
+   Pivots are explicit user-space points (set inline): fill-box origins drift in Chrome
+   while an ancestor carries a 3D transform. */
+.cc-fs, .cc-fc, .cc-thumb { transform-box: view-box; }
+.cc-fs { animation-name: cc-fs; }
+@keyframes cc-fs {
+  0%, 74% { transform: scaleY(1); animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5); }
+  76.5%, 100% { transform: scaleY(0); }
+}
+.cc-fc { animation-name: cc-fc; }
+@keyframes cc-fc {
+  0%, 76.5% { transform: scaleY(0); animation-timing-function: cubic-bezier(0.1, 0.5, 0.3, 1); }
+  79% { transform: scaleY(1.08); animation-timing-function: ease-in-out; }
+  80.5%, 100% { transform: scaleY(1); }
+}
+.cc-thumb { transform-origin: 0 0; animation-name: cc-thumb; }
+@keyframes cc-thumb {
+  0%, 77% { transform: rotate(34deg); animation-timing-function: cubic-bezier(0.55, 0, 0.3, 1); }
+  83.5% { transform: rotate(-70deg); animation-timing-function: ease-in-out; }
+  86%, 100% { transform: rotate(-63deg); }
+}
+
+/* bill: floats, flutters, then glides into the palm */
+.cc-bill {
+  position: absolute;
+  left: 125px;
+  top: 86px;
+  width: 150px;
+  height: 68px;
+  animation-name: cc-bill;
+  animation-timing-function: ease-in-out;
+  will-change: transform;
+}
+@keyframes cc-bill {
+  0% { transform: translate(0, 26px) rotate(-3deg) scale(0.6); opacity: 0; animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  9% { transform: translate(0, 0) rotate(-6deg) scale(1); opacity: 1; }
+  22% { transform: translate(-6px, -10px) rotate(3deg) scale(1); }
+  36% { transform: translate(5px, 4px) rotate(-5deg) scale(1); }
+  50% { transform: translate(-4px, -9px) rotate(4deg) scale(1); }
+  60% { transform: translate(0, -4px) rotate(0deg) scale(1); animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1); }
+  74% { transform: translate(4px, 104px) rotate(-76deg) scale(0.94); animation-timing-function: ease-out; }
+  77% { transform: translate(4px, 99px) rotate(-78deg) scale(0.94); animation-timing-function: ease-in-out; }
+  80%, 100% { transform: translate(4px, 102px) rotate(-77deg) scale(0.94); }
+}
+.cc-bill-flutter { width: 100%; height: 100%; animation-name: cc-flutter; animation-timing-function: ease-in-out; }
+.cc-bill-flutter svg { width: 100%; height: 100%; display: block; overflow: visible; }
+@keyframes cc-flutter {
+  0% { transform: perspective(420px) rotateY(0deg) rotateX(0deg); }
+  15% { transform: perspective(420px) rotateY(24deg) rotateX(-9deg); }
+  30% { transform: perspective(420px) rotateY(-18deg) rotateX(10deg); }
+  45% { transform: perspective(420px) rotateY(20deg) rotateX(-6deg); }
+  58% { transform: perspective(420px) rotateY(-10deg) rotateX(4deg); }
+  70%, 100% { transform: perspective(420px) rotateY(0deg) rotateX(0deg); }
+}
+.cc-bill-body { fill: var(--paper); stroke: var(--ink); stroke-width: 3; }
+.cc-bill-inner { fill: none; stroke: var(--ink); stroke-width: 1.6; opacity: 0.7; }
+.cc-bill-mark { fill: none; stroke: var(--ink); stroke-width: 2; }
+.cc-bill-seal { fill: var(--paper); stroke: var(--ink); stroke-width: 2.4; }
+.cc-bill-sign { font-family: var(--hand); font-weight: 700; font-size: 27px; text-anchor: middle; fill: var(--ink); }
+
+/* hover shadow under the floating bill */
+.cc-halo {
+  position: absolute;
+  left: 152px;
+  top: 170px;
+  width: 96px;
+  height: 16px;
+  border: 2px dashed rgba(15, 15, 15, 0.32);
+  border-radius: 50%;
+  animation-name: cc-halo;
+  animation-timing-function: ease-in-out;
+}
+@keyframes cc-halo {
+  0% { transform: scale(0.5); opacity: 0; }
+  9% { transform: scale(1); opacity: 0.9; }
+  22% { transform: scale(0.82); opacity: 0.5; }
+  36% { transform: scale(1.05); opacity: 0.9; }
+  50% { transform: scale(0.84); opacity: 0.55; }
+  60% { transform: scale(0.95); opacity: 0.6; }
+  66%, 100% { transform: scale(0.4); opacity: 0; }
+}
+
+/* specks drifting around the bill */
+.cc-dust {
+  position: absolute;
+  left: 197px;
+  top: 117px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  animation-name: cc-dust;
+  animation-timing-function: ease-in-out;
+}
+.cc-dust:nth-of-type(even) { background: var(--ink); }
+@keyframes cc-dust {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  14% { transform: translate(calc(var(--x) * 0.7), calc(var(--y) * 0.7)) scale(1); opacity: 0.8; }
+  56% { transform: translate(var(--x), calc(var(--y) - 22px)) scale(0.8); opacity: 0.6; }
+  64%, 100% { transform: translate(var(--x), calc(var(--y) - 30px)) scale(0.4); opacity: 0; }
+}
+
+/* flick marks (same as the wordmark's) */
+.cc-sparks {
+  position: absolute;
+  left: 238px;
+  top: 96px;
+  width: 46px;
+  height: 52px;
+  overflow: visible;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.cc-sparks--l { left: 116px; top: 110px; transform: scaleX(-1) rotate(8deg); }
+.cc-sparks path { stroke-dasharray: 40; animation-name: cc-draw; }
+@keyframes cc-draw {
+  0%, 88% { stroke-dashoffset: 40; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  92.5%, 100% { stroke-dashoffset: 0; }
+}
+
+.cc-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 26px;
+  text-align: center;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  animation-name: cc-caption;
+}
+@keyframes cc-caption {
+  0%, 88% { clip-path: inset(0 100% 0 0); transform: translateY(6px); opacity: 0; animation-timing-function: cubic-bezier(0.3, 0.6, 0.3, 1); }
+  89% { opacity: 1; }
+  97%, 100% { clip-path: inset(0 0 0 0); transform: none; opacity: 1; }
+}
+
+.cc-replay {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  z-index: 2;
+}
+.cc-replay:hover { background: var(--ink); color: var(--paper); }
+.cc-replay svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
