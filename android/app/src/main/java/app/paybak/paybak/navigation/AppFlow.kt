@@ -99,14 +99,23 @@ fun AppFlow(navigator: AppNavigator, profileStore: ProfileStore) {
 
             SignIn ->
                 SignInScreen(
-                    onCodeSent = { navigate { push(Verify(wrongCode = false)) } },
+                    initialContact = profile.contact,
+                    onSendCode = { contact ->
+                        navigate {
+                            profileStore.update {
+                                it.copy(signInMethod = contact.method, contact = contact.value)
+                            }
+                            push(Verify())
+                        }
+                    },
                     onBack = { navigate { back() } },
                 )
 
             is Verify ->
                 VerifyScreen(
-                    wrongCode = destination.wrongCode,
-                    onWrongCodeChange = { wrongCode -> navigate { replace(Verify(wrongCode)) } },
+                    contact = profile.contact,
+                    rejectedCode = destination.rejectedCode,
+                    onRejectedCodeChange = { code -> navigate { replace(Verify(code)) } },
                     onVerified = { navigate { push(Setup(1)) } },
                     onBack = { navigate { back() } },
                 )

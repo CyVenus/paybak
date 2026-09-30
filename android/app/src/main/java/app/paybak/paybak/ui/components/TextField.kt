@@ -19,11 +19,15 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.ui.icons.PbIcon
@@ -42,9 +46,12 @@ internal val FieldRingWidth = 1.5.dp
  * `Control / Input Field` (`PBTextField`): a 52 dp #F5F5F5 field with an optional label above and
  * helper below. States follow Figma: Default (placeholder), Focused (black ring), Filled, Error
  * (red ring and red helper) and Disabled. The ring is drawn inside the field as an overlay, so the
- * text stays 16 dp from the edge in every state (README rule 6).
+ * text stays 16 dp from the edge in every state (README rule 6). Text set from outside, such as a
+ * prefilled value, puts the cursor at its end.
  *
  * @param helper Helper text; in the error state it carries the error message.
+ * @param fieldModifier Applied to the editable field itself: its test tag, a focus requester or
+ *   autofill semantics.
  */
 @Composable
 fun PbTextField(
@@ -60,6 +67,7 @@ fun PbTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     interactionSource: MutableInteractionSource? = null,
+    fieldModifier: Modifier = Modifier,
 ) {
     val source = interactionSource ?: remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
@@ -75,6 +83,10 @@ fun PbTextField(
             animationSpec = tween(PbMotion.FADE_MILLIS),
             label = "PbTextField ring",
         )
+    // The String overload of BasicTextField would put the cursor of a prefilled value at its start.
+    var editing by remember { mutableStateOf(TextFieldValue(value, TextRange(value.length))) }
+    val shown =
+        if (editing.text == value) editing else TextFieldValue(value, TextRange(value.length))
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
         if (label != null) {
             Text(
@@ -84,9 +96,12 @@ fun PbTextField(
             )
         }
         BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
+            value = shown,
+            onValueChange = { edited ->
+                editing = edited
+                if (edited.text != value) onValueChange(edited.text)
+            },
+            modifier = fieldModifier.fillMaxWidth(),
             enabled = enabled,
             textStyle =
                 PbTextStyles.Body.copy(

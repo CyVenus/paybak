@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import app.paybak.paybak.data.UserProfile
 
 /**
  * Launches [MainActivity] like `adb shell am start` with the flow.md debug extras. Close the
@@ -30,3 +31,8 @@ fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 10_000) {
         onAllNodes(hasTestTag("screen.$id")).fetchSemanticsNodes().size == 1
     }
 }
+
+/** The profile as the app has saved it. */
+val savedProfile: UserProfile
+    get() =
+        ApplicationProvider.getApplicationContext<PaybakApplication>().profileStore.profile.value

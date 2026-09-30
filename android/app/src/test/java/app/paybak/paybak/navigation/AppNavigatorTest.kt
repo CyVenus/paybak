@@ -43,13 +43,20 @@ class AppNavigatorTest {
     }
 
     @Test
+    fun anyRejectedCodeSurvivesASavedStack() {
+        val wrong = Destination.Verify(rejectedCode = "123456")
+        assertEquals("verifyWrong", wrong.id)
+        assertEquals(wrong, AppNavigator(listOf(wrong)).savedAndRestored().current)
+    }
+
+    @Test
     fun aRestoredStackKeepsItsHistory() {
         val navigator = AppNavigator(canonicalBackStack(Destination.Setup(3))).savedAndRestored()
         navigator.back()
         assertEquals(Destination.Setup(2), navigator.current)
         navigator.back()
         navigator.back()
-        assertEquals(Destination.Verify(wrongCode = false), navigator.current)
+        assertEquals(Destination.Verify(), navigator.current)
     }
 
     @Test
@@ -86,7 +93,7 @@ class AppNavigatorTest {
         navigator.back()
         assertEquals(Destination.Setup(1), navigator.current)
         navigator.back()
-        assertEquals(Destination.Verify(wrongCode = false), navigator.current)
+        assertEquals(Destination.Verify(), navigator.current)
     }
 
     @Test

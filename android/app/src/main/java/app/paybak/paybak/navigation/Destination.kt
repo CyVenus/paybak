@@ -43,9 +43,23 @@ sealed interface Destination {
         override val id = "signIn"
     }
 
-    data class Verify(val wrongCode: Boolean) : Destination {
+    /** The code screen; in its error state it shows the [rejectedCode]. */
+    data class Verify(val rejectedCode: String? = null) : Destination {
         override val id
-            get() = if (wrongCode) "verifyWrong" else "verify"
+            get() = if (rejectedCode == null) "verify" else WRONG_ID
+
+        override val savedKey
+            get() = rejectedCode?.let { "$WRONG_ID:$it" } ?: id
+
+        companion object {
+            private const val WRONG_ID = "verifyWrong"
+
+            /** The wrong code in Figma's "Sign in — Wrong code" frame. */
+            const val FIGMA_WRONG_CODE = "482917"
+
+            fun fromSavedKey(key: String): Verify? =
+                key.removePrefix("$WRONG_ID:").takeIf { it != key }?.let(::Verify)
+        }
     }
 
     data class Setup(val step: Int) : Destination {
@@ -77,8 +91,8 @@ sealed interface Destination {
             (1..WELCOME_STEPS).forEach { add(Welcome(it)) }
             add(GetStarted)
             add(SignIn)
-            add(Verify(wrongCode = false))
-            add(Verify(wrongCode = true))
+            add(Verify())
+            add(Verify(rejectedCode = Verify.FIGMA_WRONG_CODE))
             (1..SETUP_STEPS).forEach { add(Setup(it)) }
             add(AllSet)
             add(Home(HomeState.FirstDay))
@@ -94,7 +108,8 @@ sealed interface Destination {
 
         fun fromId(id: String): Destination? = all.firstOrNull { it.id == id }
 
-        fun fromSavedKey(key: String): Destination? = saveable.firstOrNull { it.savedKey == key }
+        fun fromSavedKey(key: String): Destination? =
+            saveable.firstOrNull { it.savedKey == key } ?: Verify.fromSavedKey(key)
     }
 }
 
@@ -105,7 +120,7 @@ sealed interface Destination {
 fun canonicalBackStack(destination: Destination): List<Destination> {
     val toGetStarted =
         listOf(Destination.Welcome(Destination.WELCOME_STEPS), Destination.GetStarted)
-    val toVerify = toGetStarted + Destination.SignIn + Destination.Verify(wrongCode = false)
+    val toVerify = toGetStarted + Destination.SignIn + Destination.Verify()
     return when (destination) {
         Destination.Splash,
         is Destination.Welcome,

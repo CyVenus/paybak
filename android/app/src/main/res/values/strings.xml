@@ -30,4 +30,20 @@
     <string name="get_started_legal">By continuing, you agree to our %1$s and %2$s.</string>
     <string name="get_started_terms">Terms</string>
     <string name="get_started_privacy">Privacy Policy</string>
+
+    <!-- Sign in (screens-signin.md §1) -->
+    <string name="sign_in_headline">What’s your email or phone?</string>
+    <string name="sign_in_body">We’ll send a 6-digit code. No password needed.</string>
+    <string name="sign_in_label">Email or phone number</string>
+    <string name="sign_in_placeholder">you@example.com</string>
+    <string name="sign_in_helper">We’ll only use it to sign you in.</string>
+    <string name="sign_in_send_code">Send code</string>
+
+    <!-- Verify (screens-signin.md §2–3) -->
+    <string name="verify_headline">Enter the code</string>
+    <string name="verify_sent_to">Sent to %1$s ·\u0020</string>
+    <string name="verify_change">Change</string>
+    <string name="verify_wrong_code">That code didn’t match. Check it and try again.</string>
+    <string name="verify_resend_in">Resend code in %1$s</string>
+    <string name="verify_resend">Resend code</string>
 </resources>
