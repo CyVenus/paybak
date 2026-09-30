@@ -33,8 +33,11 @@ private val KnobWidth = 38.dp
 private val KnobHeight = 24.dp
 private val KnobInset = 2.dp
 
-/** The kit switch's off track (iOS `Fills - Primary` on white). */
-private val TrackOff = Color(0xFFE9E9EA)
+/**
+ * The kit switch's off track: "Labels/Tertiary" at 30 % as it renders on the #F5F5F5 setting cards
+ * every switch sits on (screens-settings §1.1).
+ */
+private val TrackOff = Color(0xFFBEBEC0)
 private val KnobShadow =
     Shadow(radius = 8.dp, color = Color.Black, offset = DpOffset(0.dp, 3.dp), alpha = 0.12f)
 
