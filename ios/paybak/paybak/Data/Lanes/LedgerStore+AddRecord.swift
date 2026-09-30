@@ -1,0 +1,47 @@
+import Foundation
+import os
+
+/// Add & Record's reads on the store (lane A, M3): today's exchange rates and the people and
+/// currencies the forms offer.
+extension LedgerStore {
+    /// The bundled "today's rate" from `code` to the default currency; nil for the default itself.
+    func todayRate(for code: String) -> Rate? {
+        RateTable.bundled.rate(from: code, to: books.defaultCurrency)
+    }
+
+    /// Friends in the order they were added, guests included (pickers list them like this).
+    var friends: [Person] { ledger.people }
+
+    /// Groups (not projects, not archived) you're in, for the expense Group picker.
+    var expenseGroups: [LedgerGroup] {
+        ledger.groups.filter { !$0.isProject && $0.memberIds.contains(Person.me) }
+    }
+
+    /// The expense currency sheet's Recent list: the default currency, then the ones used most
+    /// recently on expenses, payments and groups.
+    var recentCurrencyCodes: [String] {
+        let groupCodes = ledger.groups.sorted { $0.createdAt > $1.createdAt }.map(\.currency)
+        var codes = [books.defaultCurrency]
+        for code in snapshot.recentCurrencies + groupCodes where !codes.contains(code) {
+            codes.append(code)
+        }
+        return codes
+    }
+}
+
+extension RateTable {
+    private static let log = Logger(subsystem: "app.paybak.paybak", category: "Rates")
+
+    /// `Resources/Rates/rates.json`; an empty table (no conversions) if it can't be read.
+    static let bundled: RateTable = {
+        do {
+            guard let url = Bundle.main.url(forResource: "rates", withExtension: "json") else {
+                throw CocoaError(.fileNoSuchFile)
+            }
+            return try JSONDecoder().decode(RateTable.self, from: Data(contentsOf: url))
+        } catch {
+            log.error("Could not read rates.json: \(String(describing: error), privacy: .public)")
+            return RateTable(inrPerUnit: [:])
+        }
+    }()
+}

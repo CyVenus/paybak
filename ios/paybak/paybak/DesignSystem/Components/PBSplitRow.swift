@@ -7,7 +7,7 @@ import SwiftUI
 /// - Percent: the field shows the percentage; the amount is the Footnote under the name.
 /// - Shares: a 48 pt field with the share count plus the system stepper; amount under the name.
 /// Excluded people show ₹0 / 0% / 0 in gray and can't be edited. The divider starts at the name.
-/// Pass `focus` to focus the value field from code (the editor's Next button, a start state).
+/// Pass `focus` to focus the value field from code (a start state, dismissing on a tap outside).
 struct PBSplitRow: View {
     enum Mode {
         case equally
