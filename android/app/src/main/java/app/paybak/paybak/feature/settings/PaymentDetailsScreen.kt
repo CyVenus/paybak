@@ -50,6 +50,8 @@ fun PaymentDetailsScreen(route: Route.PaymentDetails) {
     val profile by profileStore.profile.collectAsState()
     val designed = rememberDebugStartScreen(*AddSheetStates.keys.toTypedArray())
     var adding by rememberSaveable { mutableStateOf(designed != null) }
+    // A debug start state prefills the sheet the first time only.
+    var designedSheet by rememberSaveable { mutableStateOf(designed) }
     var actionsFor by rememberSaveable { mutableStateOf<String?>(null) }
     var removing by rememberSaveable { mutableStateOf<String?>(null) }
     val copy = rememberCopier()
@@ -107,12 +109,15 @@ fun PaymentDetailsScreen(route: Route.PaymentDetails) {
     if (adding) {
         AddPaymentMethodSheet(
             profile,
-            start = AddSheetStates[designed] ?: AddMethodStart(profile.suggestedUpi()),
+            start = AddSheetStates[designedSheet] ?: AddMethodStart(profile.suggestedUpi()),
             onAdded = { updated, toast ->
                 profileStore.update { updated }
                 navigator.toast(toast)
             },
-            onDismiss = { adding = false },
+            onDismiss = {
+                adding = false
+                designedSheet = null
+            },
         )
     }
     profile.paymentMethods.firstOrNull { it.id == actionsFor }?.let { method ->
