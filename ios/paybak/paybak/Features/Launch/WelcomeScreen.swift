@@ -2,8 +2,9 @@ import SwiftUI
 
 /// Welcome 1–3 (screens-launch.md §2): one screen whose step drives the onboarding Rive, the copy,
 /// the page dots and the CTA. Continue or a left swipe goes to the next step, a right swipe back to
-/// the previous one; "Get started" (step 3) and Skip (steps 1–2) go to Get Started. The step lives
-/// in the router, so Back from Get Started returns to the step the user left from.
+/// the previous one (VoiceOver adjusts the page dots instead); "Get started" (step 3) and Skip
+/// (steps 1–2) go to Get Started. The step lives in the router, so Back from Get Started returns to
+/// the step the user left from.
 struct WelcomeScreen: View {
     @Environment(AppRouter.self) private var router
 
@@ -41,6 +42,16 @@ struct WelcomeScreen: View {
     private var footer: some View {
         VStack(alignment: .leading, spacing: PBSpace.s24) {
             PBPageDots(count: WelcomeCopy.all.count, active: step)
+                // VoiceOver can't make the swipes, and Welcome is the stack's root with no back, so
+                // the dots are adjustable like UIPageControl: swipe up or down to change the step.
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: showNextStep()
+                    case .decrement: showPreviousStep()
+                    @unknown default: break
+                    }
+                }
+                .accessibilityIdentifier("welcome.dots")
             PBButton(isLastStep ? "Get started" : "Continue", fillsWidth: true, action: next)
                 .contentTransition(.opacity)
                 .animation(.easeInOut(duration: 0.2), value: isLastStep)
@@ -54,9 +65,8 @@ struct WelcomeScreen: View {
 
     private var isLastStep: Bool { step == WelcomeCopy.all.count }
 
-    /// Horizontal swipes change the step, like the CTA: left = next, right = previous. Step 3 ignores
-    /// the forward swipe, so only "Get started" leaves the pager. The art can't be scrubbed, so the
-    /// content doesn't follow the finger; the step changes when the swipe ends.
+    /// Horizontal swipes change the step, like the CTA: left = next, right = previous. The art can't
+    /// be scrubbed, so the content doesn't follow the finger; the step changes when the swipe ends.
     private var swipe: some Gesture {
         DragGesture(minimumDistance: 20)
             .onEnded { value in
@@ -64,12 +74,25 @@ struct WelcomeScreen: View {
                 guard abs(dx) > abs(value.translation.height),
                       abs(dx) > 50 || abs(value.velocity.width) > 300
                 else { return }
-                if dx < 0, !isLastStep {
-                    changeStep(to: step + 1)
-                } else if dx > 0, step > 1 {
-                    changeStep(to: step - 1)
+                if dx < 0 {
+                    showNextStep()
+                } else {
+                    showPreviousStep()
                 }
             }
+    }
+
+    /// A left swipe or a VoiceOver increment. The last step ignores it: only "Get started" leaves
+    /// the pager.
+    private func showNextStep() {
+        guard !isLastStep else { return }
+        changeStep(to: step + 1)
+    }
+
+    /// A right swipe or a VoiceOver decrement.
+    private func showPreviousStep() {
+        guard step > 1 else { return }
+        changeStep(to: step - 1)
     }
 
     private func next() {

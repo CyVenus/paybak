@@ -51,7 +51,10 @@ final class AppRouter {
         }
     }
 
+    /// Pushes `route` unless it's already on top: a quick double tap lands both taps before the push
+    /// covers the button, and would otherwise open the same screen twice.
     func push(_ route: OnboardingRoute) {
+        guard path.last != route else { return }
         path.append(route)
     }
 

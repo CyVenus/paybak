@@ -40,4 +40,20 @@ final class GetStartedUITests: XCTestCase {
 
         XCTAssertTrue(app.screen(.signIn).waitForExistence(timeout: 3))
     }
+
+    /// A quick double tap opens the next screen once, so one back returns to Get Started.
+    @MainActor
+    func testDoubleTapOpensTheNextScreenOnce() {
+        let app = XCUIApplication.launchPaybak(startScreen: .getStarted)
+
+        app.element("getStarted.apple").doubleTap()
+        XCTAssertTrue(app.screen(.setup1).waitForExistence(timeout: 3))
+        app.swipeBackFromLeftEdge()
+        XCTAssertTrue(app.screen(.getStarted).waitForExistence(timeout: 3))
+
+        app.element("getStarted.email").doubleTap()
+        XCTAssertTrue(app.screen(.signIn).waitForExistence(timeout: 3))
+        app.swipeBackFromLeftEdge()
+        XCTAssertTrue(app.screen(.getStarted).waitForExistence(timeout: 3))
+    }
 }

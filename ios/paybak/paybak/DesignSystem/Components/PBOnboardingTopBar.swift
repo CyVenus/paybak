@@ -9,8 +9,6 @@ struct PBOnboardingTopBar: View {
     /// The screen part of the buttons' test ids (flow.md): `<prefix>.back` and `<prefix>.skip`.
     var testIDPrefix: String?
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     var body: some View {
         HStack(spacing: 0) {
             if let onBack {
@@ -25,7 +23,8 @@ struct PBOnboardingTopBar: View {
             }
         }
         .frame(height: PBSize.tap)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: onSkip == nil)
+        // Skip fades in and out (200 ms), with Reduce Motion too: a fade isn't motion.
+        .animation(.easeInOut(duration: 0.2), value: onSkip == nil)
     }
 
     private func testID(_ element: String) -> String {

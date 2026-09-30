@@ -2,6 +2,8 @@ import XCTest
 
 /// Welcome 1–3 (screens-launch.md §2): one screen whose step changes with Continue and horizontal
 /// swipes; "Get started" and Skip lead to Get Started, and Back from there returns to the same step.
+/// The page dots read "Page N of 3" (VoiceOver adjusts them to change the step; XCUITest on iOS can't
+/// send that action, so the tests check the value it reads).
 final class WelcomeUITests: XCTestCase {
     /// The headlines as displayed, with the line break where Figma wraps them.
     private let headlines = [
@@ -18,16 +20,20 @@ final class WelcomeUITests: XCTestCase {
     func testContinueWalksThroughTheStepsToGetStarted() {
         let app = XCUIApplication.launchPaybak(startScreen: .welcome1)
         let headline = app.element("welcome.headline")
+        let dots = app.element("welcome.dots")
         let cta = app.element("welcome.continue")
 
         XCTAssertTrue(headline.waitForLabel(headlines[0]))
+        XCTAssertEqual(dots.value as? String, "Page 1 of 3")
         XCTAssertEqual(cta.label, "Continue")
         cta.tap()
         XCTAssertTrue(app.screen(.welcome2).waitForExistence(timeout: 2))
         XCTAssertTrue(headline.waitForLabel(headlines[1]))
+        XCTAssertEqual(dots.value as? String, "Page 2 of 3")
         cta.tap()
         XCTAssertTrue(app.screen(.welcome3).waitForExistence(timeout: 2))
         XCTAssertTrue(headline.waitForLabel(headlines[2]))
+        XCTAssertEqual(dots.value as? String, "Page 3 of 3")
         XCTAssertTrue(cta.waitForLabel("Get started"))
         XCTAssertFalse(app.element("welcome.skip").exists)
 
@@ -79,5 +85,6 @@ final class WelcomeUITests: XCTestCase {
         app.screen(.welcome3).swipeRight()
         XCTAssertTrue(app.screen(.welcome2).waitForExistence(timeout: 2))
         XCTAssertTrue(app.element("welcome.headline").waitForLabel(headlines[1]))
+        XCTAssertEqual(app.element("welcome.dots").value as? String, "Page 2 of 3")
     }
 }
