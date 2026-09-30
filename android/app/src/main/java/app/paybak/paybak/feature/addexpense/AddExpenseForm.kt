@@ -21,10 +21,12 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.domain.addrecord.AmountEntry
 import app.paybak.paybak.domain.addrecord.DateCopy
 import app.paybak.paybak.domain.addrecord.DueChip
@@ -127,7 +129,7 @@ fun AddExpenseFields(
     PbTextField(
         value = form.title,
         onValueChange = { actions.title(it.take(MAX_TITLE)) },
-        placeholder = "What was it for?",
+        placeholder = stringResource(R.string.add_expense_title_placeholder),
         keyboardOptions =
             KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
@@ -139,21 +141,21 @@ fun AddExpenseFields(
     val category = form.category?.let(Category::of)
     PbCard {
         PbSettingRow(
-            "Category",
+            stringResource(R.string.add_category),
             Modifier.testTag("addExpense.row.category"),
             icon = category?.pbIcon ?: PbIcon.Tag,
-            value = category?.label ?: "Choose",
+            value = category?.label ?: stringResource(R.string.add_choose),
             onClick = tap(actions::category),
         )
         PbSettingRow(
-            "Paid by",
+            stringResource(R.string.add_paid_by),
             Modifier.testTag("addExpense.row.paidBy"),
             icon = PbIcon.Wallet,
             value = paidByValue(form, people),
             onClick = tap(actions::paidBy),
         )
         PbSettingRow(
-            "Split",
+            stringResource(R.string.add_split),
             Modifier.testTag("addExpense.row.split"),
             icon = PbIcon.Split,
             value = splitSummary.text,
@@ -162,35 +164,36 @@ fun AddExpenseFields(
             onClick = tap(actions::split),
         )
         PbSettingRow(
-            "Group",
+            stringResource(R.string.add_group),
             Modifier.testTag("addExpense.row.group"),
             icon = PbIcon.Groups,
-            value = groupName ?: "No group",
+            value = groupName ?: stringResource(R.string.add_no_group),
             onClick = tap(actions::group),
         )
         PbSettingRow(
-            "Due",
+            stringResource(R.string.add_due),
             Modifier.testTag("addExpense.row.due"),
             icon = PbIcon.Calendar,
-            value = form.dueDate?.let(Dates::day) ?: "None",
+            value = form.dueDate?.let(Dates::day) ?: stringResource(R.string.add_none),
             onClick = tap(actions::due),
             showDivider = false,
         )
         DueChips(form.dueDate, today, onChip = actions::dueChip, onPick = tap(actions::due))
         PbDivider(inset = PbDividerInset.Leading, modifier = Modifier.padding(start = 36.dp))
         PbSettingRow(
-            "Repeat",
+            stringResource(R.string.add_repeat),
             Modifier.testTag("addExpense.row.repeat"),
             icon = PbIcon.Repeat,
-            badge = if (isPro) null else "Pro",
-            value = form.repeat?.frequency?.label ?: "Never",
+            badge = if (isPro) null else stringResource(R.string.add_pro),
+            value = form.repeat?.frequency?.label ?: stringResource(R.string.add_never),
             onClick = tap(actions::repeat),
         )
         PbSettingRow(
-            if (form.receipt != null) "Receipt" else "Add receipt",
+            if (form.receipt != null) stringResource(R.string.add_receipt)
+            else stringResource(R.string.add_add_receipt),
             Modifier.testTag("addExpense.row.receipt"),
             icon = PbIcon.Camera,
-            value = if (form.receipt != null) "Attached" else null,
+            value = if (form.receipt != null) stringResource(R.string.add_attached) else null,
             valueLeading =
                 form.receipt?.let {
                     { PbReceiptThumbnail(Modifier.size(25.dp, 32.dp), photo = receiptPhoto) }
@@ -198,11 +201,12 @@ fun AddExpenseFields(
             onClick = tap(actions::receipt),
         )
         PbSettingRow(
-            "Notes",
+            stringResource(R.string.add_notes),
             Modifier.testTag("addExpense.row.notes"),
             icon = PbIcon.Note,
             value =
-                form.notes.lineSequence().firstOrNull()?.takeIf { it.isNotBlank() } ?: "Optional",
+                form.notes.lineSequence().firstOrNull()?.takeIf { it.isNotBlank() }
+                    ?: stringResource(R.string.add_optional),
             onClick = tap(actions::notes),
             showDivider = false,
         )
@@ -218,7 +222,8 @@ private fun PeopleStrip(form: ExpenseForm, people: PeopleDirectory, onClick: () 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            if (ME in form.people) "With you and" else "With",
+            if (ME in form.people) stringResource(R.string.add_with_you_and)
+            else stringResource(R.string.add_with),
             style = PbTextStyles.Subheadline,
             color = PbColors.Text.Secondary,
         )
@@ -231,7 +236,8 @@ private fun PeopleStrip(form: ExpenseForm, people: PeopleDirectory, onClick: () 
             )
         }
         PbCategoryChip(
-            if (form.others.isEmpty()) "Add people" else "Add",
+            if (form.others.isEmpty()) stringResource(R.string.add_add_people)
+            else stringResource(R.string.add_add),
             Modifier.testTag("addExpense.addPeople").padding(end = PbLayout.ScreenMargin),
             onClick = onClick,
             leading = PbChipLeading.Icon(PbIcon.Plus),
@@ -271,7 +277,7 @@ private fun DueChips(
             )
         }
         PbCategoryChip(
-            "Pick date",
+            stringResource(R.string.add_pick_date),
             Modifier.testTag("addExpense.due.pick"),
             onClick = onPick,
             onCard = true,

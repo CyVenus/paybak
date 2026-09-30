@@ -1,4 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the add module (app-architecture §7.1): names start with "add_". Only its lane edits this file. -->
 <resources>
+    <!-- Shared by the Add & Record forms -->
+    <string name="add_save">Save</string>
+    <string name="add_done">Done</string>
+    <string name="add_edit">Edit</string>
+    <string name="add_none">None</string>
+    <string name="add_choose">Choose</string>
+    <string name="add_optional">Optional</string>
+    <string name="add_date">Date</string>
+    <string name="add_due">Due</string>
+    <string name="add_pick_date">Pick date</string>
+    <string name="add_discard">Discard</string>
+    <string name="add_keep_editing">Keep editing</string>
+    <string name="add_discard_message">Your changes won’t be saved.</string>
+    <string name="add_discard_changes">Discard changes?</string>
+    <string name="add_whats_it_for">What’s it for?</string>
+    <string name="add_add_people">Add people</string>
+    <string name="add_you">You</string>
+    <string name="add_guest">Guest</string>
+
+    <!-- Add expense (screens-add-expense §4–§8) -->
+    <string name="add_expense_title">Add expense</string>
+    <string name="add_expense_edit_title">Edit expense</string>
+    <string name="add_expense_discard_title">Discard this expense?</string>
+    <string name="add_expense_title_placeholder">What was it for?</string>
+    <string name="add_with_you_and">With you and</string>
+    <string name="add_with">With</string>
+    <string name="add_add">Add</string>
+    <string name="add_category">Category</string>
+    <string name="add_paid_by">Paid by</string>
+    <string name="add_split">Split</string>
+    <string name="add_group">Group</string>
+    <string name="add_no_group">No group</string>
+    <string name="add_repeat">Repeat</string>
+    <string name="add_pro">Pro</string>
+    <string name="add_never">Never</string>
+    <string name="add_receipt">Receipt</string>
+    <string name="add_add_receipt">Add receipt</string>
+    <string name="add_attached">Attached</string>
+    <string name="add_notes">Notes</string>
+    <string name="add_notes_placeholder">Anything to remember about it</string>
+    <string name="add_multiple_people">Multiple people</string>
+    <string name="add_multiple_people_subtitle">Enter how much each person paid</string>
+    <string name="add_payers_hint">Enter how much each person paid.</string>
+    <string name="add_search_categories">Search categories</string>
+    <string name="add_no_categories">No categories match “%1$s”</string>
+    <string name="add_split_equally">Equally</string>
+    <string name="add_split_exact">Exact</string>
+    <string name="add_split_percent">%</string>
+    <string name="add_split_shares">Shares</string>
+    <string name="add_split_hint">Uncheck someone to leave them out.</string>
+    <string name="add_toast_expense_added">Expense added</string>
+
+    <!-- Pickers -->
+    <string name="add_split_with">Split with</string>
+    <string name="add_choose_someone">Choose someone</string>
+    <string name="add_people_search">Name, phone, email or @username</string>
+    <string name="add_new_friend">Add a new friend</string>
+    <string name="add_invite">Invite %1$s</string>
+    <string name="add_as_guest">Add “%1$s” as a guest</string>
+    <string name="add_friends">Friends</string>
+    <string name="add_currency">Currency</string>
+    <string name="add_search_currencies">Search currencies</string>
+    <string name="add_no_currencies">No currencies match “%1$s”</string>
+    <string name="add_recent">Recent</string>
+    <string name="add_all_currencies">All currencies</string>
+    <string name="add_due_date">Due date</string>
+    <string name="add_set_due_date">Set due date</string>
+    <string name="add_set_date">Set date</string>
+    <string name="add_no_due_date">No due date</string>
+    <string name="add_for">For</string>
+
+    <!-- Expense detail (screens-activity §4) -->
+    <string name="add_expense">Expense</string>
+    <string name="add_expense_gone">This expense isn’t available any more.</string>
+    <string name="add_edit_expense">Edit expense</string>
+    <string name="add_resolve">Resolve</string>
+    <string name="add_comments">Comments</string>
+    <string name="add_comment_placeholder">Add a comment</string>
+    <string name="add_history">History</string>
+    <string name="add_flag_issue">Flag an issue</string>
+    <string name="add_flag_placeholder">What looks wrong?</string>
+    <string name="add_flag_expense">Flag expense</string>
+    <string name="add_delete_expense">Delete expense</string>
+    <string name="add_delete_title">Delete this expense?</string>
+    <string name="add_delete_message_group">%1$s moves to Recently deleted for 30 days. %2$s balances update for everyone.</string>
+    <string name="add_delete_message">%1$s moves to Recently deleted for 30 days. Balances update for everyone on it.</string>
+    <string name="add_cancel">Cancel</string>
+    <string name="add_delete">Delete</string>
+    <string name="add_toast_expense_deleted">Expense deleted</string>
+    <string name="add_your_share">Your share</string>
+    <string name="add_receipt_photo">Receipt photo</string>
+
+    <!-- Record payment and the payment detail (record-lend-group §2–3) -->
+    <string name="add_record_payment">Record payment</string>
+    <string name="add_edit_payment">Edit payment</string>
+    <string name="add_payment_discard_title">Discard this payment?</string>
+    <string name="add_method">Method</string>
+    <string name="add_copy">Copy</string>
+    <string name="add_upi_id">UPI ID</string>
+    <string name="add_toast_upi_copied">UPI ID copied</string>
+    <string name="add_proof">Proof</string>
+    <string name="add_one_photo">1 photo</string>
+    <string name="add_add_photo">Add photo (optional)</string>
+    <string name="add_toast_payment_recorded">Payment recorded</string>
+    <string name="add_payment">Payment</string>
+    <string name="add_payment_gone">This payment isn’t available any more.</string>
+    <string name="add_confirm">Confirm</string>
+    <string name="add_not_received">Not received</string>
+    <string name="add_toast_payment_confirmed">Payment confirmed</string>
+    <string name="add_from">From</string>
+    <string name="add_to">To</string>
+    <string name="add_paid_to">Paid to</string>
+    <string name="add_cancel_payment">Cancel payment</string>
+    <string name="add_cancel_payment_title">Cancel this payment?</string>
+    <string name="add_keep">Keep</string>
+
+    <!-- Lend money and the loan detail (record-lend-group §4–5) -->
+    <string name="add_lend_money">Lend money</string>
+    <string name="add_edit_loan">Edit loan</string>
+    <string name="add_loan_discard_title">Discard this loan?</string>
+    <string name="add_i_lent">I lent</string>
+    <string name="add_i_borrowed">I borrowed</string>
+    <string name="add_lent_to">Lent to</string>
+    <string name="add_borrowed_from">Borrowed from</string>
+    <string name="add_reason">Reason</string>
+    <string name="add_installments">Installments</string>
+    <string name="add_installments_subtitle">Paid back in parts</string>
+    <string name="add_installment_count">Number of installments</string>
+    <string name="add_repeats">Repeats</string>
+    <string name="add_first_due">First due</string>
+    <string name="add_toast_loan_added">Loan added</string>
+    <string name="add_loan">Loan</string>
+    <string name="add_loan_gone">This loan isn’t available any more.</string>
+    <string name="add_remind">Remind %1$s</string>
+    <string name="add_record_repayment">Record repayment</string>
+    <string name="add_you_lent">You lent %1$s</string>
+    <string name="add_you_borrowed">You borrowed from %1$s</string>
+    <string name="add_paid_back">Paid back</string>
+    <string name="add_installment">Installment %1$d</string>
+
+    <!-- New group (record-lend-group §6) -->
+    <string name="add_new_group">New group</string>
+    <string name="add_create">Create</string>
+    <string name="add_group_discard_title">Discard this group?</string>
+    <string name="add_project_discard_title">Discard this project?</string>
+    <string name="add_mode_group">Group</string>
+    <string name="add_mode_project">Project</string>
+    <string name="add_name">Name</string>
+    <string name="add_group_name_placeholder">e.g. Weekend Trek</string>
+    <string name="add_project_name_placeholder">e.g. Build a Drone</string>
+    <string name="add_description">Description</string>
+    <string name="add_cover_photo">Cover photo</string>
+    <string name="add_add_cover_photo">Add cover photo</string>
+    <string name="add_added">Added</string>
+    <string name="add_budget">Budget</string>
+    <string name="add_budget_helper">Optional. Spending is tracked against it.</string>
+    <string name="add_type">Type</string>
+    <string name="add_type_trip">Trip</string>
+    <string name="add_type_home">Home</string>
+    <string name="add_type_friends">Friends</string>
+    <string name="add_type_other">Other</string>
+    <string name="add_contribution">Contribution</string>
+    <string name="add_contribution_equal">Equal</string>
+    <string name="add_contribution_percent">Percent</string>
+    <string name="add_contribution_fixed">Fixed</string>
+    <string name="add_members">Members</string>
+    <string name="add_remove">Remove %1$s</string>
+    <string name="add_simplify_debts">Simplify debts</string>
+    <string name="add_simplify_debts_subtitle">Fewer payments when settling up</string>
 </resources>

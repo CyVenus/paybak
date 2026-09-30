@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import app.paybak.paybak.R
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.feature.pickers.PeopleDirectory
@@ -62,17 +64,17 @@ fun PaidBySheet(
             picked()
             onDismiss()
         },
-        title = "Paid by",
+        title = stringResource(R.string.add_paid_by),
         testTag = "paidBy.sheet",
     ) { dismiss ->
         Column(Modifier.fillMaxWidth()) {
             choices.forEachIndexed { index, id ->
                 PbPersonRow(
-                    if (id == ME) "You" else people.full(id),
+                    if (id == ME) stringResource(R.string.add_you) else people.full(id),
                     people.avatar(id),
                     Modifier.testTag("paidBy.row.$id"),
                     subtitle = people.full(id).takeIf { id == ME },
-                    tag = "Guest".takeIf { people.isGuest(id) },
+                    tag = stringResource(R.string.add_guest).takeIf { people.isGuest(id) },
                     trailing = if (id == payerId) PbPersonTrailing.Check else null,
                     onClick = {
                         picked = { onPick(id) }
@@ -83,8 +85,8 @@ fun PaidBySheet(
             }
             PbDivider()
             PbSheetRow(
-                "Multiple people",
-                "Enter how much each person paid",
+                stringResource(R.string.add_multiple_people),
+                stringResource(R.string.add_multiple_people_subtitle),
                 PbIcon.People,
                 onClick = {
                     picked = onMultiple
@@ -106,16 +108,17 @@ fun CategorySheet(selected: String?, onPick: (Category) -> Unit, onDismiss: () -
             picked?.let(onPick)
             onDismiss()
         },
-        title = "Category",
+        title = stringResource(R.string.add_category),
         detent = PbSheetDetent.Large,
-        search = PbSheetSearch(query, { query = it }, "Search categories"),
+        search =
+            PbSheetSearch(query, { query = it }, stringResource(R.string.add_search_categories)),
         testTag = "category.sheet",
     ) { dismiss ->
         val shown = Category.entries.filter { matchesSearch(it.label, query = query) }
         Column(Modifier.verticalScroll(rememberScrollState())) {
             if (shown.isEmpty()) {
                 Text(
-                    "No categories match “$query”",
+                    stringResource(R.string.add_no_categories, query),
                     Modifier.fillMaxWidth().padding(top = PbSpace.S16),
                     style = PbTextStyles.Footnote,
                     color = PbColors.Text.Secondary,
@@ -154,18 +157,18 @@ fun NotesSheet(notes: String, onDone: (String) -> Unit, onDismiss: () -> Unit) {
             if (save) onDone(text)
             onDismiss()
         },
-        title = "Notes",
+        title = stringResource(R.string.add_notes),
         testTag = "notes.sheet",
     ) { dismiss ->
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S16)) {
             PbTextArea(
                 text,
                 { text = it.take(MAX_NOTES) },
-                placeholder = "Anything to remember about it",
+                placeholder = stringResource(R.string.add_notes_placeholder),
                 fieldModifier = Modifier.focusRequester(focus).testTag("notes.field"),
             )
             PbButton(
-                "Done",
+                stringResource(R.string.add_done),
                 onClick = {
                     save = true
                     dismiss()

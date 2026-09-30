@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import app.paybak.paybak.R
 import app.paybak.paybak.feature.pickers.rememberLedgerPhoto
 import app.paybak.paybak.navigation.LocalMainNavigator
@@ -53,21 +54,24 @@ fun PhotoViewerScreen(route: Route.PhotoViewer) {
         contentAlignment = Alignment.Center,
     ) {
         val imageModifier =
-            Modifier.fillMaxSize()
-                .transformable(zoom)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offset.x
-                    translationY = offset.y
-                }
+            Modifier.fillMaxSize().transformable(zoom).graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationX = offset.x
+                translationY = offset.y
+            }
         when {
             photo != null ->
-                Image(photo, "Receipt photo", imageModifier, contentScale = ContentScale.Fit)
+                Image(
+                    photo,
+                    stringResource(R.string.add_receipt_photo),
+                    imageModifier,
+                    contentScale = ContentScale.Fit,
+                )
             route.photo.file == null ->
                 Image(
                     painterResource(R.drawable.art_receipt_full),
-                    "Receipt",
+                    stringResource(R.string.add_receipt),
                     imageModifier.padding(PbLayout.ScreenMargin),
                     contentScale = ContentScale.Fit,
                 )

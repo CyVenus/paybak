@@ -15,8 +15,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.addGuest
 import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.domain.model.Person
@@ -61,7 +63,9 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
     val friends =
         people.friends
             .filter { route.allowsGuests || !it.isGuest }
-            .sortedBy { friend -> route.selected.indexOf(friend.id).let { if (it < 0) Int.MAX_VALUE else it } }
+            .sortedBy { friend ->
+                route.selected.indexOf(friend.id).let { if (it < 0) Int.MAX_VALUE else it }
+            }
     // Coming back from Add friend, tick whoever was just added.
     LaunchedEffect(friends.map { it.id }) {
         val before = known ?: return@LaunchedEffect
@@ -87,9 +91,13 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
         testTag = "screen.pickPeople",
         header = {
             PbPushHeader(
-                route.title ?: if (multi) "Split with" else "Choose someone",
+                route.title
+                    ?: if (multi) stringResource(R.string.add_split_with)
+                    else stringResource(R.string.add_choose_someone),
                 onBack = { if (multi) finish() else navigator.back() },
-                action = if (multi) PbHeaderAction.Text("Done", ::finish) else null,
+                action =
+                    if (multi) PbHeaderAction.Text(stringResource(R.string.add_done), ::finish)
+                    else null,
                 testTag = tag,
                 actionTag = "done",
             )
@@ -98,7 +106,7 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
         PbTextField(
             value = query,
             onValueChange = { query = it },
-            placeholder = "Name, phone, email or @username",
+            placeholder = stringResource(R.string.add_people_search),
             leadingIcon = PbIcon.Search,
             onClear = { query = "" },
             keyboardOptions =
@@ -132,7 +140,7 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
             if (route.includesYou) {
                 PbCard {
                     PbPersonRow(
-                        "You",
+                        stringResource(R.string.add_you),
                         people.avatar(ME),
                         Modifier.testTag("$tag.you"),
                         subtitle = people.full(ME),
@@ -144,7 +152,7 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
                 }
             }
             PbSheetRow(
-                "Add a new friend",
+                stringResource(R.string.add_new_friend),
                 subtitle = null,
                 icon = PbIcon.UserAdd,
                 onClick = {
@@ -156,7 +164,8 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
         } else if (matches.isEmpty()) {
             val invite = EmailOrPhone.matches(query.trim())
             PbSheetRow(
-                if (invite) "Invite ${query.trim()}" else "Add “${query.trim()}” as a guest",
+                if (invite) stringResource(R.string.add_invite, query.trim())
+                else stringResource(R.string.add_as_guest, query.trim()),
                 subtitle = null,
                 icon = PbIcon.UserAdd,
                 onClick = ::addGuest,
@@ -166,7 +175,7 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
         }
         if (matches.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
-                PbSectionHeader("Friends")
+                PbSectionHeader(stringResource(R.string.add_friends))
                 FriendList(matches, picked, multi, people, tag, ::choose)
             }
         }
@@ -188,7 +197,7 @@ private fun FriendList(
                 friend.name,
                 people.avatar(friend.id),
                 Modifier.testTag("$tag.friend.${friend.id}"),
-                tag = "Guest".takeIf { friend.isGuest },
+                tag = stringResource(R.string.add_guest).takeIf { friend.isGuest },
                 trailing = if (multi) PbPersonTrailing.Select(friend.id in picked) else null,
                 onCard = true,
                 onClick = { onChoose(friend.id) },

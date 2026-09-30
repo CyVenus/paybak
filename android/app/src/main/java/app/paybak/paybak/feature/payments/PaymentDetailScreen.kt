@@ -10,6 +10,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.cancelPayment
 import app.paybak.paybak.data.ledger.actions.confirmPayment
 import app.paybak.paybak.data.ledger.collectSnapshot
@@ -66,17 +68,19 @@ fun PaymentDetailScreen(route: Route.Payment) {
     val payment = detail?.payment
     val pending = payment?.status == PaymentStatus.Pending
     val mine = payment?.recordedBy == ME && detail?.youPaid == true
+    val confirmed = stringResource(R.string.add_toast_payment_confirmed)
+    val proofLabel = stringResource(R.string.add_proof)
 
     PbPinnedHeaderScreen(
         testTag = "screen.payment",
         header = {
             PbPushHeader(
-                "Payment",
+                stringResource(R.string.add_payment),
                 onBack = { navigator.back() },
                 action =
                     if (pending && mine) {
                         PbHeaderAction.Text(
-                            "Edit",
+                            stringResource(R.string.add_edit),
                             {
                                 navigator.open(
                                     Route.RecordPayment(
@@ -94,7 +98,7 @@ fun PaymentDetailScreen(route: Route.Payment) {
     ) {
         if (detail == null || payment == null) {
             Text(
-                "This payment isn’t available any more.",
+                stringResource(R.string.add_payment_gone),
                 style = PbTextStyles.Body,
                 color = PbColors.Text.Secondary,
             )
@@ -119,18 +123,18 @@ fun PaymentDetailScreen(route: Route.Payment) {
             primaryAction =
                 if (receiving) {
                     PbNoticeAction(
-                        "Confirm",
+                        stringResource(R.string.add_confirm),
                         onClick = {
                             ledger.confirmPayment(payment.id)
                             haptics.perform(HapticKind.Success)
-                            navigator.toast("Payment confirmed")
+                            navigator.toast(confirmed)
                         },
                     )
                 } else null,
             secondaryAction =
                 if (receiving) {
                     PbNoticeAction(
-                        "Not received",
+                        stringResource(R.string.add_not_received),
                         onClick = { navigator.open(Route.NotReceived(payment.id)) },
                     )
                 } else null,
@@ -138,17 +142,19 @@ fun PaymentDetailScreen(route: Route.Payment) {
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
             val rows =
                 listOfNotNull(
-                    "From" to people.first(payment.fromId),
-                    "To" to people.first(payment.toId),
-                    "Method" to payment.method.label,
-                    detail.paidTo?.let { "Paid to" to it },
-                    "Date" to Dates.day(payment.date),
-                    detail.forLabel?.let { "For" to it },
-                    "Proof" to if (payment.proof != null) "1 photo" else "None",
+                    stringResource(R.string.add_from) to people.first(payment.fromId),
+                    stringResource(R.string.add_to) to people.first(payment.toId),
+                    stringResource(R.string.add_method) to payment.method.label,
+                    detail.paidTo?.let { paidTo -> stringResource(R.string.add_paid_to) to paidTo },
+                    stringResource(R.string.add_date) to Dates.day(payment.date),
+                    detail.forLabel?.let { label -> stringResource(R.string.add_for) to label },
+                    proofLabel to
+                        if (payment.proof != null) stringResource(R.string.add_one_photo)
+                        else stringResource(R.string.add_none),
                 )
             PbCard(Modifier.testTag("paymentRecorded.details")) {
                 rows.forEachIndexed { index, (title, value) ->
-                    val proof = payment.proof.takeIf { title == "Proof" }
+                    val proof = payment.proof.takeIf { title == proofLabel }
                     PbSettingRow(
                         title,
                         value = value,
@@ -170,7 +176,7 @@ fun PaymentDetailScreen(route: Route.Payment) {
         if (pending && mine) {
             PbCard {
                 PbSettingRow(
-                    "Cancel payment",
+                    stringResource(R.string.add_cancel_payment),
                     Modifier.testTag("paymentRecorded.cancel"),
                     icon = PbIcon.Delete,
                     tone = PbSettingTone.Destructive,
@@ -188,10 +194,10 @@ fun PaymentDetailScreen(route: Route.Payment) {
                 PaymentContext(payment.groupId, payment.loanId),
             )
         PbAlert(
-            title = "Cancel this payment?",
+            title = stringResource(R.string.add_cancel_payment_title),
             message = snapshot.view.cancelPaymentMessage(payment, owed),
-            cancelLabel = "Keep",
-            actionLabel = "Cancel payment",
+            cancelLabel = stringResource(R.string.add_keep),
+            actionLabel = stringResource(R.string.add_cancel_payment),
             onCancel = { cancelling = false },
             onAction = {
                 cancelling = false

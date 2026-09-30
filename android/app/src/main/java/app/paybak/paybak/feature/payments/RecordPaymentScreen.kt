@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.recordPayment
 import app.paybak.paybak.data.ledger.actions.updatePayment
 import app.paybak.paybak.data.ledger.collectSnapshot
@@ -109,6 +111,10 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     val canSave = form.total > 0 && form.friendId != null
+    val chooseSomeone = stringResource(R.string.add_choose_someone)
+    val recorded = stringResource(R.string.add_toast_payment_recorded)
+    val upiLabel = stringResource(R.string.add_upi_id)
+    val upiCopied = stringResource(R.string.add_toast_upi_copied)
 
     RouteResultEffect("$requestId.person") { result ->
         val picked = (result as? RouteResult.Person)?.personId ?: return@RouteResultEffect
@@ -163,7 +169,7 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
             Route.PickPeople(
                 PickRequest("$requestId.person"),
                 PickMode.Single,
-                title = "Choose someone",
+                title = chooseSomeone,
             )
         )
     }
@@ -175,7 +181,7 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
                 navigator.dismissModal()
             } else {
                 val id = ledger.recordPayment(draft)
-                navigator.didSave(Route.Payment(id), "Payment recorded")
+                navigator.didSave(Route.Payment(id), recorded)
             }
             haptics.perform(HapticKind.Success)
         } catch (error: LedgerRuleException) {
@@ -194,9 +200,10 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
         testTag = "screen.recordPayment",
         header = {
             PbModalHeader(
-                if (editing != null) "Edit payment" else "Record payment",
+                if (editing != null) stringResource(R.string.add_edit_payment)
+                else stringResource(R.string.add_record_payment),
                 onClose = ::close,
-                action = "Save",
+                action = stringResource(R.string.add_save),
                 actionEnabled = canSave,
                 onAction = ::save,
                 testTag = "recordPayment",
@@ -207,9 +214,9 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S20)) {
             PbPaymentParties(
-                fromName = form.fromId?.let(people::first) ?: "Choose",
+                fromName = form.fromId?.let(people::first) ?: stringResource(R.string.add_choose),
                 fromAvatar = party(people, form.fromId),
-                toName = form.toId?.let(people::first) ?: "Choose",
+                toName = form.toId?.let(people::first) ?: stringResource(R.string.add_choose),
                 toAvatar = party(people, form.toId),
                 onFromClick = { pickPerson("from") },
                 onToClick = { pickPerson("to") },
@@ -268,18 +275,18 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
             val recipient = form.toId ?: ME
             UpiPreview(people.full(recipient), recipientUpi, people, recipient) {
                 scope.launch {
-                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("UPI ID", recipientUpi)))
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(upiLabel, recipientUpi)))
                 }
-                navigator.toast("UPI ID copied")
+                navigator.toast(upiCopied)
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
             PbCard {
                 PbSettingRow(
-                    "For",
+                    stringResource(R.string.add_for),
                     Modifier.testTag("recordPayment.for"),
                     icon = PbIcon.Groups,
-                    value = forLabel ?: "None",
+                    value = forLabel ?: stringResource(R.string.add_none),
                     onClick = {
                         focusManager.clearFocus()
                         navigator.open(
@@ -292,7 +299,7 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
                     },
                 )
                 PbSettingRow(
-                    "Date",
+                    stringResource(R.string.add_date),
                     Modifier.testTag("recordPayment.date"),
                     icon = PbIcon.Calendar,
                     value = Dates.day(form.date),
@@ -308,10 +315,12 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
                     },
                 )
                 PbSettingRow(
-                    "Proof",
+                    stringResource(R.string.add_proof),
                     Modifier.testTag("recordPayment.proof"),
                     icon = PbIcon.Camera,
-                    value = if (form.proof != null) "1 photo" else "Add photo (optional)",
+                    value =
+                        if (form.proof != null) stringResource(R.string.add_one_photo)
+                        else stringResource(R.string.add_add_photo),
                     onClick = {
                         val proof = form.proof
                         if (proof != null) navigator.open(Route.PhotoViewer(PhotoRef(file = proof)))
@@ -338,10 +347,12 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
     }
     if (discarding) {
         PbAlert(
-            title = if (editing != null) "Discard changes?" else "Discard this payment?",
-            message = "Your changes won’t be saved.",
-            cancelLabel = "Keep editing",
-            actionLabel = "Discard",
+            title =
+                if (editing != null) stringResource(R.string.add_discard_changes)
+                else stringResource(R.string.add_payment_discard_title),
+            message = stringResource(R.string.add_discard_message),
+            cancelLabel = stringResource(R.string.add_keep_editing),
+            actionLabel = stringResource(R.string.add_discard),
             onCancel = { discarding = false },
             onAction = {
                 discarding = false
@@ -359,7 +370,11 @@ private fun party(people: PeopleDirectory, id: String?) =
 @Composable
 private fun MethodPicker(selected: PaymentMethod, onPick: (PaymentMethod) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S4)) {
-        Text("Method", style = PbTextStyles.Subheadline, color = PbColors.Text.Secondary)
+        Text(
+            stringResource(R.string.add_method),
+            style = PbTextStyles.Subheadline,
+            color = PbColors.Text.Secondary,
+        )
         Row(
             Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(PbSpace.S6),
@@ -407,7 +422,7 @@ private fun UpiPreview(
                 )
             }
             PbButton(
-                "Copy",
+                stringResource(R.string.add_copy),
                 onClick = onCopy,
                 modifier = Modifier.testTag("recordPayment.preview.copy"),
                 style = PbButtonStyle.OnCard,

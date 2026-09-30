@@ -19,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.addExpense
 import app.paybak.paybak.data.ledger.actions.updateExpense
 import app.paybak.paybak.data.ledger.collectSnapshot
@@ -95,6 +97,7 @@ fun AddExpenseScreen(route: Route.AddExpense) {
     val start = rememberDebugStartScreen(*StartStates)
     val editing = route.args.editing?.let { snapshot.ledger.expense(it) }
     val defaultCurrency = profile.defaultCurrency
+    val expenseAdded = stringResource(R.string.add_toast_expense_added)
 
     val initial =
         rememberSaveable(stateSaver = ExpenseForm.Saver) {
@@ -196,7 +199,7 @@ fun AddExpenseScreen(route: Route.AddExpense) {
             } else {
                 val id = ledger.addExpense(form.toDraft())
                 haptics.perform(HapticKind.Success)
-                navigator.didSave(Route.Expense(id), "Expense added")
+                navigator.didSave(Route.Expense(id), expenseAdded)
             }
         } catch (error: LedgerRuleException) {
             haptics.perform(HapticKind.Warning)
@@ -301,9 +304,10 @@ fun AddExpenseScreen(route: Route.AddExpense) {
                         testTag = "addExpense.form",
                         header = {
                             PbModalHeader(
-                                if (editing != null) "Edit expense" else "Add expense",
+                                if (editing != null) stringResource(R.string.add_expense_edit_title)
+                                else stringResource(R.string.add_expense_title),
                                 onClose = ::close,
-                                action = "Save",
+                                action = stringResource(R.string.add_save),
                                 actionEnabled = canSave,
                                 onAction = ::save,
                                 testTag = "addExpense",
@@ -388,10 +392,12 @@ fun AddExpenseScreen(route: Route.AddExpense) {
     }
     if (discarding) {
         PbAlert(
-            title = if (editing != null) "Discard changes?" else "Discard this expense?",
-            message = "Your changes won’t be saved.",
-            cancelLabel = "Keep editing",
-            actionLabel = "Discard",
+            title =
+                if (editing != null) stringResource(R.string.add_discard_changes)
+                else stringResource(R.string.add_expense_discard_title),
+            message = stringResource(R.string.add_discard_message),
+            cancelLabel = stringResource(R.string.add_keep_editing),
+            actionLabel = stringResource(R.string.add_discard),
             onCancel = { discarding = false },
             onAction = {
                 discarding = false

@@ -11,6 +11,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.flagExpense
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.ui.components.PbButton
@@ -32,18 +34,18 @@ fun FlagSheet(expenseId: String, onDismiss: () -> Unit) {
             if (send) ledger.flagExpense(expenseId, note.trim())
             onDismiss()
         },
-        title = "Flag an issue",
+        title = stringResource(R.string.add_flag_issue),
         testTag = "flag.sheet",
     ) { dismiss ->
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S16)) {
             PbTextArea(
                 note,
                 { note = it.take(MAX_NOTE) },
-                placeholder = "What looks wrong?",
+                placeholder = stringResource(R.string.add_flag_placeholder),
                 fieldModifier = Modifier.testTag("flag.note"),
             )
             PbButton(
-                "Flag expense",
+                stringResource(R.string.add_flag_expense),
                 onClick = {
                     send = true
                     dismiss()

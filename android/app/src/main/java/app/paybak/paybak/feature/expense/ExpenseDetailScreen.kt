@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.addComment
 import app.paybak.paybak.data.ledger.actions.deleteExpense
 import app.paybak.paybak.data.ledger.actions.resolveFlag
@@ -85,6 +87,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
         mutableStateOf(if (start == "expenseComment") "Thanks, that works for me." else "")
     }
     val detail = snapshot.view.expenseDetail(route.expenseId)
+    val deleted = stringResource(R.string.add_toast_expense_deleted)
     val receiptRequest = PickRequest(rememberSaveable { newId() })
     val photo = rememberLedgerPhoto(detail?.expense?.receipt?.photo)
     fun attach(receipt: Receipt) {
@@ -104,13 +107,16 @@ fun ExpenseDetailScreen(route: Route.Expense) {
         testTag = "screen.expense",
         header = {
             PbPushHeader(
-                "Expense",
+                stringResource(R.string.add_expense),
                 onBack = { navigator.back() },
                 action =
                     detail
                         ?.takeIf { it.expense.deletedAt == null }
                         ?.let {
-                            PbHeaderAction.Text("Edit", { edit(navigator::open, it) })
+                            PbHeaderAction.Text(
+                                stringResource(R.string.add_edit),
+                                { edit(navigator::open, it) },
+                            )
                         },
                 testTag = "expense",
                 actionTag = "edit",
@@ -120,7 +126,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
     ) {
         if (detail == null) {
             Text(
-                "This expense isn’t available any more.",
+                stringResource(R.string.add_expense_gone),
                 style = PbTextStyles.Body,
                 color = PbColors.Text.Secondary,
             )
@@ -142,10 +148,13 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                     PbIcon.Flag,
                     title = detail.flagTitle,
                     primaryAction =
-                        PbNoticeAction("Edit expense", onClick = { edit(navigator::open, detail) }),
+                        PbNoticeAction(
+                            stringResource(R.string.add_edit_expense),
+                            onClick = { edit(navigator::open, detail) },
+                        ),
                     secondaryAction =
                         PbNoticeAction(
-                            "Resolve",
+                            stringResource(R.string.add_resolve),
                             onClick = { ledger.resolveFlag(detail.expense.id) },
                         ),
                     testTag = "expense.dispute",
@@ -161,7 +170,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                         people.avatar(line.personId),
                         Modifier.testTag("expense.split.${line.personId}"),
                         subtitle = line.paid,
-                        tag = "Guest".takeIf { line.isGuest },
+                        tag = stringResource(R.string.add_guest).takeIf { line.isGuest },
                         trailing = PbPersonTrailing.Amount(line.share),
                         size = PbPersonRowSize.Compact,
                         showDivider = index < detail.split.lastIndex,
@@ -169,7 +178,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 }
             }
         }
-        Section("Receipt") {
+        Section(stringResource(R.string.add_receipt)) {
             val receipt = detail.expense.receipt
             if (receipt != null && detail.receiptLine != null) {
                 ReceiptCard(photo, detail.receiptLine) {
@@ -178,7 +187,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
             } else {
                 PbCard {
                     PbSettingRow(
-                        "Add receipt",
+                        stringResource(R.string.add_add_receipt),
                         Modifier.testTag("expense.addReceipt"),
                         icon = PbIcon.Camera,
                         onClick = {
@@ -190,7 +199,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 }
             }
         }
-        Section("Comments") {
+        Section(stringResource(R.string.add_comments)) {
             Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
                 Column {
                     detail.comments.forEach {
@@ -204,12 +213,12 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                         ledger.addComment(detail.expense.id, comment)
                         comment = ""
                     },
-                    placeholder = "Add a comment",
+                    placeholder = stringResource(R.string.add_comment_placeholder),
                     fieldModifier = Modifier.testTag("expense.composer"),
                 )
             }
         }
-        Section("History") {
+        Section(stringResource(R.string.add_history)) {
             Column {
                 detail.history.forEachIndexed { index, line ->
                     PbHistoryRow(line.text, line.date, last = index == detail.history.lastIndex)
@@ -219,14 +228,14 @@ fun ExpenseDetailScreen(route: Route.Expense) {
         PbCard {
             if (detail.canFlag) {
                 PbSettingRow(
-                    "Flag an issue",
+                    stringResource(R.string.add_flag_issue),
                     Modifier.testTag("expense.flag"),
                     icon = PbIcon.Flag,
                     onClick = { flagging = true },
                 )
             }
             PbSettingRow(
-                "Delete expense",
+                stringResource(R.string.add_delete_expense),
                 Modifier.testTag("expense.delete"),
                 icon = PbIcon.Delete,
                 tone = PbSettingTone.Destructive,
@@ -240,19 +249,21 @@ fun ExpenseDetailScreen(route: Route.Expense) {
     if (detail != null && deleting) {
         val group = detail.tags.takeIf { detail.expense.groupId != null }?.first()
         PbAlert(
-            title = "Delete this expense?",
+            title = stringResource(R.string.add_delete_title),
             message =
-                "${detail.title} moves to Recently deleted for 30 days. " +
-                    (group?.let { "$it balances update for everyone." }
-                        ?: "Balances update for everyone on it."),
-            cancelLabel = "Cancel",
-            actionLabel = "Delete",
+                if (group != null) {
+                    stringResource(R.string.add_delete_message_group, detail.title, group)
+                } else {
+                    stringResource(R.string.add_delete_message, detail.title)
+                },
+            cancelLabel = stringResource(R.string.add_cancel),
+            actionLabel = stringResource(R.string.add_delete),
             onCancel = { deleting = false },
             onAction = {
                 deleting = false
                 ledger.deleteExpense(detail.expense.id)
                 navigator.back()
-                navigator.toast("Expense deleted")
+                navigator.toast(deleted)
             },
             testTag = "expense.alert",
         )
@@ -291,7 +302,7 @@ private fun ShareCard(detail: ExpenseDetail, onGroup: (String) -> Unit) {
             when (row) {
                 "share" ->
                     PbSettingRow(
-                        "Your share",
+                        stringResource(R.string.add_your_share),
                         icon = PbIcon.Wallet,
                         value = detail.yourShare,
                         trailing = PbSettingTrailing.None,
@@ -299,7 +310,7 @@ private fun ShareCard(detail: ExpenseDetail, onGroup: (String) -> Unit) {
                     )
                 "due" ->
                     PbSettingRow(
-                        "Due",
+                        stringResource(R.string.add_due),
                         icon = PbIcon.Calendar,
                         value = detail.due,
                         trailing = PbSettingTrailing.None,
@@ -338,9 +349,16 @@ private fun ReceiptCard(photo: ImageBitmap?, line: String, onClick: () -> Unit) 
             horizontalArrangement = Arrangement.spacedBy(PbSpace.S12),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PbReceiptThumbnail(photo = photo, contentDescription = "Receipt photo")
+            PbReceiptThumbnail(
+                photo = photo,
+                contentDescription = stringResource(R.string.add_receipt_photo),
+            )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PbSpace.S2)) {
-                Text("Receipt photo", style = PbTextStyles.Headline, color = PbColors.Text.Primary)
+                Text(
+                    stringResource(R.string.add_receipt_photo),
+                    style = PbTextStyles.Headline,
+                    color = PbColors.Text.Primary,
+                )
                 Text(line, style = PbTextStyles.Footnote, color = PbColors.Text.Secondary)
             }
             PbIconImage(
