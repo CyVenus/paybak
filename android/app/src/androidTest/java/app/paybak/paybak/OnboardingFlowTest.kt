@@ -24,6 +24,7 @@ class OnboardingFlowTest {
 
     private fun tag(tag: String) = compose.onNodeWithTag(tag)
 
+    /** The email path, with a wrong code first: the error shows and typing starts over. */
     @Test
     fun emailSignInThroughSetupToHome() {
         launchPaybak().use {
@@ -35,6 +36,9 @@ class OnboardingFlowTest {
             tag("signIn.field").performTextInput("priya@example.com")
             tag("signIn.sendCode").performClick()
             compose.awaitScreen("verify")
+            tag("verify.code").performTextInput("123456")
+            compose.awaitScreen("verifyWrong")
+            tag("verify.error").assertIsDisplayed()
             tag("verify.code").performTextInput("000000")
             compose.awaitScreen("setup1")
             tag("setup1.name").performTextInput("Priya Shah")

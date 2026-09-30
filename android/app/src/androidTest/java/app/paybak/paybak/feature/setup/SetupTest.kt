@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.paybak.paybak.awaitScreen
+import app.paybak.paybak.awaitTag
 import app.paybak.paybak.data.AvatarChoice
 import app.paybak.paybak.launchPaybak
 import app.paybak.paybak.savedProfile
@@ -46,6 +47,7 @@ class SetupTest {
         launchPaybak("setup2").use {
             tag("setup2.row.INR").assertIsSelected()
             tag("setup2.search").performTextInput("yen")
+            compose.awaitTag("setup2.row.JPY")
             tag("setup2.row.JPY").performClick()
             tag("setup2.search").performTextClearance()
             tag("setup2.row.JPY").assertIsSelected()

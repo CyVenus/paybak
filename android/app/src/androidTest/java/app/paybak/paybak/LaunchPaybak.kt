@@ -32,6 +32,14 @@ fun ComposeTestRule.awaitScreen(id: String, timeoutMillis: Long = 10_000) {
     }
 }
 
+/**
+ * Waits until a node tagged [tag] exists: for content the app loads off the main thread, which the
+ * test rule doesn't wait for (the full currency list on Setup 2).
+ */
+fun ComposeTestRule.awaitTag(tag: String, timeoutMillis: Long = 5_000) {
+    waitUntil(timeoutMillis) { onAllNodes(hasTestTag(tag)).fetchSemanticsNodes().isNotEmpty() }
+}
+
 /** The profile as the app has saved it. */
 val savedProfile: UserProfile
     get() =
