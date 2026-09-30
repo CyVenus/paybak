@@ -10,14 +10,30 @@
 		9864C1DD082A0F5107BD3C6D /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 2020BBCB7A14F5E98F58F85B /* RiveRuntime */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E19BB7FCFF26685B0EB36BD9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F6137C3306D291A00F755CE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F6137CA306D291A00F755CE;
+			remoteInfo = paybak;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		4F6137CB306D291A00F755CE /* paybak.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = paybak.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B0381CCF93ABAB4E1087761B /* paybakUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = paybakUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4F6137CD306D291A00F755CE /* paybak */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = paybak;
+			sourceTree = "<group>";
+		};
+		CCD00E2FB6A8DC22C5C4CB6F /* paybakUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = paybakUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -29,6 +45,11 @@
 				9864C1DD082A0F5107BD3C6D /* RiveRuntime in Frameworks */,
 			);
 		};
+		9E9AC54E5E36146C96DD2EE1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -36,6 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				4F6137CD306D291A00F755CE /* paybak */,
+				CCD00E2FB6A8DC22C5C4CB6F /* paybakUITests */,
 				4F6137CC306D291A00F755CE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -44,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				4F6137CB306D291A00F755CE /* paybak.app */,
+				B0381CCF93ABAB4E1087761B /* paybakUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,6 +95,27 @@
 			productReference = 4F6137CB306D291A00F755CE /* paybak.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E8107936F7C9F6B1A171C767 /* paybakUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8BC53427CF40466DC41CA59E /* Build configuration list for PBXNativeTarget "paybakUITests" */;
+			buildPhases = (
+				AA50DDB142CC6C8E30A67CE2 /* Sources */,
+				9E9AC54E5E36146C96DD2EE1 /* Frameworks */,
+				9CCB2D0AE9B13F0A9EE9E9D5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCDB0E946936F1C8A17E2129 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CCD00E2FB6A8DC22C5C4CB6F /* paybakUITests */,
+			);
+			name = paybakUITests;
+			productName = paybakUITests;
+			productReference = B0381CCF93ABAB4E1087761B /* paybakUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -84,6 +128,10 @@
 				TargetAttributes = {
 					4F6137CA306D291A00F755CE = {
 						CreatedOnToolsVersion = 27.0;
+					};
+					E8107936F7C9F6B1A171C767 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 4F6137CA306D291A00F755CE;
 					};
 				};
 			};
@@ -105,12 +153,18 @@
 			projectRoot = "";
 			targets = (
 				4F6137CA306D291A00F755CE /* paybak */,
+				E8107936F7C9F6B1A171C767 /* paybakUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4F6137C9306D291A00F755CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		9CCB2D0AE9B13F0A9EE9E9D5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -123,7 +177,20 @@
 			files = (
 			);
 		};
+		AA50DDB142CC6C8E30A67CE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FCDB0E946936F1C8A17E2129 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F6137CA306D291A00F755CE /* paybak */;
+			targetProxy = E19BB7FCFF26685B0EB36BD9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4F6137D4306D291A00F755CE /* Debug configuration for PBXProject "paybak" */ = {
@@ -311,6 +378,44 @@
 			};
 			name = Release;
 		};
+		C05BC4ED949F74590180220E /* Debug configuration for PBXNativeTarget "paybakUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.paybak.paybakUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = paybak;
+			};
+			name = Debug;
+		};
+		CF910A1F1F17362F64F78141 /* Release configuration for PBXNativeTarget "paybakUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.paybak.paybakUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = paybak;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -327,6 +432,14 @@
 			buildConfigurations = (
 				4F6137D7306D291A00F755CE /* Debug configuration for PBXNativeTarget "paybak" */,
 				4F6137D8306D291A00F755CE /* Release configuration for PBXNativeTarget "paybak" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		8BC53427CF40466DC41CA59E /* Build configuration list for PBXNativeTarget "paybakUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C05BC4ED949F74590180220E /* Debug configuration for PBXNativeTarget "paybakUITests" */,
+				CF910A1F1F17362F64F78141 /* Release configuration for PBXNativeTarget "paybakUITests" */,
 			);
 			defaultConfigurationName = Release;
 		};
