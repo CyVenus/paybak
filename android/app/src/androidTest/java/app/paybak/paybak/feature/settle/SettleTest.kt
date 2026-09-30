@@ -17,6 +17,7 @@ import app.paybak.paybak.domain.model.ReminderTone
 import app.paybak.paybak.domain.model.ReminderVia
 import app.paybak.paybak.launchPaybak
 import app.paybak.paybak.paybakApp
+import app.paybak.paybak.pressSystemBack
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -154,6 +155,68 @@ class SettleTest {
             tap("notReceived.cancel")
             awaitGone("screen.notReceived")
             assertEquals(PaymentStatus.Pending, ledger.payment("pay-esha-olive")?.status)
+        }
+    }
+
+    @Test
+    fun theOwedCardLeadsThroughSettleUpToKabirsPrefilledForm() {
+        launchPaybak("homeActive").use {
+            compose.awaitScreen("homeActive")
+            tap("home.balance.owed")
+            compose.awaitScreen("owedBreakdown")
+            tap("owedBreakdown.settleUp")
+            compose.awaitScreen("settleUp")
+            compose.onNodeWithText("2 payments to make").assertExists()
+            compose.onNodeWithText("4 people owe you").assertExists()
+            tap("settleUp.pay.p-kabir")
+            compose.awaitScreen("recordPayment")
+            compose.onNodeWithText("You owe Kabir ₹1,400 in Goa Trip").assertExists()
+            compose.onNodeWithText("kabir@okaxis").assertExists()
+        }
+    }
+
+    @Test
+    fun aRecordedPaymentWaitsAsPendingInThePlan() {
+        launchPaybak("settleUp").use { app ->
+            tap("settleUp.pay.p-kabir")
+            compose.awaitScreen("recordPayment")
+            tap("recordPayment.save")
+            compose.awaitScreen("payment")
+            compose.onNodeWithText("Pending confirmation").assertExists()
+            app.pressSystemBack()
+            compose.awaitScreen("settleUp")
+            compose.onNodeWithText("Pending").assertExists()
+            awaitGone("settleUp.pay.p-kabir")
+            assertEquals(185_000L, paybakApp.ledger.snapshot.value.home.totals.owe)
+            compose.onNodeWithText("Pending").performClick()
+            compose.awaitScreen("payment")
+        }
+    }
+
+    @Test
+    fun remindOpensTheSheetOverThePlan() {
+        launchPaybak("settleUp").use {
+            tap("settleUp.remind.p-rohan")
+            compose.awaitTag("screen.remind")
+            compose.onNodeWithText("Remind Rohan").assertExists()
+            tag("screen.settleUp").assertExists()
+            tap("remind.send")
+            awaitGone("screen.remind")
+            compose.onNodeWithText("Reminder sent to Rohan").assertExists()
+        }
+    }
+
+    @Test
+    fun aConfirmedClaimLeavesTheOwedBreakdown() {
+        launchPaybak("homeConfirmPayment").use {
+            compose.awaitScreen("homeConfirmPayment")
+            tap("claim.pay-esha-olive.confirm")
+            compose.awaitScreen("homeActive")
+            awaitText("+₹2,200")
+            tap("home.balance.owed")
+            compose.awaitScreen("owedBreakdown")
+            compose.onNodeWithText("from 3 people").assertExists()
+            tag("owedBreakdown.row.p-esha").assertDoesNotExist()
         }
     }
 }
