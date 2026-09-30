@@ -23,11 +23,10 @@ struct PaymentDetailScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBPushHeader("Payment", trailing: detail?.canChange == true ? .text("Edit", action: edit) : .none,
                          testIDPrefix: "paymentRecorded", onBack: router.back)
         }
-        .background(PBColor.bgPrimary)
         .pbAlert(isPresented: $showsCancel, title: "Cancel this payment?",
                  message: store.ledger.payment(paymentId).map(store.books.cancelPaymentMessage),
                  cancelLabel: "Keep", actionLabel: "Cancel payment", testIDPrefix: "paymentRecorded.alert", onAction: cancel)
@@ -65,10 +64,9 @@ struct PaymentDetailScreen: View {
                     .accessibilityIdentifier("paymentRecorded.cancel")
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             // Room for the toast under the last row (the "Scroll spacer").
             .padding(.bottom, PBSpace.s48)
-            .phoneContentWidth()
+            .pbPushContent()
         }
     }
 

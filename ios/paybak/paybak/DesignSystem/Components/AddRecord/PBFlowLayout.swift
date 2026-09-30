@@ -1,19 +1,5 @@
 import SwiftUI
 
-extension View {
-    /// The header of Add & Record's forms and details (the "Scroll edge (top)" band in Figma): the
-    /// 44 pt header sits fixed at the top safe area on a solid white band that also covers the status
-    /// bar, the scroll content starts 16 pt below it and scrolls under the band.
-    func pinnedHeader<Header: View>(@ViewBuilder _ header: () -> Header) -> some View {
-        safeAreaInset(edge: .top, spacing: PBSpace.s16) {
-            header()
-                .padding(.horizontal, PBLayout.screenMargin)
-                .phoneContentWidth()
-                .background(PBColor.bgPrimary.ignoresSafeArea(edges: .top))
-        }
-    }
-}
-
 /// Lays children out left to right and wraps them onto new rows (the due quick chips).
 struct PBFlowLayout: Layout {
     var spacing: CGFloat = PBSpace.s8

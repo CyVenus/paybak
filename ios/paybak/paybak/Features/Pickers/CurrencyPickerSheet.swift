@@ -37,8 +37,7 @@ struct CurrencyPickerSheet: View {
             .scrollIndicators(.hidden)
             .scrollDismissesKeyboard(.immediately)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("currency.sheet")
+        .routeTestRoot("pickCurrency")
     }
 
     private var recent: [String] { store.recentCurrencyCodes }

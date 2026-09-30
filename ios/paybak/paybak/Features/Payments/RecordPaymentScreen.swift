@@ -114,16 +114,14 @@ private struct PaymentFormView: View {
                     }
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s32)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBModalHeader(form.editing == nil ? "Record payment" : "Edit payment", actionLabel: "Save", isActionEnabled: form.canSave,
                           testIDPrefix: "recordPayment", onClose: close, onAction: save)
         }
-        .background(PBColor.bgPrimary)
         .pbSheet(isPresented: $showsFor) {
             PaymentForSheet(contexts: form.friend.map { books.paymentContexts(with: $0) } ?? [.direct(expense: nil)],
                             selected: form.context, onClose: { showsFor = false }) { context in

@@ -79,16 +79,14 @@ private struct LoanFormView: View {
                     }
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s32)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBModalHeader(form.editing == nil ? "Lend money" : "Edit loan", actionLabel: "Save", isActionEnabled: form.canSave,
                           testIDPrefix: "lendMoney", onClose: close, onAction: save)
         }
-        .background(PBColor.bgPrimary)
         .pbItemSheet(item: $sheet) { sheet in
             switch sheet {
             case .reason:

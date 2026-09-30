@@ -23,8 +23,7 @@ struct GroupPickerSheet: View {
             .scrollBounceBehavior(.basedOnSize)
             .frame(maxHeight: 56 * 7)
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("group.sheet")
+        .routeTestRoot("pickGroup")
     }
 
     private func row(_ title: String, icon: PBIcon, id: GroupID?, isLast: Bool) -> some View {

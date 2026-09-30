@@ -27,10 +27,9 @@ struct ExpenseDetailScreen: View {
                 missing
             }
         }
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBPushHeader("Expense", trailing: canEdit ? .text("Edit", action: edit) : .none, testIDPrefix: "expense", onBack: router.back)
         }
-        .background(PBColor.bgPrimary)
         .task {
             // A toast handed over with the route shows once, not again after a push comes back.
             if let toast, !didShowToast { router.toast(toast) }
@@ -71,9 +70,8 @@ struct ExpenseDetailScreen: View {
                 history(detail)
                 actions(detail)
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s48)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
         .pbAlert(

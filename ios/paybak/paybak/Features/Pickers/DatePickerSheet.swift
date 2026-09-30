@@ -54,8 +54,7 @@ struct DatePickerSheet: View {
                 }
             }
         }
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("\(prefix).sheet")
+        .routeTestRoot("pickDate")
         .onAppear {
             guard !didLoad else { return }
             didLoad = true

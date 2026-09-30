@@ -24,11 +24,10 @@ struct LoanScreen: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBPushHeader("Loan", trailing: detail.map { !$0.isPaidBack } == true ? .text("Edit", action: edit) : .none,
                          testIDPrefix: "loan", onBack: router.back)
         }
-        .background(PBColor.bgPrimary)
         .onChange(of: router.toast, initial: true) { _, message in
             guard let message, isOnTop else { return }
             toast = message
@@ -75,9 +74,8 @@ struct LoanScreen: View {
                     }
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s16)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .pbToast($toast, bottomPadding: PBSpace.s12)
         .safeAreaInset(edge: .bottom) {

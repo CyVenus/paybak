@@ -81,12 +81,11 @@ struct SplitEditorPage: View {
                         .accessibilityIdentifier("split.hint")
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s16)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBDoneHeader(title: "Split", isDoneEnabled: preview.isBalanced, testIDPrefix: "split", onBack: { dismiss() }, onDone: { dismiss() })
         }
         .safeAreaInset(edge: .bottom) {
@@ -101,7 +100,7 @@ struct SplitEditorPage: View {
         .onDisappear {
             if preview.isBalanced { editor.apply(to: form) }
         }
-        .routeTestRoot("splitEditor")
+        .routeTestRoot("addExpense")
     }
 
     private var summary: String {

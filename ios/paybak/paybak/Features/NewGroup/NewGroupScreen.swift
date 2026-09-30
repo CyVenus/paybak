@@ -50,16 +50,14 @@ struct NewGroupScreen: View {
                     settingsCard(form)
                 }
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s32)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBModalHeader("New group", actionLabel: "Create", isActionEnabled: form.canCreate, testIDPrefix: "newGroup",
                           onClose: { close(form) }, onAction: { create(form) })
         }
-        .background(PBColor.bgPrimary)
         .pbAlert(isPresented: $showsDiscard, title: form.isProject ? "Discard this project?" : "Discard this group?",
                  message: "Your changes won’t be saved.", cancelLabel: "Keep editing", actionLabel: "Discard",
                  testIDPrefix: "newGroup.discardAlert", onAction: router.dismissModal)

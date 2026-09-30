@@ -49,7 +49,7 @@ final class AddRecordUITests: XCTestCase {
     @MainActor
     func testExactSplitMustAddUp() {
         let app = XCUIApplication.launchPaybak(startScreen: .addExpenseSplitEqually)
-        XCTAssertTrue(app.element("screen.splitEditor").waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["split.done"].waitForExistence(timeout: 5))
         app.buttons["Exact"].tap()
         let devField = app.element(label: "Dev’s amount")
         devField.tap()

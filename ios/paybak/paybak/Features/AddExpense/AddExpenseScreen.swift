@@ -15,7 +15,7 @@ struct AddExpenseScreen: View {
     var body: some View {
         Group {
             if let form {
-                ExpenseFormView(form: form, focusAmount: args.focusAmount && args.editing == nil && args.draft == nil)
+                ExpenseFormView(form: form, focusAmount: args.focusAmount && args.editing == nil && form.amount == 0)
             } else {
                 PBColor.bgPrimary
             }
@@ -101,12 +101,11 @@ private struct ExpenseFormView: View {
                     .accessibilityIdentifier("addExpense.title")
                 ExpenseFormCard(form: form, split: split, isPro: store.isPro, actions: cardActions)
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s32)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBModalHeader(
                 form.isEditing ? "Edit expense" : "Add expense",
                 actionLabel: "Save",
@@ -116,7 +115,6 @@ private struct ExpenseFormView: View {
                 onAction: save
             )
         }
-        .background(PBColor.bgPrimary)
         .navigationDestination(isPresented: $showsSplitEditor) {
             SplitEditorPage(form: form, initialEdit: splitEditorEdit)
         }

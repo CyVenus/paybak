@@ -35,15 +35,13 @@ struct PeoplePickerScreen: View {
                 }
                 friends
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s32)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBDoneHeader(title: request.title, testIDPrefix: prefix, onBack: router.back, onDone: router.back)
         }
-        .background(PBColor.bgPrimary)
         .onAppear(perform: load)
         .onChange(of: store.ledger.people.map(\.id)) { old, new in
             // A friend added from "Add a new friend" (or a guest from search) joins the selection.

@@ -48,12 +48,11 @@ struct PayerEditorPage: View {
                     .foregroundStyle(PBColor.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, PBLayout.screenMargin)
             .padding(.bottom, PBSpace.s16)
-            .phoneContentWidth()
+            .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
-        .pinnedHeader {
+        .pbPinnedHeader {
             PBDoneHeader(title: "Paid by", isDoneEnabled: isBalanced, testIDPrefix: "payers", onBack: { dismiss() }) {
                 apply()
                 dismiss()
@@ -66,10 +65,9 @@ struct PayerEditorPage: View {
                 .phoneContentWidth()
                 .keyboardGap(PBSpace.s8)
         }
-        .background(PBColor.bgPrimary)
         .navigationBarHiddenKeepingSwipeBack()
         .onAppear(perform: load)
-        .routeTestRoot("payerEditor")
+        .routeTestRoot("addExpense")
     }
 
     private var summary: String {
