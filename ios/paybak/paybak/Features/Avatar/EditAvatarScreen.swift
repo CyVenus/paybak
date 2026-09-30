@@ -64,7 +64,7 @@ struct EditAvatarScreen: View {
                         self.draft?.select(index == 0 ? .boy : .girl)
                     }
                 },
-                testIDs: ["editAvatar.gender.boy", "editAvatar.gender.girl"]
+                testIDPrefix: "editAvatar.gender"
             )
             AvatarCategoryChips(categories: draft.categories, selection: draft.category) { category in
                 withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {

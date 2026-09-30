@@ -39,8 +39,7 @@ struct AddPaymentMethodSheet: View {
     var body: some View {
         PBSheet(title: "Add payment method", testIDPrefix: "paymentAddUpi", onClose: onClose) {
             VStack(spacing: PBSpace.s16) {
-                PBSegmentedControl(options: ["UPI ID", "Bank account"], selection: $tab,
-                                   testIDs: ["paymentAddUpi.segment.upi", "paymentAddUpi.segment.bank"])
+                PBSegmentedControl(options: ["UPI ID", "Bank account"], selection: $tab, testIDPrefix: "paymentAddUpi.segment")
                 VStack(spacing: PBSpace.s20) {
                     if tab == 0 {
                         upiForm

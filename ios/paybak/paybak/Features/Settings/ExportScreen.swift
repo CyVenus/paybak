@@ -22,8 +22,7 @@ struct ExportScreen: View {
         let rows = rows
         SettingsScaffold(title: "Export records", testIDPrefix: "privacyExport") {
             SettingsSection(title: "Format") {
-                PBSegmentedControl(options: ["PDF", "CSV"], selection: $format,
-                                   testIDs: ["privacyExport.format.pdf", "privacyExport.format.csv"])
+                PBSegmentedControl(options: ["PDF", "CSV"], selection: $format, testIDPrefix: "privacyExport.format")
             }
             SettingsSection(title: "Range") {
                 HStack(spacing: PBSpace.s8) {

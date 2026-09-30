@@ -18,8 +18,12 @@ struct PBNoticeCard: View {
         let label: String
         let action: () -> Void
 
-        init(_ label: String, action: @escaping () -> Void) {
+        /// A leading icon (the single large button only, e.g. Share on "Send invite").
+        var icon: PBIcon?
+
+        init(_ label: String, icon: PBIcon? = nil, action: @escaping () -> Void) {
             self.label = label
+            self.icon = icon
             self.action = action
         }
     }
@@ -103,7 +107,7 @@ struct PBNoticeCard: View {
                 PBButton(secondary.label, style: .onCard, size: .small, fillsWidth: true, action: secondary.action)
             }
         } else {
-            PBButton(primary.label, fillsWidth: true, action: primary.action)
+            PBButton(primary.label, icon: primary.icon, fillsWidth: true, action: primary.action)
         }
     }
 }
@@ -112,7 +116,7 @@ struct PBNoticeCard: View {
     ScrollView {
         VStack(spacing: PBSpace.s16) {
             PBNoticeCard(icon: .activity, title: "Pending confirmation", message: "Waiting for Meera to confirm")
-            PBNoticeCard(icon: .mail, title: "Arjun R isn’t on Paybak", message: "Invite them so they see what they owe.", primary: .init("Send invite") {})
+            PBNoticeCard(icon: .mail, title: "Arjun R isn’t on Paybak", message: "Invite them so they see what they owe.", primary: .init("Send invite", icon: .share) {})
             PBNoticeCard(icon: .flag, title: "Priya disputed this", message: "She says the amount should be ₹2,400.", primary: .init("Edit expense") {}, secondary: .init("Resolve") {})
             PBNoticeCard(icon: .lock, title: "Insights is part of Pro", message: "See where your money goes each month.", badge: "Pro", layout: .centered, primary: .init("See Pro") {}, secondary: .init("Not now") {})
         }
