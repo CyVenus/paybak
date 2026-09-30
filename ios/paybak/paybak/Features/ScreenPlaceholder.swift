@@ -56,8 +56,8 @@ struct ScreenPlaceholder: View {
         .padding(.horizontal, PBLayout.screenMargin)
         .padding(.bottom, PBSpace.s16)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .phoneContentWidth()
         .background(PBColor.bgPrimary)
-        .toolbar(.hidden, for: .navigationBar)
     }
 
     /// Shows what onboarding saved so far (or the debug seed).

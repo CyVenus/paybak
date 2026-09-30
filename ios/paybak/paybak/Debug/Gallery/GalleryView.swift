@@ -22,6 +22,7 @@ struct GalleryView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .phoneContentWidth()
         .background(PBColor.bgPrimary)
     }
 

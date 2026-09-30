@@ -53,6 +53,7 @@ struct HomeScreen: View {
                 .padding(PBLayout.screenMargin)
                 .background(PBColor.bgPrimary, in: .rect(cornerRadius: PBRadius.sheet))
                 .padding(PBSpace.s8)
+                .phoneContentWidth()
         }
     }
 }

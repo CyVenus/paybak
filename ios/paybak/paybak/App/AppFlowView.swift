@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// The root: Splash, the onboarding stack, Home, or (debug builds) the design-system gallery.
-/// Root changes cross-dissolve. Phone layouts stay centred at 430 pt on wider screens.
+/// Root changes cross-dissolve. It fills the whole screen; each screen centres its own content with
+/// `phoneContentWidth()`, so full-bleed layers still reach the edges on wider screens.
 struct AppFlowView: View {
     @Environment(AppRouter.self) private var router
 
@@ -23,15 +24,14 @@ struct AppFlowView: View {
             #endif
             }
         }
-        .frame(maxWidth: PBLayout.maxContentWidth)
-        .frame(maxWidth: .infinity)
         .background(PBColor.bgPrimary)
         // Match Figma at the default size; stop before the accessibility sizes break fixed layouts.
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
     }
 }
 
-/// Welcome is the stack's root; everything up to All set is pushed over it.
+/// Welcome is the stack's root; everything up to All set is pushed over it. Every screen draws its
+/// own top bar, and the edge swipe goes back wherever the screen allows it.
 private struct OnboardingFlow: View {
     @Environment(AppRouter.self) private var router
 
@@ -39,18 +39,25 @@ private struct OnboardingFlow: View {
         @Bindable var router = router
         NavigationStack(path: $router.path) {
             WelcomeScreen()
+                .navigationBarHiddenKeepingSwipeBack()
                 .navigationDestination(for: OnboardingRoute.self) { route in
-                    switch route {
-                    case .getStarted: GetStartedScreen()
-                    case .signIn: SignInScreen()
-                    case .verify(let showsError): VerifyScreen(showsError: showsError)
-                    case .setup1: SetupNameScreen()
-                    case .setup2: SetupCurrencyScreen()
-                    case .setup3: SetupPaymentScreen()
-                    case .setup4: SetupNotificationsScreen()
-                    case .allSet: AllSetScreen()
-                    }
+                    screen(for: route)
+                        .navigationBarHiddenKeepingSwipeBack()
                 }
+        }
+    }
+
+    @ViewBuilder
+    private func screen(for route: OnboardingRoute) -> some View {
+        switch route {
+        case .getStarted: GetStartedScreen()
+        case .signIn: SignInScreen()
+        case .verify(let showsError): VerifyScreen(showsError: showsError)
+        case .setup1: SetupNameScreen()
+        case .setup2: SetupCurrencyScreen()
+        case .setup3: SetupPaymentScreen()
+        case .setup4: SetupNotificationsScreen()
+        case .allSet: AllSetScreen()
         }
     }
 }

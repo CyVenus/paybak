@@ -2,7 +2,7 @@ import SwiftUI
 
 // TODO(Launch phase): replace this placeholder with the real Get Started (screens-launch.md §3).
 /// Get Started: Apple / Google → Setup 1 (no backend yet); email or phone → Sign in.
-/// Back returns to Welcome at the step the user left from.
+/// Figma has no back button here: the edge swipe returns to Welcome at the step the user left from.
 struct GetStartedScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(ProfileStore.self) private var profileStore
@@ -11,7 +11,6 @@ struct GetStartedScreen: View {
         ScreenPlaceholder(
             screen: .getStarted,
             spec: "screens-launch.md §3",
-            onBack: router.pop,
             actions: [
                 .init("Continue with Apple") { signIn(with: .apple) },
                 .init("Continue with Google") { signIn(with: .google) },
