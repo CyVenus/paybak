@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,6 +65,9 @@ enum class PbSettingTone {
  *
  * @param onClick Chevron, Check and None rows; Toggle rows flip their switch instead.
  * @param badge An Inverse `Badge / Pill` before the value ("Pro", "Try free").
+ * @param titleMaxLines 2 where a long title wraps instead of truncating (Help's questions).
+ * @param valueColor The value's colour: `text/secondary`, or e.g. red for "Doesn’t add up".
+ * @param valueLeading Drawn just before the value, e.g. an attached receipt's thumbnail.
  */
 @Composable
 fun PbSettingRow(
@@ -77,6 +81,9 @@ fun PbSettingRow(
     badge: String? = null,
     tone: PbSettingTone = PbSettingTone.Default,
     showDivider: Boolean = true,
+    titleMaxLines: Int = 1,
+    valueColor: Color = PbColors.Text.Secondary,
+    valueLeading: (@Composable () -> Unit)? = null,
 ) {
     val destructive = tone == PbSettingTone.Destructive
     val press = rememberPressState(interactionSource = null)
@@ -124,7 +131,7 @@ fun PbSettingRow(
                     text = title,
                     style = PbTextStyles.Headline,
                     color = if (destructive) PbColors.Text.Destructive else PbColors.Text.Primary,
-                    maxLines = 1,
+                    maxLines = titleMaxLines,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (subtitle != null) {
@@ -132,13 +139,9 @@ fun PbSettingRow(
                 }
             }
             if (badge != null) PbBadge(badge, style = PbBadgeStyle.Inverse)
+            valueLeading?.invoke()
             if (value != null) {
-                Text(
-                    value,
-                    style = PbTextStyles.Body,
-                    color = PbColors.Text.Secondary,
-                    maxLines = 1,
-                )
+                Text(value, style = PbTextStyles.Body, color = valueColor, maxLines = 1)
             }
             SettingTrailing(trailing, destructive)
         }

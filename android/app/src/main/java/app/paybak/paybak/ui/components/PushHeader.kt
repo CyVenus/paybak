@@ -35,9 +35,14 @@ sealed interface PbHeaderAction {
     /**
      * A glass capsule with a Headline label ("Save"). [wide] is for long labels ("Mark all read"):
      * 12 dp sides, at most 122 dp, and the title narrows to 102 dp so 8 dp always separate them.
+     * Disabled, the capsule stays and its label turns `text/tertiary` ("Done" on 06-06).
      */
-    data class Text(val label: String, val onClick: () -> Unit, val wide: Boolean = false) :
-        PbHeaderAction
+    data class Text(
+        val label: String,
+        val onClick: () -> Unit,
+        val wide: Boolean = false,
+        val enabled: Boolean = true,
+    ) : PbHeaderAction
 
     /** A glass icon button (the gear on 10-01). */
     data class Icon(val icon: PbIcon, val contentDescription: String, val onClick: () -> Unit) :
@@ -47,9 +52,11 @@ sealed interface PbHeaderAction {
 /**
  * `Navigation / Push Header` (`PBPushHeader`): the 44 dp header of a pushed screen: the glass back
  * button, a centred Headline title and an optional glass action. On a long scrolling screen, pin it
- * and give it a `bg/primary` background. Parts are tagged "[testTag].back" and "[testTag].action".
+ * and give it a `bg/primary` background. Parts are tagged "[testTag].back" and
+ * "[testTag].[actionTag]".
  *
  * @param onBack Pops the screen, like system back (wire `BackHandler` to the same action).
+ * @param actionTag The action's part tag, e.g. "done" or "edit".
  */
 @Composable
 fun PbPushHeader(
@@ -58,6 +65,7 @@ fun PbPushHeader(
     modifier: Modifier = Modifier,
     action: PbHeaderAction? = null,
     testTag: String? = null,
+    actionTag: String = "action",
 ) {
     Box(modifier.fillMaxWidth().height(PbSize.Tap).partTag(testTag)) {
         PbIconButton(
@@ -75,7 +83,7 @@ fun PbPushHeader(
                 Modifier.align(Alignment.Center),
             )
         }
-        val actionModifier = Modifier.align(Alignment.CenterEnd).partTag(testTag, "action")
+        val actionModifier = Modifier.align(Alignment.CenterEnd).partTag(testTag, actionTag)
         when (action) {
             is PbHeaderAction.Text -> GlassTextAction(action, actionModifier)
             is PbHeaderAction.Icon ->
@@ -120,14 +128,14 @@ private fun GlassTextAction(action: PbHeaderAction.Text, modifier: Modifier = Mo
                 .height(PbSize.Tap)
                 .widthIn(min = PbSize.Tap, max = if (action.wide) 122.dp else Dp.Unspecified)
                 .pbMaterial(PbMaterial.GlassSmall, PbShapes.Pill, fill)
-                .pressable(press, enabled = true, onClick = action.onClick)
+                .pressable(press, enabled = action.enabled, onClick = action.onClick)
                 .padding(horizontal = if (action.wide) PbSpace.S12 else PbSpace.S16),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = action.label,
             style = PbTextStyles.Headline,
-            color = PbColors.Text.Primary,
+            color = if (action.enabled) PbColors.Text.Primary else PbColors.Text.Tertiary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

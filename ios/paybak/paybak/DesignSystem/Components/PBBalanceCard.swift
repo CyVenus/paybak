@@ -137,8 +137,8 @@ private struct PBBalanceCardStyle: ButtonStyle {
 }
 
 /// Card / Balance Summary (Figma 13:271, components-home §7): the Owed and Owe cards side by side
-/// (12 apart, equal widths) and the full-width "Settle up". Test ids: `home.owed`, `home.owe`,
-/// `home.settleUp`.
+/// (12 apart, equal widths) and the full-width "Settle up". Test ids: `home.balance.owed`,
+/// `home.balance.owe`, `home.settleUp`.
 struct PBBalanceSummary: View {
     let totals: HomeTotals
     var currency = "INR"
@@ -151,11 +151,11 @@ struct PBBalanceSummary: View {
         VStack(spacing: PBSpace.s12) {
             HStack(alignment: .top, spacing: PBSpace.s12) {
                 PBBalanceCard(kind: .owed, amount: Money.format(totals.owed, currency, sign: .signed),
-                              caption: totals.owedCaption, onTap: onOwed)
-                    .accessibilityIdentifier("home.owed")
+                              caption: totals.owed > 0 ? totals.owedCaption : "Nothing pending", onTap: onOwed)
+                    .accessibilityIdentifier("home.balance.owed")
                 PBBalanceCard(kind: .owe, amount: Money.format(-totals.owe, currency, sign: .signed),
                               caption: totals.owe > 0 ? totals.oweCaption : "Nothing to pay", onTap: onOwe)
-                    .accessibilityIdentifier("home.owe")
+                    .accessibilityIdentifier("home.balance.owe")
             }
             .fixedSize(horizontal: false, vertical: true)
             if let onSettleUp {

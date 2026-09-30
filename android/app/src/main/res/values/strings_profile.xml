@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the profile module (app-architecture §7.1): names start with "profile_". Only its lane edits this file. -->
 <resources>
+    <!-- Profile tab (screens-profile §2) -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_avatar">Your avatar. Edit avatar</string>
+    <string name="profile_edit_avatar">Edit avatar</string>
+    <string name="profile_row_pro">Paybak Pro</string>
+    <string name="profile_try_free">Try free</string>
+    <string name="profile_pro_active">Active</string>
+    <string name="profile_row_payment">Payment details</string>
+    <string name="profile_value_upi">UPI</string>
+    <string name="profile_value_bank">Bank</string>
+    <string name="profile_row_currency">Currency</string>
+    <string name="profile_row_notifications">Notifications</string>
+    <string name="profile_row_privacy">Privacy</string>
+    <string name="profile_row_help">Help &amp; feedback</string>
+    <string name="profile_sign_out">Sign out</string>
+    <string name="profile_sign_out_title">Sign out?</string>
+    <string name="profile_sign_out_message">Your records stay on this device.</string>
+    <string name="profile_cancel">Cancel</string>
+
+    <!-- Edit avatar (screens-profile §3–4) -->
+    <string name="profile_editor_title">Edit avatar</string>
+    <string name="profile_editor_boy">Boy</string>
+    <string name="profile_editor_girl">Girl</string>
+    <string name="profile_editor_preview">Avatar preview</string>
+    <string name="profile_editor_shuffle">Shuffle avatar</string>
+    <string name="profile_discard_title">Discard changes?</string>
+    <string name="profile_discard_message">Your avatar edits won’t be saved.</string>
+    <string name="profile_discard_keep">Keep editing</string>
+    <string name="profile_discard">Discard</string>
 </resources>
