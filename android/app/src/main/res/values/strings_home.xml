@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the home module (app-architecture §7.1): names start with "home_". Only its lane edits this file. -->
 <resources>
+    <!-- "Good evening, Arjun": part of the day, first name (flow.md) -->
+    <string name="home_greeting">Good %1$s, %2$s</string>
+    <string name="home_ask_paybak">Ask Paybak</string>
+    <string name="home_notifications">Notifications</string>
+    <string name="home_notifications_unread">Notifications, unread</string>
+    <string name="home_due_soon">Due soon</string>
+    <string name="home_remind">Remind</string>
+    <string name="home_settle">Settle</string>
+    <string name="home_recent_activity">Recent activity</string>
+    <string name="home_see_all">See all</string>
+    <string name="home_first_day_title">Nothing here yet.</string>
+    <string name="home_first_day_body">Add your first expense or invite a friend to get started.</string>
+    <string name="home_add_expense">Add expense</string>
+    <string name="home_invite_friends">Invite friends</string>
+    <string name="home_all_square_title">You’re all square.</string>
+    <string name="home_all_square_body">No one owes anyone right now.</string>
 </resources>
