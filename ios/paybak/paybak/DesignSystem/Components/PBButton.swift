@@ -73,7 +73,9 @@ private struct PBPillButtonStyle: ButtonStyle {
         let colors = style.colors(isPressed: isPressed, isEnabled: isEnabled)
         configuration.label
             .foregroundStyle(colors.label)
-            .padding(.horizontal, size.horizontalPadding)
+            // A full-width pill takes its width from the layout, so a long label may use more of it
+            // (Figma lets "Record payment" fit a 175 pt half-width button).
+            .padding(.horizontal, fillsWidth ? PBSpace.s16 : size.horizontalPadding)
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(height: size.height)
             .background(colors.fill, in: .capsule)
