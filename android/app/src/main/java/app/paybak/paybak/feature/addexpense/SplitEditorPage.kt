@@ -18,8 +18,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.domain.addrecord.AmountEntry
 import app.paybak.paybak.domain.addrecord.SplitDraft
 import app.paybak.paybak.domain.format.Money
@@ -43,7 +45,6 @@ import app.paybak.paybak.ui.theme.PbTextStyles
 
 /** The editor's modes in segment order: Equally · Exact · % · Shares. */
 private val Modes = listOf(SplitMode.Equal, SplitMode.Exact, SplitMode.Percent, SplitMode.Shares)
-private val ModeLabels = listOf("Equally", "Exact", "%", "Shares")
 private val ModeTags = listOf("equally", "exact", "percent", "shares")
 
 private val DraftSaver: Saver<SplitDraft, String> =
@@ -96,9 +97,14 @@ fun SplitEditorPage(
         testTag = "split.page",
         header = {
             PbPushHeader(
-                "Split",
+                stringResource(R.string.add_split),
                 onBack = leave,
-                action = PbHeaderAction.Text("Done", { onDone(draft) }, enabled = preview.balanced),
+                action =
+                    PbHeaderAction.Text(
+                        stringResource(R.string.add_done),
+                        { onDone(draft) },
+                        enabled = preview.balanced,
+                    ),
                 testTag = "split",
                 actionTag = "done",
             )
@@ -123,7 +129,12 @@ fun SplitEditorPage(
             textAlign = TextAlign.Center,
         )
         PbSegmentedControl(
-            ModeLabels,
+            listOf(
+                stringResource(R.string.add_split_equally),
+                stringResource(R.string.add_split_exact),
+                stringResource(R.string.add_split_percent),
+                stringResource(R.string.add_split_shares),
+            ),
             selectedIndex = Modes.indexOf(draft.mode).coerceAtLeast(0),
             onSelect = { index ->
                 haptics.perform(HapticKind.Selection)
@@ -190,7 +201,7 @@ fun SplitEditorPage(
         }
         if (draft.mode == SplitMode.Equal || draft.mode == SplitMode.Shares) {
             Text(
-                "Uncheck someone to leave them out.",
+                stringResource(R.string.add_split_hint),
                 Modifier.testTag("split.hint"),
                 style = PbTextStyles.Footnote,
                 color = PbColors.Text.Secondary,

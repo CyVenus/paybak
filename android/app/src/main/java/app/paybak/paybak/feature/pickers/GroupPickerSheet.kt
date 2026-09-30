@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.model.GroupKind
 import app.paybak.paybak.domain.model.ME
@@ -54,14 +56,21 @@ fun GroupPickerSheet(route: Route.PickGroup) {
                 }
                 .map { Choice(it.id, "Loan · ${it.title}", PbIcon.Lend) }
     val choices =
-        listOf(Choice(null, if (person != null) "None" else "No group", PbIcon.Groups)) +
-            groups +
-            loans
+        listOf(
+            Choice(
+                null,
+                if (person != null) stringResource(R.string.add_none)
+                else stringResource(R.string.add_no_group),
+                PbIcon.Groups,
+            )
+        ) + groups + loans
     PbSheet(
         onDismiss = {
             answer?.let { navigator.complete(route.request.id, it) } ?: navigator.dismissSheet()
         },
-        title = if (person != null) "For" else "Group",
+        title =
+            if (person != null) stringResource(R.string.add_for)
+            else stringResource(R.string.add_group),
         testTag = "group.sheet",
     ) { dismiss ->
         Column(Modifier.verticalScroll(rememberScrollState()).testTag("screen.pickGroup")) {

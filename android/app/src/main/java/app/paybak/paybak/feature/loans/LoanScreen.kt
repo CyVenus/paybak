@@ -14,7 +14,9 @@ import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.addrecord.LoanSchedule
 import app.paybak.paybak.domain.calc.loanDetail
@@ -65,17 +67,18 @@ fun LoanScreen(route: Route.Loan) {
     val lent = loan?.lenderId == ME
     val overdue = detail?.rows?.any { it.overdue } == true
     val next = detail?.rows?.firstOrNull { it.installment.paidOn == null }
+    val noDueDate = stringResource(R.string.add_no_due_date)
 
     PbPinnedHeaderScreen(
         testTag = "screen.loan",
         header = {
             PbPushHeader(
-                "Loan",
+                stringResource(R.string.add_loan),
                 onBack = { navigator.back() },
                 action =
                     if (loan != null && !paidBack) {
                         PbHeaderAction.Text(
-                            "Edit",
+                            stringResource(R.string.add_edit),
                             {
                                 navigator.open(Route.LendMoney(LendMoneyArgs(editing = loan.id)))
                             },
@@ -94,7 +97,7 @@ fun LoanScreen(route: Route.Loan) {
                     ) {
                         if (overdue && lent) {
                             PbButton(
-                                "Remind ${people.first(loan.friendId)}",
+                                stringResource(R.string.add_remind, people.first(loan.friendId)),
                                 onClick = {
                                     navigator.open(
                                         Route.Remind(
@@ -108,7 +111,7 @@ fun LoanScreen(route: Route.Loan) {
                             )
                         }
                         PbButton(
-                            "Record repayment",
+                            stringResource(R.string.add_record_repayment),
                             onClick = {
                                 navigator.open(
                                     Route.RecordPayment(
@@ -130,7 +133,7 @@ fun LoanScreen(route: Route.Loan) {
     ) {
         if (detail == null || loan == null) {
             Text(
-                "This loan isn’t available any more.",
+                stringResource(R.string.add_loan_gone),
                 style = PbTextStyles.Body,
                 color = PbColors.Text.Secondary,
             )
@@ -138,12 +141,13 @@ fun LoanScreen(route: Route.Loan) {
         }
         val name = people.first(loan.friendId)
         PbAmountHero(
-            if (lent) "You lent $name" else "You borrowed from $name",
+            if (lent) stringResource(R.string.add_you_lent, name)
+            else stringResource(R.string.add_you_borrowed, name),
             Money.format(loan.amount, loan.currency),
             detail.meta,
             PbHeroLeading.Single(people.avatar(loan.friendId)),
             Modifier.testTag("loan.hero"),
-            status = "Paid back".takeIf { paidBack },
+            status = stringResource(R.string.add_paid_back).takeIf { paidBack },
         )
         PbLoanProgressCard(
             original = Money.format(loan.amount, loan.currency),
@@ -157,7 +161,8 @@ fun LoanScreen(route: Route.Loan) {
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
             val plan = loan.installments
             PbSectionHeader(
-                if (plan != null) LoanSchedule.header(plan.count, plan.frequency) else "Due"
+                if (plan != null) LoanSchedule.header(plan.count, plan.frequency)
+                else stringResource(R.string.add_due)
             )
             Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
                 PbCard {
@@ -170,10 +175,12 @@ fun LoanScreen(route: Route.Loan) {
                                     if (paid) PbIcon.CheckCircle else PbIcon.Calendar
                                 ),
                                 title =
-                                    if (plan != null) "Installment ${index + 1}" else loan.title,
+                                    if (plan != null)
+                                        stringResource(R.string.add_installment, index + 1)
+                                    else loan.title,
                                 subtitle =
                                     if (row.overdue && due != null) Dates.dueLabel(due)
-                                    else row.label.ifEmpty { "No due date" },
+                                    else row.label.ifEmpty { noDueDate },
                                 amount = Money.format(row.installment.amount, loan.currency),
                                 badge = row.label.takeIf { row.overdue },
                                 badgeStyle = PbBadgeStyle.Overdue.takeIf { row.overdue },

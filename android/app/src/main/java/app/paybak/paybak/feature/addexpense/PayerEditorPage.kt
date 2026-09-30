@@ -17,8 +17,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.domain.addrecord.AmountEntry
 import app.paybak.paybak.domain.format.Money
 import app.paybak.paybak.feature.pickers.PeopleDirectory
@@ -60,9 +62,14 @@ fun PayerEditorPage(
         testTag = "payers.page",
         header = {
             PbPushHeader(
-                "Paid by",
+                stringResource(R.string.add_paid_by),
                 onBack = onBack,
-                action = PbHeaderAction.Text("Done", { onDone(amounts) }, enabled = balanced),
+                action =
+                    PbHeaderAction.Text(
+                        stringResource(R.string.add_done),
+                        { onDone(amounts) },
+                        enabled = balanced,
+                    ),
                 testTag = "payers",
                 actionTag = "done",
             )
@@ -120,7 +127,7 @@ fun PayerEditorPage(
             }
         }
         Text(
-            "Enter how much each person paid.",
+            stringResource(R.string.add_payers_hint),
             style = PbTextStyles.Footnote,
             color = PbColors.Text.Secondary,
         )

@@ -13,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.addrecord.DateCopy
 import app.paybak.paybak.navigation.DateKind
@@ -55,7 +57,8 @@ fun DatePickerSheet(route: Route.PickDate) {
         onDismiss = {
             answer?.let { navigator.complete(route.request.id, it) } ?: navigator.dismissSheet()
         },
-        title = if (due) "Due date" else "Date",
+        title =
+            if (due) stringResource(R.string.add_due_date) else stringResource(R.string.add_date),
         testTag = "$tag.sheet",
     ) { dismiss ->
         Column(
@@ -92,7 +95,8 @@ fun DatePickerSheet(route: Route.PickDate) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 PbButton(
-                    if (due) "Set due date" else "Set date",
+                    if (due) stringResource(R.string.add_set_due_date)
+                    else stringResource(R.string.add_set_date),
                     onClick = {
                         answer = RouteResult.Day(day)
                         dismiss()
@@ -102,7 +106,7 @@ fun DatePickerSheet(route: Route.PickDate) {
                 )
                 if (due && route.allowsNone) {
                     PbTextButton(
-                        "No due date",
+                        stringResource(R.string.add_no_due_date),
                         onClick = {
                             answer = RouteResult.Day(null)
                             dismiss()

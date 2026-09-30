@@ -23,9 +23,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.addLoan
 import app.paybak.paybak.data.ledger.actions.updateLoan
 import app.paybak.paybak.data.ledger.collectSnapshot
@@ -142,6 +144,11 @@ fun LendMoneyScreen(route: Route.LendMoney) {
     }
 
     val canSave = form.total > 0 && form.friendId != null
+    val loanAdded = stringResource(R.string.add_toast_loan_added)
+    val optional = stringResource(R.string.add_optional)
+    val personTitle =
+        if (form.lent) stringResource(R.string.add_lent_to)
+        else stringResource(R.string.add_borrowed_from)
     fun close() {
         if (form != initial.value) discarding = true else navigator.dismissModal()
     }
@@ -156,7 +163,7 @@ fun LendMoneyScreen(route: Route.LendMoney) {
                 ledger.updateLoan(editing.id, draft)
                 navigator.dismissModal()
             } else {
-                navigator.didSave(Route.Loan(ledger.addLoan(draft)), "Loan added")
+                navigator.didSave(Route.Loan(ledger.addLoan(draft)), loanAdded)
             }
             haptics.perform(HapticKind.Success)
         } catch (error: LedgerRuleException) {
@@ -171,9 +178,10 @@ fun LendMoneyScreen(route: Route.LendMoney) {
         testTag = "screen.lendMoney",
         header = {
             PbModalHeader(
-                if (editing != null) "Edit loan" else "Lend money",
+                if (editing != null) stringResource(R.string.add_edit_loan)
+                else stringResource(R.string.add_lend_money),
                 onClose = ::close,
-                action = "Save",
+                action = stringResource(R.string.add_save),
                 actionEnabled = canSave,
                 onAction = ::save,
                 testTag = "lendMoney",
@@ -182,7 +190,7 @@ fun LendMoneyScreen(route: Route.LendMoney) {
         },
     ) {
         PbSegmentedControl(
-            listOf("I lent", "I borrowed"),
+            listOf(stringResource(R.string.add_i_lent), stringResource(R.string.add_i_borrowed)),
             selectedIndex = if (form.lent) 0 else 1,
             onSelect = {
                 haptics.perform(HapticKind.Selection)
@@ -209,33 +217,34 @@ fun LendMoneyScreen(route: Route.LendMoney) {
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S24)) {
             PbCard {
                 PbSettingRow(
-                    if (form.lent) "Lent to" else "Borrowed from",
+                    personTitle,
                     Modifier.testTag("lendMoney.person"),
                     icon = PbIcon.Profile,
-                    value = form.friendId?.let(people::first) ?: "Choose",
+                    value =
+                        form.friendId?.let(people::first) ?: stringResource(R.string.add_choose),
                     onClick = {
                         open(
                             Route.PickPeople(
                                 request("person"),
                                 PickMode.Single,
-                                title = if (form.lent) "Lent to" else "Borrowed from",
+                                title = personTitle,
                                 includesYou = false,
                             )
                         )
                     },
                 )
                 PbSettingRow(
-                    "Reason",
+                    stringResource(R.string.add_reason),
                     Modifier.testTag("lendMoney.reason"),
                     icon = PbIcon.Receipt,
-                    value = form.reason.ifBlank { "Optional" },
+                    value = form.reason.ifBlank { optional },
                     onClick = {
                         focusManager.clearFocus()
                         sheet = "reason"
                     },
                 )
                 PbSettingRow(
-                    "Date",
+                    stringResource(R.string.add_date),
                     Modifier.testTag("lendMoney.date"),
                     icon = PbIcon.Calendar,
                     value = Dates.day(form.date),
@@ -248,10 +257,10 @@ fun LendMoneyScreen(route: Route.LendMoney) {
             Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
                 PbCard {
                     PbSettingRow(
-                        "Installments",
+                        stringResource(R.string.add_installments),
                         Modifier.testTag("lendMoney.installments"),
                         icon = PbIcon.Lend,
-                        subtitle = "Paid back in parts",
+                        subtitle = stringResource(R.string.add_installments_subtitle),
                         trailing =
                             PbSettingTrailing.Toggle(form.installments) {
                                 form = form.copy(installments = it)
@@ -259,7 +268,7 @@ fun LendMoneyScreen(route: Route.LendMoney) {
                     )
                     if (form.installments) {
                         PbSettingRow(
-                            "Number of installments",
+                            stringResource(R.string.add_installment_count),
                             Modifier.testTag("lendMoney.count"),
                             icon = PbIcon.Split,
                             value = form.count.toString(),
@@ -272,14 +281,14 @@ fun LendMoneyScreen(route: Route.LendMoney) {
                                 ),
                         )
                         PbSettingRow(
-                            "Repeats",
+                            stringResource(R.string.add_repeats),
                             Modifier.testTag("lendMoney.repeats"),
                             icon = PbIcon.Repeat,
                             value = form.frequency.label,
                             onClick = { sheet = "repeats" },
                         )
                         PbSettingRow(
-                            "First due",
+                            stringResource(R.string.add_first_due),
                             Modifier.testTag("lendMoney.firstDue"),
                             icon = PbIcon.Calendar,
                             value = Dates.day(form.effectiveFirstDue),
@@ -297,10 +306,10 @@ fun LendMoneyScreen(route: Route.LendMoney) {
                         )
                     } else {
                         PbSettingRow(
-                            "Due",
+                            stringResource(R.string.add_due),
                             Modifier.testTag("lendMoney.due"),
                             icon = PbIcon.Calendar,
-                            value = form.due?.let(Dates::day) ?: "None",
+                            value = form.due?.let(Dates::day) ?: stringResource(R.string.add_none),
                             onClick = { open(dueRoute(request("due"), form.due)) },
                             showDivider = false,
                         )
@@ -347,10 +356,12 @@ fun LendMoneyScreen(route: Route.LendMoney) {
     }
     if (discarding) {
         PbAlert(
-            title = if (editing != null) "Discard changes?" else "Discard this loan?",
-            message = "Your changes won’t be saved.",
-            cancelLabel = "Keep editing",
-            actionLabel = "Discard",
+            title =
+                if (editing != null) stringResource(R.string.add_discard_changes)
+                else stringResource(R.string.add_loan_discard_title),
+            message = stringResource(R.string.add_discard_message),
+            cancelLabel = stringResource(R.string.add_keep_editing),
+            actionLabel = stringResource(R.string.add_discard),
             onCancel = { discarding = false },
             onAction = {
                 discarding = false
@@ -384,7 +395,7 @@ private fun DueChips(due: LocalDate?, today: LocalDate, onChip: (DueChip?) -> Un
             )
         }
         PbCategoryChip(
-            "Pick date",
+            stringResource(R.string.add_pick_date),
             Modifier.testTag("lendMoney.due.pick"),
             onClick = { onChip(null) },
             onCard = true,
@@ -404,7 +415,7 @@ private fun ReasonSheet(reason: String, onDone: (String) -> Unit, onDismiss: () 
             if (save) onDone(text.trim())
             onDismiss()
         },
-        title = "Reason",
+        title = stringResource(R.string.add_reason),
         testTag = "reason.sheet",
     ) { dismiss ->
         val done = {
@@ -415,7 +426,7 @@ private fun ReasonSheet(reason: String, onDone: (String) -> Unit, onDismiss: () 
             PbTextField(
                 text,
                 { text = it.take(MAX_REASON) },
-                placeholder = "What’s it for?",
+                placeholder = stringResource(R.string.add_whats_it_for),
                 keyboardOptions =
                     KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -425,7 +436,7 @@ private fun ReasonSheet(reason: String, onDone: (String) -> Unit, onDismiss: () 
                 fieldModifier = Modifier.focusRequester(focus).testTag("reason.field"),
             )
             PbButton(
-                "Done",
+                stringResource(R.string.add_done),
                 onClick = done,
                 modifier = Modifier.fillMaxWidth().testTag("reason.done"),
             )
@@ -442,7 +453,7 @@ private fun RepeatsSheet(selected: Frequency, onPick: (Frequency) -> Unit, onDis
             picked?.let(onPick)
             onDismiss()
         },
-        title = "Repeats",
+        title = stringResource(R.string.add_repeats),
         testTag = "repeats.sheet",
     ) { dismiss ->
         PbCard {

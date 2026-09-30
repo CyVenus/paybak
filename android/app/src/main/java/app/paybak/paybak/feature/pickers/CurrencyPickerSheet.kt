@@ -17,7 +17,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import app.paybak.paybak.R
 import app.paybak.paybak.data.Currencies
 import app.paybak.paybak.data.Currency
 import app.paybak.paybak.data.ledger.collectSnapshot
@@ -72,9 +74,10 @@ fun CurrencyPickerSheet(route: Route.PickCurrency) {
             if (code != null) navigator.complete(route.request.id, RouteResult.Currency(code))
             else navigator.dismissSheet()
         },
-        title = route.title ?: "Currency",
+        title = route.title ?: stringResource(R.string.add_currency),
         detent = PbSheetDetent.Large,
-        search = PbSheetSearch(query, { query = it }, "Search currencies"),
+        search =
+            PbSheetSearch(query, { query = it }, stringResource(R.string.add_search_currencies)),
         testTag = "currency.sheet",
     ) { dismiss ->
         val pick: (String) -> Unit = {
@@ -87,7 +90,7 @@ fun CurrencyPickerSheet(route: Route.PickCurrency) {
                 if (results.isEmpty()) {
                     item {
                         Text(
-                            "No currencies match “$query”",
+                            stringResource(R.string.add_no_currencies, query),
                             Modifier.fillMaxWidth().padding(top = PbSpace.S16),
                             style = PbTextStyles.Footnote,
                             color = PbColors.Text.Secondary,
@@ -97,13 +100,13 @@ fun CurrencyPickerSheet(route: Route.PickCurrency) {
                 }
                 items(results, key = { it.code }) { CurrencyItem(it, route.selected, pick) }
             } else {
-                item { PbSectionHeader("Recent") }
+                item { PbSectionHeader(stringResource(R.string.add_recent)) }
                 items(recent, key = { "recent-$it" }) {
                     CurrencyItem(Currencies.currency(it), route.selected, pick)
                 }
                 item {
                     Column(Modifier.padding(top = PbSpace.S24 - PbSpace.S4)) {
-                        PbSectionHeader("All currencies")
+                        PbSectionHeader(stringResource(R.string.add_all_currencies))
                     }
                 }
                 items(others, key = { it.code }) { CurrencyItem(it, route.selected, pick) }

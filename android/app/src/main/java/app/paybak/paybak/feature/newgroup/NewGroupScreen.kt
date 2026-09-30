@@ -23,11 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.actions.addGroup
 import app.paybak.paybak.domain.actions.LedgerRuleException
 import app.paybak.paybak.domain.addrecord.AmountEntry
@@ -77,13 +79,13 @@ import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
 
-/** Group types in chip order, with their labels (record-lend-group §6.2). */
+/** Group types in chip order, with their labels and tags (record-lend-group §6.2). */
 private val Types =
     listOf(
-        GroupType.Trip to "Trip",
-        GroupType.Home to "Home",
-        GroupType.Friends to "Friends",
-        GroupType.Other to "Other",
+        Triple(GroupType.Trip, R.string.add_type_trip, "trip"),
+        Triple(GroupType.Home, R.string.add_type_home, "home"),
+        Triple(GroupType.Friends, R.string.add_type_friends, "friends"),
+        Triple(GroupType.Other, R.string.add_type_other, "other"),
     )
 private val Rules = listOf(ContributionRule.Equal, ContributionRule.Percent, ContributionRule.Fixed)
 
@@ -124,6 +126,7 @@ fun NewGroupScreen(route: Route.NewGroup) {
         }
     var form by rememberSaveable(stateSaver = GroupForm.Saver) { mutableStateOf(initial.value) }
     var discarding by rememberSaveable { mutableStateOf(false) }
+    val addPeople = stringResource(R.string.add_add_people)
     val requestId = rememberSaveable { newId() }
     RouteResultEffect("$requestId.people") { result ->
         (result as? RouteResult.People)?.let { picked ->
@@ -156,9 +159,9 @@ fun NewGroupScreen(route: Route.NewGroup) {
         testTag = "screen.newGroup",
         header = {
             PbModalHeader(
-                "New group",
+                stringResource(R.string.add_new_group),
                 onClose = ::close,
-                action = "Create",
+                action = stringResource(R.string.add_create),
                 actionEnabled = form.canCreate,
                 onAction = ::create,
                 testTag = "newGroup",
@@ -167,7 +170,10 @@ fun NewGroupScreen(route: Route.NewGroup) {
         },
     ) {
         PbSegmentedControl(
-            listOf("Group", "Project"),
+            listOf(
+                stringResource(R.string.add_mode_group),
+                stringResource(R.string.add_mode_project),
+            ),
             selectedIndex = if (form.project) 1 else 0,
             onSelect = {
                 haptics.perform(HapticKind.Selection)
@@ -181,8 +187,10 @@ fun NewGroupScreen(route: Route.NewGroup) {
                 PbTextField(
                     form.name,
                     { form = form.copy(name = it.take(MAX_NAME)) },
-                    label = "Name",
-                    placeholder = if (form.project) "e.g. Build a Drone" else "e.g. Weekend Trek",
+                    label = stringResource(R.string.add_name),
+                    placeholder =
+                        if (form.project) stringResource(R.string.add_project_name_placeholder)
+                        else stringResource(R.string.add_group_name_placeholder),
                     keyboardOptions =
                         KeyboardOptions(
                             capitalization = KeyboardCapitalization.Words,
@@ -194,18 +202,21 @@ fun NewGroupScreen(route: Route.NewGroup) {
                     PbTextField(
                         form.description,
                         { form = form.copy(description = it.take(MAX_DESCRIPTION)) },
-                        label = "Description",
-                        placeholder = "What’s it for?",
+                        label = stringResource(R.string.add_description),
+                        placeholder = stringResource(R.string.add_whats_it_for),
                         keyboardOptions =
                             KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         fieldModifier = Modifier.testTag("newGroup.description"),
                     )
                     PbCard {
                         PbSettingRow(
-                            if (form.cover != null) "Cover photo" else "Add cover photo",
+                            if (form.cover != null) stringResource(R.string.add_cover_photo)
+                            else stringResource(R.string.add_add_cover_photo),
                             Modifier.testTag("newGroup.cover"),
                             icon = PbIcon.Camera,
-                            value = if (form.cover != null) "Added" else null,
+                            value =
+                                if (form.cover != null) stringResource(R.string.add_added)
+                                else null,
                             valueLeading =
                                 form.cover?.let {
                                     { PbReceiptThumbnail(Modifier.size(32.dp), photo = cover) }
@@ -229,9 +240,9 @@ fun NewGroupScreen(route: Route.NewGroup) {
                             form = form.copy(budget = it)
                         }
                     },
-                    label = "Budget",
+                    label = stringResource(R.string.add_budget),
                     placeholder = AmountEntry.placeholder(form.currency),
-                    helper = "Optional. Spending is tracked against it.",
+                    helper = stringResource(R.string.add_budget_helper),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     fieldModifier = Modifier.testTag("newGroup.budget"),
                 )
@@ -251,7 +262,7 @@ fun NewGroupScreen(route: Route.NewGroup) {
                         Route.PickPeople(
                             PickRequest("$requestId.people"),
                             selected = form.members,
-                            title = "Add people",
+                            title = addPeople,
                             includesYou = false,
                         )
                     )
@@ -259,7 +270,7 @@ fun NewGroupScreen(route: Route.NewGroup) {
             )
             PbCard {
                 PbSettingRow(
-                    "Currency",
+                    stringResource(R.string.add_currency),
                     Modifier.testTag("newGroup.currency"),
                     icon = PbIcon.Exchange,
                     value = "${form.currency} ${Money.currency(form.currency).symbol}",
@@ -276,10 +287,10 @@ fun NewGroupScreen(route: Route.NewGroup) {
                 )
                 if (!form.project) {
                     PbSettingRow(
-                        "Simplify debts",
+                        stringResource(R.string.add_simplify_debts),
                         Modifier.testTag("newGroup.simplify"),
                         icon = PbIcon.Shuffle,
-                        subtitle = "Fewer payments when settling up",
+                        subtitle = stringResource(R.string.add_simplify_debts_subtitle),
                         trailing =
                             PbSettingTrailing.Toggle(form.simplify) {
                                 form = form.copy(simplify = it)
@@ -292,10 +303,12 @@ fun NewGroupScreen(route: Route.NewGroup) {
     }
     if (discarding) {
         PbAlert(
-            title = if (form.project) "Discard this project?" else "Discard this group?",
-            message = "Your changes won’t be saved.",
-            cancelLabel = "Keep editing",
-            actionLabel = "Discard",
+            title =
+                if (form.project) stringResource(R.string.add_project_discard_title)
+                else stringResource(R.string.add_group_discard_title),
+            message = stringResource(R.string.add_discard_message),
+            cancelLabel = stringResource(R.string.add_keep_editing),
+            actionLabel = stringResource(R.string.add_discard),
             onCancel = { discarding = false },
             onAction = {
                 discarding = false
@@ -310,12 +323,16 @@ fun NewGroupScreen(route: Route.NewGroup) {
 @Composable
 private fun TypePicker(selected: GroupType?, onPick: (GroupType) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S4)) {
-        Text("Type", style = PbTextStyles.Subheadline, color = PbColors.Text.Secondary)
+        Text(
+            stringResource(R.string.add_type),
+            style = PbTextStyles.Subheadline,
+            color = PbColors.Text.Secondary,
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
-            Types.forEach { (type, label) ->
+            Types.forEach { (type, label, tag) ->
                 PbCategoryChip(
-                    label,
-                    Modifier.testTag("newGroup.type.${label.lowercase()}"),
+                    stringResource(label),
+                    Modifier.testTag("newGroup.type.$tag"),
                     selected = type == selected,
                     onClick = { onPick(type) },
                 )
@@ -332,9 +349,17 @@ private fun ContributionPicker(
     onPick: (ContributionRule) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
-        Text("Contribution", style = PbTextStyles.Subheadline, color = PbColors.Text.Secondary)
+        Text(
+            stringResource(R.string.add_contribution),
+            style = PbTextStyles.Subheadline,
+            color = PbColors.Text.Secondary,
+        )
         PbSegmentedControl(
-            listOf("Equal", "Percent", "Fixed"),
+            listOf(
+                stringResource(R.string.add_contribution_equal),
+                stringResource(R.string.add_contribution_percent),
+                stringResource(R.string.add_contribution_fixed),
+            ),
             selectedIndex = Rules.indexOf(rule),
             onSelect = { onPick(Rules[it]) },
             modifier = Modifier.fillMaxWidth(),
@@ -361,7 +386,7 @@ private fun Members(
     onAdd: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S4)) {
-        PbSectionHeader("Members")
+        PbSectionHeader(stringResource(R.string.add_members))
         PbCard {
             form.everyone.forEachIndexed { index, id ->
                 val you = id == ME
@@ -374,14 +399,18 @@ private fun Members(
                         form.project -> null
                         you -> null
                         else ->
-                            PbPersonTrailing.Remove("Remove ${people.first(id)}") { onRemove(id) }
+                            PbPersonTrailing.Remove(
+                                stringResource(R.string.add_remove, people.first(id))
+                            ) {
+                                onRemove(id)
+                            }
                     }
                 Box(Modifier.testTag("newGroup.member.$index")) {
                     PbPersonRow(
-                        if (you) "You" else people.full(id),
+                        if (you) stringResource(R.string.add_you) else people.full(id),
                         people.avatar(id),
                         subtitle = people.full(ME).takeIf { you && !form.project },
-                        tag = "Guest".takeIf { people.isGuest(id) },
+                        tag = stringResource(R.string.add_guest).takeIf { people.isGuest(id) },
                         trailing = trailing,
                         size = PbPersonRowSize.Compact,
                     )
@@ -427,7 +456,7 @@ private fun AddPeopleRow(onClick: () -> Unit) {
             PbIconImage(PbIcon.UserAdd, contentDescription = null)
         }
         Text(
-            "Add people",
+            stringResource(R.string.add_add_people),
             Modifier.weight(1f),
             style = PbTextStyles.Headline,
             color = PbColors.Text.Primary,
