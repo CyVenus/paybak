@@ -6,11 +6,18 @@ import SwiftUI
 struct SettingsScaffold<Content: View, Bottom: View>: View {
     let title: String
     let testIDPrefix: String
-    @ViewBuilder var content: Content
+    let content: Content
     /// A pinned bottom bar (Export's CTA), drawn over a white strip.
-    @ViewBuilder var bottom: Bottom
+    let bottom: Bottom
 
     @Environment(AppRouter.self) private var router
+
+    init(title: String, testIDPrefix: String, @ViewBuilder content: () -> Content, @ViewBuilder bottom: () -> Bottom) {
+        self.title = title
+        self.testIDPrefix = testIDPrefix
+        self.content = content()
+        self.bottom = bottom()
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,7 +44,7 @@ struct SettingsScaffold<Content: View, Bottom: View>: View {
 
 extension SettingsScaffold where Bottom == EmptyView {
     init(title: String, testIDPrefix: String, @ViewBuilder content: () -> Content) {
-        self.init(title: title, testIDPrefix: testIDPrefix, content: content, bottom: { EmptyView() })
+        self.init(title: title, testIDPrefix: testIDPrefix, content: content) { EmptyView() }
     }
 }
 
