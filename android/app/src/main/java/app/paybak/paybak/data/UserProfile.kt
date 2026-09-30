@@ -23,7 +23,7 @@ sealed interface AvatarChoice {
     /** Index into `PbPeepHead.Presets` (0 = Arjun … 4 = Dev). */
     data class Preset(val index: Int) : AvatarChoice
 
-    /** A photo saved in the app's files directory; see [ProfileStore.photoFile]. */
+    /** A photo saved with the profile; see [ProfileStore.photoFile]. */
     data class Photo(val fileName: String) : AvatarChoice
 }
 

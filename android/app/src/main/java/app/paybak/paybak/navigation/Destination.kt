@@ -8,14 +8,19 @@ enum class HomeState(val id: String) {
 }
 
 /**
- * Every screen in flow.md. [id] is the flow.md screen id (also the debug start-screen id), and it
- * encodes the whole destination, so the back stack can be saved as a list of ids.
+ * Every screen in flow.md. [id] is the flow.md screen id (also the debug start-screen id), and
+ * [savedKey] encodes the whole destination, so the back stack can be saved as a list of keys.
  *
  * Welcome, Verify, Setup and Home are each ONE screen with a state (step, error, sheet), so moving
  * between their states is not a push: they share a [screenKey].
  */
 sealed interface Destination {
+    /** The flow.md screen id. */
     val id: String
+
+    /** Encodes the whole destination for a saved back stack; [fromSavedKey] decodes it. */
+    val savedKey: String
+        get() = id
 
     /** Destinations with the same key are the same screen in a different state. */
     val screenKey: String
@@ -52,9 +57,14 @@ sealed interface Destination {
         override val id = "allSet"
     }
 
+    /** The Add sheet can open over any [state]; flow.md's `homeAddSheet` is the sheet itself. */
     data class Home(val state: HomeState, val addSheetOpen: Boolean = false) : Destination {
         override val id
             get() = if (addSheetOpen) "homeAddSheet" else state.id
+
+        /** Unlike [id], this keeps the state under the sheet. */
+        override val savedKey
+            get() = if (addSheetOpen) "${state.id}+addSheet" else state.id
     }
 
     companion object {
@@ -78,7 +88,13 @@ sealed interface Destination {
             add(Home(HomeState.Active, addSheetOpen = true))
         }
 
+        /** [all], plus the Add sheet over the other Home states. */
+        private val saveable: List<Destination> =
+            (all + HomeState.entries.map { Home(it, addSheetOpen = true) }).distinct()
+
         fun fromId(id: String): Destination? = all.firstOrNull { it.id == id }
+
+        fun fromSavedKey(key: String): Destination? = saveable.firstOrNull { it.savedKey == key }
     }
 }
 

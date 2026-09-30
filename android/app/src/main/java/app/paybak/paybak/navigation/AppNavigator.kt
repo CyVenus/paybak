@@ -25,9 +25,9 @@ enum class NavTransition {
 }
 
 /**
- * The app's back stack. It is saved as destination ids, so it survives recreation. Moving between
- * states of one screen (a Welcome or Setup step, the Add sheet) replaces the top entry and the
- * screen animates the change itself.
+ * The app's back stack. It is saved as [Destination.savedKey]s, so it survives recreation and
+ * process death. Moving between states of one screen (a Welcome or Setup step, the Add sheet)
+ * replaces the top entry and the screen animates the change itself.
  */
 @Stable
 class AppNavigator(initialStack: List<Destination>) {
@@ -85,10 +85,12 @@ class AppNavigator(initialStack: List<Destination>) {
     companion object {
         val Saver =
             listSaver<AppNavigator, String>(
-                save = { navigator -> navigator.stack.map(Destination::id) },
-                restore = { ids ->
+                save = { navigator -> navigator.stack.map(Destination::savedKey) },
+                restore = { keys ->
                     AppNavigator(
-                        ids.mapNotNull(Destination::fromId).ifEmpty { listOf(Destination.Splash) }
+                        keys.mapNotNull(Destination::fromSavedKey).ifEmpty {
+                            listOf(Destination.Splash)
+                        }
                     )
                 },
             )

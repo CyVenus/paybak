@@ -1,5 +1,6 @@
 package app.paybak.paybak.navigation
 
+import androidx.compose.runtime.saveable.SaverScope
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -30,6 +31,25 @@ class AppNavigatorTest {
             )
         assertEquals(ids, Destination.all.map(Destination::id))
         ids.forEach { id -> assertEquals(id, Destination.fromId(id)?.id) }
+    }
+
+    @Test
+    fun aSavedStackRestoresEveryDestinationExactly() {
+        val destinations =
+            Destination.all + HomeState.entries.map { Destination.Home(it, addSheetOpen = true) }
+        destinations.forEach { destination ->
+            assertEquals(destination, AppNavigator(listOf(destination)).savedAndRestored().current)
+        }
+    }
+
+    @Test
+    fun aRestoredStackKeepsItsHistory() {
+        val navigator = AppNavigator(canonicalBackStack(Destination.Setup(3))).savedAndRestored()
+        navigator.back()
+        assertEquals(Destination.Setup(2), navigator.current)
+        navigator.back()
+        navigator.back()
+        assertEquals(Destination.Verify(wrongCode = false), navigator.current)
     }
 
     @Test
@@ -77,4 +97,10 @@ class AppNavigatorTest {
         navigator.back()
         assertEquals(Destination.Home(HomeState.Active), navigator.current)
     }
+}
+
+/** Saves and restores the navigator the way `rememberSaveable` does across process death. */
+private fun AppNavigator.savedAndRestored(): AppNavigator {
+    val saved = with(AppNavigator.Saver) { SaverScope { true }.save(this@savedAndRestored) }
+    return AppNavigator.Saver.restore(checkNotNull(saved)) ?: error("Nothing restored")
 }

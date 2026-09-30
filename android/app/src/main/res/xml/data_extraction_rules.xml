@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Cloud backup and device transfer on Android 12 and higher. Keep in step with backup_rules.xml.
+    Only the saved profile is copied (ProfileStore: the "profile" preferences and photo folder).
+    With no account backend it is all the user has, and it moves to a new phone the way iOS
+    backs up UserDefaults and Application Support.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <include domain="sharedpref" path="profile.xml" />
+        <include domain="file" path="profile/" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="sharedpref" path="profile.xml" />
+        <include domain="file" path="profile/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

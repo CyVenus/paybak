@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * The saved [UserProfile], kept in SharedPreferences; a custom photo lives in the files directory.
- * [profile] always holds the latest value, and every change is written through.
+ * The saved [UserProfile], kept in the `profile` SharedPreferences; a custom photo lives in the
+ * `profile` folder of the files directory. Those two are all that backups and device transfers copy
+ * (res/xml/backup_rules.xml, res/xml/data_extraction_rules.xml). [profile] always holds the latest
+ * value, and every change is written through.
  */
 class ProfileStore(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    private val filesDir = context.filesDir
+    private val photoDir = File(context.filesDir, PHOTO_DIR).apply { mkdirs() }
     private val state = MutableStateFlow(read())
 
     val profile: StateFlow<UserProfile> = state.asStateFlow()
@@ -31,7 +33,7 @@ class ProfileStore(context: Context) {
         state.value = UserProfile()
     }
 
-    fun photoFile(photo: AvatarChoice.Photo): File = File(filesDir, photo.fileName)
+    fun photoFile(photo: AvatarChoice.Photo): File = File(photoDir, photo.fileName)
 
     private fun read() =
         UserProfile(
@@ -78,6 +80,7 @@ class ProfileStore(context: Context) {
 
     private companion object {
         const val PREFS_NAME = "profile"
+        const val PHOTO_DIR = "profile"
         const val KEY_NAME = "name"
         const val KEY_AVATAR_PRESET = "avatar_preset"
         const val KEY_AVATAR_PHOTO = "avatar_photo"

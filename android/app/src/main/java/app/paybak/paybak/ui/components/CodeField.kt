@@ -121,7 +121,9 @@ fun PbCodeDigit(
  * never drops below 12 dp. Focus it with `Modifier.focusRequester(...)`.
  *
  * @param code Digits entered so far (0–6).
- * @param onCodeChange Receives digits only, at most [CodeLength].
+ * @param onCodeChange Receives digits only, at most [CodeLength]. While [isError], typing starts a
+ *   new code from box 1 and backspace deletes the last digit, so the screen should clear the error
+ *   on any change.
  * @param isError Rings every box in red (the wrong-code state).
  */
 @Composable
@@ -142,7 +144,7 @@ fun PbCodeField(
     CompositionLocalProvider(LocalTextSelectionColors provides HiddenSelection) {
         BasicTextField(
             value = code,
-            onValueChange = { input -> onCodeChange(input.filter(Char::isDigit).take(CodeLength)) },
+            onValueChange = { input -> onCodeChange(nextCode(code, input, isError)) },
             modifier =
                 modifier.fillMaxWidth().semantics {
                     contentType = ContentType.SmsOtpCode
@@ -182,6 +184,17 @@ fun PbCodeField(
 }
 
 private val HiddenSelection = TextSelectionColors(Color.Transparent, Color.Transparent)
+
+/**
+ * The code after the hidden field reports [input]: digits only, at most [CodeLength]. Typing while
+ * [isError] starts over from box 1 with the new digits (screens-signin.md §3). The field's cursor
+ * stays at the end, so the new digits are the ones after the old [code].
+ */
+internal fun nextCode(code: String, input: String, isError: Boolean): String {
+    val digits = input.filter(Char::isDigit)
+    val startsOver = isError && digits.length > code.length
+    return (if (startsOver) digits.drop(code.length) else digits).take(CodeLength)
+}
 
 /**
  * Blinks every 0.5 s, restarting (visible) whenever the caret moves; steady under reduce motion.
