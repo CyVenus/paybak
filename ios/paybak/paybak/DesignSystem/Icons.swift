@@ -114,7 +114,7 @@ enum PBPeepHead: String, CaseIterable, Identifiable {
 
     var image: Image { Image(rawValue) }
 
-    /// The Figma component name, used as the accessibility label of picker options.
+    /// The Figma component name ("Art / Peep Head / Arjun"), shown in the debug gallery.
     var name: String {
         switch self {
         case .arjun: "Arjun"

@@ -11,8 +11,9 @@ final class ProfileStore {
     /// The avatar photo, while the profile uses one.
     private(set) var photo: UIImage?
 
+    /// Where the avatar photo is saved.
+    @ObservationIgnored let photoURL: URL
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let photoURL: URL
 
     private static let profileKey = "userProfile"
     /// Setup 1 saves photos as square JPEGs of at most this many pixels a side.
@@ -32,11 +33,14 @@ final class ProfileStore {
         }
     }
 
-    /// Applies `change` to the profile and saves it.
+    /// Applies `change` to the profile and saves it. Choosing another avatar deletes the photo, so the
+    /// user's picture doesn't stay on the device once nothing shows it.
     func update(_ change: (inout UserProfile) -> Void) {
+        let hadPhoto = profile.avatar == .photo
         change(&profile)
-        if profile.avatar != .photo {
+        if hadPhoto, profile.avatar != .photo {
             photo = nil
+            try? FileManager.default.removeItem(at: photoURL)
         }
         save()
     }

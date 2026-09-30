@@ -64,9 +64,12 @@ struct PBAvatarOption: View {
         }
     }
 
+    /// Presets are numbered like the Setup 1 row ("Avatar 1"…"Avatar 5"): the art's names belong to
+    /// the sample people, not to the user choosing their own avatar.
     private var accessibilityLabel: String {
         switch kind {
-        case .art(let head): "Avatar \(head.name)"
+        case .art(let head):
+            if let index = PBPeepHead.presets.firstIndex(of: head) { "Avatar \(index + 1)" } else { "Avatar" }
         case .upload: "Choose a photo"
         case .photo: "Your photo"
         }

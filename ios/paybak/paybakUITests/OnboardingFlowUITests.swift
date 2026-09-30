@@ -22,8 +22,11 @@ final class OnboardingFlowUITests: XCTestCase {
         field.typeText("arjun@example.com")
         app.buttons["signIn.sendCode"].tap()
 
-        // Verify
+        // Verify: a wrong code first, then 000000 (typing after the error starts over)
         XCTAssertTrue(app.screen(.verify).waitForExistence(timeout: 3))
+        app.typeText("123456")
+        XCTAssertTrue(app.screen(.verifyWrong).waitForExistence(timeout: 3))
+        XCTAssertTrue(app.element("verify.error").exists)
         app.typeText("000000")
 
         // Setup 1: name and avatar
@@ -31,6 +34,10 @@ final class OnboardingFlowUITests: XCTestCase {
         XCTAssertEqual(app.element("setup.progress").label, "Step 1 of 4")
         let continueName = app.buttons["setup1.continue"]
         XCTAssertFalse(continueName.isEnabled)
+        // VoiceOver numbers the presets rather than naming them after the sample people.
+        XCTAssertEqual(app.buttons["setup1.avatar.0"].label, "Avatar 1")
+        XCTAssertEqual(app.buttons["setup1.avatar.4"].label, "Avatar 5")
+        XCTAssertEqual(app.buttons["setup1.camera"].label, "Choose a photo")
         app.buttons["setup1.avatar.0"].tap()
         XCTAssertTrue(app.buttons["setup1.avatar.0"].isSelected)
         let name = app.textFields["setup1.name"]
@@ -127,6 +134,36 @@ final class OnboardingFlowUITests: XCTestCase {
         upi.typeText("\n")
         app.buttons["setup3.continue"].tap()
         XCTAssertTrue(app.screen(.setup4).waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    func testContinueIsReachableAfterComingBackToTheNameStep() {
+        let app = XCUIApplication.launchPaybak(startScreen: .setup1)
+        let continueName = app.buttons["setup1.continue"]
+        XCTAssertTrue(continueName.waitForExistence(timeout: 3))
+        continueName.tap()
+        XCTAssertTrue(app.screen(.setup2).waitForExistence(timeout: 3))
+        app.buttons["setup.back"].tap()
+        XCTAssertTrue(app.screen(.setup1).waitForExistence(timeout: 3))
+
+        // Refocusing the name while Back revealed the screen left Continue under the keyboard.
+        XCTAssertTrue(continueName.isHittable)
+        app.textFields["setup1.name"].tap()
+        continueName.tap()
+        XCTAssertTrue(app.screen(.setup2).waitForExistence(timeout: 3))
+    }
+
+    @MainActor
+    func testNameStepScrollsInsteadOfCuttingItsCopyWithLargeText() {
+        let app = XCUIApplication.launchPaybak(startScreen: .setup1, textSize: .extraExtraExtraLarge)
+        let name = app.textFields["setup1.name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        let body = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Friends see your name")).firstMatch
+
+        // Squeezed between the header and the keyboard, the copy was cut to one line
+        // ("…and picture o…"); it needs at least two lines at this size.
+        XCTAssertGreaterThanOrEqual(body.frame.height, 2 * 24)
+        XCTAssertLessThanOrEqual(name.frame.maxY, app.buttons["setup1.continue"].frame.minY)
     }
 
     /// Taps Allow on the system notification prompt when it appears (it doesn't once answered).

@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 /// The flow.md screen ids: the values of the debug `-startScreen` argument and of the
@@ -25,13 +26,21 @@ enum ScreenID: String {
 extension XCUIApplication {
     /// Launches Paybak with its debug launch hooks (flow.md "Debug-only hooks"): `-resetOnboarding`
     /// clears the saved profile, and `-startScreen` opens a screen directly instead of the splash.
-    static func launchPaybak(startScreen: ScreenID? = nil, resetOnboarding: Bool = true) -> XCUIApplication {
+    /// `textSize` sets the app's Dynamic Type size without touching the device's settings.
+    static func launchPaybak(
+        startScreen: ScreenID? = nil,
+        resetOnboarding: Bool = true,
+        textSize: UIContentSizeCategory? = nil
+    ) -> XCUIApplication {
         let app = XCUIApplication()
         if resetOnboarding {
             app.launchArguments += ["-resetOnboarding", "YES"]
         }
         if let startScreen {
             app.launchArguments += ["-startScreen", startScreen.rawValue]
+        }
+        if let textSize {
+            app.launchArguments += ["-UIPreferredContentSizeCategoryName", textSize.rawValue]
         }
         app.launch()
         return app

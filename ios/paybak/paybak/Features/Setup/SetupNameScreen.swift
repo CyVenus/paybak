@@ -6,7 +6,8 @@ import os
 /// Setup 1 — Name & photo (screens-setup.md §1): pick one of five line-art avatars or a photo from
 /// the system picker, and enter a name. Continue (enabled once the name isn't blank) saves both and
 /// goes to Setup 2; with no avatar chosen the initials are the fallback. The name field is focused on
-/// appear and the CTA rides 12 pt above the keyboard. Back returns to Verify or Get Started.
+/// arrival (not when Back from Setup 2 returns here) and the CTA rides 12 pt above the keyboard. Back
+/// returns to Verify or Get Started.
 struct SetupNameScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(ProfileStore.self) private var profileStore
@@ -17,7 +18,7 @@ struct SetupNameScreen: View {
     @State private var pickedPhoto: UIImage?
     @State private var photoItem: PhotosPickerItem?
     @State private var isPickingPhoto = false
-    @State private var hasLoadedProfile = false
+    @State private var hasAppeared = false
     @FocusState private var isNameFocused: Bool
 
     private static let log = Logger(subsystem: "app.paybak.paybak", category: "Setup")
@@ -25,8 +26,43 @@ struct SetupNameScreen: View {
     private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             PBSetupHeader(step: 1, onBack: router.pop)
+                .padding(.horizontal, PBLayout.screenMargin)
+            // With the keyboard up everything only just fits on the Figma-sized screen, so on shorter
+            // screens or with larger text the content scrolls instead of squeezing its copy.
+            ScrollView {
+                content
+                    .padding(.horizontal, PBLayout.screenMargin)
+                    .padding(.bottom, PBSpace.s24)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                PBButton("Continue", fillsWidth: true, action: next)
+                    .disabled(trimmedName.isEmpty)
+                    .accessibilityIdentifier("setup1.continue")
+                    .padding(.horizontal, PBLayout.screenMargin)
+                    .keyboardGap()
+            }
+        }
+        .phoneContentWidth()
+        .background(PBColor.bgPrimary)
+        .screenIdentifier(.setup1)
+        .photosPicker(isPresented: $isPickingPhoto, selection: $photoItem, matching: .images)
+        .task(id: photoItem) { await loadPickedPhoto() }
+        .onAppear {
+            // Only on arrival. Raising the keyboard while Back reveals this screen would leave
+            // Continue under it: SwiftUI skips its keyboard avoidance during the pop transition.
+            guard !hasAppeared else { return }
+            hasAppeared = true
+            loadProfile()
+            isNameFocused = true
+        }
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: PBSpace.s12) {
                 Text("What’s your name?")
                     .textStyle(.title1)
@@ -46,28 +82,11 @@ struct SetupNameScreen: View {
                 .onSubmit(next)
                 .accessibilityIdentifier("setup1.name")
                 .padding(.top, PBSpace.s20)
-            Spacer(minLength: PBSpace.s24)
-            PBButton("Continue", fillsWidth: true, action: next)
-                .disabled(trimmedName.isEmpty)
-                .accessibilityIdentifier("setup1.continue")
-                .keyboardGap()
-        }
-        .padding(.horizontal, PBLayout.screenMargin)
-        .phoneContentWidth()
-        .background(PBColor.bgPrimary)
-        .screenIdentifier(.setup1)
-        .photosPicker(isPresented: $isPickingPhoto, selection: $photoItem, matching: .images)
-        .task(id: photoItem) { await loadPickedPhoto() }
-        .onAppear {
-            loadProfile()
-            isNameFocused = true
         }
     }
 
     /// Starts from what's saved (coming back later, or the debug seed).
     private func loadProfile() {
-        guard !hasLoadedProfile else { return }
-        hasLoadedProfile = true
         name = profileStore.profile.name
         avatar = profileStore.profile.avatar
     }

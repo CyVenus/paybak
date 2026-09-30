@@ -63,11 +63,16 @@ struct ProfileStoreTests {
         #expect(reloaded.size.width * reloaded.scale == ProfileStore.photoMaxPixels)
     }
 
-    @Test func choosingArtDropsThePhoto() throws {
+    @Test func choosingArtDeletesThePhoto() throws {
         let store = makeStore()
         try store.savePhoto(image(width: 40, height: 40))
+        let file = store.photoURL.path(percentEncoded: false)
+        #expect(FileManager.default.fileExists(atPath: file))
+
         store.update { $0.avatar = .preset(0) }
+
         #expect(store.photo == nil)
+        #expect(!FileManager.default.fileExists(atPath: file))
     }
 
     @Test func avatarPhotoIsACentredSquareOfAtMost512Pixels() {
