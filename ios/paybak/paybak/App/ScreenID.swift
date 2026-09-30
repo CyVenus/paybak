@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// Every screen id in flow.md. The ids are also the values of the debug `-startScreen` argument.
 /// Some ids are states of one screen: welcome1–3 are the Welcome steps, verifyWrong is Verify in its
 /// error state, and the four home ids are Home states.
@@ -19,6 +21,15 @@ enum ScreenID: String {
     case homeActive
     case homeAllSettled
     case homeAddSheet
+}
+
+extension View {
+    /// Marks a screen's root container for UI tests as `screen.<id>` (flow.md "UI tests and test
+    /// IDs"). The container keeps its children's own identifiers.
+    func screenIdentifier(_ screen: ScreenID) -> some View {
+        accessibilityElement(children: .contain)
+            .accessibilityIdentifier("screen.\(screen.rawValue)")
+    }
 }
 
 #if DEBUG

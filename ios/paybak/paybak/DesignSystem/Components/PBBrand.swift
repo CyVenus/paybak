@@ -45,6 +45,25 @@ private struct PBMonogram: Shape {
     }
 }
 
+/// The live "Paybak" wordmark in Manrope ExtraBold, as Brand / Logo sets it. On its own only where
+/// the mark and the wordmark move separately (the Splash entrance); elsewhere use `PBLogo`.
+struct PBWordmark: View {
+    enum Size {
+        /// Brand/Wordmark S, 20/24 (horizontal lockup).
+        case small
+        /// Brand/Wordmark L, 40/44 (stacked lockup).
+        case large
+    }
+
+    var size: Size = .small
+
+    var body: some View {
+        Text(verbatim: "Paybak")
+            .textStyle(size == .small ? .wordmarkS : .wordmarkL)
+            .foregroundStyle(PBColor.textPrimary)
+    }
+}
+
 /// Brand / Logo (Figma 8:31): the mark with the live "Paybak" wordmark in Manrope ExtraBold.
 struct PBLogo: View {
     enum Layout {
@@ -62,23 +81,17 @@ struct PBLogo: View {
             case .horizontal:
                 HStack(spacing: PBSpace.s8) {
                     PBAppMark(size: 28)
-                    wordmark(.wordmarkS)
+                    PBWordmark(size: .small)
                 }
             case .stacked:
                 VStack(spacing: PBSpace.s16) {
                     PBAppMark(size: 96)
-                    wordmark(.wordmarkL)
+                    PBWordmark(size: .large)
                 }
             }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("Paybak")
-    }
-
-    private func wordmark(_ style: PBTextStyle) -> some View {
-        Text(verbatim: "Paybak")
-            .textStyle(style)
-            .foregroundStyle(PBColor.textPrimary)
     }
 }
 
