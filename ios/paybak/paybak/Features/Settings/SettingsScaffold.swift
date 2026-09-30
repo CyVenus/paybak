@@ -68,20 +68,29 @@ struct SettingsSection<Content: View>: View {
     }
 }
 
-/// Footnote in `text/secondary` under a card.
+/// Footnote in `text/secondary` under a card. Copy that Figma ends with a lone word carries a `\n`
+/// at Figma's break and sets `wrapsLikeFigma` (FigmaWrappedText); other `\n`s are paragraph breaks.
 struct SettingsFooter: View {
     let text: String
+    var wrapsLikeFigma = false
 
-    init(_ text: String) {
+    init(_ text: String, wrapsLikeFigma: Bool = false) {
         self.text = text
+        self.wrapsLikeFigma = wrapsLikeFigma
     }
 
     var body: some View {
-        Text(text)
-            .textStyle(.footnote)
-            .foregroundStyle(PBColor.textSecondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .fixedSize(horizontal: false, vertical: true)
+        Group {
+            if wrapsLikeFigma {
+                FigmaWrappedText(text, style: .footnote)
+            } else {
+                Text(text)
+                    .textStyle(.footnote)
+            }
+        }
+        .foregroundStyle(PBColor.textSecondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 

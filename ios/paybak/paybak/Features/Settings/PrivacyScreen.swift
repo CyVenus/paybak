@@ -40,7 +40,7 @@ struct PrivacyScreen: View {
                 }
                 .pbCard(padding: 0)
             }
-            SettingsSection(footer: "Your past records stay in friends’ groups, shown as a former member.") {
+            VStack(alignment: .leading, spacing: PBSpace.s8) {
                 PBSettingRow("Delete account", icon: .delete, trailing: .none, tone: .destructive, showsDivider: false) {
                     if totals.owe != 0 || totals.owed != 0 {
                         isBlockedAlertPresented = true
@@ -50,6 +50,7 @@ struct PrivacyScreen: View {
                 }
                 .pbCard(padding: 0)
                 .accessibilityIdentifier("privacyData.deleteAccount")
+                SettingsFooter("Your past records stay in friends’ groups, shown as a former\nmember.", wrapsLikeFigma: true)
             }
         }
         .pbAlert(

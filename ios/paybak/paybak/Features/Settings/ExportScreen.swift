@@ -51,7 +51,7 @@ struct ExportScreen: View {
                     }
                 }
                 .pbCard(padding: 0)
-                SettingsFooter("Includes expenses, payments and loans, with each person’s share.")
+                SettingsFooter("Includes expenses, payments and loans, with each person’s\nshare.", wrapsLikeFigma: true)
             }
         } bottom: {
             PBButton("Export", fillsWidth: true, action: export)
