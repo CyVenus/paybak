@@ -164,7 +164,8 @@ fun LendMoneyScreen(route: Route.LendMoney) {
             navigator.toast(error.message.orEmpty())
         }
     }
-    BackHandler(onBack = ::close)
+    // A route sheet over the form (currency, dates) closes first.
+    BackHandler(enabled = navigator.sheet == null, onBack = ::close)
 
     PbPinnedHeaderScreen(
         testTag = "screen.lendMoney",

@@ -149,7 +149,8 @@ fun NewGroupScreen(route: Route.NewGroup) {
             navigator.toast(error.message.orEmpty())
         }
     }
-    BackHandler(onBack = ::close)
+    // A route sheet over the form (currency) closes first.
+    BackHandler(enabled = navigator.sheet == null, onBack = ::close)
 
     PbPinnedHeaderScreen(
         testTag = "screen.newGroup",

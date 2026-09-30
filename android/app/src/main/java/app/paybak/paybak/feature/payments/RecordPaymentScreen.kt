@@ -183,7 +183,8 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
             navigator.toast(error.message.orEmpty())
         }
     }
-    BackHandler(onBack = ::close)
+    // A route sheet over the form (currency, For, date) closes first.
+    BackHandler(enabled = navigator.sheet == null, onBack = ::close)
 
     val friend = form.friendId
     val friendName = friend?.let(people::first)

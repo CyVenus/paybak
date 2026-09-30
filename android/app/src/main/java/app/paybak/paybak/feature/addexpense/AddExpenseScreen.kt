@@ -135,7 +135,6 @@ fun AddExpenseScreen(route: Route.AddExpense) {
     val preview = form.preview(order, counter)
     val canSave =
         form.total > 0 && form.others.isNotEmpty() && preview.balanced && form.payersBalanced
-    val dirty = form != initial.value
 
     RouteResultEffect("$requestId.people") { result ->
         (result as? RouteResult.People)?.let { form = form.withPeople(it.personIds) }
@@ -184,8 +183,9 @@ fun AddExpenseScreen(route: Route.AddExpense) {
     }
     val receiptPhoto = rememberLedgerPhoto(form.receipt?.photo)
 
+    // Reads the state itself: a function reference can outlive the composition that made it.
     fun close() {
-        if (dirty) discarding = true else navigator.dismissModal()
+        if (form != initial.value) discarding = true else navigator.dismissModal()
     }
     fun save() {
         try {
@@ -207,7 +207,8 @@ fun AddExpenseScreen(route: Route.AddExpense) {
     if (route.args.focusAmount && editing == null && start == null) {
         LaunchedEffect(Unit) { amountFocus.requestFocus() }
     }
-    BackHandler(enabled = page == Page.Form, onBack = ::close)
+    // A route sheet over the form (currency, dates, group) closes first.
+    BackHandler(enabled = page == Page.Form && navigator.sheet == null, onBack = ::close)
 
     val actions =
         object : ExpenseFormActions {
