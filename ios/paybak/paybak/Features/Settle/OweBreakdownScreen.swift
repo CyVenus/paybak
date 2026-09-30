@@ -1,11 +1,8 @@
 import SwiftUI
 
-// PLACEHOLDER (app-architecture §2.2): Lane B replaces this file with the real screen and keeps
-// this initializer.
-/// Who you owe, by person.
+/// You owe (settle §2): who you pay, and why simplified groups send you to one person.
 struct OweBreakdownScreen: View {
-
     var body: some View {
-        RoutePlaceholder(route: .oweBreakdown, title: "You owe", owner: .b, spec: "screens-settle §2")
+        BalanceBreakdownView(direction: .owe)
     }
 }
