@@ -51,6 +51,43 @@ extension Currency {
         popularCodes.filter { $0 != suggestedCode }.map { Currency(code: $0, locale: locale) }
     }
 
+    /// The currencies whose code or name contains `query`, ignoring case and accents: exact code
+    /// matches first, then code prefixes, name prefixes and other name matches, each alphabetical
+    /// by name. A blank query matches nothing.
+    static func search(_ query: String, in currencies: [Currency]) -> [Currency] {
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).searchFolded
+        guard !needle.isEmpty else { return [] }
+        let matches: [(currency: Currency, match: Match)] = currencies.compactMap { currency in
+            currency.match(for: needle).map { (currency, $0) }
+        }
+        return matches
+            .sorted { lhs, rhs in
+                guard lhs.match == rhs.match else { return lhs.match < rhs.match }
+                return lhs.currency.name.localizedStandardCompare(rhs.currency.name) == .orderedAscending
+            }
+            .map(\.currency)
+    }
+
+    /// How well a currency matches a search, best first.
+    private enum Match: Int, Comparable {
+        case code
+        case codePrefix
+        case namePrefix
+        case name
+
+        static func < (lhs: Match, rhs: Match) -> Bool { lhs.rawValue < rhs.rawValue }
+    }
+
+    private func match(for needle: String) -> Match? {
+        let code = code.searchFolded
+        let name = name.searchFolded
+        if code == needle { return .code }
+        if code.hasPrefix(needle) { return .codePrefix }
+        if name.hasPrefix(needle) { return .namePrefix }
+        if name.contains(needle) { return .name }
+        return nil
+    }
+
     private static let designed: [String: (name: String, symbol: String)] = [
         "INR": ("Indian Rupee", "₹"),
         "USD": ("US Dollar", "$"),
@@ -70,5 +107,12 @@ extension Currency {
     private static func englishSymbol(for code: String) -> String {
         englishFormatter.currencyCode = code
         return englishFormatter.currencySymbol
+    }
+}
+
+private extension String {
+    /// Lowercased and without accents, for search ("Córdoba" → "cordoba").
+    var searchFolded: String {
+        folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
     }
 }

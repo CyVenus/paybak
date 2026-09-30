@@ -66,7 +66,7 @@ struct ScreenPlaceholder: View {
         let profile = profileStore.profile
         let details = [profile.currencyCode, profile.upiID.isEmpty ? nil : profile.upiID].compactMap(\.self)
         return HStack(spacing: PBSpace.s12) {
-            PBAvatar(avatarContent(for: profile), isOnCard: true)
+            PBAvatar(profileStore.avatarContent, isOnCard: true)
             VStack(alignment: .leading, spacing: PBSpace.s2) {
                 Text(profile.name.isEmpty ? "No profile yet" : profile.name)
                     .textStyle(.headline)
@@ -82,17 +82,6 @@ struct ScreenPlaceholder: View {
         .padding(PBLayout.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
-    }
-
-    private func avatarContent(for profile: UserProfile) -> PBAvatar.Content {
-        switch profile.avatar {
-        case .preset(let index) where PBPeepHead.presets.indices.contains(index):
-            .art(PBPeepHead.presets[index])
-        case .photo:
-            profileStore.loadPhoto().map { .photo(Image(uiImage: $0)) } ?? .initials(profile.initials)
-        default:
-            profile.name.isEmpty ? .icon(.profile) : .initials(profile.initials)
-        }
     }
 }
 

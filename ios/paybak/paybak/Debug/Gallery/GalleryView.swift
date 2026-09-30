@@ -74,6 +74,7 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
     case riveWelcome
     case riveSetup
     case riveHome
+    case feedback
 
     var id: Int { rawValue }
 
@@ -99,6 +100,7 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .riveWelcome: "Rive: Welcome, Get Started"
         case .riveSetup: "Rive: Setup 4, All set"
         case .riveHome: "Rive: Home empty states"
+        case .feedback: "Section header, preview, toast"
         }
     }
 
@@ -125,6 +127,7 @@ enum GalleryPage: Int, CaseIterable, Identifiable {
         case .riveWelcome: GalleryRivePage(assets: [.onboarding, .getStarted])
         case .riveSetup: GalleryRivePage(assets: [.notifications, .allSet])
         case .riveHome: GalleryRivePage(assets: [.homeFirstDay, .homeAllSquare])
+        case .feedback: GalleryFeedbackPage()
         }
     }
 }

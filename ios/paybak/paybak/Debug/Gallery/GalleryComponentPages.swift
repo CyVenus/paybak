@@ -254,4 +254,27 @@ struct GalleryPickersPage: View {
         return "\(Currency.all().count) ISO currencies · suggested \(suggestion.currency.code) (\(source)) · popular \(popular)"
     }
 }
+struct GalleryFeedbackPage: View {
+    @State private var toast: PBToastMessage?
+
+    var body: some View {
+        GalleryPageScroll {
+            GallerySection("Row / Section Header: title · with See all") {
+                PBSectionHeader("Suggested")
+                PBSectionHeader("Recent activity") {}
+            }
+            GallerySection("Card / Payment Preview: UPI ID · none (hint, no copy)") {
+                PBPaymentPreview(avatar: .art(.arjun), name: "Arjun Mehta", upiID: "arjun@okaxis") {
+                    toast = PBToastMessage("UPI ID copied")
+                }
+                PBPaymentPreview(avatar: .initials("AM"), name: "Arjun Mehta", upiID: "") {}
+            }
+            GallerySection("Overlay / Toast: icon · no icon (copy above to see it live)") {
+                PBToast("UPI ID copied")
+                PBToast("Payment recorded", icon: nil)
+            }
+        }
+        .pbToast($toast, bottomPadding: PBSpace.s48)
+    }
+}
 #endif

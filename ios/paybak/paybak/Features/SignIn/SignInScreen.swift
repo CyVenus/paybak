@@ -18,9 +18,7 @@ struct SignInScreen: View {
         VStack(alignment: .leading, spacing: 0) {
             PBOnboardingTopBar(onBack: router.pop, testIDPrefix: "signIn")
             VStack(alignment: .leading, spacing: PBSpace.s12) {
-                // Figma's break: the system would otherwise pull "or" down so "phone?" isn't alone.
-                Text("What’s your email or\nphone?")
-                    .textStyle(.title1)
+                FigmaWrappedText("What’s your email or\nphone?", style: .title1)
                     .foregroundStyle(PBColor.textPrimary)
                     .accessibilityAddTraits(.isHeader)
                 Text("We’ll send a 6-digit code. No password needed.")

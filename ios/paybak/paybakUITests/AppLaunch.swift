@@ -47,6 +47,11 @@ extension XCUIApplication {
         descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
 
+    /// The first element labelled `label`, whatever its type (e.g. a toast).
+    func element(label: String) -> XCUIElement {
+        descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+    }
+
     /// The iOS back gesture: a drag from the left screen edge (onboarding screens have no nav bar).
     func swipeBackFromLeftEdge() {
         let start = coordinate(withNormalizedOffset: CGVector(dx: 0.01, dy: 0.5))

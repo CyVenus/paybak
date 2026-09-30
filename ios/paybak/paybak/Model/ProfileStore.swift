@@ -8,64 +8,83 @@ import os
 @Observable
 final class ProfileStore {
     private(set) var profile: UserProfile
+    /// The avatar photo, while the profile uses one.
+    private(set) var photo: UIImage?
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private let photoURL: URL
 
     private static let profileKey = "userProfile"
-    /// Setup 1 saves photos as JPEGs of at most this many pixels on the long side.
-    private static let photoMaxPixels: CGFloat = 512
+    /// Setup 1 saves photos as square JPEGs of at most this many pixels a side.
+    static let photoMaxPixels: CGFloat = 512
     private static let log = Logger(subsystem: "app.paybak.paybak", category: "ProfileStore")
 
-    init(defaults: UserDefaults = .standard) {
+    /// - Parameters:
+    ///   - defaults: Where the profile is saved.
+    ///   - directory: Where the avatar photo is saved.
+    init(defaults: UserDefaults = .standard, directory: URL = .applicationSupportDirectory) {
         self.defaults = defaults
-        photoURL = URL.applicationSupportDirectory.appending(path: "avatar-photo.jpg")
+        photoURL = directory.appending(path: "avatar-photo.jpg")
         profile = defaults.data(forKey: Self.profileKey)
             .flatMap { try? JSONDecoder().decode(UserProfile.self, from: $0) } ?? UserProfile()
+        if profile.avatar == .photo {
+            photo = UIImage(contentsOfFile: photoURL.path(percentEncoded: false))
+        }
     }
 
     /// Applies `change` to the profile and saves it.
     func update(_ change: (inout UserProfile) -> Void) {
         change(&profile)
+        if profile.avatar != .photo {
+            photo = nil
+        }
         save()
     }
 
     /// Replaces the whole profile (the debug seed) and saves it.
     func replace(with profile: UserProfile) {
-        self.profile = profile
-        save()
+        update { $0 = profile }
     }
 
     /// Clears the saved profile and photo ("Reset onboarding").
     func reset() {
         profile = UserProfile()
+        photo = nil
         defaults.removeObject(forKey: Self.profileKey)
         try? FileManager.default.removeItem(at: photoURL)
     }
 
     // MARK: Photo
 
-    /// Scales the photo down to 512 px, saves it as a JPEG and makes it the avatar.
+    /// Crops the photo to a centred square of at most 512 px, saves it as a JPEG and makes it the
+    /// avatar.
     func savePhoto(_ image: UIImage) throws {
-        let scale = min(1, Self.photoMaxPixels / max(image.size.width * image.scale, image.size.height * image.scale))
-        let size = CGSize(width: image.size.width * image.scale * scale, height: image.size.height * image.scale * scale)
-        let format = UIGraphicsImageRendererFormat()
-        format.scale = 1
-        let resized = UIGraphicsImageRenderer(size: size, format: format).image { _ in
-            image.draw(in: CGRect(origin: .zero, size: size))
-        }
-        guard let data = resized.jpegData(compressionQuality: 0.85) else {
+        guard let data = Self.avatarPhoto(from: image).jpegData(compressionQuality: 0.85) else {
             throw CocoaError(.fileWriteUnknown)
         }
         try FileManager.default.createDirectory(at: photoURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: photoURL, options: .atomic)
         update { $0.avatar = .photo }
+        photo = UIImage(data: data)
     }
 
-    /// The saved avatar photo, if the profile uses one.
-    func loadPhoto() -> UIImage? {
-        guard profile.avatar == .photo else { return nil }
-        return UIImage(contentsOfFile: photoURL.path(percentEncoded: false))
+    /// The centred square of `image`, scaled down to at most `photoMaxPixels` a side (never up),
+    /// at scale 1, upright.
+    static func avatarPhoto(from image: UIImage) -> UIImage {
+        let side = min(image.size.width, image.size.height)
+        let pixels = min(photoMaxPixels, (side * image.scale).rounded(.down))
+        let scale = pixels / side
+        let drawn = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        return UIGraphicsImageRenderer(size: CGSize(width: pixels, height: pixels), format: format).image { _ in
+            image.draw(in: CGRect(
+                x: (pixels - drawn.width) / 2,
+                y: (pixels - drawn.height) / 2,
+                width: drawn.width,
+                height: drawn.height
+            ))
+        }
     }
 
     // MARK: Private

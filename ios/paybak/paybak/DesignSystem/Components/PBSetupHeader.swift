@@ -1,8 +1,10 @@
 import SwiftUI
 
 /// Navigation / Setup Header (Figma 36:666): back, optional Skip, a 4-segment progress bar and
-/// "Step N of 4". 82 pt tall. Changing `step` grows or shrinks the segment fill from its leading edge
-/// (0.35 s, the Figma push curve) and rolls the step number; both are instant under Reduce Motion.
+/// "Step N of 4". 82 pt tall. Each setup step is its own pushed screen, so a new header first shows
+/// the previous step's fill and grows the new segment from its leading edge while the screen slides
+/// in (0.35 s, the Figma push curve); later `step` changes grow or shrink it and roll the number.
+/// Both are instant under Reduce Motion. Test ids: `setup.back`, `setup.skip`, `setup.progress`.
 struct PBSetupHeader: View {
     static let stepCount = 4
 
@@ -13,17 +15,46 @@ struct PBSetupHeader: View {
     var onSkip: (() -> Void)?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// How many segments are filled; starts one short so the entrance can grow the last one.
+    @State private var filledSegments: Int
+
+    init(step: Int, onBack: @escaping () -> Void, onSkip: (() -> Void)? = nil) {
+        self.step = step
+        self.onBack = onBack
+        self.onSkip = onSkip
+        _filledSegments = State(initialValue: step - 1)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: PBSpace.s8) {
-            PBOnboardingTopBar(onBack: onBack, onSkip: onSkip)
-            progress
-            Text("Step \(step) of \(Self.stepCount)")
-                .textStyle(.footnote)
-                .foregroundStyle(PBColor.textSecondary)
-                .contentTransition(.numericText(value: Double(step)))
+            PBOnboardingTopBar(onBack: onBack, onSkip: onSkip, testIDPrefix: "setup")
+            VStack(alignment: .leading, spacing: PBSpace.s8) {
+                progress
+                Text("Step \(step) of \(Self.stepCount)")
+                    .textStyle(.footnote)
+                    .foregroundStyle(PBColor.textSecondary)
+                    .contentTransition(.numericText(value: Double(step)))
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Step \(step) of \(Self.stepCount)")
+            .accessibilityIdentifier("setup.progress")
         }
-        .animation(reduceMotion ? nil : .timingCurve(0.42, 0, 0.58, 1, duration: 0.35), value: step)
+        .animation(fillAnimation, value: step)
+        .task {
+            // Only the first appearance animates; coming back to the screen finds it filled.
+            guard filledSegments != step else { return }
+            if !reduceMotion {
+                try? await Task.sleep(for: .seconds(0.1))
+            }
+            withAnimation(fillAnimation) { filledSegments = step }
+        }
+        .onChange(of: step) {
+            withAnimation(fillAnimation) { filledSegments = step }
+        }
+    }
+
+    private var fillAnimation: Animation? {
+        reduceMotion ? nil : .timingCurve(0.42, 0, 0.58, 1, duration: 0.35)
     }
 
     private var progress: some View {
@@ -35,13 +66,12 @@ struct PBSetupHeader: View {
                         GeometryReader { track in
                             Capsule()
                                 .fill(PBColor.bgInverse)
-                                .frame(width: index <= step ? track.size.width : 0)
+                                .frame(width: index <= filledSegments ? track.size.width : 0)
                         }
                     }
             }
         }
         .frame(height: 4)
-        .accessibilityHidden(true)
     }
 }
 
