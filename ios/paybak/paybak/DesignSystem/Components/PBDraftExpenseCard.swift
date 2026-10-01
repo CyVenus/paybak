@@ -15,8 +15,9 @@ struct PBDraftExpenseCard: View {
     /// "Split equally with Esha and Dev".
     let splitLine: String
     var members: [PBPeepHead] = []
-    /// The split's 2–4 avatars (you first) as any avatars: your photo or character, a friend's head
-    /// or initials. Overrides `members`.
+    /// The split's avatars (you first) as any avatars: your photo or character, a friend's head or
+    /// initials. Overrides `members`. The first four show as a stack, and only when there are two or
+    /// more.
     var memberAvatars: [PBAvatarStack.Member]?
     /// "₹200 each".
     let eachLine: String
@@ -51,7 +52,9 @@ struct PBDraftExpenseCard: View {
                         .textStyle(.subheadline)
                         .foregroundStyle(PBColor.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    PBAvatarStack(members: Array((memberAvatars ?? members.map { PBAvatarStack.Member.content(.art($0)) }).prefix(4)))
+                    if stackMembers.count >= 2 {
+                        PBAvatarStack(members: stackMembers)
+                    }
                 }
                 Text(eachLine)
                     .textStyle(.subheadline)
@@ -69,6 +72,10 @@ struct PBDraftExpenseCard: View {
         .padding(PBLayout.cardPadding)
         .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
         .animation(reduceMotion ? nil : .easeOut(duration: 0.25), value: isSaved)
+    }
+
+    private var stackMembers: [PBAvatarStack.Member] {
+        Array((memberAvatars ?? members.map { PBAvatarStack.Member.content(.art($0)) }).prefix(4))
     }
 
     private var actions: some View {
