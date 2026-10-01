@@ -1,0 +1,15 @@
+{
+  "note": "Bundled \"today's rates\" in INR per 1 unit, used when an expense or payment is saved in a currency other than the default (the rate is then stored on the record and never recomputed). Cross rate a→b = inr[a] / inr[b]. AED matches the Add expense rate-line example (₹22.85 per AED).",
+  "base": "INR",
+  "inrPerUnit": {
+    "INR": "1",
+    "AED": "22.85",
+    "USD": "83.92",
+    "EUR": "91.20",
+    "GBP": "106.40",
+    "SGD": "64.80",
+    "AUD": "55.10",
+    "CAD": "61.50",
+    "JPY": "0.56"
+  }
+}

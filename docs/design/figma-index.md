@@ -1,0 +1,280 @@
+# Figma frame index (node ids)
+
+Every frame and component on pages 02 and 04–12 of Figma file `2SPNUpHlG8bCO62YfwRuRi` ("Paybak-iOS"), as exported through the REST API on 30 Sep 2026. Use it to find a node id, then its render or node JSON.
+
+Columns: page | section | frame/component name | node id | 2x render / SVG | node JSON. The render and node-JSON paths are relative to `docs/design/.figma-cache/`, which isn't in git: run `python3 docs/design/tools/fetch_figma.py` to create it (it also writes a fresh copy of this index to `.figma-cache/INDEX.md`, with page 03 included). In this snapshot the components page (3:3) is split over `nodes/3-3-a.json` and `3-3-b.json`. The screen refs used by the specs are in `ref/` under their screen ids.
+
+- 02 Components | Icons | Icon / Home | `5:7` |  · svg/5-7.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Groups | `5:10` |  · svg/5-10.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Plus | `5:13` |  · svg/5-13.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Activity | `5:18` |  · svg/5-18.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Profile | `5:23` |  · svg/5-23.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Bell | `5:26` |  · svg/5-26.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Chevron Right | `5:29` |  · svg/5-29.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Chevron Left | `5:32` |  · svg/5-32.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Settings | `5:37` |  · svg/5-37.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Mail | `5:42` |  · svg/5-42.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Receipt | `5:45` |  · svg/5-45.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Food | `5:50` |  · svg/5-50.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Bolt | `5:53` |  · svg/5-53.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Wallet | `5:59` |  · svg/5-59.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Money In | `5:65` |  · svg/5-65.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Money Out | `5:71` |  · svg/5-71.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Exchange | `5:77` |  · svg/5-77.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Lend | `5:83` |  · svg/5-83.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Calendar | `5:88` |  · svg/5-88.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Check | `5:91` |  · svg/5-91.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Check Circle | `5:96` |  · svg/5-96.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Close | `5:99` |  · svg/5-99.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Alert | `5:104` |  · svg/5-104.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / User Add | `5:109` |  · svg/5-109.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / People | `5:112` |  · svg/5-112.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Apple | `5:115` |  · svg/5-115.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Google | `5:121` |  · svg/5-121.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Search | `34:590` |  · svg/34-590.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Camera | `34:597` |  · svg/34-597.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Copy | `34:603` |  · svg/34-603.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Car | `81:671` |  · svg/81-671.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Bed | `81:678` |  · svg/81-678.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Ticket | `81:684` |  · svg/81-684.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Shopping Bag | `81:690` |  · svg/81-690.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Tag | `81:697` |  · svg/81-697.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Split | `81:703` |  · svg/81-703.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Note | `81:707` |  · svg/81-707.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Arrow Right | `81:711` |  · svg/81-711.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Arrow Up | `81:715` |  · svg/81-715.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Sparkles | `81:719` |  · svg/81-719.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Plane | `81:723` |  · svg/81-723.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Drone | `81:727` |  · svg/81-727.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Package | `81:731` |  · svg/81-731.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / QR Code | `81:739` |  · svg/81-739.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Scan | `81:743` |  · svg/81-743.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Link | `81:749` |  · svg/81-749.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Share | `82:669` |  · svg/82-669.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Logout | `82:675` |  · svg/82-675.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Repeat | `82:679` |  · svg/82-679.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Flag | `82:683` |  · svg/82-683.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Delete | `82:687` |  · svg/82-687.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Restore | `82:691` |  · svg/82-691.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Chart | `82:697` |  · svg/82-697.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Mic | `82:701` |  · svg/82-701.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Image | `82:708` |  · svg/82-708.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Flame | `82:712` |  · svg/82-712.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Wi-Fi | `82:719` |  · svg/82-719.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Crown | `82:725` |  · svg/82-725.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Bank | `82:731` |  · svg/82-731.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Download | `82:735` |  · svg/82-735.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / Star | `82:739` |  · svg/82-739.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Icons | Icon / WhatsApp | `82:745` |  · svg/82-745.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Arjun | `7:5` | components/7-5.png · svg/7-5.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Priya | `7:22` | components/7-22.png · svg/7-22.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Rohan | `7:37` | components/7-37.png · svg/7-37.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Esha | `7:52` | components/7-52.png · svg/7-52.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Dev | `7:67` | components/7-67.png · svg/7-67.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Welcome 1 — Split | `7:82` | components/7-82.png · svg/7-82.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Welcome 2 — Track | `7:117` | components/7-117.png · svg/7-117.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Welcome 3 — Settle | `7:142` | components/7-142.png · svg/7-142.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Get Started — People | `7:174` | components/7-174.png · svg/7-174.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Empty — First day | `7:216` | components/7-216.png · svg/7-216.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Empty — All square | `7:221` | components/7-221.png · svg/7-221.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Cover — Crowd | `7:245` | components/7-245.png · svg/7-245.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / Reminders | `35:588` | components/35-588.png · svg/35-588.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Illustration / All set | `35:607` | components/35-607.png · svg/35-607.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Kabir | `84:667` | components/84-667.png · svg/84-667.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Peep Head / Meera | `84:669` | components/84-669.png · svg/84-669.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Illustrations & Art | Art / Receipt | `86:730` | components/86-730.png · svg/86-730.svg | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Brand | Brand / App Mark | `8:22` | components/8-22.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Brand | Brand / Logo | `8:31` | components/8-31.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Primary | `9:36` | components/9-36.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Secondary | `9:62` | components/9-62.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / On Card | `9:88` | components/9-88.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Destructive | `9:114` | components/9-114.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Text | `10:45` | components/10-45.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Icon | `10:79` | components/10-79.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Buttons | Button / Add | `10:87` | components/10-87.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Badges & Avatars | Badge / Pill | `11:46` | components/11-46.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Badges & Avatars | Avatar / Circle | `11:136` | components/11-136.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Badges & Avatars | Avatar / Stack | `11:417` | components/11-417.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Controls | Control / Page Dots | `12:230` | components/12-230.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Controls | Control / Segment | `12:236` | components/12-236.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Controls | Control / Segmented | `12:249` | components/12-249.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Controls | Control / Input Field | `12:296` | components/12-296.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Controls | Divider / Line | `12:302` | components/12-302.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Row / Section Header | `13:223` | components/13-223.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Card / Balance | `13:269` | components/13-269.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Card / Balance Summary | `13:271` | components/13-271.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Row / Attention | `13:379` | components/13-379.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Row / Activity | `13:477` | components/13-477.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Cards & Rows | Card / Empty State | `13:541` | components/13-541.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Navigation | Navigation / Onboarding Top Bar | `17:461` | components/17-461.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Navigation | Navigation / Nav Header | `17:494` | components/17-494.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Navigation | Navigation / Tab Bar Item | `17:504` | components/17-504.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Navigation | Navigation / Tab Bar | `17:618` | components/17-618.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sheets | Sheet / Action Row | `17:641` | components/17-641.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sheets | Sheet / Action Sheet | `17:643` | components/17-643.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Navigation / Setup Header | `36:666` | components/36-666.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Control / Code Digit | `36:675` | components/36-675.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Control / Code Input | `36:702` | components/36-702.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Control / Avatar Option | `37:655` | components/37-655.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Row / Currency | `37:673` | components/37-673.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Sign-in & Setup | Card / Payment Preview | `37:675` | components/37-675.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Control / Category Chip | `64:4185` | components/64-4185.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Icon / Shuffle | `64:3957` | components/64-3957.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Icon / Lock | `64:3963` | components/64-3963.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Icon / Help | `64:3969` | components/64-3969.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Row / Setting | `97:996` | components/97-996.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Navigation / Push Header | `97:1082` | components/97-1082.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Shared (from Profile) | Overlay / Alert | `102:1115` | components/102-1115.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Navigation / Modal Header | `115:886` | components/115-886.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Control / Composer | `115:907` | components/115-907.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Control / Text Area | `115:9936` | components/115-9936.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Control / Amount Display | `125:1084` | components/125-1084.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Control / Payment Parties | `125:1085` | components/125-1085.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Card / Split Total | `125:1170` | components/125-1170.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Card / Plan | `125:1198` | components/125-1198.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Forms & Money | Row / Split Person | `126:1596` | components/126-1596.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Avatar / Pair | `116:1005` | components/116-1005.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Row / Comment | `116:1007` | components/116-1007.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Row / History | `116:1058` | components/116-1058.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Row / Person | `127:2252` | components/127-2252.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Row / Transfer | `128:1604` | components/128-1604.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Header / Title Row | `128:1857` | components/128-1857.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Header / Amount Hero | `128:2004` | components/128-2004.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Card / Notice | `129:1976` | components/129-1976.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Card / Confirm Payment | `129:2060` | components/129-2060.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Card / QR Code | `130:1912` | components/130-1912.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Lists & Detail | Row / Group | `139:2052` | components/139-2052.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | Control / Progress Bar | `116:1099` | components/116-1099.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | _Example · Progress Bar marks | `116:1101` | components/116-1101.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | Row / Bar | `143:2156` | components/143-2156.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | Chart / Monthly Bars | `143:2157` | components/143-2157.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | Card / Budget | `145:2106` | components/145-2106.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | Card / Loan Progress | `145:2155` | components/145-2155.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | _Example · Loan paid back | `145:2156` | components/145-2156.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Progress & Charts | _Example · Over budget (10-03) | `159:11440` | components/159-11440.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Chat / Bubble | `117:971` | components/117-971.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Row / Receipt Line | `117:993` | components/117-993.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Control / Shutter | `117:1001` | components/117-1001.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Chat / Draft Expense | `147:2315` | components/147-2315.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Row / Assign Item | `147:2532` | components/147-2532.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Assistant & Scan | Card / Person Totals | `147:2533` | components/147-2533.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Feedback & Overlays | Overlay / Toast | `118:965` | components/118-965.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Feedback & Overlays | Sheet / Container | `118:1017` | components/118-1017.png | nodes/3-3-a.json or 3-3-b.json
+- 02 Components | Feedback & Overlays | _Example backdrop | `118:10155` | components/118-10155.png | nodes/3-3-a.json or 3-3-b.json
+- 04 Home | Home | Home — Active | `24:5` | renders/24-5.png | nodes/3-5.json
+- 04 Home | Home | Home — Confirm payment | `167:11424` | renders/167-11424.png | nodes/3-5.json
+- 04 Home | Home | Home — First day | `24:326` | renders/24-326.png | nodes/3-5.json
+- 04 Home | Home | Home — All settled | `24:414` | renders/24-414.png | nodes/3-5.json
+- 04 Home | Home | Home — ＋ Action sheet | `24:520` | renders/24-520.png | nodes/3-5.json
+- 04 Home | Home | Overlay — Add sheet | `24:808` | renders/24-808.png | nodes/3-5.json
+- 05 Profile | Customize Avatar | Profile | `64:4316` | renders/64-4316.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Boy · Hair | `64:4503` | renders/64-4503.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Boy · Beard | `64:4963` | renders/64-4963.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Boy · Eyewear | `64:5384` | renders/64-5384.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Boy · Outfit | `64:5931` | renders/64-5931.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Girl · Hair | `64:6721` | renders/64-6721.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Girl · Accessory | `64:7535` | renders/64-7535.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Edit avatar — Girl · Outfit | `64:8052` | renders/64-8052.png | nodes/53-892.json
+- 05 Profile | Customize Avatar | Discard alert | `64:8823` | renders/64-8823.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Boy parts | `53:899` | renders/53-899.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Girl parts | `53:900` | renders/53-900.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Avatar / Character / Boy | `61:100` | renders/61-100.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Avatar / Character / Girl | `61:145` | renders/61-145.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Avatar / Character | `61:272` | renders/61-272.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Parts sheet — Boy | `62:243` | renders/62-243.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | Parts sheet — Girl | `62:2148` | renders/62-2148.png | nodes/53-892.json
+- 05 Profile | Avatar Parts | UI components | `64:3948` | renders/64-3948.png | nodes/53-892.json
+- 05 Profile | Overlay helpers | ↳ Add sheet (overlay) | `216:24577` |  | nodes/53-892.json
+- 06 Add & Record | Add expense | Add expense — Empty | `176:17454` | renders/176-17454.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Add expense — Filled | `176:18002` | renders/176-18002.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Split with | `176:19238` | renders/176-19238.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Paid by | `176:19877` | renders/176-19877.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Split — Equally | `176:21025` | renders/176-21025.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Split — Exact (error) | `177:21514` | renders/177-21514.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Category | `177:21884` | renders/177-21884.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Currency | `177:22329` | renders/177-22329.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Due date | `177:23763` | renders/177-23763.png | nodes/77-100.json
+- 06 Add & Record | Add expense | Expense added | `177:24360` | renders/177-24360.png | nodes/77-100.json
+- 06 Add & Record | Record payment | Record payment — form | `177:29750` | renders/177-29750.png | nodes/77-100.json
+- 06 Add & Record | Record payment | Payment recorded | `177:30023` | renders/177-30023.png | nodes/77-100.json
+- 06 Add & Record | Lend money (IOU) | Lend money — form | `185:25810` | renders/185-25810.png | nodes/77-100.json
+- 06 Add & Record | Lend money (IOU) | Loan added | `186:10325` | renders/186-10325.png | nodes/77-100.json
+- 06 Add & Record | Lend money (IOU) | Loan — Paid back | `186:26377` | renders/186-26377.png | nodes/77-100.json
+- 06 Add & Record | Lend money (IOU) | Loan — Installment overdue | `186:26608` | renders/186-26608.png | nodes/77-100.json
+- 06 Add & Record | New group | New group — Group | `190:8356` | renders/190-8356.png | nodes/77-100.json
+- 06 Add & Record | New group | New group — Project | `190:12242` | renders/190-12242.png | nodes/77-100.json
+- 06 Add & Record | New group | Group created | `190:27177` | renders/190-27177.png | nodes/77-100.json
+- 07 Groups & Friends | Groups tab | Groups | `167:14881` | renders/167-14881.png | nodes/77-101.json
+- 07 Groups & Friends | Groups tab | Friends | `167:15557` | renders/167-15557.png | nodes/77-101.json
+- 07 Groups & Friends | Groups tab | Groups — Empty | `167:16388` | renders/167-16388.png | nodes/77-101.json
+- 07 Groups & Friends | Group detail | Group — Goa Trip | `167:18792` | renders/167-18792.png | nodes/77-101.json
+- 07 Groups & Friends | Group detail | Group settings — Goa Trip | `176:18633` | renders/176-18633.png | nodes/77-101.json
+- 07 Groups & Friends | Group detail | Leave group — Blocked | `176:18995` | renders/176-18995.png | nodes/77-101.json
+- 07 Groups & Friends | Group detail | Group — Dubai Weekend | `176:20314` | renders/176-20314.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | Friend — Rohan | `177:25988` | renders/177-25988.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | Add friend | `177:26746` | renders/177-26746.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | _Sheet / My QR code | `177:28072` | renders/177-28072.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | My QR code | `177:28130` | renders/177-28130.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | Friend — Ananya (Guest) | `177:28684` | renders/177-28684.png | nodes/77-101.json
+- 07 Groups & Friends | Friends & add friend | ↳ My QR code sheet (overlay) | `189:6345` |  | nodes/77-101.json
+- 07 Groups & Friends | Overlay helpers | ↳ Add sheet (overlay) | `216:28953` |  | nodes/77-101.json
+- 07 Groups & Friends | Overlay helpers | ↳ Remind sheet (overlay) | `216:28961` |  | nodes/77-101.json
+- 08 Settle Up | Balance breakdowns | You’re owed — Breakdown | `167:11705` | renders/167-11705.png | nodes/77-102.json
+- 08 Settle Up | Balance breakdowns | You owe — Breakdown | `167:11957` | renders/167-11957.png | nodes/77-102.json
+- 08 Settle Up | Settle up & record | Settle up | `167:12113` | renders/167-12113.png | nodes/77-102.json
+- 08 Settle Up | Settle up & record | Record payment — Kabir | `167:13635` | renders/167-13635.png | nodes/77-102.json
+- 08 Settle Up | Settle up & record | Payment pending | `167:17304` | renders/167-17304.png | nodes/77-102.json
+- 08 Settle Up | Remind | _Sheet / Remind Rohan | `176:20970` | renders/176-20970.png | nodes/77-102.json
+- 08 Settle Up | Remind | Remind — Rohan | `177:21203` | renders/177-21203.png | nodes/77-102.json
+- 08 Settle Up | Remind | Remind sheet (overlay) | `177:21801` | renders/177-21801.png | nodes/77-102.json
+- 08 Settle Up | Remind | Remind — Share | `177:23342` | renders/177-23342.png | nodes/77-102.json
+- 08 Settle Up | Receiver confirmation | _Sheet / Not received | `177:24988` | renders/177-24988.png | nodes/77-102.json
+- 08 Settle Up | Receiver confirmation | Not received | `177:25006` | renders/177-25006.png | nodes/77-102.json
+- 08 Settle Up | Receiver confirmation | Not received sheet (overlay) | `177:25168` | renders/177-25168.png | nodes/77-102.json
+- 08 Settle Up | Receiver confirmation | Payment confirmed | `177:25303` | renders/177-25303.png | nodes/77-102.json
+- 08 Settle Up | Overlay helpers | ↳ Add sheet (overlay) | `216:29122` |  | nodes/77-102.json
+- 09 Activity | Timeline | Activity — Timeline | `167:14361` | renders/167-14361.png | nodes/77-103.json
+- 09 Activity | Timeline | Activity — Empty | `167:16311` | renders/167-16311.png | nodes/77-103.json
+- 09 Activity | Expense detail | Expense — Villa | `167:17847` | renders/167-17847.png | nodes/77-103.json
+- 09 Activity | Expense detail | Expense — Comment | `167:20257` | renders/167-20257.png | nodes/77-103.json
+- 09 Activity | Expense detail | Expense — Delete | `177:28846` | renders/177-28846.png | nodes/77-103.json
+- 09 Activity | Expense detail | Expense — Disputed | `177:29389` | renders/177-29389.png | nodes/77-103.json
+- 09 Activity | Expense detail | Recently deleted | `177:29968` | renders/177-29968.png | nodes/77-103.json
+- 09 Activity | Notifications | Notifications | `177:30749` | renders/177-30749.png | nodes/77-103.json
+- 09 Activity | Notifications | Lock screen — Confirm request | `186:6896` | renders/186-6896.png | nodes/77-103.json
+- 09 Activity | Notifications | Lock screen — Reminder | `186:26798` | renders/186-26798.png | nodes/77-103.json
+- 09 Activity | Overlay helpers | ↳ Not received sheet (overlay) | `190:27698` |  | nodes/77-103.json
+- 09 Activity | Overlay helpers | ↳ Remind sheet (overlay) | `190:27725` |  | nodes/77-103.json
+- 09 Activity | Overlay helpers | ↳ Add sheet (overlay) | `216:28703` |  | nodes/77-103.json
+- 10 Projects | Project dashboard | Project — Build a Drone | `167:12476` | renders/167-12476.png | nodes/77-104.json
+- 10 Projects | Project dashboard | Project — Over budget | `167:20507` | renders/167-20507.png | nodes/77-104.json
+- 10 Projects | Project dashboard | Add component | `167:21585` | renders/167-21585.png | nodes/77-104.json
+- 10 Projects | Settings, closing and archive | Project settings — Members & rules | `177:25664` | renders/177-25664.png | nodes/77-104.json
+- 10 Projects | Settings, closing and archive | Project — Closed | `177:26392` | renders/177-26392.png | nodes/77-104.json
+- 10 Projects | Settings, closing and archive | Project — Archived | `177:27619` | renders/177-27619.png | nodes/77-104.json
+- 11 Insights & AI | Insights | Insights — September | `167:17585` | renders/167-17585.png | nodes/77-105.json
+- 11 Insights & AI | Insights | Insights — Scrolled | `167:20007` | renders/167-20007.png | nodes/77-105.json
+- 11 Insights & AI | Insights | Insights — Locked | `167:21336` | renders/167-21336.png | nodes/77-105.json
+- 11 Insights & AI | Ask Paybak | Ask Paybak — Start | `167:13148` | renders/167-13148.png | nodes/77-105.json
+- 11 Insights & AI | Ask Paybak | Ask Paybak — Answer | `167:14107` | renders/167-14107.png | nodes/77-105.json
+- 11 Insights & AI | Ask Paybak | Ask Paybak — Confirm | `167:15071` | renders/167-15071.png | nodes/77-105.json
+- 11 Insights & AI | Scan receipt | Scan receipt — Camera | `177:25568` | renders/177-25568.png | nodes/77-105.json
+- 11 Insights & AI | Scan receipt | Scan receipt — Review | `177:26256` | renders/177-26256.png | nodes/77-105.json
+- 11 Insights & AI | Scan receipt | Scan receipt — Assign items | `177:26997` | renders/177-26997.png | nodes/77-105.json
+- 11 Insights & AI | Scan receipt | Scan receipt — Add expense | `177:28338` | renders/177-28338.png | nodes/77-105.json
+- 11 Insights & AI | Recurring | Recurring — Flat 302 | `177:29224` | renders/177-29224.png | nodes/77-105.json
+- 11 Insights & AI | Recurring | Recurring — Repeat | `177:30291` | renders/177-30291.png | nodes/77-105.json
+- 11 Insights & AI | Recurring | Recurring — Enter amount | `177:30957` | renders/177-30957.png | nodes/77-105.json
+- 11 Insights & AI | Overlay helpers | ↳ Add sheet (overlay) | `216:24642` |  | nodes/77-105.json
+- 11 Insights & AI | Overlay helpers | ↳ Remind sheet (overlay) | `216:24704` |  | nodes/77-105.json
+- 12 Settings & Pro | Paybak Pro | Paybak Pro — Paywall | `167:13003` | renders/167-13003.png | nodes/77-106.json
+- 12 Settings & Pro | Paybak Pro | Paybak Pro — Welcome | `167:13888` | renders/167-13888.png | nodes/77-106.json
+- 12 Settings & Pro | Payment details | Payment details | `167:14684` | renders/167-14684.png | nodes/77-106.json
+- 12 Settings & Pro | Payment details | Add UPI ID | `167:15962` | renders/167-15962.png | nodes/77-106.json
+- 12 Settings & Pro | Payment details | Add UPI ID — Error | `167:18527` | renders/167-18527.png | nodes/77-106.json
+- 12 Settings & Pro | Preferences | Currency | `176:17773` | renders/176-17773.png | nodes/77-106.json
+- 12 Settings & Pro | Preferences | Notifications & reminders | `176:18371` | renders/176-18371.png | nodes/77-106.json
+- 12 Settings & Pro | Privacy & data | Privacy & data | `176:19720` | renders/176-19720.png | nodes/77-106.json
+- 12 Settings & Pro | Privacy & data | Export records | `176:20773` | renders/176-20773.png | nodes/77-106.json
+- 12 Settings & Pro | Privacy & data | Delete account — Blocked | `177:24246` | renders/177-24246.png | nodes/77-106.json
+- 12 Settings & Pro | Help | Help & feedback | `177:24773` | renders/177-24773.png | nodes/77-106.json
