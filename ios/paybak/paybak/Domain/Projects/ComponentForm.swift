@@ -60,11 +60,12 @@ nonisolated struct ComponentForm: Hashable, Sendable {
 /// Lane B's project edits (screens-projects §1.5–§1.6, §6.7): parts from the sheet, the contribution
 /// rule, budget and pool from Project settings.
 nonisolated extension Books {
-    /// Adds a part from the sheet; one added as bought or done logs that status after "added".
+    /// Adds a part from the sheet; one added with a cost logs "bought" after "added", and Done is
+    /// logged after that, as if it was fitted right away. You made the change, so you're its actor.
     @discardableResult
     mutating func addComponent(to projectId: GroupID, _ form: ComponentForm, at moment: Date) throws -> ComponentID {
         let currency = try editableProject(projectId).currency
-        guard form.canSave(currency: currency) else { throw LedgerError.invalidAmount }
+        try Self.checkSavable(form, currency: currency)
         let id = try addComponent(ComponentDraft(projectId: projectId, name: form.trimmedName, status: form.status,
                                                  estimatedCost: form.estimatedCost(currency: currency),
                                                  actualCost: form.actualCost(currency: currency), paidBy: form.paidBy),
@@ -72,7 +73,10 @@ nonisolated extension Books {
         guard let index = ledger.components.firstIndex(where: { $0.id == id }) else { return id }
         ledger.components[index].receipt = receipt(form.receipt, at: moment)
         if form.status.isSpent {
-            ledger.components[index].history.append(.init(kind: form.status.rawValue, at: moment, by: form.paidBy))
+            ledger.components[index].history.append(.init(kind: ProjectComponent.Status.bought.rawValue, at: moment, by: Person.me))
+        }
+        if form.status == .done {
+            ledger.components[index].history.append(.init(kind: ProjectComponent.Status.done.rawValue, at: moment, by: Person.me))
         }
         return id
     }
@@ -82,9 +86,10 @@ nonisolated extension Books {
     mutating func editComponent(_ id: ComponentID, _ form: ComponentForm, at moment: Date) throws {
         guard let part = ledger.components.first(where: { $0.id == id }) else { throw LedgerError.notFound }
         let currency = try editableProject(part.projectId).currency
-        guard form.canSave(currency: currency) else { throw LedgerError.invalidAmount }
+        try Self.checkSavable(form, currency: currency)
         try updateComponent(id, status: form.status, actualCost: form.actualCost(currency: currency), paidBy: form.paidBy,
-                            name: form.trimmedName, estimatedCost: .some(form.estimatedCost(currency: currency)), at: moment)
+                            name: form.trimmedName, estimatedCost: .some(form.estimatedCost(currency: currency)),
+                            by: Person.me, at: moment)
         guard let index = ledger.components.firstIndex(where: { $0.id == id }) else { return }
         if form.receipt != part.receipt?.photo {
             ledger.components[index].receipt = receipt(form.receipt, at: moment)
@@ -114,6 +119,12 @@ nonisolated extension Books {
         guard let project = ledger.group(projectId), project.isProject else { throw LedgerError.notFound }
         guard project.project?.status == .active else { throw LedgerError.notAllowed }
         return project
+    }
+
+    /// "Name the part." / "Add what it cost." when the sheet can't save yet.
+    private static func checkSavable(_ form: ComponentForm, currency: String) throws {
+        guard !form.canSave(currency: currency) else { return }
+        throw LedgerError.rule(form.trimmedName.isEmpty ? "Name the part." : "Add what it cost.")
     }
 
     private func receipt(_ photo: String?, at moment: Date) -> Receipt? {

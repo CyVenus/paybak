@@ -8,14 +8,30 @@ nonisolated struct RateTable: Decodable, Sendable {
     let inrPerUnit: [String: String]
 
     /// The rate from `code` to `target` (`{value: "22.85", to: "INR"}`), nil when either is unknown
-    /// or they're the same currency.
+    /// or they're the same currency. Like Android: 4 decimals, rounded half up, trailing zeros
+    /// dropped but at least 2 decimals ("22.85", "0.012", "1.00").
     func rate(from code: String, to target: String) -> Rate? {
         guard code != target,
               let from = decimal(code), let to = decimal(target), to != 0 else { return nil }
         var value = from / to
         var rounded = Decimal()
-        NSDecimalRound(&rounded, &value, 6, .plain)
-        return Rate(value: NSDecimalNumber(decimal: rounded).stringValue, to: target)
+        NSDecimalRound(&rounded, &value, Self.scale, .plain)
+        return Rate(value: Self.text(rounded), to: target)
+    }
+
+    private static let scale = 4
+
+    /// A non-negative rate as plain decimal text with 2 to 4 decimals.
+    private static func text(_ value: Decimal) -> String {
+        var scaled = value * Decimal(10_000)
+        var whole = Decimal()
+        NSDecimalRound(&whole, &scaled, 0, .plain)
+        let units = NSDecimalNumber(decimal: whole).int64Value
+        let (integer, fraction) = units.quotientAndRemainder(dividingBy: 10_000)
+        var digits = String(fraction)
+        digits = String(repeating: "0", count: scale - digits.count) + digits
+        while digits.count > 2, digits.hasSuffix("0") { digits.removeLast() }
+        return "\(integer).\(digits)"
     }
 
     private func decimal(_ code: String) -> Decimal? {

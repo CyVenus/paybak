@@ -124,7 +124,7 @@ nonisolated extension Books {
                 bar(id: row.personId, title: firstName(row.personId), amount: row.amount, percent: row.percent,
                     leading: .person(row.personId), target: .person(row.personId))
             },
-            loansTitle: "Lent vs borrowed since \(windowStart.name)",
+            loansTitle: "Lent vs borrowed since \(windowStart.name)" + (windowStart.year == month.year ? "" : " \(windowStart.year)"),
             lent: Money.format(lent, defaultCurrency),
             borrowed: Money.format(borrowed, defaultCurrency),
             loans: loans.map(loanRow)
@@ -132,23 +132,29 @@ nonisolated extension Books {
     }
 
     /// Who you spent with, Friends (§2.6 #8): your share of each expense split evenly across the
-    /// other people on it (fair rotation), so the friends add up to the month's total. By amount
-    /// descending (ties in people order), with largest-remainder percentages.
+    /// other people on it, the leftover paise rotating fairly from one expense to the next, so the
+    /// friends add up to the month's total. By amount descending (ties in the order they first
+    /// appear), with largest-remainder percentages.
     func insightFriends(_ month: YearMonth) -> [(personId: PersonID, amount: Int64, percent: Int)] {
         var amounts: [PersonID: Int64] = [:]
+        var firstSeen: [PersonID] = []
+        var counter = 0
         for (expense, share) in insightExpenses(month) {
             let others = expense.split.rows.filter { $0.included && $0.personId != Person.me }.map(\.personId)
             guard !others.isEmpty else { continue }
-            for (person, part) in Splits.equal(share, among: others).shares {
-                amounts[person, default: 0] += part
+            let split = Splits.equal(share, among: others, counter: counter)
+            counter = split.counter
+            for person in others {
+                if amounts[person] == nil { firstSeen.append(person) }
+                amounts[person, default: 0] += split.shares[person, default: 0]
             }
         }
-        let order = ledger.people.map(\.id)
-        let sorted = amounts.filter { $0.value != 0 }.sorted { lhs, rhs in
-            lhs.value != rhs.value ? lhs.value > rhs.value
-                : (order.firstIndex(of: lhs.key) ?? .max) < (order.firstIndex(of: rhs.key) ?? .max)
-        }
-        let percents = Splits.largestRemainderPercent(sorted.map { ($0.key, $0.value) })
+        let rows: [(key: PersonID, value: Int64)] = firstSeen.map { ($0, amounts[$0, default: 0]) }.filter { $0.1 != 0 }
+        // By amount, ties in the order they first appeared (a stable sort).
+        let sorted: [(key: PersonID, value: Int64)] = rows.enumerated()
+            .sorted { lhs, rhs in lhs.element.value != rhs.element.value ? lhs.element.value > rhs.element.value : lhs.offset < rhs.offset }
+            .map(\.element)
+        let percents = Splits.largestRemainderPercent(sorted)
         return sorted.map { ($0.key, $0.value, percents[$0.key, default: 0]) }
     }
 
@@ -165,7 +171,7 @@ nonisolated extension Books {
         ledger.loans
             .filter { $0.date >= start && $0.date <= end && ($0.lenderId == Person.me || $0.borrowerId == Person.me) }
             .enumerated()
-            .sorted { $0.element.date != $1.element.date ? $0.element.date > $1.element.date : $0.offset > $1.offset }
+            .sorted { $0.element.date != $1.element.date ? $0.element.date > $1.element.date : $0.offset < $1.offset }
             .map(\.element)
     }
 
@@ -181,7 +187,7 @@ nonisolated extension Books {
         } else {
             .open
         }
-        let text = [firstName(other), loan.reason].compactMap(\.self).joined(separator: " · ")
+        let text = "\(firstName(other)) · \(loan.title)"
         return InsightsPage.LoanRow(id: loan.id, personId: other, text: text, status: status)
     }
 

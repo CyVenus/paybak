@@ -10,6 +10,7 @@ nonisolated struct FriendBalance: Hashable, Sendable, Identifiable {
     var items: [Obligation]
     /// The earliest due date among the open items.
     var due: LocalDay?
+    /// They owe you and the earliest due date has passed.
     var isOverdue: Bool
 }
 
@@ -47,7 +48,7 @@ nonisolated extension Books {
             let net = nets[person.id, default: 0]
             let mine = items.filter { $0.friend == person.id }
             let due = mine.compactMap(\.due).min()
-            return FriendBalance(person: person, net: net, items: mine, due: due, isOverdue: due.map { $0 < today } ?? false)
+            return FriendBalance(person: person, net: net, items: mine, due: due, isOverdue: net > 0 && (due.map { $0 < today } ?? false))
         }
         func key(_ row: FriendBalance, index: Int) -> (Int, LocalDay, Int64, Int) {
             let due = row.due ?? far
@@ -113,7 +114,8 @@ nonisolated extension Books {
             guard let deletedAt = expense.deletedAt else { return nil }
             let deletedOn = day(of: deletedAt)
             let left = max(0, today.days(to: deletedOn.adding(days: Ledger.deletedRetentionDays)))
-            let who = expense.deletedBy.map(firstName) ?? "You"
+            // "Deleted by Priya", or "Deleted by you".
+            let who = expense.deletedBy.map(name) ?? "you"
             return DeletedExpenseRow(expense: expense,
                                      detail: "Deleted by \(who) on \(Format.short(deletedOn)) · \(Format.daysLeft(deletedOn: deletedOn, today: today))",
                                      daysLeft: left)
@@ -131,11 +133,17 @@ nonisolated extension Books {
         ledger.reminders.filter { $0.toId == person }.max { $0.sentAt < $1.sentAt }
     }
 
-    /// Currencies used most recently in your records, newest first, without duplicates.
-    func recentCurrencies(limit: Int = 5) -> [String] {
+    /// The currency picker's Recent section after the default currency: the other currencies of your
+    /// latest expenses (newest first), then of your latest payments, without duplicates.
+    func recentCurrencies(limit: Int = 3) -> [String] {
+        let expenses = ledger.expenses.enumerated()
+            .sorted { $0.element.createdAt != $1.element.createdAt ? $0.element.createdAt > $1.element.createdAt : $0.offset < $1.offset }
+            .map(\.element.currency)
+        let payments = ledger.payments.enumerated()
+            .sorted { $0.element.createdAt != $1.element.createdAt ? $0.element.createdAt > $1.element.createdAt : $0.offset < $1.offset }
+            .map(\.element.currency)
         var seen: [String] = []
-        let records = ledger.expenses.map { ($0.createdAt, $0.currency) } + ledger.payments.map { ($0.createdAt, $0.currency) }
-        for (_, code) in records.sorted(by: { $0.0 > $1.0 }) where !seen.contains(code) {
+        for code in expenses + payments where code != defaultCurrency && !seen.contains(code) {
             seen.append(code)
             if seen.count == limit { break }
         }

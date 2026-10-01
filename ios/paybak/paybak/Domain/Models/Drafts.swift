@@ -113,7 +113,8 @@ nonisolated struct ComponentDraft: Codable, Hashable, Sendable {
     var paidBy: PersonID = Person.me
 }
 
-/// Why an action was refused. The message is user-facing copy.
+/// Why an action was refused. The message is user-facing copy (the same words as Android's
+/// `LedgerRuleException`s).
 nonisolated enum LedgerError: LocalizedError, Equatable {
     case notFound
     case invalidAmount
@@ -121,15 +122,18 @@ nonisolated enum LedgerError: LocalizedError, Equatable {
     case splitDoesNotAddUp(remaining: Int64)
     case balanceNotSettled(amount: Int64, currency: String)
     case notAllowed
+    /// A ledger rule's own message ("The percentages must add up to 100%.", "Give it a name.").
+    case rule(String)
 
     var errorDescription: String? {
         switch self {
         case .notFound: "That record no longer exists."
-        case .invalidAmount: "Enter an amount above zero."
-        case .needsSomeoneElse: "Add at least one other person."
+        case .invalidAmount: "Enter an amount."
+        case .needsSomeoneElse: "Add someone to split with."
         case .splitDoesNotAddUp(let remaining): "The split is off by \(Money.format(abs(remaining)))."
         case .balanceNotSettled(let amount, let currency): "There’s still \(Money.format(abs(amount), currency)) to settle first."
         case .notAllowed: "That can’t be changed."
+        case .rule(let message): message
         }
     }
 }

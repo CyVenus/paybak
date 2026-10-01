@@ -64,7 +64,7 @@ nonisolated extension Books {
                 ))
             }
             for (index, entry) in expense.history.enumerated() where entry.kind == .amountChanged {
-                let old = entry.old?.amount.map { Money.format($0, expense.currency) } ?? ""
+                let old = Money.format(entry.old?.amount ?? 0, expense.currency)
                 events.append(TimelineEvent(
                     id: "edit:\(expense.id):\(index)", at: entry.at, kind: .expenseEdited(expense.id),
                     title: "\(firstName(entry.by)) changed \(expense.title)",

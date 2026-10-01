@@ -28,19 +28,21 @@ nonisolated extension Books {
     func inboxText(_ item: InboxItem) -> (title: String, body: String) {
         let p = item.params
         let currency = p.currency ?? defaultCurrency
-        let person = p.personId.map(firstName) ?? ""
+        // The person, else whoever acted; "Someone" when neither is known.
+        let person = firstName(p.personId ?? p.actorId ?? "")
         let amount = Money.format(p.amount ?? 0, currency)
         let title = p.title ?? ""
         switch item.type {
         case .newExpenseInGroup:
             return ("New expense in \(groupName(p.groupId))",
-                    "\(p.actorId.map(firstName) ?? "") added \(title), \(Money.format(p.total ?? 0, currency)). Your share is \(Money.format(p.share ?? 0, currency)).")
+                    "\(firstName(p.actorId ?? "")) added \(title), \(Money.format(p.total ?? 0, currency)). Your share is \(Money.format(p.share ?? 0, currency)).")
         case .paymentOverdue:
             return ("Payment overdue", "\(person) owes you \(amount) for \(title). It was due on \(p.dueDate.map(Format.short) ?? "").")
         case .paymentConfirmed:
             return ("Payment confirmed", "\(person) paid you \(amount) for \(title) by \(p.method?.label ?? "").")
         case .paymentReminder:
-            return ("Payment reminder", "You owe \(person) \(amount) for \(title). \(reminderWhen(due: p.dueDate, createdAt: item.createdAt))")
+            let body = "You owe \(person) \(amount) for \(title). \(reminderWhen(due: p.dueDate, createdAt: item.createdAt))"
+            return ("Payment reminder", body.trimmingCharacters(in: .whitespaces))
         case .monthlySummary:
             let tail = if let owed = p.owed, owed > 0 {
                 "You’re owed \(Money.format(owed, defaultCurrency))."
@@ -50,7 +52,7 @@ nonisolated extension Books {
                 "You’re all square."
             }
             return ("Monthly summary",
-                    "\(Format.month(p.month ?? 1)): you spent \(Money.format(p.spent ?? 0, defaultCurrency)) on shared expenses. \(tail)")
+                    "\(Format.month(p.month ?? today.month)): you spent \(Money.format(p.spent ?? 0, defaultCurrency)) on shared expenses. \(tail)")
         case .paymentNotReceived:
             return ("\(person) hasn’t received it", p.note ?? "")
         case .expenseFlagged:

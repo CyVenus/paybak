@@ -30,12 +30,13 @@ nonisolated struct GroupRowCopy: Hashable, Sendable {
     }
 
     struct Budget: Hashable, Sendable {
-        /// Spent ÷ budget, 0…1.
+        /// Spent ÷ budget, 0…1; over budget, budget ÷ spent (where the red starts).
         var progress: Double
         /// "₹52,000 of ₹60,000".
         var spent: String
-        /// "₹8,000 left" or "₹2,000 over".
+        /// "₹8,000 left", "₹8,000 under budget" or "₹2,000 over budget" (the project's budget line).
         var left: String
+        var isOver = false
     }
 
     var subtitle: String
@@ -137,9 +138,8 @@ nonisolated extension Books {
         let group = summary.group
         let members = Self.members(group.memberIds.count)
         if group.isArchived {
-            let closed = group.project?.closedAt ?? group.project?.archivedAt
-            return GroupRowCopy(subtitle: ["Project", closed.map { "Closed \(Format.short(day(of: $0)))" }].compactMap(\.self).joined(separator: " · "),
-                                trailing: .readOnly)
+            let subtitle = group.project?.closedAt.map { "Project · Closed \(Format.short(day(of: $0)))" } ?? "Project · \(members)"
+            return GroupRowCopy(subtitle: subtitle, trailing: .readOnly)
         }
         let trailing: GroupRowCopy.Trailing = switch summary.myNet.signum() {
         case -1: .owe(Money.format(-summary.myNet, group.currency))
@@ -149,21 +149,30 @@ nonisolated extension Books {
         if group.isProject {
             return GroupRowCopy(subtitle: "Project · \(members)", trailing: trailing, budget: budget(group))
         }
+        // The settle-by date shows while your balance there is open.
         var parts = [members]
         if group.currency != defaultCurrency { parts.append(group.currency) }
-        if summary.myNet != 0, let due = summary.due { parts.append(Format.dueLabel(due)) }
+        if summary.myNet != 0, let due = group.settleBy { parts.append(Format.dueLabel(due)) }
         return GroupRowCopy(subtitle: parts.joined(separator: " · "), trailing: trailing)
     }
 
     /// The project budget bar under a Row / Group, when the project has a budget.
     private func budget(_ project: LedgerGroup) -> GroupRowCopy.Budget? {
-        guard let budget = project.project?.budget, budget > 0 else { return nil }
+        guard let info = project.project, let budget = info.budget, budget > 0 else { return nil }
         let spent = projectSpent(project.id)
-        let left = budget - spent
+        let over = spent > budget
+        let left = if over {
+            "\(Money.format(spent - budget, project.currency)) over budget"
+        } else if info.status == .active {
+            "\(Money.format(budget - spent, project.currency)) left"
+        } else {
+            "\(Money.format(budget - spent, project.currency)) under budget"
+        }
         return GroupRowCopy.Budget(
-            progress: min(1, Double(spent) / Double(budget)),
+            progress: over ? Double(budget) / Double(spent) : Double(spent) / Double(budget),
             spent: "\(Money.format(spent, project.currency)) of \(Money.format(budget, project.currency))",
-            left: left >= 0 ? "\(Money.format(left, project.currency)) left" : "\(Money.format(-left, project.currency)) over"
+            left: left,
+            isOver: over
         )
     }
 
@@ -195,23 +204,21 @@ nonisolated extension Books {
             .element
     }
 
-    /// "Goa Trip · Due Fri 2 Oct" for a group, "Due Sun 4 Oct" for a direct item or a loan; the title
-    /// when there's no due date.
+    /// "Due Sun 4 Oct" for a direct item; a group, project or loan names itself first ("Goa Trip · Due
+    /// Fri 2 Oct"); the title when there's no due date.
     private func context(_ item: Obligation) -> String {
         guard let due = item.due else { return item.title }
         switch item.kind {
-        case .group, .project: return "\(item.title) · \(Format.dueLabel(due))"
-        case .direct, .loan: return Format.dueLabel(due)
+        case .group, .project, .loan: return "\(item.title) · \(Format.dueLabel(due))"
+        case .direct: return Format.dueLabel(due)
         }
     }
 
-    /// Whether you share any record or group with a person ("Settled" rather than "No balance").
+    /// Whether anything is recorded with a person ("Settled" rather than "No balance"): their friend
+    /// page has History or Groups together.
     func sharesAnything(with person: PersonID) -> Bool {
-        let pair = Set([Person.me, person])
-        return liveExpenses().contains { Set($0.participantIds).isSuperset(of: pair) }
-            || ledger.payments.contains { Set([$0.fromId, $0.toId]) == pair && $0.status != .cancelled }
-            || ledger.loans.contains { $0.friendId == person }
-            || ledger.groups.contains { Set($0.memberIds).isSuperset(of: pair) }
+        guard let page = friendPage(person) else { return false }
+        return !page.history.isEmpty || !page.groupsTogether.isEmpty
     }
 
     // MARK: Group detail
@@ -243,10 +250,11 @@ nonisolated extension Books {
                                     settle: settleTarget(transfers, group: group))
         }
         if net > 0 {
+            // Settle up opens the group's plan.
             let transfers = sheet.plan.filter { $0.to == Person.me }
             let who = transfers.count == 1 ? "\(firstName(transfers[0].from)) owes" : "\(transfers.count) people owe"
             return GroupBalanceCopy(tone: .owed, amount: Money.format(net, group.currency, sign: .signed),
-                                    caption: "\(who) you\(dueSuffix)", showsSettleUp: false)
+                                    caption: "\(who) you\(dueSuffix)", showsSettleUp: true, settle: .plan(group.id))
         }
         return GroupBalanceCopy(tone: .settled, amount: "Settled", caption: lastSettlement(inGroup: group.id) ?? "Nothing pending",
                                 showsSettleUp: false)
@@ -295,10 +303,11 @@ nonisolated extension Books {
         return "Total \(Money.format(sheet.spent, sheet.group.currency)) · ≈ \(Money.format(converted, defaultCurrency)) at saved rates"
     }
 
-    /// "Dev paid · Your share ₹500".
+    /// "Dev paid · Your share ₹500"; "Kabir paid" when you have no share.
     func groupExpenseSubtitle(_ expense: Expense) -> String {
-        let payer = expense.payers.count > 1 ? "\(expense.payers.count) people" : firstName(expense.payerId)
-        return "\(payer) paid · Your share \(Money.format(expense.share(of: Person.me), expense.currency))"
+        let payer = "\(firstName(expense.payerId)) paid"
+        let share = expense.share(of: Person.me)
+        return share == 0 ? payer : "\(payer) · Your share \(Money.format(share, expense.currency))"
     }
 
     /// "Fri 25 Sep" (with the year when it isn't this year).
@@ -327,8 +336,8 @@ nonisolated extension Books {
         }
         if net > 0 {
             let transfers = plan.filter { $0.to == Person.me }
-            let who = transfers.count == 1 ? "\(firstName(transfers[0].from)) owes" : "\(transfers.count) people owe"
-            return .blocked(message: "\(who) you \(amount) in \(group.name). Settle up first, then you can leave.", settle: .plan(groupId))
+            let who = transfers.count == 1 ? "\(firstName(transfers[0].from)) owes you" : "You’re owed"
+            return .blocked(message: "\(who) \(amount) in \(group.name). Settle up first, then you can leave.", settle: .plan(groupId))
         }
         return .allowed
     }
@@ -366,13 +375,21 @@ nonisolated extension Books {
         return page.history.map { item in
             switch item {
             case .expense(let expense):
-                let payer = expense.payers.count > 1 ? "\(expense.payers.count) people paid" : "\(firstName(expense.payerId)) paid"
+                // "You paid · Rohan owes ₹800" while a direct expense is open; a group's says where you
+                // stand there: "College Gang · Settled", "Goa Trip · You paid", "Goa Trip · Your share ₹3,600".
+                let payer = "\(firstName(expense.payerId)) paid"
                 let subtitle: String
                 let isOpen: Bool
                 if let groupId = expense.groupId {
-                    let owed = open.first { $0.ref == groupId }
-                    isOpen = owed != nil
-                    subtitle = "\(groupName(groupId)) · " + (owed.map { debtText($0, friend: first) } ?? "Settled")
+                    let name = groupName(groupId)
+                    isOpen = groupNets(groupId)[Person.me, default: 0] != 0
+                    if !isOpen {
+                        subtitle = "\(name) · Settled"
+                    } else if expense.payerId == Person.me {
+                        subtitle = "\(name) · You paid"
+                    } else {
+                        subtitle = "\(name) · Your share \(Money.format(expense.share(of: Person.me), expense.currency))"
+                    }
                 } else {
                     let owed = open.first { $0.ref == expense.id }
                     isOpen = owed != nil
@@ -382,24 +399,29 @@ nonisolated extension Books {
                                         amount: Money.format(expense.amount, expense.currency), date: Format.rowDate(expense.date, today: today),
                                         isOpen: isOpen, target: .expense(expense.id))
             case .payment(let payment):
-                let title = payment.fromId == Person.me ? "You paid \(first)" : "\(first) paid you"
-                var parts = [payment.method.label]
-                if payment.groupId != nil || payment.expenseId != nil || payment.loanId != nil { parts.append(paymentFor(payment)) }
+                // "Weekend groceries · UPI", "Payment · Cash · Pending".
+                let toMe = payment.toId == Person.me
+                let title = toMe ? "\(first) paid you" : "You paid \(first)"
+                var parts = [paymentFor(payment), payment.method.label]
                 switch payment.status {
                 case .pending: parts.append("Pending")
                 case .notReceived: parts.append("Not received")
                 case .confirmed, .cancelled: break
                 }
-                return FriendHistoryRow(id: payment.id, leading: .person(payment.fromId), title: title, subtitle: parts.joined(separator: " · "),
+                return FriendHistoryRow(id: payment.id, leading: .icon(toMe ? "money-in" : "money-out"), title: title,
+                                        subtitle: parts.joined(separator: " · "),
                                         amount: Money.format(payment.amount, payment.currency), date: Format.rowDate(payment.date, today: today),
-                                        isOpen: payment.toId == Person.me, target: .payment(payment.id))
+                                        isOpen: toMe, target: .payment(payment.id))
             case .loan(let loan):
+                // "You lent · Dev owes ₹6,000", "Kabir lent you · Paid back".
                 let remaining = abs(loanContext(loan)?.amount ?? 0)
-                let verb = loan.lenderId == Person.me ? "You lent" : "You borrowed"
-                let state = remaining > 0 ? "\(Money.format(remaining, loan.currency)) left" : "Paid back"
-                return FriendHistoryRow(id: loan.id, leading: .icon("lend"), title: loan.title, subtitle: "\(verb) · \(state)",
+                let lent = loan.lenderId == Person.me
+                let who = lent ? "You lent" : "\(first) lent you"
+                let state = remaining == 0 ? "Paid back" : "\(lent ? "\(first) owes" : "You owe") \(Money.format(remaining, loan.currency))"
+                return FriendHistoryRow(id: loan.id, leading: .icon(lent ? "money-out" : "money-in"), title: loan.title,
+                                        subtitle: "\(who) · \(state)",
                                         amount: Money.format(loan.amount, loan.currency), date: Format.rowDate(loan.date, today: today),
-                                        isOpen: remaining > 0, target: .loan(loan.id))
+                                        isOpen: remaining != 0, target: .loan(loan.id))
             }
         }
     }

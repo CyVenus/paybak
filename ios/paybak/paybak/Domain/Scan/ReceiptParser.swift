@@ -52,7 +52,7 @@ nonisolated enum ReceiptParser {
                 continue
             }
             guard row.count > 1, let last = row.last, let reading = reading(last.text, currency: currency) else { continue }
-            let label = row.dropLast().map(\.text).joined(separator: " ").trimmingCharacters(in: .whitespaces)
+            let label = Self.label(row.dropLast().map(\.text).joined(separator: " "))
             switch kind(of: label) {
             case .subtotal: subtotal = reading
             case .tax: charges.append((label, reading, false))
@@ -127,6 +127,18 @@ nonisolated enum ReceiptParser {
         if sub != nil { next += 1 }
         return (Array(values[..<items.count]), sub, Array(values[items.count..<(items.count + charges.count)]),
                 total.map { _ in values[next] })
+    }
+
+    /// A row's words before its amount, tidied as Android does: no trailing ".", ":" or "-", and a
+    /// quantity written "×3" ("Fresh lime soda x3" → "Fresh lime soda ×3").
+    static func label(_ text: String) -> String {
+        var label = text.trimmingCharacters(in: .whitespaces)
+        while let last = label.last, ".:-".contains(last) { label.removeLast() }
+        label = label.trimmingCharacters(in: .whitespaces)
+        if let match = label.firstMatch(of: /\s[xX](\d+)$/) {
+            label = String(label[..<match.range.lowerBound]) + " ×" + String(match.1)
+        }
+        return label
     }
 
     private enum Kind {

@@ -30,6 +30,8 @@ nonisolated struct RecurringRule: Codable, Hashable, Identifiable, Sendable {
 
 nonisolated enum RecurrenceFrequency: String, Codable, Sendable, CaseIterable {
     case weekly
+    /// Every other week on the anchor's weekday (the Repeat sheet's Custom).
+    case biweekly
     case monthly
     case yearly
 }

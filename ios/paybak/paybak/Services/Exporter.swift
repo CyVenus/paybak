@@ -2,8 +2,9 @@ import Foundation
 import UIKit
 
 /// Builds an export file in the cache folder for the share sheet (screens-settings §9): a CSV from
-/// the Domain rows, or an A4 PDF with one table per ticked group and its total. The file is named
-/// after the range ("Paybak records 1 Sep – 30 Sep 2026.pdf").
+/// the Domain rows, or an A4 PDF with one table per group that has records and its expenses total,
+/// laid out as Android's `RecordsPdf`. The file is named after the range ("Paybak records 1 Sep –
+/// 30 Sep 2026.pdf"); earlier exports are cleared first.
 enum Exporter {
     enum Format: String {
         case csv
@@ -15,96 +16,181 @@ enum Exporter {
         let rangeLine = paybak.Format.exportRange(start, end)
         let folder = URL.cachesDirectory.appending(path: "exports", directoryHint: .isDirectory)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for old in (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [] {
+            try? FileManager.default.removeItem(at: old)
+        }
         let url = folder.appending(path: "Paybak records \(rangeLine).\(format.rawValue)")
         switch format {
         case .csv:
             try Data(ExportCSV.make(records, defaultCurrency: books.defaultCurrency).utf8).write(to: url, options: .atomic)
         case .pdf:
-            let rows = books.exportGroups(from: start, to: end).filter { groups.contains($0.id) }
-            try pdf(records, groups: rows, rangeLine: rangeLine, defaultCurrency: books.defaultCurrency).write(to: url, options: .atomic)
+            try RecordsPDF(defaultCurrency: books.defaultCurrency).render(rangeLine: rangeLine, records: records)
+                .write(to: url, options: .atomic)
         }
         return url
     }
+}
 
-    // MARK: PDF
+/// The PDF export (screens-settings §9, proposal): "Paybak records", the range, then one section per
+/// group with a table (Date · Title · Paid by · Amount · Each person's share) and its expenses total,
+/// on A4 pages with the footer "Paybak never moves money." Positions are Android's, in points, with
+/// `y` as the text baseline.
+private struct RecordsPDF {
+    let defaultCurrency: String
 
     private static let page = CGRect(x: 0, y: 0, width: 595, height: 842)
-    /// `text/primary` and `text/secondary`, fixed so the page stays black on white in Dark Mode.
-    private static let primaryText = UIColor(red: 0x0A / 255, green: 0x0A / 255, blue: 0x0A / 255, alpha: 1)
-    private static let secondaryText = UIColor(red: 0x6B / 255, green: 0x6B / 255, blue: 0x6B / 255, alpha: 1)
     private static let margin: CGFloat = 40
-    /// Date · Title · Paid by · Amount, as fractions of the text width.
-    private static let columns: [CGFloat] = [0.16, 0.46, 0.18, 0.20]
+    private static let footerY: CGFloat = 842 - 24
+    private static let line: CGFloat = 15
+    /// Table columns: left edges (Amount is right-aligned to its column's end).
+    private static let colDate: CGFloat = margin
+    private static let colTitle: CGFloat = 96
+    private static let colPaidBy: CGFloat = 256
+    private static let colAmountEnd: CGFloat = 408
+    private static let colShares: CGFloat = 420
+    private static let widthTitle: CGFloat = 150
+    private static let widthPaidBy: CGFloat = 80
+    private static let widthShares: CGFloat = 595 - margin - colShares
 
-    private static func pdf(_ records: [ExportRecord], groups: [ExportGroupRow], rangeLine: String, defaultCurrency: String) -> Data {
-        UIGraphicsPDFRenderer(bounds: page).pdfData { context in
-            var y = margin
-            let width = page.width - margin * 2
+    /// `text/primary`, `text/secondary` and the divider, fixed so the page stays black on white.
+    private static let ink = UIColor(red: 0x0A / 255, green: 0x0A / 255, blue: 0x0A / 255, alpha: 1)
+    private static let secondary = UIColor(red: 0x6B / 255, green: 0x6B / 255, blue: 0x6B / 255, alpha: 1)
+    private static let rule = UIColor(red: 0xEB / 255, green: 0xEB / 255, blue: 0xEB / 255, alpha: 1)
 
-            func newPageIfNeeded(_ height: CGFloat) {
-                if y + height > page.height - margin - 24 {
-                    footer()
-                    context.beginPage()
-                    y = margin
+    struct Style {
+        let font: UIFont
+        let color: UIColor
+    }
+
+    private static let title = Style(font: PBFont.bold.uiFont(size: 22), color: ink)
+    private static let subtitle = Style(font: PBFont.regular.uiFont(size: 12), color: secondary)
+    private static let heading = Style(font: PBFont.bold.uiFont(size: 14), color: ink)
+    private static let label = Style(font: PBFont.bold.uiFont(size: 9), color: secondary)
+    private static let body = Style(font: PBFont.regular.uiFont(size: 10), color: ink)
+    private static let total = Style(font: PBFont.bold.uiFont(size: 10), color: ink)
+
+    func render(rangeLine: String, records: [ExportRecord]) -> Data {
+        UIGraphicsPDFRenderer(bounds: Self.page).pdfData { context in
+            var writer = Writer(context: context)
+            writer.newPage()
+            writer.text("Paybak records", x: Self.margin, baseline: writer.y + 22, Self.title)
+            writer.y += 42
+            writer.text(rangeLine, x: Self.margin, baseline: writer.y, Self.subtitle)
+            writer.y += 28
+            if records.isEmpty { writer.text("No records in this range.", x: Self.margin, baseline: writer.y, Self.body) }
+            var sections: [(name: String, rows: [ExportRecord])] = []
+            for record in records {
+                if let index = sections.firstIndex(where: { $0.name == record.groupName && $0.rows.first?.groupKey == record.groupKey }) {
+                    sections[index].rows.append(record)
+                } else {
+                    sections.append((record.groupName, [record]))
                 }
             }
-
-            func footer() {
-                draw("Paybak never moves money.", font: .medium, size: 9, color: secondaryText,
-                     in: CGRect(x: margin, y: page.height - margin, width: width, height: 14))
+            for section in sections {
+                self.section(section.name, rows: section.rows, writer: &writer)
             }
+            writer.finishPage()
+        }
+    }
 
+    private func section(_ name: String, rows: [ExportRecord], writer: inout Writer) {
+        writer.ensureSpace(Self.line * 4)
+        writer.text(name, x: Self.margin, baseline: writer.y, Self.heading)
+        writer.y += 20
+        writer.columnLabels()
+        for record in rows {
+            row(record, writer: &writer)
+        }
+        let spent = rows.filter { $0.kind == .expense }.reduce(0) { $0 + $1.defaultAmount }
+        writer.ensureSpace(Self.line)
+        writer.text("Expenses total", x: Self.colTitle, baseline: writer.y, Self.total)
+        writer.rightText(Money.format(spent, defaultCurrency), end: Self.colAmountEnd, baseline: writer.y, Self.total)
+        writer.y += Self.line * 2
+    }
+
+    private func row(_ record: ExportRecord, writer: inout Writer) {
+        let shares = record.shares.map { "\($0.name) \(Money.format($0.amount, record.currency))" }
+        let height = Self.line * CGFloat(max(shares.count, 1))
+        if writer.ensureSpace(height) { writer.columnLabels() }
+        writer.text(paybak.Format.short(record.date), x: Self.colDate, baseline: writer.y, Self.body)
+        writer.text(Writer.fit(record.title, width: Self.widthTitle, Self.body), x: Self.colTitle, baseline: writer.y, Self.body)
+        writer.text(Writer.fit(record.paidBy, width: Self.widthPaidBy, Self.body), x: Self.colPaidBy, baseline: writer.y, Self.body)
+        writer.rightText(Money.format(record.amount, record.currency), end: Self.colAmountEnd, baseline: writer.y, Self.body)
+        for (index, share) in shares.enumerated() {
+            writer.text(Writer.fit(share, width: Self.widthShares, Self.body), x: Self.colShares,
+                        baseline: writer.y + CGFloat(index) * Self.line, Self.body)
+        }
+        writer.y += height + 4
+    }
+
+    /// The page being drawn and the current baseline.
+    struct Writer {
+        let context: UIGraphicsPDFRendererContext
+        var y: CGFloat = 0
+        private var isOpen = false
+
+        init(context: UIGraphicsPDFRendererContext) {
+            self.context = context
+        }
+
+        mutating func newPage() {
             context.beginPage()
-            y += draw("Paybak records", font: .extraBold, size: 24, in: CGRect(x: margin, y: y, width: width, height: 32))
-            y += draw(rangeLine, font: .medium, size: 12, color: secondaryText, in: CGRect(x: margin, y: y, width: width, height: 18)) + 16
-            for group in groups {
-                let groupRecords = records.filter { $0.groupKey == group.id }
-                newPageIfNeeded(60)
-                y += draw(group.name, font: .bold, size: 15, in: CGRect(x: margin, y: y, width: width, height: 22)) + 4
-                y += row(["Date", "Title", "Paid by", "Amount"], font: .semiBold, color: secondaryText, y: y, width: width) + 4
-                if groupRecords.isEmpty {
-                    y += draw("Nothing in this range.", font: .regular, size: 10, color: secondaryText,
-                              in: CGRect(x: margin, y: y, width: width, height: 16))
-                }
-                for record in groupRecords {
-                    let shares = record.shares.map { "\($0.name) \(Money.format($0.amount, record.currency))" }.joined(separator: " · ")
-                    newPageIfNeeded(shares.isEmpty ? 18 : 32)
-                    y += row([paybak.Format.short(record.date), "\(record.kind.rawValue): \(record.title)", record.paidBy,
-                              Money.format(record.amount, record.currency)], font: .regular, color: primaryText, y: y, width: width)
-                    if !shares.isEmpty {
-                        y += draw(shares, font: .regular, size: 8, color: secondaryText,
-                                  in: CGRect(x: margin + width * columns[0], y: y, width: width * (1 - columns[0]), height: 14))
-                    }
-                    y += 2
-                }
-                let total = groupRecords.filter { $0.kind != .payment }.reduce(0) { $0 + $1.defaultAmount }
-                y += row(["", "Total", "", Money.format(total, defaultCurrency)], font: .bold, color: primaryText, y: y, width: width) + 16
-            }
-            footer()
+            isOpen = true
+            y = RecordsPDF.margin
         }
-    }
 
-    /// One table row in the four columns; returns its height.
-    private static func row(_ cells: [String], font: PBFont, color: UIColor, y: CGFloat, width: CGFloat) -> CGFloat {
-        var x = margin
-        for (index, cell) in cells.enumerated() {
-            let cellWidth = width * columns[index]
-            draw(cell, font: font, size: 10, color: color, alignment: index == cells.count - 1 ? .right : .left,
-                 in: CGRect(x: x, y: y, width: cellWidth - 6, height: 16))
-            x += cellWidth
+        /// The footer on the page being finished.
+        mutating func finishPage() {
+            guard isOpen else { return }
+            text("Paybak never moves money.", x: RecordsPDF.margin, baseline: RecordsPDF.footerY, RecordsPDF.subtitle)
+            isOpen = false
         }
-        return 16
-    }
 
-    /// Draws one line of text (truncating) and returns the rect's height.
-    @discardableResult
-    private static func draw(_ text: String, font: PBFont, size: CGFloat, color: UIColor = primaryText,
-                             alignment: NSTextAlignment = .left, in rect: CGRect) -> CGFloat {
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = alignment
-        paragraph.lineBreakMode = .byTruncatingTail
-        let attributes: [NSAttributedString.Key: Any] = [.font: font.uiFont(size: size), .foregroundColor: color, .paragraphStyle: paragraph]
-        (text as NSString).draw(with: rect, options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], attributes: attributes, context: nil)
-        return rect.height
+        /// Starts a new page when `height` doesn't fit on this one; true if it did.
+        @discardableResult
+        mutating func ensureSpace(_ height: CGFloat) -> Bool {
+            if y + height <= RecordsPDF.footerY - RecordsPDF.line * 2 { return false }
+            finishPage()
+            newPage()
+            return true
+        }
+
+        mutating func columnLabels() {
+            text("DATE", x: RecordsPDF.colDate, baseline: y, RecordsPDF.label)
+            text("TITLE", x: RecordsPDF.colTitle, baseline: y, RecordsPDF.label)
+            text("PAID BY", x: RecordsPDF.colPaidBy, baseline: y, RecordsPDF.label)
+            rightText("AMOUNT", end: RecordsPDF.colAmountEnd, baseline: y, RecordsPDF.label)
+            text("EACH PERSON’S SHARE", x: RecordsPDF.colShares, baseline: y, RecordsPDF.label)
+            y += 6
+            let path = UIBezierPath()
+            path.move(to: CGPoint(x: RecordsPDF.margin, y: y))
+            path.addLine(to: CGPoint(x: RecordsPDF.page.width - RecordsPDF.margin, y: y))
+            path.lineWidth = 1
+            RecordsPDF.rule.setStroke()
+            path.stroke()
+            y += RecordsPDF.line
+        }
+
+        func text(_ text: String, x: CGFloat, baseline: CGFloat, _ style: Style) {
+            (text as NSString).draw(at: CGPoint(x: x, y: baseline - style.font.ascender), withAttributes: Self.attributes(style))
+        }
+
+        func rightText(_ text: String, end: CGFloat, baseline: CGFloat, _ style: Style) {
+            let width = (text as NSString).size(withAttributes: Self.attributes(style)).width
+            self.text(text, x: end - width, baseline: baseline, style)
+        }
+
+        /// `text` cut with an ellipsis to fit `width`.
+        static func fit(_ text: String, width: CGFloat, _ style: Style) -> String {
+            func measure(_ string: String) -> CGFloat { (string as NSString).size(withAttributes: attributes(style)).width }
+            guard measure(text) > width else { return text }
+            var cut = text
+            while !cut.isEmpty, measure(cut + "…") > width { cut.removeLast() }
+            return cut.trimmingCharacters(in: .whitespaces) + "…"
+        }
+
+        private static func attributes(_ style: Style) -> [NSAttributedString.Key: Any] {
+            [.font: style.font, .foregroundColor: style.color]
+        }
     }
 }

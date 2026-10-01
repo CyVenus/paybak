@@ -3,9 +3,13 @@ import Foundation
 /// A read receipt as the user checks and assigns it (screens-insights-ai §4.3–§4.6): editable lines,
 /// the total they make, who had each item, and the itemized expense it becomes.
 nonisolated struct ReceiptReview: Hashable, Sendable {
-    /// Empty for a reassignment, whose draft then leaves the form's title alone.
-    var merchant: String
-    var date: LocalDay
+    /// As read; nil when the receipt shows none ("Not found") and for a reassignment, whose draft
+    /// then leaves the form's title alone.
+    var merchant: String?
+    /// The receipt's date as read; nil when it shows none ("Not found").
+    var date: LocalDay?
+    /// The expense's date: the receipt's, or today when it has none or a future (misread) one.
+    var draftDate: LocalDay
     /// "1:15 pm"
     var time: String?
     var items: [ReceiptScan.Line]
@@ -16,21 +20,32 @@ nonisolated struct ReceiptReview: Hashable, Sendable {
     var assignment: [Set<PersonID>]
 
     init(_ scan: ReceiptScan, today: LocalDay) {
-        merchant = scan.merchant ?? "Receipt"
+        merchant = scan.merchant.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }
+        date = scan.date
         // A receipt can't be from the future: that's a misread date.
-        date = min(scan.date ?? today, today)
+        draftDate = scan.date.flatMap { $0 <= today ? $0 : nil } ?? today
         time = scan.time
         items = scan.items
-        subtotal = scan.subtotal ?? scan.items.reduce(0) { $0 + $1.amount }
-        charges = scan.taxes + (scan.tip.map { [$0] } ?? [])
+        let itemsSubtotal = scan.subtotal ?? scan.items.reduce(0) { $0 + $1.amount }
+        subtotal = itemsSubtotal
+        // The tip reads "Tip 10%" from its share of the subtotal, whatever the receipt printed.
+        let tip = scan.tip.map { ReceiptScan.Line(label: ReceiptReview.tipLabel(tip: $0.amount, subtotal: itemsSubtotal), amount: $0.amount) }
+        charges = scan.taxes + (tip.map { [$0] } ?? [])
         assignment = scan.items.map { _ in [] }
+    }
+
+    /// "Tip 10%" from the tip and the subtotal; "Tip" when it isn't a whole percentage.
+    static func tipLabel(tip: Int64, subtotal: Int64) -> String {
+        guard subtotal != 0, tip * 100 % subtotal == 0 else { return "Tip" }
+        return "Tip \(tip * 100 / subtotal)%"
     }
 
     /// A scanned expense's items, as assigned, to change who had what (the form's Split row). People
     /// since taken off the expense drop out of the assignment.
     init(reassigning itemized: Itemized, among people: [PersonID], on date: LocalDay) {
-        merchant = ""
+        merchant = nil
         self.date = date
+        draftDate = date
         items = itemized.items.map { .init(label: $0.label, amount: $0.amount) }
         subtotal = itemized.subtotal
         charges = itemized.lines.map { .init(label: $0.label, amount: $0.amount) }
@@ -64,20 +79,28 @@ nonisolated struct ReceiptReview: Hashable, Sendable {
         addsUp ? nil : "Items add up to \(Money.format(itemsTotal, currency)), the subtotal is \(Money.format(subtotal, currency))."
     }
 
-    /// "Wed 30 Sep · 1:15 pm"
-    var dateLine: String { [Format.day(date), time].compactMap(\.self).joined(separator: " · ") }
+    /// The Merchant row: the name as read, or "Not found".
+    var merchantLine: String { merchant ?? Self.notFound }
 
-    /// "Shared by 3 · ₹80 each" for an item two or more people had.
+    /// "Wed 30 Sep · 1:15 pm", or "Not found".
+    var dateLine: String {
+        guard let date else { return Self.notFound }
+        return [Format.day(date), time].compactMap(\.self).joined(separator: " · ")
+    }
+
+    static let notFound = "Not found"
+
+    /// "Shared by 3 · ₹80 each" for an item two or more people had: its price ÷ the people, before
+    /// the leftover paise rotate.
     func sharedCaption(_ index: Int, currency: String) -> String? {
         let people = assignment[index]
         guard people.count > 1 else { return nil }
-        let (each, leftover) = items[index].amount.quotientAndRemainder(dividingBy: Int64(people.count))
-        let prefix = leftover == 0 ? "" : "About "
-        return "Shared by \(people.count) · \(prefix)\(Money.format(leftover == 0 ? each : Money.roundedToWholeUnits(each, currency), currency)) each"
+        let each = items[index].amount / Int64(people.count)
+        return "Shared by \(people.count) · \(Money.format(each, currency)) each"
     }
 
-    /// Each person's part with tax and tip in proportion (§4.6 #4). While items are unassigned, only
-    /// the assigned ones count (with their share of tax and tip).
+    /// Each person's part with tax and tip in proportion (§4.6 #4): the assigned items' prices scaled
+    /// by total ÷ subtotal, so while items are unassigned only the assigned ones count.
     func shares(order: [PersonID]) -> [PersonID: Int64] {
         let assigned = zip(items, assignment).filter { !$0.1.isEmpty }
         let lines = assigned.map { item, people in
@@ -85,17 +108,18 @@ nonisolated struct ReceiptReview: Hashable, Sendable {
         }
         let assignedTotal = assigned.reduce(Int64(0)) { $0 + $1.0.amount }
         let scaled = subtotal > 0 ? (assignedTotal * total + subtotal / 2) / subtotal : assignedTotal
-        return Splits.itemized(items: lines, total: unassignedCount == 0 ? total : scaled, order: order).shares
+        return Splits.itemized(items: lines, total: scaled, order: order).shares
     }
 
-    /// The Add expense draft the scan ends in: "{meal} at {merchant}", the receipt's date, paid by
-    /// you, split itemized among `order` with tax and tip in proportion.
+    /// The Add expense draft the scan ends in: "{meal} at {merchant}" (no title without a merchant:
+    /// the form keeps its own), the receipt's date (else today), paid by you, split itemized among
+    /// `order` with tax and tip in proportion.
     func expenseDraft(order: [PersonID], currency: String, receipt: Receipt?) -> ExpenseDraft {
         let shares = shares(order: order)
-        let category = Self.category(merchant: merchant, items: items.map(\.label))
+        let category = Self.category(merchant: merchant ?? "", items: items.map(\.label))
         return ExpenseDraft(
-            title: merchant.isEmpty ? "" : Self.title(merchant: merchant, time: time, category: category), category: category, amount: total,
-            currency: currency, date: date, payers: [Payer(personId: Person.me, amount: total)], splitMode: .itemized,
+            title: merchant.map { Self.title(merchant: $0, time: time, category: category) } ?? "", category: category, amount: total,
+            currency: currency, date: draftDate, payers: [Payer(personId: Person.me, amount: total)], splitMode: .itemized,
             rows: order.map { SplitRow(personId: $0, included: true, value: shares[$0], share: shares[$0] ?? 0) },
             itemized: Itemized(
                 items: zip(items, assignment).map { item, people in
@@ -108,12 +132,13 @@ nonisolated struct ReceiptReview: Hashable, Sendable {
         )
     }
 
-    /// Food for cafés and restaurants (or a receipt of mostly food), else Other.
+    /// Food for a café or restaurant (a word of its name), or when most items are food; Other
+    /// otherwise.
     static func category(merchant: String, items: [String]) -> ExpenseCategory {
-        let words = merchant.lowercased()
-        if ["cafe", "café", "restaurant", "dhaba", "bar", "bistro", "kitchen"].contains(where: words.contains) { return .food }
-        let food = items.filter { AssistantParser.category(for: $0) == .food }.count
-        return !items.isEmpty && food * 2 >= items.count ? .food : .other
+        let words = merchant.lowercased().split { !($0.isLetter || $0.isNumber || $0 == "_") }.map(String.init)
+        if words.contains(where: ["cafe", "café", "restaurant", "dhaba", "bar", "bistro", "kitchen"].contains) { return .food }
+        let food = items.filter { AssistantParser.guessCategory($0) == .food }.count
+        return food > 0 && food * 2 >= items.count ? .food : .other
     }
 
     /// "Lunch at Leopold Cafe" for food by the receipt's time (05–11 Breakfast, 11–16 Lunch, 16–19

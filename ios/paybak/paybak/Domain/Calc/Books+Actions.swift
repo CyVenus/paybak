@@ -11,11 +11,12 @@ nonisolated extension Books {
     mutating func addExpense(_ draft: ExpenseDraft, by actor: PersonID = Person.me, at moment: Date) throws -> ExpenseID {
         let split = try computeSplit(draft)
         let id = RecordID.make()
-        var history = [HistoryEntry(kind: .created, at: moment, by: actor)]
-        if draft.receipt != nil { history.append(HistoryEntry(kind: .receiptAdded, at: moment, by: actor)) }
+        // Only `created`: a receipt attached while adding isn't a separate history entry.
+        let history = [HistoryEntry(kind: .created, at: moment, by: actor)]
         ledger.expenses.append(Expense(
             id: id, groupId: draft.groupId, title: title(for: draft), category: draft.category, amount: draft.amount,
-            currency: draft.currency, rate: draft.rate, date: draft.date, dueDate: draft.dueDate, payers: payers(for: draft),
+            currency: draft.currency, rate: draft.currency == defaultCurrency ? nil : draft.rate, date: draft.date,
+            dueDate: draft.dueDate, payers: payers(for: draft),
             split: split, itemized: draft.itemized, notes: draft.notes, receipt: draft.receipt, recurringRuleId: nil,
             occurrenceDate: nil, createdAt: moment, createdBy: actor, history: history, comments: [], flag: nil,
             deletedAt: nil, deletedBy: nil
@@ -45,33 +46,46 @@ nonisolated extension Books {
         guard let index = ledger.expenses.firstIndex(where: { $0.id == id }) else { throw LedgerError.notFound }
         let old = ledger.expenses[index]
         var expense = old
-        let splitChanged = old.amount != draft.amount || old.split.mode != draft.splitMode
+        // Who is on it and how it's split, apart from the amounts that follow the total.
+        let shapeChanged = old.split.mode != draft.splitMode
             || old.split.rows.map { [$0.personId, "\($0.included)", "\($0.value ?? -1)"] } != draft.rows.map { [$0.personId, "\($0.included)", "\($0.value ?? -1)"] }
-        if splitChanged || old.payers != payers(for: draft) {
-            expense.split = try computeSplit(draft)
+        // No payers in the draft keeps who paid (one payer now paying the new amount).
+        var payers = draft.payers
+        if payers.isEmpty {
+            payers = old.payers.count == 1 ? [Payer(personId: old.payerId, amount: draft.amount)] : old.payers
         }
+        let splitChanged = old.amount != draft.amount || shapeChanged || (!draft.payers.isEmpty && draft.payers != old.payers)
+        if splitChanged {
+            var computed = draft
+            computed.payers = payers
+            expense.split = try computeSplit(computed)
+            expense.payers = payers
+        }
+        let trimmed = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
         expense.groupId = draft.groupId
-        expense.title = title(for: draft)
+        expense.title = trimmed.isEmpty ? old.title : trimmed
         expense.category = draft.category
         expense.amount = draft.amount
         expense.currency = draft.currency
-        expense.rate = draft.rate
+        expense.rate = draft.rate ?? old.rate
         expense.date = draft.date
         expense.dueDate = draft.dueDate
-        expense.payers = payers(for: draft)
-        expense.itemized = draft.itemized
+        expense.itemized = draft.itemized ?? old.itemized
         expense.notes = draft.notes
-        expense.receipt = draft.receipt
+        expense.receipt = draft.receipt ?? old.receipt
         func log(_ kind: HistoryEntry.Kind, old: HistoryValue? = nil, new: HistoryValue? = nil) {
             expense.history.append(HistoryEntry(kind: kind, at: moment, by: actor, old: old, new: new))
         }
         if old.amount != expense.amount { log(.amountChanged, old: .amount(old.amount), new: .amount(expense.amount)) }
         if old.title != expense.title { log(.titleChanged, old: .text(old.title), new: .text(expense.title)) }
         if old.date != expense.date { log(.dateChanged, old: .text(old.date.description), new: .text(expense.date.description)) }
-        if old.split != expense.split, old.amount == expense.amount { log(.splitChanged) }
-        if old.payers != expense.payers { log(.payersChanged) }
         if old.category != expense.category { log(.categoryChanged, old: .text(old.category.rawValue), new: .text(expense.category.rawValue)) }
-        if old.receipt == nil, expense.receipt != nil { log(.receiptAdded) }
+        if shapeChanged { log(.splitChanged) }
+        // A single payer whose amount just follows the new total isn't a payer change.
+        if splitChanged, expense.payers.map(\.personId) != old.payers.map(\.personId) || (old.payers.count > 1 && expense.payers != old.payers) {
+            log(.payersChanged)
+        }
+        if old.receipt == nil, draft.receipt != nil { log(.receiptAdded) }
         expense.flag = nil
         ledger.expenses[index] = expense
     }
@@ -94,8 +108,10 @@ nonisolated extension Books {
 
     @discardableResult
     mutating func addComment(to expenseId: ExpenseID, text: String, by actor: PersonID = Person.me, at moment: Date) throws -> String {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { throw LedgerError.rule("Write a comment first.") }
         let id = RecordID.make()
-        try editExpense(expenseId) { $0.comments.append(Comment(id: id, by: actor, at: moment, text: text)) }
+        try editExpense(expenseId) { $0.comments.append(Comment(id: id, by: actor, at: moment, text: trimmed)) }
         return id
     }
 
@@ -134,11 +150,12 @@ nonisolated extension Books {
     @discardableResult
     mutating func recordPayment(_ draft: PaymentDraft, at moment: Date) throws -> PaymentID {
         guard draft.amount > 0 else { throw LedgerError.invalidAmount }
-        guard draft.fromId != draft.toId else { throw LedgerError.needsSomeoneElse }
+        guard draft.fromId != draft.toId else { throw LedgerError.rule("Pick who paid and who received it.") }
         let id = draft.id ?? RecordID.make()
         let confirmed = draft.recordedBy == draft.toId
         ledger.payments.append(Payment(
-            id: id, fromId: draft.fromId, toId: draft.toId, amount: draft.amount, currency: draft.currency, rate: draft.rate,
+            id: id, fromId: draft.fromId, toId: draft.toId, amount: draft.amount, currency: draft.currency,
+            rate: draft.currency == defaultCurrency ? nil : draft.rate,
             method: draft.method, date: draft.date, groupId: draft.groupId, loanId: draft.loanId, expenseId: draft.expenseId,
             note: draft.note, proof: draft.proof, status: confirmed ? .confirmed : .pending, recordedBy: draft.recordedBy,
             createdAt: moment, confirmedAt: confirmed ? moment : nil, notReceivedNote: nil
@@ -190,7 +207,10 @@ nonisolated extension Books {
     }
 
     /// The receiver says the money didn't arrive: the debt stays.
+    /// A blank note is stored as none (Android: `note.trim().ifEmpty { null }`).
     mutating func markNotReceived(_ id: PaymentID, note: String, at moment: Date) throws {
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        let note: String? = trimmed.isEmpty ? nil : trimmed
         try editPayment(id) { payment in
             payment.status = .notReceived
             payment.notReceivedNote = note
@@ -207,11 +227,14 @@ nonisolated extension Books {
     @discardableResult
     mutating func addLoan(_ draft: LoanDraft, at moment: Date) throws -> LoanID {
         guard draft.amount > 0 else { throw LedgerError.invalidAmount }
-        guard draft.lenderId != draft.borrowerId else { throw LedgerError.needsSomeoneElse }
+        guard draft.lenderId == Person.me || draft.borrowerId == Person.me, draft.lenderId != draft.borrowerId else {
+            throw LedgerError.rule("One side of a loan is you.")
+        }
         let id = draft.id ?? RecordID.make()
         ledger.loans.append(Loan(
             id: id, lenderId: draft.lenderId, borrowerId: draft.borrowerId, amount: draft.amount, currency: draft.currency,
-            rate: draft.rate, reason: draft.reason, date: draft.date, installments: draft.installments,
+            rate: draft.currency == defaultCurrency ? nil : draft.rate, reason: Self.loanReason(draft.reason), date: draft.date,
+            installments: draft.installments,
             dueDate: draft.dueDate, createdAt: moment, createdBy: Person.me
         ))
         return id
@@ -225,7 +248,7 @@ nonisolated extension Books {
         ledger.loans[index].amount = draft.amount
         ledger.loans[index].currency = draft.currency
         ledger.loans[index].rate = draft.rate
-        ledger.loans[index].reason = draft.reason
+        ledger.loans[index].reason = Self.loanReason(draft.reason)
         ledger.loans[index].date = draft.date
         ledger.loans[index].installments = draft.installments
         ledger.loans[index].dueDate = draft.dueDate
@@ -236,12 +259,18 @@ nonisolated extension Books {
     @discardableResult
     mutating func addGroup(_ draft: GroupDraft, at moment: Date) -> GroupID {
         let id = draft.id ?? RecordID.make()
-        var members = draft.memberIds
-        if !members.contains(Person.me) { members.insert(Person.me, at: 0) }
+        // You're always the first member.
+        var members = [Person.me]
+        for member in draft.memberIds where !members.contains(member) {
+            members.append(member)
+        }
+        let isProject = draft.kind == .project
         ledger.groups.append(LedgerGroup(
-            id: id, kind: draft.kind, type: draft.kind == .group ? draft.type : nil, icon: draft.icon, name: draft.name,
-            currency: draft.currency, memberIds: members, simplifyDebts: draft.kind == .project ? true : draft.simplifyDebts,
-            settleBy: draft.settleBy, createdAt: moment, createdBy: Person.me, project: draft.kind == .project ? draft.project : nil
+            id: id, kind: draft.kind, type: isProject ? nil : draft.type, icon: draft.icon,
+            name: draft.name.trimmingCharacters(in: .whitespacesAndNewlines),
+            currency: draft.currency, memberIds: members, simplifyDebts: isProject ? true : draft.simplifyDebts,
+            settleBy: isProject ? nil : draft.settleBy, createdAt: moment, createdBy: Person.me,
+            project: isProject ? draft.project ?? ProjectInfo(contribution: Contribution()) : nil
         ))
         return id
     }
@@ -270,17 +299,33 @@ nonisolated extension Books {
     mutating func removeMember(_ personId: PersonID, from groupId: GroupID) throws {
         guard let group = ledger.group(groupId) else { throw LedgerError.notFound }
         let net = groupNets(groupId)[personId, default: 0]
-        guard net == 0 else { throw LedgerError.balanceNotSettled(amount: net, currency: group.currency) }
+        guard net == 0 else {
+            let name = ledger.person(personId)?.firstName ?? "They"
+            throw LedgerError.rule("\(name) still has a balance of \(Money.format(abs(net), group.currency)) in \(group.name).")
+        }
         try updateGroup(groupId) { $0.memberIds.removeAll { $0 == personId } }
     }
 
+    /// Only at a net of exactly 0 (§6.5): "You owe ₹1,400 in Goa Trip. Settle up with Kabir first, then
+    /// you can leave."
     mutating func leaveGroup(_ groupId: GroupID) throws {
-        try removeMember(Person.me, from: groupId)
+        guard let group = ledger.group(groupId) else { throw LedgerError.notFound }
+        let net = groupNets(groupId)[Person.me, default: 0]
+        guard net == 0 else {
+            let amount = Money.format(abs(net), group.currency)
+            if net < 0 {
+                let payees = groupPlan(groupId).filter { $0.from == Person.me }.map { firstName($0.to) }
+                throw LedgerError.rule("You owe \(amount) in \(group.name). Settle up with \(payees.joined(separator: " and ")) first, then you can leave.")
+            }
+            throw LedgerError.rule("You’re owed \(amount) in \(group.name). Settle up first, then you can leave.")
+        }
+        try updateGroup(groupId) { $0.memberIds.removeAll { $0 == Person.me } }
     }
 
     @discardableResult
     mutating func addComponent(_ draft: ComponentDraft, at moment: Date) throws -> ComponentID {
-        if draft.status.isSpent, (draft.actualCost ?? 0) <= 0 { throw LedgerError.invalidAmount }
+        guard !draft.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw LedgerError.rule("Name the part.") }
+        if draft.status.isSpent, (draft.actualCost ?? 0) <= 0 { throw LedgerError.rule("Add what it cost.") }
         let id = RecordID.make()
         ledger.components.append(ProjectComponent(
             id: id, projectId: draft.projectId, name: draft.name, status: draft.status, estimatedCost: draft.estimatedCost,
@@ -290,15 +335,17 @@ nonisolated extension Books {
         return id
     }
 
-    /// Moves a part through its lifecycle; bought and done need an actual cost.
+    /// Moves a part through its lifecycle; bought and done need an actual cost. The status change is
+    /// logged as `by` (the payer when nil: a simulated friend's purchase).
     mutating func updateComponent(_ id: ComponentID, status: ProjectComponent.Status, actualCost: Int64?, paidBy: PersonID,
-                                  name: String? = nil, estimatedCost: Int64?? = nil, at moment: Date) throws {
+                                  name: String? = nil, estimatedCost: Int64?? = nil, by actor: PersonID? = nil,
+                                  at moment: Date) throws {
         guard let index = ledger.components.firstIndex(where: { $0.id == id }) else { throw LedgerError.notFound }
-        if status.isSpent, (actualCost ?? 0) <= 0 { throw LedgerError.invalidAmount }
+        if status.isSpent, (actualCost ?? 0) <= 0 { throw LedgerError.rule("Add what it cost.") }
         var part = ledger.components[index]
         if part.status != status {
             part.statusChangedAt = moment
-            part.history.append(.init(kind: status.rawValue, at: moment, by: paidBy))
+            part.history.append(.init(kind: status.rawValue, at: moment, by: actor ?? paidBy))
         }
         part.status = status
         part.actualCost = actualCost
@@ -334,7 +381,10 @@ nonisolated extension Books {
     /// Someone not on Paybak, added by name and phone or email.
     @discardableResult
     mutating func addGuest(name: String, contact: String?, at moment: Date) -> PersonID {
+        // Someone already here with that phone or email is kept.
+        if let contact, let known = ledger.people.first(where: { $0.contact == contact }) { return known.id }
         let id = RecordID.make()
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
         ledger.people.append(Person(id: id, name: name, avatar: nil, upi: nil, username: nil, pronoun: .they, isGuest: true,
                                     contact: contact, remindersMuted: false, addedAt: moment))
         return id
@@ -438,6 +488,12 @@ nonisolated extension Books {
             || ledger.components.contains { $0.projectId == groupId }
     }
 
+    /// A loan's reason, trimmed; blank is no reason ("Loan").
+    private static func loanReason(_ reason: String?) -> String? {
+        let trimmed = reason?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     /// An empty title saves as the category name.
     private func title(for draft: ExpenseDraft) -> String {
         let trimmed = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -457,7 +513,7 @@ nonisolated extension Books {
         let payerIds = payers(for: draft).map(\.personId)
         guard Set(included).union(payerIds).count > 1 else { throw LedgerError.needsSomeoneElse }
         guard payers(for: draft).reduce(0, { $0 + $1.amount }) == draft.amount else {
-            throw LedgerError.splitDoesNotAddUp(remaining: draft.amount - payers(for: draft).reduce(0) { $0 + $1.amount })
+            throw LedgerError.rule("The payers’ amounts must add up to the total.")
         }
         let order: [PersonID]
         if let groupId = draft.groupId, let group = ledger.group(groupId) {
@@ -474,14 +530,25 @@ nonisolated extension Books {
         case .equal:
             (shares, next) = Splits.equal(draft.amount, among: order, counter: counter)
         case .exact:
+            let status = Splits.exactStatus(total: draft.amount, amounts: order.map { values[$0, default: 0] }, currency: draft.currency)
+            guard status.remaining == 0 else { throw LedgerError.rule(status.left) }
             shares = values
         case .percent:
-            guard order.reduce(0, { $0 + values[$1, default: 0] }) == 10_000 else { throw LedgerError.splitDoesNotAddUp(remaining: 0) }
+            guard order.reduce(0, { $0 + values[$1, default: 0] }) == 10_000 else {
+                throw LedgerError.rule("The percentages must add up to 100%.")
+            }
             (shares, next) = Splits.weighted(draft.amount, weights: values, order: order, counter: counter)
         case .shares:
+            guard order.allSatisfy({ values[$0, default: 0] >= 1 }) else { throw LedgerError.rule("Everyone needs at least 1 share.") }
             (shares, next) = Splits.weighted(draft.amount, weights: values, order: order, counter: counter)
         case .itemized:
-            shares = Dictionary(draft.rows.map { ($0.personId, $0.share) }, uniquingKeysWith: { first, _ in first })
+            if let itemized = draft.itemized {
+                // Each item among its people, then the total (tax and tip included) in proportion.
+                let result = Splits.itemized(items: itemized.items, total: draft.amount, order: order, counter: counter)
+                (shares, next) = (result.shares, result.counter)
+            } else {
+                shares = Dictionary(draft.rows.map { ($0.personId, $0.share) }, uniquingKeysWith: { first, _ in first })
+            }
         }
         let total = order.reduce(0) { $0 + shares[$1, default: 0] }
         guard total == draft.amount else { throw LedgerError.splitDoesNotAddUp(remaining: draft.amount - total) }

@@ -3,7 +3,7 @@ import Foundation
 /// A group's detail (domain.md §5.2–5.4, §6.5).
 nonisolated struct GroupSheet: Sendable {
     var group: LedgerGroup
-    /// Live expenses, newest date first.
+    /// Live expenses, newest date first; on one date, the newest added first.
     var expenses: [Expense]
     var paid: [PersonID: Int64]
     var share: [PersonID: Int64]
@@ -58,7 +58,12 @@ nonisolated extension Books {
         return GroupSheet(
             group: group,
             expenses: expenses.enumerated()
-                .sorted { $0.element.date != $1.element.date ? $0.element.date > $1.element.date : $0.offset > $1.offset }
+                .sorted { lhs, rhs in
+                    let (a, b) = (lhs.element, rhs.element)
+                    if a.date != b.date { return a.date > b.date }
+                    if a.createdAt != b.createdAt { return a.createdAt > b.createdAt }
+                    return lhs.offset < rhs.offset
+                }
                 .map(\.element),
             paid: paid,
             share: share,
@@ -68,9 +73,7 @@ nonisolated extension Books {
             dateRange: dates.min().flatMap { first in dates.max().map { Format.dateRange(first, $0) } },
             simplifyFootnote: simplifyFootnote(group, plan: plan),
             spentInDefault: foreign
-                ? expenses.reduce(0) { sum, expense in
-                    sum + (expense.rate.map { Money.convert(expense.amount, rate: $0.decimal, from: expense.currency, to: $0.to) } ?? 0)
-                }
+                ? expenses.reduce(0) { $0 + toDefault($1.amount, currency: $1.currency, rate: $1.rate) }
                 : nil
         )
     }
@@ -90,22 +93,33 @@ nonisolated extension Books {
 
     func friendPage(_ id: PersonID) -> FriendPage? {
         guard let balance = friendBalances().first(where: { $0.id == id }) else { return nil }
-        var history: [FriendPage.HistoryItem] = []
-        for expense in liveExpenses() where expense.participantIds.contains(id) && expense.participantIds.contains(Person.me) {
-            if let groupId = expense.groupId, ledger.group(groupId)?.isProject == true { continue }
-            history.append(.expense(expense))
+        var history: [(item: FriendPage.HistoryItem, at: Date)] = []
+        func isProject(_ groupId: GroupID?) -> Bool {
+            groupId.flatMap { ledger.group($0)?.isProject } ?? false
         }
-        for payment in ledger.payments where Set([payment.fromId, payment.toId]) == Set([Person.me, id]) && payment.status != .cancelled {
-            history.append(.payment(payment))
+        // Every live non-project expense they're on, and the payments (not project ones) and loans
+        // between you.
+        for expense in liveExpenses() where expense.participantIds.contains(id) && !isProject(expense.groupId) {
+            history.append((.expense(expense), expense.createdAt))
+        }
+        for payment in ledger.payments
+        where Set([payment.fromId, payment.toId]) == Set([Person.me, id]) && payment.status != .cancelled && !isProject(payment.groupId) {
+            history.append((.payment(payment), payment.createdAt))
         }
         for loan in ledger.loans where loan.friendId == id {
-            history.append(.loan(loan))
+            history.append((.loan(loan), loan.createdAt))
         }
         return FriendPage(
             balance: balance,
+            // Newest date first; on one date, the newest added first.
             history: history.enumerated()
-                .sorted { $0.element.date != $1.element.date ? $0.element.date > $1.element.date : $0.offset < $1.offset }
-                .map(\.element),
+                .sorted { lhs, rhs in
+                    let (a, b) = (lhs.element, rhs.element)
+                    if a.item.date != b.item.date { return a.item.date > b.item.date }
+                    if a.at != b.at { return a.at > b.at }
+                    return lhs.offset < rhs.offset
+                }
+                .map(\.element.item),
             groupsTogether: ledger.groups.filter { $0.memberIds.contains(id) && $0.memberIds.contains(Person.me) },
             lastReminder: lastReminder(to: id)
         )

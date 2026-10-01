@@ -14,12 +14,11 @@ extension LedgerStore {
         ledger.groups.filter { !$0.isProject && $0.memberIds.contains(Person.me) }
     }
 
-    /// The expense currency sheet's Recent list: the default currency, then the ones used most
-    /// recently on expenses, payments and groups.
+    /// The currency sheet's Recent list: the default currency, then the (up to 3) other ones used
+    /// most recently on expenses and payments. The sheet adds the selected currency after them.
     var recentCurrencyCodes: [String] {
-        let groupCodes = ledger.groups.sorted { $0.createdAt > $1.createdAt }.map(\.currency)
         var codes = [books.defaultCurrency]
-        for code in snapshot.recentCurrencies + groupCodes where !codes.contains(code) {
+        for code in snapshot.recentCurrencies where !codes.contains(code) {
             codes.append(code)
         }
         return codes

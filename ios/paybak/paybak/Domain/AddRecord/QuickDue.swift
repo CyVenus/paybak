@@ -47,7 +47,22 @@ nonisolated extension Format {
     static func dateChip(_ day: LocalDay, today: LocalDay) -> String {
         if day == today { return "Today" }
         if day == today.adding(days: -1) { return "Yesterday" }
-        return day.year == today.year ? Self.day(day) : "\(Self.day(day)) \(day.year)"
+        return Self.day(day)
+    }
+
+    /// The Due date sheet's hint, from the Settings reminder schedule: "Paybak reminds them 2 days
+    /// before, on the day, and every 3 days if it’s overdue."
+    static func reminderHint(_ schedule: LedgerSettings.ReminderSchedule) -> String {
+        let parts = [
+            schedule.twoDaysBefore ? "2 days before" : nil,
+            schedule.onDueDate ? "on the day" : nil,
+            schedule.overdueEvery3Days ? "every 3 days if it’s overdue" : nil,
+        ].compactMap(\.self)
+        switch parts.count {
+        case 0: return "Paybak won’t send reminders for it. You can still remind them yourself."
+        case 1: return "Paybak reminds them \(parts[0])."
+        default: return "Paybak reminds them \(parts.dropLast().joined(separator: ", ")), and \(parts[parts.count - 1])."
+        }
     }
 
     /// "Sun 4 Oct", with the year when it isn't this year.

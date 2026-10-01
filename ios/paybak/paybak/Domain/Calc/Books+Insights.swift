@@ -128,7 +128,7 @@ nonisolated extension Books {
         guard previous > 0 else { return nil }
         let difference = abs(current - previous)
         let percent = (difference * 200 + previous) / (2 * previous)
-        if current == previous || percent == 0 { return "Same as \(previousMonth.name)" }
+        if current == previous { return "Same as \(previousMonth.name)" }
         return "\(current > previous ? "Up" : "Down") \(percent)% from \(previousMonth.name)"
     }
 

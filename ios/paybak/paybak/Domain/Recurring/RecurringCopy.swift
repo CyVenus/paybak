@@ -47,10 +47,10 @@ nonisolated struct DraftAmountPage: Hashable, Sendable {
 
 nonisolated extension Books {
     func recurringPage(_ groupId: GroupID) -> RecurringPage {
-        let rules = ledger.recurringRules.filter { $0.groupId == groupId }
+        // The active rules; drafts still waiting for an amount, in the order they came.
+        let rules = ledger.recurringRules.filter { $0.groupId == groupId && $0.active }
         let drafts = ledger.drafts
             .filter { draft in draft.expenseId == nil && rules.contains { $0.id == draft.ruleId } }
-            .sorted { $0.occurrenceDate < $1.occurrenceDate }
             .compactMap { draft -> RecurringPage.DraftRow? in
                 guard let rule = ledger.rule(draft.ruleId) else { return nil }
                 return RecurringPage.DraftRow(
@@ -62,12 +62,12 @@ nonisolated extension Books {
         return RecurringPage(
             intro: "Paybak adds these to \(groupName(groupId)) on schedule.",
             drafts: drafts,
-            rules: rules.filter(\.active).map { rule in
+            rules: rules.map { rule in
                 RecurringPage.RuleRow(
                     id: rule.id, title: rule.title, icon: Self.ruleIcon(rule),
                     subtitle: "\(rule.repeatRule.schedule)\nPaid by \(rule.payerId == Person.me ? "you" : firstName(rule.payerId))",
                     detail: "Next \(Format.day(nextOccurrence(of: rule)))",
-                    amount: rule.amount.map { Money.format($0, rule.currency) } ?? "Varies"
+                    amount: rule.variable ? "Varies" : rule.amount.map { Money.format($0, rule.currency) } ?? "Varies"
                 )
             }
         )
@@ -75,10 +75,9 @@ nonisolated extension Books {
 
     func draftAmountPage(_ id: DraftID) -> DraftAmountPage? {
         guard let draft = ledger.drafts.first(where: { $0.id == id }), let rule = ledger.rule(draft.ruleId) else { return nil }
-        let place = rule.groupId.map(groupName) ?? Format.joinedNames(rule.split.personIds.filter { $0 != Person.me }.map(firstName))
         return DraftAmountPage(
             title: rule.title,
-            meta: "\(place) · \(Format.month(draft.occurrenceDate.month))",
+            meta: [rule.groupId.map(groupName), Format.month(draft.occurrenceDate.month)].compactMap(\.self).joined(separator: " · "),
             currency: rule.currency,
             paidBy: rule.payerId == Person.me ? "You" : firstName(rule.payerId),
             split: "Equally · \(rule.split.personIds.count) people",
@@ -87,17 +86,17 @@ nonisolated extension Books {
         )
     }
 
-    /// The rule's next occurrence that hasn't been added yet: today's if the 09:00 run is still to
-    /// come, else the first one after today.
+    /// The rule's next occurrence after today (or after its last one, when that's later).
     func nextOccurrence(of rule: RecurringRule) -> LocalDay {
-        Self.nextOccurrence(rule, after: max(Self.lastOccurrence(of: rule), today.adding(days: -1)))
+        Self.nextOccurrence(rule, after: max(today, rule.lastOccurrence ?? today))
     }
 
-    /// A rule's tile: Wi-Fi and gas have their own icons, everything else its category's.
+    /// A rule's tile: Flame for gas and Wi-Fi for internet (Figma's Cooking gas and Wi-Fi rows),
+    /// otherwise its category's icon. Whole words only ("Gas bill", not "Vegas").
     static func ruleIcon(_ rule: RecurringRule) -> String {
-        let title = rule.title.lowercased()
-        if ["wi-fi", "wifi", "internet", "broadband"].contains(where: title.contains) { return "wi-fi" }
-        if ["gas", "cylinder", "lpg"].contains(where: title.contains) { return "flame" }
+        let words = rule.title.lowercased().split { !(($0 >= "a" && $0 <= "z") || $0 == "-") }.map(String.init)
+        if words.contains("gas") { return "flame" }
+        if words.contains(where: ["wi-fi", "wifi", "internet", "broadband"].contains) { return "wi-fi" }
         return rule.category.icon
     }
 }
@@ -110,30 +109,33 @@ nonisolated extension RecurringRule {
 
 /// The Repeat sheet's and the rule rows' copy (§5.3, §5.5).
 nonisolated extension RepeatRule {
-    /// "Monthly on the 28th" · "Weekly on Mondays" · "Yearly on 28 Sep".
+    /// "Monthly on the 28th" · "Weekly on Mondays" · "Every 2 weeks on Mondays" · "Yearly on 28 Sep".
     var schedule: String {
         switch frequency {
         case .weekly: "Weekly on \(Format.weekday(anchorDate))s"
+        case .biweekly: "Every 2 weeks on \(Format.weekday(anchorDate))s"
         case .monthly: "Monthly on the \(dayOfMonth)"
         case .yearly: "Yearly on \(Format.short(anchorDate))"
         }
     }
 
-    /// The Day of month row's value: "28th", or "Last day" for the 31st (it follows short months).
+    /// The Day of month row's value: "28th", "31st" (a short month uses its last day).
     var dayOfMonthValue: String {
-        anchorDate.day == 31 ? "Last day" : Format.ordinal(anchorDate.day)
+        Format.ordinal(anchorDate.day)
     }
 
     /// "Paybak adds a draft on the 28th and asks you for the amount."
     var helper: String {
         let when = switch frequency {
         case .weekly: "every \(Format.weekday(anchorDate))"
+        case .biweekly: "every other \(Format.weekday(anchorDate))"
         case .monthly: "on the \(dayOfMonth)"
-        case .yearly: "on \(Format.short(anchorDate))"
+        case .yearly: "on \(Format.short(anchorDate)) each year"
         }
         if variable { return "Paybak adds a draft \(when) and asks you for the amount." }
         return switch frequency {
         case .weekly: "Paybak adds this expense every \(Format.weekday(anchorDate))."
+        case .biweekly: "Paybak adds this expense every other \(Format.weekday(anchorDate))."
         case .monthly: "Paybak adds this expense on the \(dayOfMonth) of every month."
         case .yearly: "Paybak adds this expense on \(Format.short(anchorDate)) every year."
         }
@@ -155,6 +157,6 @@ nonisolated extension RepeatRule {
     }
 
     private var dayOfMonth: String {
-        anchorDate.day == 31 ? "last day" : Format.ordinal(anchorDate.day)
+        Format.ordinal(anchorDate.day)
     }
 }

@@ -6,7 +6,7 @@ nonisolated struct LoanDetail: Sendable {
     struct Line: Hashable, Sendable, Identifiable {
         var id: Int { number }
         let number: Int
-        /// "Installment 1" (or "Repayment" for a loan without installments).
+        /// "Installment 1" (or the loan's title for a loan without installments).
         let title: String
         /// "Due Fri 30 Oct" · "Paid 10 Jul" · "Paid 14 Sep · 2 days late" · "No due date".
         let subtitle: String
@@ -30,7 +30,7 @@ nonisolated struct LoanDetail: Sendable {
     /// "0% paid back" / "Paid back on 14 Sep".
     let caption: String
     let isPaidBack: Bool
-    /// "3 monthly installments" / "Repayment".
+    /// "3 monthly installments" / "Due".
     let sectionTitle: String
     let lines: [Line]
     /// "Last reminder sent Mon 2 Nov", shown while something is overdue.
@@ -49,10 +49,10 @@ nonisolated extension Books {
         let installments = installments(of: loan)
         let lastPaidOn = confirmedPayments().filter { $0.loanId == loan.id }.map(\.date).max()
         let lines = installments.enumerated().map { index, installment in
-            loanLine(installment, number: index + 1, hasPlan: loan.installments != nil, currency: loan.currency)
+            loanLine(installment, number: index + 1, title: loan.installments == nil ? loan.title : nil, currency: loan.currency)
         }
         let isOverdue = lines.contains { $0.overdue != nil }
-        let meta = [loan.reason, Format.loanMetaDate(loan.date, today: today)].compactMap(\.self).joined(separator: " · ")
+        let meta = "\(loan.title) · \(Format.loanMetaDate(loan.date, today: today))"
         return LoanDetail(
             loan: loan,
             title: lent ? "You lent \(firstName(loan.borrowerId))" : "You borrowed from \(firstName(loan.lenderId))",
@@ -63,10 +63,10 @@ nonisolated extension Books {
             remaining: Money.format(remaining, loan.currency),
             progress: loan.amount > 0 ? min(1, Double(paid) / Double(loan.amount)) : 0,
             caption: remaining == 0
-                ? "Paid back on \(lastPaidOn.map(Format.short) ?? Format.short(loan.date))"
-                : "\(loan.amount > 0 ? Int((Double(paid) * 100 / Double(loan.amount)).rounded()) : 0)% paid back",
+                ? "Paid back on \(Format.short(installments.last?.paidOn ?? lastPaidOn ?? loan.date))"
+                : "\(loan.amount > 0 ? min(100, Int((Double(paid) * 100 / Double(loan.amount)).rounded())) : 0)% paid back",
             isPaidBack: remaining == 0,
-            sectionTitle: loan.installments.map { "\($0.count) \(Self.frequencyAdjective($0.frequency)) installments" } ?? "Repayment",
+            sectionTitle: loan.installments.map { Self.installmentsHeader(count: $0.count, frequency: $0.frequency) } ?? "Due",
             lines: lines,
             lastReminder: isOverdue ? lastReminder(forLoan: loan.id).map(loanReminderText) : nil,
             isOverdue: isOverdue,
@@ -80,11 +80,17 @@ nonisolated extension Books {
         guard count > 0 else { return "" }
         let amounts = Splits.installments(amount, count: count)
         let dues = (0..<count).map { installmentDue(first: firstDue, frequency: frequency, index: $0) }
-        let each = Set(amounts).count == 1 ? Money.format(amounts[0], currency) : "about \(Money.format(amounts[0], currency))"
+        // Uneven amounts give the first ones the extra unit: "about" the smaller, later ones.
+        let each = Set(amounts).count == 1 ? Money.format(amounts[0], currency) : "about \(Money.format(amounts[count - 1], currency))"
         let when = count <= 3
             ? Format.joinedNames(dues.map(Format.day))
             : "\(frequencyAdverb(frequency)) from \(Format.day(dues[0])) to \(Format.day(dues[count - 1]))"
         return "\(count) × \(each) · \(when)"
+    }
+
+    /// The loan detail's section header: "3 monthly installments", "1 weekly installment".
+    static func installmentsHeader(count: Int, frequency: Loan.Frequency) -> String {
+        "\(count) \(frequencyAdjective(frequency)) installment\(count == 1 ? "" : "s")"
     }
 
     static func frequencyAdjective(_ frequency: Loan.Frequency) -> String {
@@ -95,15 +101,13 @@ nonisolated extension Books {
         }
     }
 
+    /// The preview's "monthly from …": the same words as the header ("fortnightly" every 2 weeks).
     static func frequencyAdverb(_ frequency: Loan.Frequency) -> String {
-        switch frequency {
-        case .weekly: "weekly"
-        case .biweekly: "every 2 weeks"
-        case .monthly: "monthly"
-        }
+        frequencyAdjective(frequency)
     }
 
-    private func loanLine(_ installment: Installment, number: Int, hasPlan: Bool, currency: String) -> LoanDetail.Line {
+    /// `title` names the single repayment of a loan without installments (its title); nil numbers them.
+    private func loanLine(_ installment: Installment, number: Int, title: String?, currency: String) -> LoanDetail.Line {
         let subtitle: String
         var overdue: String?
         if let paidOn = installment.paidOn {
@@ -116,7 +120,7 @@ nonisolated extension Books {
         } else {
             subtitle = "No due date"
         }
-        return LoanDetail.Line(number: number, title: hasPlan ? "Installment \(number)" : "Repayment", subtitle: subtitle,
+        return LoanDetail.Line(number: number, title: title ?? "Installment \(number)", subtitle: subtitle,
                                amount: Money.format(installment.amount, currency), isPaid: installment.paidOn != nil,
                                overdue: overdue)
     }

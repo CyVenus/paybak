@@ -52,7 +52,7 @@ nonisolated struct ExpenseDetail: Sendable {
     let history: [HistoryLine]
     /// "Esha flagged this expense" and the quoted note.
     let flag: (title: String, note: String)?
-    /// Flag an issue: people on it who didn't pay and haven't flagged it.
+    /// Flag an issue: you didn't pay it and nobody has flagged it.
     let canFlag: Bool
 }
 
@@ -61,7 +61,8 @@ nonisolated extension Books {
         guard let expense = ledger.expense(id) else { return nil }
         let payerIds = expense.payers.map(\.personId)
         let group = expense.groupId.flatMap(ledger.group)
-        let myRow = expense.split.rows.first { $0.personId == Person.me }
+        // Your share counts only while you're on the split.
+        let myRow = expense.split.rows.first { $0.personId == Person.me && $0.included }
         return ExpenseDetail(
             expense: expense,
             title: expense.title,
@@ -77,14 +78,14 @@ nonisolated extension Books {
             },
             splitHeader: splitHeader(expense),
             splitLines: splitLines(expense, group: group),
-            receiptCaption: expense.receipt.map { "Added by \(name($0.addedBy)) · \(Format.short(day(of: $0.addedAt)))" },
+            receiptCaption: expense.receipt.map { "Added by \(name($0.addedBy)) · \(Format.rowDate(day(of: $0.addedAt), today: today))" },
             comments: expense.comments.map { comment in
                 ExpenseDetail.CommentLine(id: comment.id, personId: comment.by, name: firstName(comment.by),
                                           date: Format.rowDate(day(of: comment.at), today: today), text: comment.text)
             },
             history: historyLines(expense),
             flag: expense.flag.map { ("\(firstName($0.by)) flagged this expense", "“\($0.note)”") },
-            canFlag: myRow != nil && !payerIds.contains(Person.me) && expense.flag?.by != Person.me
+            canFlag: !payerIds.contains(Person.me) && expense.flag == nil
         )
     }
 
@@ -160,7 +161,7 @@ nonisolated extension Books {
                 text = "\(actor) flagged this"
             case .flagRemoved: text = "\(actor) removed their flag"
             case .flagResolved:
-                text = lastFlagger.map { "\(actor) resolved \(firstName($0))’s flag" } ?? "\(actor) resolved a flag"
+                text = lastFlagger.map { "\(actor) resolved \(firstName($0))’s flag" } ?? "\(actor) resolved the flag"
             case .deleted: text = "\(actor) deleted this"
             case .restored: text = "\(actor) restored this"
             }

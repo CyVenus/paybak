@@ -58,20 +58,25 @@ nonisolated struct AssistantReply: Hashable, Sendable {
 }
 
 nonisolated extension Books {
-    /// The four prompts: Figma's for the demo; another account gets its soonest-due group and its
-    /// most overdue debtor, and a prompt with nothing behind it is left out (§3.6.1).
+    /// The four prompts, for this account's own group and debtor (§3.6.1): who owes you (while
+    /// someone does), food this month (once there's some), the soonest-due group you owe in, and the
+    /// first person in "People who owe you". A prompt with nothing behind it is left out.
     func suggestedPrompts() -> [AssistantSuggestion] {
-        var prompts = [
-            AssistantSuggestion(icon: "people", prompt: "Who owes me money?"),
-            AssistantSuggestion(icon: "food", prompt: "How much did I spend on food this month?"),
-        ]
-        let items = openItems()
-        if let group = items.filter({ $0.debtor == Person.me && $0.kind == .group && $0.due != nil }).min(by: { $0.due! < $1.due! }) {
-            prompts.append(AssistantSuggestion(icon: "calendar", prompt: "When is \(groupName(group.ref)) due?"))
+        let owers = settleRows().get
+        var prompts: [AssistantSuggestion] = []
+        if !owers.isEmpty {
+            prompts.append(AssistantSuggestion(icon: "people", prompt: Self.whoOwesMePrompt))
         }
-        let overdue = items.filter { $0.isOwedToMe && ($0.due.map { $0 < today } ?? false) }
-        if let debtor = overdue.min(by: { $0.due! < $1.due! }) {
-            prompts.append(AssistantSuggestion(icon: "bell", prompt: "Draft a reminder for \(firstName(debtor.friend))"))
+        let food = insights(YearMonth(today)).categories.first(where: { $0.category == .food })?.amount ?? 0
+        if food > 0 {
+            prompts.append(AssistantSuggestion(icon: "food", prompt: "How much did I spend on food this month?"))
+        }
+        let dueGroup = openItems().filter { $0.kind == .group && !$0.isOwedToMe && $0.due != nil }.min { $0.due! < $1.due! }
+        if let dueGroup, let group = ledger.group(dueGroup.ref) {
+            prompts.append(AssistantSuggestion(icon: "calendar", prompt: "When is \(group.name) due?"))
+        }
+        if let debtor = owers.first?.friend {
+            prompts.append(AssistantSuggestion(icon: "bell", prompt: "Draft a reminder for \(firstName(debtor))"))
         }
         return prompts
     }
@@ -80,13 +85,15 @@ nonisolated extension Books {
     func answer(_ prompt: String, upi: String?) -> AssistantReply {
         switch AssistantParser.intent(of: prompt) {
         case .whoOwesMe: whoOwesReply()
-        case .spend(let category, let month): spendReply(category: category, monthName: month)
+        case .spend(let category, let month, let year): spendReply(category: category, monthName: month, year: year)
         case .due(let group): dueReply(groupName: group)
         case .reminder(let name): reminderReply(name: name, upi: upi)
         case .expense(let phrase): expenseReply(phrase)
         case .unknown: Self.fallback
         }
     }
+
+    static let whoOwesMePrompt = "Who owes me money?"
 
     static let fallback = AssistantReply(
         text: "I can answer questions about your balances and due dates, or add an expense. Try “Who owes me money?”",
@@ -112,135 +119,122 @@ nonisolated extension Books {
 
     // MARK: Spending
 
-    /// "You spent ₹3,850 on food in September — 17% of your ₹23,300 share."
-    func spendReply(category word: String, monthName: String?) -> AssistantReply {
+    /// "You spent ₹3,850 on food in September — 17% of your ₹23,300 share."; a word that names no
+    /// category gets the fallback.
+    func spendReply(category word: String, monthName: String?, year: Int? = nil) -> AssistantReply {
         let category = AssistantParser.category(for: word)
         guard category != .other || word == "other" else { return Self.fallback }
-        guard let month = month(named: monthName) else { return Self.fallback }
+        let month = month(named: monthName, year: year) ?? YearMonth(today)
+        let name = category.name.lowercased()
+        let report = insights(month)
         let page = insightsPage(month)
         guard let row = page.categories.first(where: { $0.id == category.rawValue }) else {
-            return AssistantReply(text: "You didn’t spend anything on \(word) in \(month.name).", chips: [.seeInsights(month)])
+            return AssistantReply(text: "You didn’t spend anything on \(name) in \(month.name).", chips: [.seeInsights(month)])
         }
+        let amount = report.categories.first(where: { $0.category == category })?.amount ?? 0
         return AssistantReply(
-            text: "You spent \(row.amount) on \(word) in \(month.name) — \(row.caption) of your \(page.total) share.",
+            text: "You spent \(Money.format(amount, defaultCurrency)) on \(name) in \(month.name) — \(report.percent(of: category))% of your \(Money.format(report.total, defaultCurrency)) share.",
             card: .category(row), chips: [.seeInsights(month)]
         )
     }
 
-    /// This month, or the latest month with that name up to this one.
-    private func month(named name: String?) -> YearMonth? {
+    /// "september" → the latest September up to this month; "september 2025" → that one.
+    private func month(named name: String?, year: Int?) -> YearMonth? {
+        guard let name, let number = Format.monthNames.firstIndex(where: { $0.lowercased() == name }) else { return nil }
+        if let year { return YearMonth(year: year, month: number + 1) }
         let current = YearMonth(today)
-        guard let name else { return current }
-        guard let number = Format.monthNames.firstIndex(where: { $0.lowercased() == name || $0.lowercased().hasPrefix(name) && name.count >= 3 })
-        else { return nil }
         let candidate = YearMonth(year: current.year, month: number + 1)
         return candidate > current ? YearMonth(year: current.year - 1, month: number + 1) : candidate
     }
 
     // MARK: Due dates
 
-    /// "Your Goa Trip share of ₹1,400 is due Fri 2 Oct."
+    /// "Your Goa Trip share of ₹1,400 is due Fri 2 Oct." (or "… is open." without a date); a name
+    /// that isn't one of your groups gets the fallback.
     func dueReply(groupName name: String) -> AssistantReply {
-        guard let group = ledger.groups.first(where: { $0.name.lowercased() == name }) else {
-            return AssistantReply(text: "I couldn’t find a group called \(name.capitalized).", card: .suggestions)
+        guard let group = ledger.groups.first(where: { $0.name.lowercased() == name }) else { return Self.fallback }
+        let open: AssistantReply.Chip = .openGroup(group.id, name: group.name, isProject: group.isProject)
+        guard let item = openItems().first(where: { $0.kind == .group && $0.ref == group.id && !$0.isOwedToMe }) else {
+            return AssistantReply(text: "Nothing is due in \(group.name).", chips: [open])
         }
-        let chips: [AssistantReply.Chip] = [.settleUp(group.id), .openGroup(group.id, name: group.name, isProject: group.isProject)]
-        let mine = openItems().filter { $0.debtor == Person.me && $0.ref == group.id }
-        guard !mine.isEmpty else { return AssistantReply(text: "Nothing is due in \(group.name).", chips: [chips[1]]) }
-        let amount = Money.format(mine.reduce(0) { $0 + $1.amount }, defaultCurrency)
-        guard let due = mine.compactMap(\.due).min() else {
-            return AssistantReply(text: "Your \(group.name) share of \(amount) has no due date.", chips: chips)
-        }
-        let when = due < today ? "was due \(Format.day(due))" : "is due \(Format.day(due))"
-        return AssistantReply(text: "Your \(group.name) share of \(amount) \(when).", chips: chips)
+        let due = item.due.map { " is due \(Format.day($0))" } ?? " is open"
+        return AssistantReply(text: "Your \(group.name) share of \(Money.format(item.amount, defaultCurrency))\(due).",
+                              chips: [.settleUp(group.id), open])
     }
 
     // MARK: Reminders
 
+    /// The Remind sheet's Friendly message to a friend who owes you, so the chat and the sheet say the
+    /// same thing.
     func reminderReply(name: String, upi: String?) -> AssistantReply {
-        guard let person = friend(named: name) else { return AssistantReply(text: "I couldn’t find \(name.capitalized).") }
+        guard let person = friend(named: name) else { return AssistantReply(text: Self.notFound(name)) }
         let first = person.firstName
-        let items = openItems().filter { $0.friend == person.id && $0.isOwedToMe }
-        // The earliest due first; items without a due date last.
-        let item = items.min { lhs, rhs in
-            switch (lhs.due, rhs.due) {
-            case let (left?, right?): left < right
-            case (.some, .none): true
-            default: false
-            }
-        }
-        guard let item else {
+        guard let draft = remindDraft(for: person.id, context: nil, upi: upi) else {
             return AssistantReply(text: "\(first) doesn’t owe you anything right now.")
         }
         return AssistantReply(
             text: "Here’s a reminder for \(first). Nothing is sent until you tap Send.",
-            more: [friendlyReminder(item, upi: upi)],
-            chips: [.remind(person.id, name: first, context: item)]
+            more: [draft.friendly],
+            chips: [.remind(person.id, name: first, context: draft.item)]
         )
     }
 
     /// The Remind sheet's Friendly message: "Hi Rohan! Just a gentle reminder about ₹800 for the movie
     /// tickets on 20 Sep. You can pay me on UPI at arjun@okaxis. Thanks."
     func friendlyReminder(_ item: Obligation, upi: String?) -> String {
-        let subject: String = switch item.kind {
-        case .direct:
-            if let expense = ledger.expense(item.ref) {
-                "the \(expense.title.prefix(1).lowercased() + expense.title.dropFirst()) on \(Format.short(expense.date))"
-            } else {
-                item.title
-            }
-        case .group, .project: groupName(item.ref)
-        case .loan: "the loan" + (item.title.isEmpty ? "" : " for \(item.title.lowercased())")
-        }
-        let payMe = upi.map { " You can pay me on UPI at \($0)." } ?? ""
-        return "Hi \(firstName(item.friend))! Just a gentle reminder about \(Money.format(item.amount, defaultCurrency)) for \(subject).\(payMe) Thanks."
+        reminderMessage(item, tone: .friendly, upi: upi)
     }
 
     // MARK: Drafting an expense
 
     func expenseReply(_ phrase: AssistantParser.ExpensePhrase) -> AssistantReply {
-        let group = phrase.group.flatMap { name in ledger.groups.first { $0.name.lowercased() == name } }
+        let group = phrase.group.flatMap { name in ledger.groups.first { $0.name.lowercased() == name.lowercased() } }
+        // "in …" that names none of your groups stays part of what it was for.
+        var what = phrase.what
+        if group == nil, let place = phrase.group {
+            what = what.map { "\($0) in \(place)" }
+        }
         var people: [PersonID] = []
-        var missing: [String] = []
+        var missing = ""
         for name in phrase.names {
             if let person = friend(named: name) {
                 if !people.contains(person.id) { people.append(person.id) }
             } else {
-                missing.append(name.capitalized)
+                missing += " " + Self.notFound(name)
             }
         }
-        if people.isEmpty, let group {
-            people = group.memberIds.filter { $0 != Person.me }
-        }
-        let more = missing.map { "I couldn’t find \($0)." }
         guard !people.isEmpty else {
-            return AssistantReply(text: "Who should I split it with? Try “Add ₹600 for a cab, split with Esha and Dev”.", more: more)
+            return AssistantReply(text: "Who is it with? Try “Add ₹600 for a cab, split with Esha and Dev”." + missing)
         }
-        let currency = defaultCurrency
+        let currency = group?.currency ?? defaultCurrency
         let amount = MoneyInput.minor(phrase.amount, currency: currency)
-        let title = phrase.what.map { $0.prefix(1).uppercased() + $0.dropFirst() } ?? "Expense"
-        let category = phrase.what.map(AssistantParser.category(for:)) ?? .other
+        let category = AssistantParser.guessCategory(what ?? "")
+        let title = what.map { $0.prefix(1).uppercased() + $0.dropFirst() } ?? category.name
         let everyone = [Person.me] + people
         let draft = ExpenseDraft(
             groupId: group?.id, title: title, category: category, amount: amount, currency: currency, date: today,
             payers: [Payer(personId: Person.me, amount: amount)], splitMode: .equal, rows: everyone.map { SplitRow(personId: $0) }
         )
-        let shares = Set(previewSplit(draft).shares.values)
-        let each = shares.count == 1
-            ? "\(Money.format(shares.first!, currency)) each"
-            : "About \(Money.format(Money.roundedToWholeUnits(amount / Int64(everyone.count), currency), currency)) each"
+        let shares = Splits.equal(amount, among: everyone).shares.values
+        let each = Money.format(shares.min() ?? 0, currency)
         let card = AssistantReply.DraftCard(
             draft: draft, title: title, amount: Money.format(amount, currency), icon: category.icon,
             paidLine: "Paid by you · Today",
-            splitLine: "Split equally with \(Format.joinedNames(people.map(firstName)))" + (group.map { " in \($0.name)" } ?? ""),
-            eachLine: each, people: everyone
+            splitLine: "Split equally with \(Format.joinedNames(people.map(firstName)))",
+            eachLine: Set(shares).count == 1 ? "\(each) each" : "About \(each) each", people: everyone
         )
-        return AssistantReply(text: "Here’s what I’ll add. Nothing is saved until you tap Save.", more: more, card: .draft(card))
+        return AssistantReply(text: "Here’s what I’ll add. Nothing is saved until you tap Save." + missing, card: .draft(card))
     }
 
-    /// A friend by first name (or full name), case-insensitively.
+    /// "I couldn’t find Zed."
+    private static func notFound(_ name: String) -> String {
+        let name = name.trimmingCharacters(in: .whitespaces)
+        return "I couldn’t find \(name.prefix(1).uppercased() + name.dropFirst())."
+    }
+
+    /// A friend by first name or full name, case-insensitively.
     private func friend(named name: String) -> Person? {
-        let name = name.lowercased()
-        return ledger.people.first { $0.firstName.lowercased() == name } ?? ledger.people.first { $0.name.lowercased() == name }
+        let name = AssistantParser.normalize(name)
+        return ledger.people.first { $0.firstName.lowercased() == name || $0.name.lowercased() == name }
     }
 }

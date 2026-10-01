@@ -8,7 +8,8 @@ nonisolated enum MoneyInput {
         fixedPoint(text, decimals: Money.info(currency).exponent)
     }
 
-    /// 280050 → "2800.5"; 280000 → "2800" (the raw text a field starts from).
+    /// 280050 → "2800.50"; 280000 → "2800" (the raw text a field starts from; Android's
+    /// `AmountEntry.text` keeps every decimal digit).
     static func text(_ minor: Int64, currency: String) -> String {
         fixedText(minor, decimals: Money.info(currency).exponent)
     }
@@ -26,7 +27,7 @@ nonisolated enum MoneyInput {
         fixedPoint(text, decimals: 2)
     }
 
-    /// 2500 → "25"; 3333 → "33.33"; 1250 → "12.5".
+    /// 2500 → "25"; 3333 → "33.33"; 1250 → "12.50".
     static func percentText(_ basisPoints: Int64) -> String {
         fixedText(basisPoints, decimals: 2)
     }
@@ -50,7 +51,6 @@ nonisolated enum MoneyInput {
         guard fraction != 0 else { return String(whole) }
         var digits = String(abs(fraction))
         digits = String(repeating: "0", count: decimals - digits.count) + digits
-        while digits.hasSuffix("0") { digits.removeLast() }
         return "\(whole).\(digits)"
     }
 }

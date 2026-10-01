@@ -44,13 +44,19 @@ nonisolated enum Money {
         "JPY": CurrencyInfo(symbol: "¥", exponent: 0, name: "Japanese yen"),
     ]
 
-    /// Codes without a minor unit, for currencies outside the designed table.
-    private static let zeroDecimalCodes: Set = ["JPY", "KRW", "VND", "CLP", "ISK", "UGX", "PYG", "XAF", "XOF"]
+    /// ISO 4217 minor units that aren't 2, for currencies outside the designed table (the same
+    /// digits Android reads from `java.util.Currency`).
+    private static let minorUnits: [String: Int] = [
+        "BIF": 0, "CLP": 0, "DJF": 0, "GNF": 0, "ISK": 0, "JPY": 0, "KMF": 0, "KRW": 0, "PYG": 0, "RWF": 0,
+        "UGX": 0, "UYI": 0, "VND": 0, "VUV": 0, "XAF": 0, "XOF": 0, "XPF": 0,
+        "BHD": 3, "IQD": 3, "JOD": 3, "KWD": 3, "LYD": 3, "OMR": 3, "TND": 3,
+        "CLF": 4, "UYW": 4,
+    ]
 
-    /// The designed symbol and exponent; any other ISO code is written as its code with 2 decimals
-    /// (or none for the zero-decimal currencies).
+    /// The designed symbol and exponent; any other ISO code is written as its code with its ISO
+    /// minor unit (2 for most).
     static func info(_ code: String) -> CurrencyInfo {
-        currencies[code] ?? CurrencyInfo(symbol: code, exponent: zeroDecimalCodes.contains(code) ? 0 : 2, name: code)
+        currencies[code] ?? CurrencyInfo(symbol: code, exponent: minorUnits[code] ?? 2, name: code)
     }
 
     /// `₹2,900` · `₹1,00,000` · `₹1,234.50` · `AED 1,800` · `+₹2,900` · `−₹1,850` (§2.2).
@@ -111,10 +117,21 @@ nonisolated enum Money {
         return (quotient + (remainder * 2 >= unit ? 1 : 0)) * unit
     }
 
-    /// "≈ ₹21,936 · ₹22.85 per AED" (§2.2): the converted amount in whole units and the rate.
+    /// "≈ ₹21,936 · ₹22.85 per AED" (§2.2): the converted amount in whole units (half to even, as
+    /// Android rounds it) and the rate.
     static func approximateLine(_ minor: Int64, currency: String, rate: Rate) -> String {
         let converted = convert(minor, rate: rate.decimal, from: currency, to: rate.to)
-        return "≈ \(format(roundedToWholeUnits(converted, rate.to), rate.to)) · \(info(rate.to).symbol)\(rateText(rate.decimal)) per \(currency)"
+        return "≈ \(format(wholeUnitsHalfEven(converted, rate.to), rate.to)) · \(info(rate.to).symbol)\(rateText(rate.decimal)) per \(currency)"
+    }
+
+    /// Whole units rounded half to even, back in minor units.
+    private static func wholeUnitsHalfEven(_ minor: Int64, _ code: String) -> Int64 {
+        let unit = pow10(info(code).exponent)
+        guard unit > 1 else { return minor }
+        let (quotient, remainder) = minor.quotientAndRemainder(dividingBy: unit)
+        let twice = abs(remainder) * 2
+        let roundsAway = twice > unit || (twice == unit && quotient % 2 != 0)
+        return (quotient + (roundsAway ? minor.signum() : 0)) * unit
     }
 
     /// A rate with exactly two decimals, rounded half up ("22.9" → "22.90").

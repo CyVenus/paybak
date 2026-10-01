@@ -32,11 +32,12 @@ nonisolated extension Books {
     }
 
     /// The next occurrence of a rule after `after` (§10): the anchor's weekday, day of month
-    /// (clamped) or day and month.
+    /// (clamped) or day and month. An every-2-weeks rule takes the next anchor weekday, as Android's
+    /// `nextOccurrence` does.
     static func nextOccurrence(_ rule: RecurringRule, after: LocalDay) -> LocalDay {
         let anchor = rule.anchorDate
         switch rule.frequency {
-        case .weekly:
+        case .weekly, .biweekly:
             let delta = ((anchor.weekday - after.weekday - 1) % 7 + 7) % 7 + 1
             return after.adding(days: delta)
         case .yearly:
@@ -70,7 +71,7 @@ nonisolated extension Books {
             let occurrence = Self.nextOccurrence(rule, after: Self.lastOccurrence(of: rule))
             guard occurrence == today else { continue }
             ledger.recurringRules[index].lastOccurrence = occurrence
-            if rule.variable {
+            if rule.variable || rule.amount == nil {
                 let id = "d-\(rule.id)-\(occurrence)"
                 guard ledger.draft(id) == nil else { continue }
                 ledger.drafts.append(RecurringDraft(id: id, ruleId: rule.id, occurrenceDate: occurrence, createdAt: moment))

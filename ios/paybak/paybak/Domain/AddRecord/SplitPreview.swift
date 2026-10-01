@@ -37,7 +37,8 @@ nonisolated struct SplitPreview: Hashable, Sendable {
         let people = "\(includedCount) \(includedCount == 1 ? "person" : "people")"
         switch mode {
         case .equal:
-            guard amount > 0 else { return ("Equally", false) }
+            // "Equally" alone until there's an amount and someone to split with.
+            guard amount > 0, shares.count > 1 else { return ("Equally", false) }
             let (each, leftover) = amount.quotientAndRemainder(dividingBy: Int64(max(includedCount, 1)))
             return (leftover == 0 ? "Equally · \(Money.format(each, currency)) each" : "Equally · \(people)", false)
         case .exact, .percent:
@@ -81,11 +82,7 @@ nonisolated extension Books {
         case .percent:
             entered = order.reduce(0) { $0 + values[$1, default: 0] }
             remaining = 10_000 - entered
-            if remaining == 0 {
-                shares = Splits.weighted(total, weights: values, order: order, counter: counter).shares
-            } else {
-                for person in order { shares[person] = total * values[person, default: 0] / 10_000 }
-            }
+            shares = Splits.weighted(total, weights: values, order: order, counter: counter).shares
         case .shares:
             shares = Splits.weighted(total, weights: values, order: order, counter: counter).shares
         case .itemized:
