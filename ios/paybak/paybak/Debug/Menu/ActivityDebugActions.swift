@@ -1,31 +1,37 @@
 #if DEBUG
 import Foundation
 
-/// Lane A's Notifications section of the debug menu (app-architecture §3.10): posts real local
-/// notifications now (lock the device within 5 s to see them on the lock screen).
+/// Lane A's Activity section of the debug menu (app-architecture §3.10): post the local
+/// notifications now instead of waiting for 9:00 pm, the month's last evening or the day after a due
+/// date. Each posts the latest inbox item of its kind (a demo has them all).
 enum ActivityDebugActions {
+    /// Long enough to lock the device first.
+    private static let delay: TimeInterval = 5
+
     static func actions(_ ledger: Ledger) -> [DebugAction] {
         [
-            DebugAction(title: "Post the claim notification", detail: "Esha’s pending ₹700, in 5 s") { context in
-                guard let claim = context.ledgerStore.snapshot.home.pendingClaims.first else { return }
-                Task { await NotificationService.postClaim(claim, after: 5) }
-            },
-            post("Fire the Kabir reminder now", type: .paymentReminder),
-            post("Post the monthly summary now", type: .monthlySummary),
-            post("Post Rohan’s overdue alert", type: .paymentOverdue),
-            DebugAction(title: "Deliver the next notification in 5 s", detail: "The nearest scheduled reminder or alert") { context in
-                let books = context.ledgerStore.books
-                guard let alert = books.upcomingAlerts(limit: 1).first else { return }
-                Task { await NotificationService.postEarly(alert, in: books, after: 5) }
+            postLatest("Fire the Kabir reminder now", detail: "The latest Payment reminder", type: .paymentReminder),
+            postLatest("Post the monthly summary now", type: .monthlySummary),
+            postLatest("Post Rohan’s overdue alert", detail: "The latest Payment overdue", type: .paymentOverdue),
+            DebugAction(title: "Deliver the next notification in 5 s", detail: "A pending claim to you, else the latest inbox item") { context in
+                let store = context.ledgerStore
+                // Pending claims come newest first.
+                if let claim = store.snapshot.home.pendingClaims.first {
+                    Task { await NotificationService.postClaim(claim, after: delay) }
+                } else if let row = store.snapshot.inbox.max(by: { $0.item.createdAt < $1.item.createdAt }) {
+                    Task { await NotificationService.post(row, link: DeepLink(row.item, in: store.ledger), after: delay) }
+                }
             },
         ]
     }
 
     /// Posts the newest inbox item of `type`.
-    private static func post(_ title: String, type: InboxItem.Kind) -> DebugAction {
-        DebugAction(title: title) { context in
-            guard let row = context.ledgerStore.snapshot.inbox.first(where: { $0.item.type == type }) else { return }
-            Task { await NotificationService.post(row, link: DeepLink(row.item, in: context.ledgerStore.ledger)) }
+    private static func postLatest(_ title: String, detail: String? = nil, type: InboxItem.Kind) -> DebugAction {
+        DebugAction(title: title, detail: detail) { context in
+            let store = context.ledgerStore
+            let rows = store.snapshot.inbox.filter { $0.item.type == type }
+            guard let row = rows.max(by: { $0.item.createdAt < $1.item.createdAt }) else { return }
+            Task { await NotificationService.post(row, link: DeepLink(row.item, in: store.ledger)) }
         }
     }
 }

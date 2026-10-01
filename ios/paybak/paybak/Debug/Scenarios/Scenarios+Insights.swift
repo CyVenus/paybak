@@ -21,13 +21,14 @@ extension Scenario {
             .recurringFlat302: Scenario(seeds: pro(), tab: .groups, stack: [.group("g-flat302"), .recurring("g-flat302")]),
             .recurringRepeat: Scenario(seeds: pro(), modals: [Layer(
                 root: .addExpense(AddExpenseArgs(draft: cookingGasDraft(on: figma), focusAmount: false)),
-                sheet: .repeatRule(RepeatRuleRequest(current: cookingGasRule(on: figma), startDate: figma))
+                sheet: .repeatRule(RepeatRuleRequest(current: cookingGasRule(on: figma), startDate: figma.adding(days: -2)))
             )]),
             .recurringEnterAmount: Scenario(seeds: pro(), modals: [Layer(root: .enterDraftAmount("d-gas-09"))]),
         ]
     }()
 
-    /// The Leopold Cafe receipt read and assigned (insights §4): ₹2,300 itemized, You ₹989 · Esha ₹621 · Dev ₹690.
+    /// The Leopold Cafe receipt read and assigned (insights §4.5): ₹2,300 itemized, You ₹989 · Esha ₹621 · Dev ₹690,
+    /// the receipt attached (scanned on `day` at 1:15 pm).
     static func leopoldDraft(on day: LocalDay) -> ExpenseDraft {
         let items: [Itemized.Item] = [
             .init(label: "Chicken biryani", amount: 43_000, personIds: ["p-dev"]),
@@ -45,7 +46,7 @@ extension Scenario {
             rows: order.map { SplitRow(personId: $0, included: true, value: shares[$0], share: shares[$0] ?? 0) },
             itemized: Itemized(items: items, lines: [.init(label: "GST 5%", amount: 10_000), .init(label: "Tip 10%", amount: 20_000)],
                                subtotal: 200_000),
-            receipt: Receipt(asset: "art-receipt-full", addedBy: Person.me, addedAt: day.start(in: .current))
+            receipt: Receipt(asset: "art-receipt-full", addedBy: Person.me, addedAt: day.moment(hour: 13, minute: 15, in: .current))
         )
     }
 

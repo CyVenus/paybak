@@ -1,20 +1,13 @@
 #if DEBUG
-/// Lane C's Settings section of the debug menu (app-architecture §3.10).
+/// Lane C's Settings section of the debug menu (app-architecture §3.10): data for Muted friends.
 enum SettingsDebugActions {
+    private static let rohan: PersonID = "p-rohan"
+
     static func actions(_ ledger: Ledger) -> [DebugAction] {
-        let rohanMuted = ledger.person("p-rohan")?.remindersMuted ?? false
-        return [
-            DebugAction(title: rohanMuted ? "Unmute Rohan" : "Mute Rohan", detail: "Settings › Muted friends lists him") { context in
-                try context.ledgerStore.setRemindersMuted("p-rohan", !rohanMuted)
-            },
-            DebugAction(title: "Subscribe monthly", detail: "Pro without a trial (₹99/month)") { context in
-                context.ledgerStore.subscribe(.monthly)
-            },
-            DebugAction(title: "Remove every payment method", detail: "Payment details’ empty preview") { context in
-                context.profileStore.update { profile in
-                    profile.paymentMethods = []
-                    profile.mirrorPrimaryUPI()
-                }
+        [
+            DebugAction(title: "Mute Rohan’s reminders", detail: "Fills Settings › Muted friends") { context in
+                guard context.ledgerStore.ledger.person(rohan) != nil else { return }
+                try context.ledgerStore.setRemindersMuted(rohan, true)
             },
         ]
     }

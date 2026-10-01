@@ -1,252 +1,265 @@
 #if DEBUG
 import SwiftUI
-import UIKit
+
+/// A named token sample.
+private struct GalleryToken: Identifiable {
+    let name: String
+    let color: Color
+
+    var id: String { name }
+
+    init(_ name: String, _ color: Color) {
+        self.name = name
+        self.color = color
+    }
+}
 
 // MARK: - Colours
 
-struct GalleryColourPrimitivesPage: View {
+struct GalleryColoursPage: View {
+    private static let primitives: [GalleryToken] = [
+        .init("gray/0", PBPalette.gray0), .init("gray/50", PBPalette.gray50), .init("gray/100", PBPalette.gray100),
+        .init("gray/200", PBPalette.gray200), .init("gray/300", PBPalette.gray300), .init("gray/400", PBPalette.gray400),
+        .init("gray/600", PBPalette.gray600), .init("gray/800", PBPalette.gray800), .init("gray/900", PBPalette.gray900),
+        .init("red/50", PBPalette.red50), .init("red/500", PBPalette.red500), .init("red/600", PBPalette.red600),
+        .init("black-40", PBPalette.black40), .init("black-06", PBPalette.black06), .init("white-72", PBPalette.white72),
+        .init("white-60", PBPalette.white60), .init("device/black", PBPalette.deviceBlack),
+    ]
+
+    private static let semantic: [(group: String, tokens: [GalleryToken])] = [
+        ("bg", [
+            .init("primary", PBColor.bgPrimary), .init("card", PBColor.bgCard), .init("card-pressed", PBColor.bgCardPressed),
+            .init("selected", PBColor.bgSelected), .init("inverse", PBColor.bgInverse), .init("inverse-pressed", PBColor.bgInversePressed),
+            .init("disabled", PBColor.bgDisabled), .init("destructive", PBColor.bgDestructive),
+            .init("destructive-pressed", PBColor.bgDestructivePressed), .init("destructive-subtle", PBColor.bgDestructiveSubtle),
+            .init("scrim", PBColor.bgScrim), .init("glass", PBColor.bgGlass), .init("indicator", PBColor.bgIndicator),
+            .init("device", PBColor.bgDevice), .init("camera", PBColor.bgCamera),
+        ]),
+        ("text", [
+            .init("primary", PBColor.textPrimary), .init("secondary", PBColor.textSecondary), .init("tertiary", PBColor.textTertiary),
+            .init("inverse", PBColor.textInverse), .init("disabled", PBColor.textDisabled), .init("destructive", PBColor.textDestructive),
+        ]),
+        ("icon", [
+            .init("primary", PBColor.iconPrimary), .init("secondary", PBColor.iconSecondary), .init("tertiary", PBColor.iconTertiary),
+            .init("inverse", PBColor.iconInverse), .init("destructive", PBColor.iconDestructive),
+        ]),
+        ("border", [
+            .init("subtle", PBColor.borderSubtle), .init("strong", PBColor.borderStrong),
+            .init("destructive", PBColor.borderDestructive), .init("glass-highlight", PBColor.borderGlassHighlight),
+        ]),
+        ("illustration", [
+            .init("line", PBColor.illustrationLine), .init("tint", PBColor.illustrationTint), .init("fill", PBColor.illustrationFill),
+        ]),
+        ("chart", [
+            .init("track", PBColor.chartTrack), .init("bar", PBColor.chartBar), .init("fill", PBColor.chartFill),
+            .init("over", PBColor.chartOver),
+        ]),
+    ]
+
     var body: some View {
         GalleryPageScroll {
             GallerySection("Primitives") {
-                SwatchGrid(swatches: [
-                    ("gray/0", PBPalette.gray0), ("gray/50", PBPalette.gray50), ("gray/100", PBPalette.gray100),
-                    ("gray/200", PBPalette.gray200), ("gray/300", PBPalette.gray300), ("gray/400", PBPalette.gray400),
-                    ("gray/600", PBPalette.gray600), ("gray/800", PBPalette.gray800), ("gray/900", PBPalette.gray900),
-                    ("red/50", PBPalette.red50), ("red/500", PBPalette.red500), ("red/600", PBPalette.red600),
-                    ("black-40", PBPalette.black40), ("black-06", PBPalette.black06), ("white-72", PBPalette.white72),
-                    ("white-60", PBPalette.white60), ("device/black", PBPalette.deviceBlack),
-                ])
+                Swatches(tokens: Self.primitives)
             }
-            GallerySection("bg/*") {
-                SwatchGrid(swatches: [
-                    ("primary", PBColor.bgPrimary), ("card", PBColor.bgCard), ("card-pressed", PBColor.bgCardPressed),
-                    ("selected", PBColor.bgSelected), ("inverse", PBColor.bgInverse), ("inverse-pressed", PBColor.bgInversePressed),
-                    ("disabled", PBColor.bgDisabled), ("destructive", PBColor.bgDestructive), ("destr.-pressed", PBColor.bgDestructivePressed),
-                    ("destr.-subtle", PBColor.bgDestructiveSubtle), ("scrim", PBColor.bgScrim), ("glass", PBColor.bgGlass),
-                    ("indicator", PBColor.bgIndicator), ("device", PBColor.bgDevice), ("camera", PBColor.bgCamera),
-                ])
+            ForEach(Self.semantic, id: \.group) { group, tokens in
+                GallerySection("color/\(group)") {
+                    Swatches(tokens: tokens)
+                }
             }
         }
     }
 }
 
-struct GalleryColourSemanticPage: View {
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("text/*") {
-                SwatchGrid(swatches: [
-                    ("primary", PBColor.textPrimary), ("secondary", PBColor.textSecondary), ("tertiary", PBColor.textTertiary),
-                    ("inverse", PBColor.textInverse), ("disabled", PBColor.textDisabled), ("destructive", PBColor.textDestructive),
-                ])
-            }
-            GallerySection("icon/*") {
-                SwatchGrid(swatches: [
-                    ("primary", PBColor.iconPrimary), ("secondary", PBColor.iconSecondary), ("tertiary", PBColor.iconTertiary),
-                    ("inverse", PBColor.iconInverse), ("destructive", PBColor.iconDestructive),
-                ])
-            }
-            GallerySection("border/*") {
-                SwatchGrid(swatches: [
-                    ("subtle", PBColor.borderSubtle), ("strong", PBColor.borderStrong),
-                    ("destructive", PBColor.borderDestructive), ("glass-highlight", PBColor.borderGlassHighlight),
-                ])
-            }
-            GallerySection("illustration/* · chart/*") {
-                SwatchGrid(swatches: [
-                    ("illus/line", PBColor.illustrationLine), ("illus/tint", PBColor.illustrationTint), ("illus/fill", PBColor.illustrationFill),
-                    ("chart/track", PBColor.chartTrack), ("chart/bar", PBColor.chartBar), ("chart/fill", PBColor.chartFill),
-                    ("chart/over", PBColor.chartOver),
-                ])
-            }
-        }
-    }
-}
-
-/// Swatches with the token name and the resolved sRGB hex (plus opacity when it isn't 100 %).
-private struct SwatchGrid: View {
-    let swatches: [(name: String, color: Color)]
+/// Chips of each colour, outlined so white and translucent tokens stay visible, with the token name
+/// and its sRGB hex ("#0A0A0A", or "#0A0A0A 6%" for a colour with alpha).
+private struct Swatches: View {
+    let tokens: [GalleryToken]
 
     @Environment(\.self) private var environment
 
     var body: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: PBSpace.s8, alignment: .topLeading), count: 4), spacing: PBSpace.s8) {
-            ForEach(swatches, id: \.name) { swatch in
-                VStack(alignment: .leading, spacing: PBSpace.s2) {
-                    RoundedRectangle(cornerRadius: PBRadius.sm)
-                        .fill(swatch.color)
+        GalleryFlow(spacing: 10, rowSpacing: PBSpace.s12) {
+            ForEach(tokens) { token in
+                VStack(alignment: .leading, spacing: PBSpace.s4) {
+                    RoundedRectangle(cornerRadius: PBRadius.tile)
+                        .fill(PBColor.bgInverse.opacity(0.04))
                         .overlay {
-                            RoundedRectangle(cornerRadius: PBRadius.sm).strokeBorder(PBColor.borderSubtle)
+                            RoundedRectangle(cornerRadius: PBRadius.tile).fill(token.color)
                         }
-                        .frame(height: 32)
-                    Text(swatch.name)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: PBRadius.tile).strokeBorder(PBColor.borderSubtle, lineWidth: PBSize.hairline)
+                        }
+                        .frame(width: 84, height: 44)
+                    Text(token.name)
                         .textStyle(.caption2)
                         .foregroundStyle(PBColor.textPrimary)
-                    Text(hex(swatch.color))
+                        .lineLimit(1)
+                    Text(hex(token.color))
                         .textStyle(.caption2)
-                        .foregroundStyle(PBColor.textTertiary)
+                        .foregroundStyle(PBColor.textSecondary)
+                        .lineLimit(1)
                 }
-                .lineLimit(1)
+                .frame(width: 84, alignment: .leading)
             }
         }
     }
 
     private func hex(_ color: Color) -> String {
         let resolved = color.resolve(in: environment)
-        let channels = [resolved.red, resolved.green, resolved.blue].map { Int(($0 * 255).rounded()) }
-        let rgb = channels.map { String(format: "%02X", $0) }.joined()
-        return resolved.opacity < 1 ? "#\(rgb) \(Int((resolved.opacity * 100).rounded()))%" : "#\(rgb)"
+        let channels = [resolved.red, resolved.green, resolved.blue].map { Int((min(max($0, 0), 1) * 255).rounded()) }
+        let rgb = "#" + channels.map { String(format: "%02X", $0) }.joined()
+        let alpha = Int((resolved.opacity * 100).rounded())
+        return alpha == 100 ? rgb : "\(rgb) \(alpha)%"
     }
 }
 
 // MARK: - Text styles
 
-/// Each style on its Figma line box (tinted), with its spec and the face actually loaded, so a
-/// missing font registration shows up as "system font".
-struct GalleryTextStylesPage: View {
-    let styles: [PBTextStyle]
+/// Every Figma text style with its specs. The tinted band behind each sample is the line box, so the
+/// line height can be checked against Figma.
+struct GalleryTypePage: View {
+    private static let samples: [(style: PBTextStyle, sample: String)] = [
+        (.title1, "Split it. Track it."),
+        (.title2, "Enter the code"),
+        (.title3, "Recent activity"),
+        (.amountDisplay, "₹2,450"),
+        (.amountLarge, "+₹1,240"),
+        (.amountMedium, "−₹380"),
+        (.headline, "Indian Rupee"),
+        (.body, "Totals show in this currency. You can still add expenses in others."),
+        (.buttonLarge, "Continue with Apple"),
+        (.buttonSmall, "See all"),
+        (.subheadline, "INR · Based on your region"),
+        (.footnote, "We’ll send a 6-digit code."),
+        (.caption1, "DUE FRI"),
+        (.caption2, "AM"),
+        (.wordmarkS, "Paybak"),
+        (.wordmarkL, "Paybak"),
+    ]
 
     var body: some View {
         GalleryPageScroll {
-            ForEach(styles, id: \.name) { style in
+            ForEach(Self.samples, id: \.style.name) { style, sample in
                 VStack(alignment: .leading, spacing: PBSpace.s4) {
-                    Text(sample(for: style))
+                    GalleryLabel("\(style.name) · \(specs(style))")
+                    Text(sample)
                         .textStyle(style)
                         .foregroundStyle(PBColor.textPrimary)
-                        .background(PBColor.bgDestructiveSubtle)
-                    Text(spec(for: style))
-                        .textStyle(.caption2)
-                        .foregroundStyle(PBColor.textTertiary)
+                        .background(PBColor.bgSelected)
                 }
             }
         }
     }
 
-    private func sample(for style: PBTextStyle) -> String {
-        switch style {
-        case .amountDisplay, .amountLarge, .amountMedium: "+₹2,450"
-        case .wordmarkS, .wordmarkL: "Paybak"
-        case .title1: "Split it. Track it.\nSettle it."
-        default: "Split it. Track it. Settle it."
+    /// "SemiBold 16/22 · -0.25%".
+    private func specs(_ style: PBTextStyle) -> String {
+        let weight = switch style.face {
+        case .regular: "Regular"
+        case .medium: "Medium"
+        case .semiBold: "SemiBold"
+        case .bold: "Bold"
+        case .extraBold: "ExtraBold"
         }
-    }
-
-    private func spec(for style: PBTextStyle) -> String {
-        let loaded = UIFont(name: style.face.postScriptName, size: style.size)?.fontName ?? "system font (Manrope missing)"
-        let percent = Double(style.letterSpacing * 100).formatted(.number.precision(.fractionLength(0...2)))
-        return "\(style.name) · \(loaded) \(Int(style.size))/\(Int(style.lineHeight)) · \(percent) %"
+        let tracking = String(format: "%+.2f", Double(style.letterSpacing * 100))
+        return "\(weight) \(Int(style.size))/\(Int(style.lineHeight)) · \(tracking)%"
     }
 }
 
-// MARK: - Metrics
+// MARK: - Spacing, radius, size, materials
 
-struct GalleryMetricsPage: View {
-    private let spaces: [(String, CGFloat)] = [
-        ("2", PBSpace.s2), ("4", PBSpace.s4), ("6", PBSpace.s6), ("8", PBSpace.s8), ("12", PBSpace.s12),
+struct GalleryLayoutPage: View {
+    private static let spaces: [(String, CGFloat)] = [
+        ("0", PBSpace.s0), ("2", PBSpace.s2), ("4", PBSpace.s4), ("6", PBSpace.s6), ("8", PBSpace.s8), ("12", PBSpace.s12),
         ("16", PBSpace.s16), ("20", PBSpace.s20), ("24", PBSpace.s24), ("28", PBSpace.s28), ("32", PBSpace.s32),
         ("40", PBSpace.s40), ("48", PBSpace.s48), ("64", PBSpace.s64), ("96", PBSpace.s96),
     ]
-    private let radii: [(String, CGFloat)] = [
-        ("xs 6", PBRadius.xs), ("sm 10", PBRadius.sm), ("input 14", PBRadius.input), ("tile 14", PBRadius.tile),
-        ("card 20", PBRadius.card), ("sheet 40", PBRadius.sheet), ("full", PBRadius.full),
+    private static let layouts: [(String, CGFloat)] = [
+        ("screen-margin", PBLayout.screenMargin), ("card-padding", PBLayout.cardPadding), ("section-gap", PBLayout.sectionGap),
     ]
-    private let sizes: [(String, CGFloat)] = [
-        ("icon-sm", PBSize.iconSm), ("icon-md", PBSize.iconMd), ("icon-lg", PBSize.iconLg), ("avatar-xs", PBSize.avatarXs),
-        ("avatar-sm", PBSize.avatarSm), ("button-sm", PBSize.buttonSm), ("avatar-md", PBSize.avatarMd), ("tap", PBSize.tap),
-        ("button-lg", PBSize.buttonLg), ("add-button", PBSize.addButton), ("avatar-lg", PBSize.avatarLg), ("tabbar", PBSize.tabbar),
+    private static let radii: [(String, CGFloat)] = [
+        ("xs", PBRadius.xs), ("sm", PBRadius.sm), ("input", PBRadius.input), ("tile", PBRadius.tile),
+        ("card", PBRadius.card), ("sheet", PBRadius.sheet),
+    ]
+    private static let sizes: [(String, CGFloat)] = [
+        ("button-lg", PBSize.buttonLg), ("button-sm", PBSize.buttonSm), ("tap", PBSize.tap), ("icon-sm", PBSize.iconSm),
+        ("icon-md", PBSize.iconMd), ("icon-lg", PBSize.iconLg), ("avatar-xs", PBSize.avatarXs), ("avatar-sm", PBSize.avatarSm),
+        ("avatar-md", PBSize.avatarMd), ("avatar-lg", PBSize.avatarLg), ("tabbar", PBSize.tabbar), ("add-button", PBSize.addButton),
+        ("hairline", PBSize.hairline),
     ]
 
     var body: some View {
         GalleryPageScroll {
-            GallerySection("space/* (layout: margin 20 · card padding 16 · section gap 24)") {
-                ForEach(spaces, id: \.0) { name, value in
-                    HStack(spacing: PBSpace.s8) {
-                        Text(name).textStyle(.caption2).foregroundStyle(PBColor.textSecondary).frame(width: 20, alignment: .trailing)
-                        Rectangle().fill(PBColor.bgInverse).frame(width: value, height: 8)
-                    }
-                }
+            GallerySection("space/*") {
+                ForEach(Self.spaces, id: \.0) { name, value in bar("space/\(name)", value) }
+            }
+            GallerySection("layout/*") {
+                ForEach(Self.layouts, id: \.0) { name, value in bar("layout/\(name)", value) }
             }
             GallerySection("radius/*") {
-                HStack(spacing: PBSpace.s8) {
-                    ForEach(radii, id: \.0) { name, value in
-                        GalleryItem(name) {
-                            UnevenRoundedRectangle(topLeadingRadius: min(value, 44), style: .circular)
+                GalleryFlow(spacing: PBSpace.s12, rowSpacing: PBSpace.s12) {
+                    ForEach(Self.radii, id: \.0) { name, radius in
+                        VStack(alignment: .leading, spacing: PBSpace.s4) {
+                            RoundedRectangle(cornerRadius: radius)
                                 .fill(PBColor.bgCard)
-                                .frame(width: 44, height: 44)
+                                .frame(width: 104, height: 64)
+                            GalleryLabel("radius/\(name) · \(Int(radius))")
                         }
+                    }
+                    VStack(alignment: .leading, spacing: PBSpace.s4) {
+                        Capsule()
+                            .fill(PBColor.bgCard)
+                            .frame(width: 104, height: 64)
+                        GalleryLabel("radius/full")
                     }
                 }
             }
-            GallerySection("size/* (hairline 1)") {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .bottomLeading), count: 4), spacing: PBSpace.s12) {
-                    ForEach(sizes, id: \.0) { name, value in
-                        GalleryItem("\(name) \(Int(value))") {
-                            RoundedRectangle(cornerRadius: PBRadius.xs)
-                                .fill(PBColor.bgCardPressed)
-                                .frame(width: value, height: value)
-                        }
-                    }
-                }
+            GallerySection("size/*") {
+                ForEach(Self.sizes, id: \.0) { name, value in bar("size/\(name)", value) }
             }
-        }
-    }
-}
-
-// MARK: - Materials
-
-struct GalleryMaterialsPage: View {
-    @State private var showsScrim = false
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Glass, Glass Small, Frosted over content") {
-                ZStack {
-                    backdrop
-                    VStack(spacing: PBSpace.s24) {
-                        Text("Material/Glass")
-                            .textStyle(.headline)
-                            .frame(width: 280, height: PBSize.tabbar)
-                            .pbMaterial(.glass, in: .capsule)
-                        HStack(spacing: PBSpace.s12) {
-                            PBIconButton(.bell, accessibilityLabel: "Notifications", style: .glass, showsBadge: true) {}
-                            Text("Material/Glass Small")
-                                .textStyle(.footnote)
-                                .padding(.horizontal, PBSpace.s8)
-                                .background(PBColor.bgPrimary, in: .capsule)
-                        }
-                        Text("Material/Frosted")
-                            .textStyle(.headline)
-                            .frame(width: 280, height: PBSize.tabbar)
-                            .pbMaterial(.frosted, in: .rect(cornerRadius: PBRadius.card))
-                    }
-                    .foregroundStyle(PBColor.textPrimary)
-                }
-                .frame(height: 300)
-                .clipShape(.rect(cornerRadius: PBRadius.card))
-            }
-            GallerySection("Scrim (bg/scrim 40 %)") {
-                PBButton("Show the scrim", style: .secondary, size: .small) { showsScrim = true }
-            }
-        }
-        .overlay {
-            if showsScrim {
-                PBScrim { showsScrim = false }
+            GallerySection("Materials") {
+                materials
             }
         }
     }
 
-    /// Stripes and art behind the glass so the refraction and blur are visible.
-    private var backdrop: some View {
+    private func bar(_ name: String, _ value: CGFloat) -> some View {
+        HStack(spacing: 0) {
+            GalleryLabel("\(name) · \(Int(value))")
+                .frame(width: 150, alignment: .leading)
+            Rectangle()
+                .fill(PBColor.bgInverse)
+                .frame(width: value, height: 12)
+        }
+    }
+
+    /// Each material over stripes, so the translucent fill, highlight and shadow show.
+    private var materials: some View {
         ZStack {
-            HStack(spacing: 0) {
-                ForEach(0..<12) { index in
-                    Rectangle().fill(index.isMultiple(of: 2) ? PBColor.bgInverse : PBColor.bgCard)
+            GalleryStripes()
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                HStack(spacing: PBSpace.s16) {
+                    GalleryLabel("Glass")
+                        .frame(width: 150, height: 62)
+                        .pbMaterial(.glass, in: .capsule)
+                    GalleryLabel("Small")
+                        .frame(width: 44, height: 44)
+                        .pbMaterial(.glassSmall, in: .circle)
                 }
-            }
-            HStack {
-                PBPeepHead.priya.image.resizable().frame(width: 120, height: 120)
-                PBPeepHead.rohan.image.resizable().frame(width: 120, height: 120)
+                Spacer(minLength: 0)
+                HStack(spacing: PBSpace.s16) {
+                    GalleryLabel("Frosted")
+                        .frame(width: 150, height: 62)
+                        .pbMaterial(.frosted, in: .rect(cornerRadius: PBRadius.card))
+                    GalleryLabel("Scrim")
+                        .frame(width: 150, height: 62)
+                        .background(PBColor.bgScrim)
+                }
+                Spacer(minLength: 0)
             }
         }
+        .frame(maxWidth: .infinity)
+        .frame(height: 220)
     }
 }
 #endif

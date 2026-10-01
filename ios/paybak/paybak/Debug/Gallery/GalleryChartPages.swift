@@ -1,76 +1,89 @@
 #if DEBUG
 import SwiftUI
 
-// Gallery pages for components-app.md §4–7: Progress & Charts, Assistant & Scan, the toast, the
-// sheet and the receipt art.
+// MARK: - Progress and charts
 
-struct GalleryProgressPage: View {
-    @State private var live = 0.3
+struct GalleryChartsPage: View {
+    @State private var progress = 0.3
 
     var body: some View {
         GalleryPageScroll {
             GallerySection("Control / Progress Bar: Small · Large × Default · Projected · Over") {
-                VStack(spacing: PBSpace.s16) {
-                    PBProgressBar(value: 0.6)
-                    PBProgressBar(value: 0.87, projected: 0.97)
-                    PBProgressBar(value: 0.976, overFrom: 0.976)
-                    PBProgressBar(value: 0.6, size: .large)
-                    PBProgressBar(value: 0.87, projected: 0.97, size: .large)
-                    PBProgressBar(value: 0.976, overFrom: 0.976, size: .large)
+                ForEach([PBProgressBar.Size.small, .large], id: \.self) { size in
+                    PBProgressBar(value: 0.6, size: size)
+                    PBProgressBar(value: 0.87, projected: 0.97, size: size)
+                    PBProgressBar(value: 0.976, overFrom: 0.976, size: size)
+                }
+                GalleryLabel("Live: changes grow over 0.3 s")
+                PBProgressBar(value: progress, projected: min(progress + 0.1, 1), size: .large)
+                HStack(spacing: PBSpace.s8) {
+                    ForEach([0, 0.3, 0.87, 1], id: \.self) { value in
+                        PBButton("\(Int((value * 100).rounded()))%", style: .secondary, size: .small) { progress = value }
+                    }
                 }
             }
-            GallerySection("Show mark=true (examples), then live (tap)") {
-                VStack(spacing: PBSpace.s16) {
-                    PBProgressBar(value: 0.6, mark: 0.51)
-                    PBProgressBar(value: 0.976, overFrom: 0.976, mark: 0.976, size: .large)
-                    PBProgressBar(value: live, projected: min(1, live + 0.1), size: .large)
-                        .onTapGesture { live = live > 0.9 ? 0.1 : live + 0.2 }
-                }
+            GallerySection("Show mark (examples)") {
+                PBProgressBar(value: 0.6, mark: 0.51)
+                PBProgressBar(value: 0.976, overFrom: 0.976, mark: 0.976, size: .large)
             }
             GallerySection("Row / Bar: Icon · Avatar × Neutral · Owed · Owe") {
                 VStack(spacing: 0) {
-                    PBBarRow(leading: .icon(.home), title: "Rent", caption: "51%", amount: "₹12,000", progress: 0.51)
-                    PBBarRow(leading: .icon(.home), title: "Rent", caption: "51%", amount: "₹12,000", direction: .owed, progress: 0.51)
-                    PBBarRow(leading: .icon(.home), title: "Rent", caption: "51%", amount: "₹12,000", direction: .owe, progress: 0.51)
+                    ForEach([nil, .owed, .owe] as [PBAmountDirection?], id: \.self) { direction in
+                        PBBarRow(leading: .icon(.home), title: "Rent", caption: "51%", amount: "₹12,000", direction: direction, progress: 0.51)
+                    }
                 }
                 VStack(spacing: 0) {
-                    PBBarRow(leading: .art(.dev), title: "Rent", caption: "51%", amount: "₹12,000", progress: 0.51, mark: 0.51, isOnCard: true)
-                    PBBarRow(leading: .art(.dev), title: "Rent", caption: "51%", amount: "₹12,000", direction: .owed, progress: 1, mark: 0.51, isOnCard: true)
-                    PBBarRow(leading: .art(.dev), title: "Rent", caption: "51%", amount: "₹12,000", direction: .owe, progress: 0.35, mark: 0.51, isOnCard: true)
+                    ForEach([(nil, 0.51), (.owed, 1), (.owe, 0.35)] as [(PBAmountDirection?, Double)], id: \.1) { direction, fill in
+                        PBBarRow(leading: .art(.dev), title: "Rent", caption: "51%", amount: "₹12,000", direction: direction,
+                                 progress: fill, mark: 0.51, isOnCard: true)
+                    }
                 }
-                .pbCard()
+                .padding(.horizontal, PBSpace.s16)
+                .pbCard(padding: 0)
             }
-        }
-    }
-}
-
-struct GalleryChartCardsPage: View {
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Chart / Monthly Bars (Apr–Sep 2026)") {
+            GallerySection("Chart / Monthly Bars") {
                 PBMonthlyBarChart(months: [
-                    .init(label: "Apr", value: 18_400), .init(label: "May", value: 21_800),
-                    .init(label: "Jun", value: 19_600), .init(label: "Jul", value: 20_500),
-                    .init(label: "Aug", value: 22_100), .init(label: "Sep", value: 23_300),
+                    .init(label: "Apr", value: 18_400), .init(label: "May", value: 21_950),
+                    .init(label: "Jun", value: 19_600), .init(label: "Jul", value: 20_600),
+                    .init(label: "Aug", value: 22_150), .init(label: "Sep", value: 23_300),
                 ])
                 .padding(PBSpace.s20)
                 .pbCard(padding: 0)
             }
-            GallerySection("Card / Budget: On track · Over budget (10-03) · Closed") {
-                PBBudgetCard(spent: "₹52,000", budget: "of ₹60,000", progress: 52.0 / 60, status: .onTrack(projected: 58.0 / 60), percentLabel: "87% used", leftLabel: "₹8,000 left", plannedText: "Planned items bring it to ₹58,000")
-                PBBudgetCard(spent: "₹61,500", budget: "of ₹60,000", progress: 60 / 61.5, status: .overBudget(warning: "₹1,500 over budget"), plannedText: "All planned items are bought.")
-                PBBudgetCard(spent: "₹52,000", budget: "of ₹60,000", progress: 52.0 / 60, status: .closed, percentLabel: "87% used", leftLabel: "₹8,000 left")
+            GallerySection("Card / Budget: On track · Over budget · Closed") {
+                PBBudgetCard(spent: "₹52,000", budget: "of ₹60,000", progress: 52.0 / 60, status: .onTrack(projected: 58.0 / 60),
+                             percentLabel: "87% used", leftLabel: "₹8,000 left", plannedText: "Planned items bring it to ₹58,000")
+                PBBudgetCard(spent: "₹52,000", budget: "of ₹60,000", progress: 0.976, status: .overBudget(warning: "₹1,500 over budget"),
+                             plannedText: "Planned items bring it to ₹58,000")
+                PBBudgetCard(spent: "₹52,000", budget: "of ₹60,000", progress: 52.0 / 60, status: .closed,
+                             percentLabel: "87% used", leftLabel: "₹8,000 left")
+                GalleryLabel("Example: over budget (10-03)")
+                PBBudgetCard(spent: "₹61,500", budget: "of ₹60,000", progress: 60 / 61.5, status: .overBudget(warning: "₹1,500 over budget"),
+                             plannedText: "All planned items are bought.")
             }
-            GallerySection("Card / Loan Progress: Active · Paid back (Kabir)") {
+            GallerySection("Card / Loan Progress: Active · Paid back") {
                 PBLoanProgressCard(original: "₹6,000", paid: "₹0", remaining: "₹6,000", progress: 0, caption: "0% paid back")
-                PBLoanProgressCard(original: "₹4,500", paid: "₹4,500", remaining: "₹0", progress: 1, caption: "Paid back on 14 Sep", isPaidBack: true)
+                PBLoanProgressCard(original: "₹4,500", paid: "₹4,500", remaining: "₹0", progress: 1, caption: "Paid back on 14 Sep",
+                                   isPaidBack: true)
             }
         }
     }
 }
 
+// MARK: - Assistant and scan
+
 struct GalleryAssistantPage: View {
     @State private var isSaved = false
+    @State private var amounts = ["430", "370", "450"]
+    @State private var editing: Int?
+    @State private var had: Set<String> = ["you", "esha", "dev"]
+
+    private static let people: [PBAssignItemRow.Person] = [
+        .init(id: "you", name: "You", avatar: .art(.arjun)),
+        .init(id: "esha", name: "Esha", avatar: .art(.esha)),
+        .init(id: "dev", name: "Dev", avatar: .art(.dev)),
+    ]
+    private static let lines = ["Chicken biryani", "Paneer tikka", "Fish and chips"]
 
     var body: some View {
         GalleryPageScroll {
@@ -78,56 +91,32 @@ struct GalleryAssistantPage: View {
                 PBChatBubble(role: .user, text: "Who owes me money?")
                 PBChatBubble(role: .assistant, text: "Who owes me money?")
             }
-            GallerySection("Chat / Draft Expense: Pending · Saved") {
-                draft(isSaved: false)
+            GallerySection("Chat / Draft Expense: Pending · Saved (tap Save)") {
                 draft(isSaved: true)
+                draft(isSaved: isSaved, onSave: { isSaved = true }, onView: { isSaved = false })
+                GalleryLabel("View resets the live card")
             }
-            GallerySection("Live: Save swaps to Saved (250 ms)") {
-                draft(isSaved: isSaved)
-                PBButton("Reset", style: .secondary, size: .small) { isSaved = false }
-            }
-        }
-    }
-
-    private func draft(isSaved: Bool) -> PBDraftExpenseCard {
-        PBDraftExpenseCard(
-            icon: .car, title: "Cab", amount: "₹600", paidLine: "Paid by you · Today",
-            splitLine: "Split equally with Esha and Dev", members: [.arjun, .esha, .dev],
-            eachLine: "₹200 each", isSaved: isSaved, onSave: { self.isSaved = true }
-        )
-    }
-}
-
-struct GalleryScanPage: View {
-    @State private var biryani = "430"
-    @State private var editing = false
-    @State private var assigned: Set<String> = ["dev"]
-
-    private let people: [PBAssignItemRow.Person] = [
-        .init(id: "you", name: "You", avatar: .art(.arjun)),
-        .init(id: "esha", name: "Esha", avatar: .art(.esha)),
-        .init(id: "dev", name: "Dev", avatar: .art(.dev)),
-    ]
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Row / Receipt Line: Default · Total × Default · Editing (tap ₹430)") {
+            GallerySection("Row / Receipt Line: Default · Total") {
                 VStack(spacing: 0) {
-                    PBReceiptLineRow(label: "Chicken biryani", amount: $biryani, isEditing: $editing)
-                    PBReceiptLineRow(label: "Chicken biryani", amount: .constant("430"), isEditing: .constant(true))
-                        .pbPreviewInteraction(.focused)
+                    PBReceiptLineRow(label: "Chicken biryani", amount: .constant("430"), isEditing: .constant(false))
                     PBReceiptLineRow(label: "Chicken biryani", amount: .constant("430"), isTotal: true, isEditing: .constant(false))
-                    PBReceiptLineRow(label: "Chicken biryani", amount: .constant("430"), isTotal: true, isEditing: .constant(true))
-                        .pbPreviewInteraction(.focused)
+                }
+                .pbCard(padding: 0)
+                GalleryLabel("Editing, live: tap an amount to fix it")
+                VStack(spacing: 0) {
+                    ForEach(Self.lines.indices, id: \.self) { index in
+                        PBReceiptLineRow(label: Self.lines[index], amount: $amounts[index], isEditing: isEditing(index))
+                    }
+                    PBReceiptLineRow(label: "Total", amount: .constant(galleryGroupIndian(String(total))), isTotal: true,
+                                     isEditing: .constant(false))
                 }
                 .pbCard(padding: 0)
             }
-            GallerySection("Row / Assign Item: Shared False (tap chips) · True") {
-                VStack(spacing: 0) {
-                    PBAssignItemRow(item: "Chicken biryani", price: "₹430", people: people, selected: assigned, sharedCaption: assigned.count > 1 ? "Shared by \(assigned.count)" : nil) {
-                        assigned.formSymmetricDifference([$0])
-                    }
-                    PBAssignItemRow(item: "Chicken biryani", price: "₹430", people: people, selected: ["you", "esha", "dev"], sharedCaption: "Shared by 3 · ₹80 each") { _ in }
+            GallerySection("Row / Assign Item (tap the people)") {
+                PBAssignItemRow(item: "Chicken biryani", price: "₹430", people: Self.people, selected: ["dev"]) { _ in }
+                PBAssignItemRow(item: "Fresh lime soda ×3", price: "₹270", people: Self.people, selected: had,
+                                sharedCaption: had.count > 1 ? "Shared by \(had.count) · ₹\(270 / had.count) each" : nil) {
+                    had.formSymmetricDifference([$0])
                 }
             }
             GallerySection("Card / Person Totals") {
@@ -137,73 +126,51 @@ struct GalleryScanPage: View {
                     .init(id: "dev", name: "Dev", avatar: .art(.dev), amount: "₹690"),
                 ])
             }
-            GallerySection("Control / Shutter: Default · Pressed · Art / Receipt Thumb") {
-                HStack(spacing: PBSpace.s32) {
+            GallerySection("Control / Shutter: Default · Pressed") {
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
                     PBShutterButton {}
-                    PBShutterButton {}.pbPreviewInteraction(.pressed)
-                    PBReceiptThumbnail()
+                    Spacer(minLength: 0)
+                    PBShutterButton {}
+                        .pbPreviewInteraction(.pressed)
+                    Spacer(minLength: 0)
                 }
                 .padding(PBSpace.s24)
                 .frame(maxWidth: .infinity)
                 .background(PBColor.bgCamera, in: .rect(cornerRadius: PBRadius.card))
             }
-            GallerySection("Art / Receipt: Full") {
-                PBReceiptThumbnail(size: .full)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-    }
-}
-
-struct GallerySheetToastPage: View {
-    @State private var toast: PBToastMessage?
-    @State private var showsSheet = false
-    @State private var query = ""
-    @State private var category = "Food"
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Overlay / Toast: icon · no icon (tap for a live one)") {
-                PBToast("Expense added")
-                PBToast("Payment recorded", icon: nil)
-                PBButton("Show a toast", style: .secondary, size: .small) { toast = PBToastMessage("Expense added") }
-            }
-            GallerySection("Sheet / Container example: Category (tap to present)") {
-                sheet
-                    .allowsHitTesting(false)
-                    .padding(.bottom, PBSpace.s28)
-                    .background(PBColor.bgPrimary, in: .rect(cornerRadius: PBRadius.sheet))
-                    .overlay(alignment: .top) {
-                        Capsule().fill(PBColor.bgIndicator).frame(width: 60, height: 4).padding(.top, PBSpace.s8)
-                    }
-                    .padding(PBSpace.s8)
-                    .background(PBColor.bgScrim, in: .rect(cornerRadius: PBRadius.card))
-                    .contentShape(.rect)
-                    .onTapGesture { showsSheet = true }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Present the category sheet")
-                    .accessibilityAddTraits(.isButton)
-                    .accessibilityIdentifier("gallery.sheetPreview")
-            }
-        }
-        .pbToast($toast, bottomPadding: 50)
-        .pbSheet(isPresented: $showsSheet) { sheet(testIDPrefix: "gallery.sheet") }
-    }
-
-    private var sheet: some View { sheet(testIDPrefix: nil) }
-
-    private func sheet(testIDPrefix: String?) -> some View {
-        PBSheet(title: "Category", search: $query, searchPrompt: "Search categories", testIDPrefix: testIDPrefix, onClose: { showsSheet = false }) {
-            VStack(spacing: 0) {
-                ForEach([("Food", PBIcon.food), ("Travel", .car), ("Stays", .bed)], id: \.0) { name, icon in
-                    PBSettingRow(name, icon: icon, trailing: category == name ? .check : .unchecked, showsDivider: name != "Stays") {
-                        category = name
-                    }
-                    .accessibilityIdentifier(testIDPrefix.map { "\($0).\(name)" } ?? "")
+            GallerySection("Art / Receipt: Full · Thumb") {
+                HStack(alignment: .top, spacing: PBSpace.s16) {
+                    PBReceiptThumbnail(size: .full)
+                        .frame(maxWidth: .infinity)
+                    PBReceiptThumbnail()
                 }
             }
-            .pbCard(padding: 0)
         }
+    }
+
+    private var total: Int {
+        amounts.map { Int($0) ?? 0 }.reduce(0, +)
+    }
+
+    private func isEditing(_ index: Int) -> Binding<Bool> {
+        Binding {
+            editing == index
+        } set: { isOn in
+            if isOn {
+                editing = index
+            } else if editing == index {
+                editing = nil
+            }
+        }
+    }
+
+    private func draft(isSaved: Bool, onSave: @escaping () -> Void = {}, onView: @escaping () -> Void = {}) -> PBDraftExpenseCard {
+        PBDraftExpenseCard(
+            icon: .car, title: "Cab", amount: "₹600", paidLine: "Paid by you · Today",
+            splitLine: "Split equally with Esha and Dev", members: [.arjun, .esha, .dev],
+            eachLine: "₹200 each", isSaved: isSaved, onSave: onSave, onView: onView
+        )
     }
 }
 #endif

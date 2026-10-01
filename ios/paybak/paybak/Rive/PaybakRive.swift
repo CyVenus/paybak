@@ -225,13 +225,18 @@ nonisolated enum PaybakRiveError: Error {
 // MARK: - Views
 
 /// Lays out the asset's Figma slot and draws the artboard centred on it at its native size, so the
-/// bleed artboards overflow the slot by 12 pt per side, unclipped. On screens narrower than the slot,
-/// slot and artboard scale down together. Keeps `reduceMotion` bound to the OS setting and pauses the
-/// animation while off screen. Decorative: hidden from VoiceOver.
+/// bleed artboards overflow the slot by 12 pt per side, unclipped. When the space is narrower or
+/// shorter than the slot, slot and artboard scale down together, keeping their proportions; they
+/// never grow. Below `minScale` the illustration would only be a speck, so it is left out. Keeps
+/// `reduceMotion` bound to the OS setting and pauses the animation while off screen. Decorative:
+/// hidden from VoiceOver.
 struct PaybakRiveView: View {
     @ObservedObject var controller: PaybakRiveController
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// The smallest share of its Figma size an illustration is still drawn at.
+    static let minScale: CGFloat = 0.25
 
     var body: some View {
         let asset = controller.asset
@@ -241,9 +246,11 @@ struct PaybakRiveView: View {
             .overlay {
                 GeometryReader { slot in
                     let scale = slot.size.width / asset.slotSize.width
-                    artboard
-                        .frame(width: asset.viewSize.width * scale, height: asset.viewSize.height * scale)
-                        .position(x: slot.size.width / 2, y: slot.size.height / 2)
+                    if scale >= Self.minScale {
+                        artboard
+                            .frame(width: asset.viewSize.width * scale, height: asset.viewSize.height * scale)
+                            .position(x: slot.size.width / 2, y: slot.size.height / 2)
+                    }
                 }
             }
             // Files with tap listeners get touches; Onboarding lets them through to the Welcome swipe.

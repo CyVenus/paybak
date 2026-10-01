@@ -1,19 +1,21 @@
 #if DEBUG
 import SwiftUI
 
-/// Debug-only design-system gallery for checking the foundations against Figma:
-/// `-startScreen gallery -galleryPage <n>` (0-based). Swipe or use the chevrons to change pages.
-/// Most pages fit one iPhone 18 Pro screen; the longer component pages scroll.
+/// Debug-only gallery of the design system: every token, text style and core component state, and
+/// the six Rive illustrations at their Figma slot sizes. `-startScreen gallery -galleryPage <n>`
+/// opens page n (1-based). Swipe or use the arrows to page.
 struct GalleryView: View {
     @State private var page: GalleryPage
 
     init(initialPage: Int) {
-        _page = State(initialValue: GalleryPage(rawValue: initialPage) ?? .coloursPrimitives)
+        let index = min(max(initialPage - 1, 0), GalleryPage.allCases.count - 1)
+        _page = State(initialValue: GalleryPage.allCases[index])
     }
 
     var body: some View {
         VStack(spacing: 0) {
             header
+            PBDivider()
             TabView(selection: $page) {
                 ForEach(GalleryPage.allCases) { page in
                     page.content
@@ -27,169 +29,92 @@ struct GalleryView: View {
     }
 
     private var header: some View {
-        HStack(spacing: PBSpace.s8) {
+        HStack(spacing: 0) {
             PBIconButton(.chevronLeft, accessibilityLabel: "Previous page") { move(by: -1) }
-                .disabled(page.rawValue == 0)
-            VStack(spacing: 0) {
-                Text("Gallery \(page.rawValue) / \(GalleryPage.allCases.count - 1)")
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Gallery \(page.rawValue + 1)/\(GalleryPage.allCases.count)")
                     .textStyle(.footnote)
                     .foregroundStyle(PBColor.textTertiary)
                 Text(page.title)
                     .textStyle(.headline)
                     .foregroundStyle(PBColor.textPrimary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, PBSpace.s4)
             PBIconButton(.chevronRight, accessibilityLabel: "Next page") { move(by: 1) }
-                .disabled(page.rawValue == GalleryPage.allCases.count - 1)
         }
-        .padding(.horizontal, PBSpace.s12)
+        .padding(.horizontal, PBSpace.s8)
     }
 
+    /// Past either end the arrow does nothing.
     private func move(by offset: Int) {
         guard let next = GalleryPage(rawValue: page.rawValue + offset) else { return }
         withAnimation { page = next }
     }
 }
 
+/// The gallery pages, in order.
 enum GalleryPage: Int, CaseIterable, Identifiable {
-    case coloursPrimitives
-    case coloursSemantic
-    case textStylesLarge
-    case textStylesSmall
-    case metrics
-    case materials
-    case icons
-    case brand
-    case pillButtons
-    case pillButtonsOnCard
-    case otherButtons
-    case badgesAndAvatars
+    case colours
+    case type
+    case layout
+    case assets
+    case buttons
     case controls
     case inputs
-    case code
     case navigation
-    case pickers
-    case riveWelcome
-    case riveSetup
-    case riveHome
-    case feedback
-    // components-app.md: the shared components of the full app.
-    case chipsSettings
-    case headersAlert
-    case textInputs
-    case amountEntry
-    case splitRows
-    case planPairs
-    case personRows
-    case transferHeaders
-    case notices
-    case confirmQR
-    case groupRows
-    case progress
-    case chartCards
+    case forms
+    case lists
+    case charts
     case assistant
-    case scan
-    case sheetToast
-    case shellNavigation
-    case shellCards
+    case shell
+    case rive
 
     var id: Int { rawValue }
 
     var title: String {
         switch self {
-        case .coloursPrimitives: "Colour primitives · bg"
-        case .coloursSemantic: "Colour: text, icon, border…"
-        case .textStylesLarge: "Text styles: titles, amounts"
-        case .textStylesSmall: "Text styles: controls, brand"
-        case .metrics: "Spacing, radius, size"
-        case .materials: "Materials"
-        case .icons: "Icons (65)"
-        case .brand: "Brand and avatar art"
-        case .pillButtons: "Button: Primary, Secondary"
-        case .pillButtonsOnCard: "Button: On Card, Destructive"
-        case .otherButtons: "Button: text, icon, add"
-        case .badgesAndAvatars: "Badge and avatars"
-        case .controls: "Page dots, segmented, divider"
-        case .inputs: "Input field"
-        case .code: "Code digit and code input"
-        case .navigation: "Top bar, setup header"
-        case .pickers: "Avatar option, currency row"
-        case .riveWelcome: "Rive: Welcome, Get Started"
-        case .riveSetup: "Rive: Setup 4, All set"
-        case .riveHome: "Rive: Home empty states"
-        case .feedback: "Section header, preview, toast"
-        case .chipsSettings: "Category chip, setting row"
-        case .headersAlert: "Push, modal header, alert"
-        case .textInputs: "Text area, composer"
-        case .amountEntry: "Amount, parties, split total"
-        case .splitRows: "Split person rows"
-        case .planPairs: "Plan, pair, comment, history"
-        case .personRows: "Person rows"
-        case .transferHeaders: "Transfer, title, amount hero"
-        case .notices: "Notice cards"
-        case .confirmQR: "Confirm payment, QR code"
-        case .groupRows: "Group rows"
-        case .progress: "Progress bars, bar rows"
-        case .chartCards: "Chart, budget, loan"
-        case .assistant: "Chat bubble, draft expense"
-        case .scan: "Receipt, assign, shutter"
-        case .sheetToast: "Toast, sheet container"
-        case .shellNavigation: "Tab bar, Add sheet, nav headers"
-        case .shellCards: "Balance, activity rows, empty states"
+        case .colours: "Colours"
+        case .type: "Text styles"
+        case .layout: "Spacing, radius, size, materials"
+        case .assets: "Icons, brand, avatars"
+        case .buttons: "Buttons"
+        case .controls: "Badges, avatars, controls"
+        case .inputs: "Inputs and setup"
+        case .navigation: "Headers, alerts, sheets, settings"
+        case .forms: "Forms and money"
+        case .lists: "Lists and detail"
+        case .charts: "Progress and charts"
+        case .assistant: "Assistant and scan"
+        case .shell: "Tab bar, Add sheet, Home cards"
+        case .rive: "Rive"
         }
     }
 
     @ViewBuilder
     var content: some View {
         switch self {
-        case .coloursPrimitives: GalleryColourPrimitivesPage()
-        case .coloursSemantic: GalleryColourSemanticPage()
-        case .textStylesLarge: GalleryTextStylesPage(styles: Array(PBTextStyle.all.prefix(8)))
-        case .textStylesSmall: GalleryTextStylesPage(styles: Array(PBTextStyle.all.dropFirst(8)))
-        case .metrics: GalleryMetricsPage()
-        case .materials: GalleryMaterialsPage()
-        case .icons: GalleryIconsPage()
-        case .brand: GalleryBrandPage()
-        case .pillButtons: GalleryPillButtonsPage(styles: [.primary, .secondary])
-        case .pillButtonsOnCard: GalleryPillButtonsPage(styles: [.onCard, .destructive], showsCTAs: true)
-        case .otherButtons: GalleryOtherButtonsPage()
-        case .badgesAndAvatars: GalleryBadgesAvatarsPage()
+        case .colours: GalleryColoursPage()
+        case .type: GalleryTypePage()
+        case .layout: GalleryLayoutPage()
+        case .assets: GalleryAssetsPage()
+        case .buttons: GalleryButtonsPage()
         case .controls: GalleryControlsPage()
         case .inputs: GalleryInputsPage()
-        case .code: GalleryCodePage()
         case .navigation: GalleryNavigationPage()
-        case .pickers: GalleryPickersPage()
-        case .riveWelcome: GalleryRivePage(assets: [.onboarding, .getStarted])
-        case .riveSetup: GalleryRivePage(assets: [.notifications, .allSet])
-        case .riveHome: GalleryRivePage(assets: [.homeFirstDay, .homeAllSquare])
-        case .feedback: GalleryFeedbackPage()
-        case .chipsSettings: GalleryChipsSettingsPage()
-        case .headersAlert: GalleryHeadersAlertPage()
-        case .textInputs: GalleryTextInputsPage()
-        case .amountEntry: GalleryAmountEntryPage()
-        case .splitRows: GallerySplitRowsPage()
-        case .planPairs: GalleryPlanPairsPage()
-        case .personRows: GalleryPersonRowsPage()
-        case .transferHeaders: GalleryTransferHeadersPage()
-        case .notices: GalleryNoticesPage()
-        case .confirmQR: GalleryConfirmQRPage()
-        case .groupRows: GalleryGroupRowsPage()
-        case .progress: GalleryProgressPage()
-        case .chartCards: GalleryChartCardsPage()
+        case .forms: GalleryFormsPage()
+        case .lists: GalleryListsPage()
+        case .charts: GalleryChartsPage()
         case .assistant: GalleryAssistantPage()
-        case .scan: GalleryScanPage()
-        case .sheetToast: GallerySheetToastPage()
-        case .shellNavigation: GalleryShellNavigationPage()
-        case .shellCards: GalleryShellCardsPage()
+        case .shell: GalleryShellPage()
+        case .rive: GalleryRivePage()
         }
     }
 }
 
 // MARK: - Shared building blocks
 
-/// A scrolling page with the screen margins.
+/// A scrolling gallery page with the screen margins.
 struct GalleryPageScroll<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -199,8 +124,7 @@ struct GalleryPageScroll<Content: View>: View {
                 content
             }
             .padding(.horizontal, PBLayout.screenMargin)
-            .padding(.top, PBSpace.s8)
-            .padding(.bottom, PBSpace.s32)
+            .padding(.vertical, PBSpace.s16)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -217,37 +141,197 @@ struct GallerySection<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PBSpace.s8) {
+        VStack(alignment: .leading, spacing: PBSpace.s12) {
             Text(title)
-                .textStyle(.caption1)
-                .foregroundStyle(PBColor.textTertiary)
-                .textCase(.uppercase)
+                .textStyle(.title3)
+                .foregroundStyle(PBColor.textPrimary)
             content
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-/// A sample with a small caption under it (the Figma variant name).
-struct GalleryItem<Content: View>: View {
-    let caption: String
-    @ViewBuilder let content: Content
+/// A small grey caption naming a sample.
+struct GalleryLabel: View {
+    let text: String
 
-    init(_ caption: String, @ViewBuilder content: () -> Content) {
-        self.caption = caption
-        self.content = content()
+    init(_ text: String) {
+        self.text = text
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PBSpace.s4) {
+        Text(text)
+            .textStyle(.footnote)
+            .foregroundStyle(PBColor.textTertiary)
+    }
+}
+
+/// A #F5F5F5 card, for the On Card variants.
+struct GalleryOnCard<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PBSpace.s12) {
             content
-            Text(caption)
-                .textStyle(.caption2)
-                .foregroundStyle(PBColor.textTertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(PBSpace.s16)
+        .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
+    }
+}
+
+/// Black diagonal stripes, a busy backdrop that shows translucent materials.
+struct GalleryStripes: View {
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            var x = -size.height
+            while x < size.width {
+                path.move(to: CGPoint(x: x, y: size.height))
+                path.addLine(to: CGPoint(x: x + size.height, y: 0))
+                x += 12
+            }
+            context.stroke(path, with: .color(PBColor.bgInverse), lineWidth: 3)
+        }
+        .clipped()
+        .accessibilityHidden(true)
+    }
+}
+
+/// The white body of a sheet drawn in place: the grabber, then the `PBSheet` header and content,
+/// and the 28 pt bottom inset of Detent=Medium.
+struct GallerySheetContainer<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .padding(.bottom, PBSpace.s28)
+            .background(PBColor.bgPrimary, in: .rect(cornerRadius: PBRadius.sheet))
+            .overlay(alignment: .top) {
+                Capsule()
+                    .fill(PBColor.bgIndicator)
+                    .frame(width: 60, height: 4)
+                    .padding(.top, PBSpace.s8)
+            }
+    }
+}
+
+/// Lays children out left to right, top-aligned, and wraps them onto new rows.
+struct GalleryFlow: Layout {
+    var spacing: CGFloat
+    var rowSpacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let rows = rows(width: proposal.width ?? .infinity, subviews: subviews)
+        let height = rows.map(\.height).reduce(0, +) + rowSpacing * CGFloat(max(rows.count - 1, 0))
+        let width = rows.map(\.width).max() ?? 0
+        return CGSize(width: proposal.width ?? width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+        for row in rows(width: bounds.width, subviews: subviews) {
+            var x = bounds.minX
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                subviews[index].place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(size))
+                x += size.width + spacing
+            }
+            y += row.height + rowSpacing
+        }
+    }
+
+    private struct Row {
+        var indices: [Int] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+    }
+
+    private func rows(width: CGFloat, subviews: Subviews) -> [Row] {
+        var rows: [Row] = []
+        var current = Row()
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let needed = current.indices.isEmpty ? size.width : current.width + spacing + size.width
+            if needed > width, !current.indices.isEmpty {
+                rows.append(current)
+                current = Row()
+            }
+            current.width = current.indices.isEmpty ? size.width : current.width + spacing + size.width
+            current.height = max(current.height, size.height)
+            current.indices.append(index)
+        }
+        if !current.indices.isEmpty {
+            rows.append(current)
+        }
+        return rows
+    }
+}
+
+/// The states a control sample is drawn in.
+enum GalleryControlState: String, CaseIterable {
+    case `default` = "Default"
+    case pressed = "Pressed"
+    case disabled = "Disabled"
+}
+
+/// One labelled sample per `GalleryControlState`; wraps when the samples are wide.
+struct GalleryStateRow<Sample: View>: View {
+    @ViewBuilder let sample: (GalleryControlState) -> Sample
+
+    var body: some View {
+        GalleryFlow(spacing: PBSpace.s12, rowSpacing: PBSpace.s8) {
+            ForEach(GalleryControlState.allCases, id: \.self) { state in
+                VStack(spacing: 0) {
+                    sample(state)
+                        .galleryState(state)
+                    GalleryLabel(state.rawValue)
+                }
+            }
         }
     }
 }
 
+extension View {
+    /// Draws a control Pressed or Disabled without touching it.
+    @ViewBuilder
+    func galleryState(_ state: GalleryControlState) -> some View {
+        switch state {
+        case .default: self
+        case .pressed: pbPreviewInteraction(.pressed)
+        case .disabled: disabled(true)
+        }
+    }
+
+    /// Sets the accessibility identifier only when there is one.
+    @ViewBuilder
+    func galleryTestID(_ id: String?) -> some View {
+        if let id {
+            accessibilityIdentifier(id)
+        } else {
+            self
+        }
+    }
+}
+
+/// "2800" → "2,800", "100000" → "1,00,000": Indian digit grouping, for the gallery's samples.
+func galleryGroupIndian(_ digits: String) -> String {
+    let parts = digits.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
+    let whole = parts.first.map(String.init).flatMap { $0.isEmpty ? nil : $0 } ?? "0"
+    let last3 = String(whole.suffix(3))
+    let restDigits = Array(whole.dropLast(3))
+    var groups: [String] = []
+    var end = restDigits.count
+    while end > 0 {
+        let start = max(0, end - 2)
+        groups.insert(String(restDigits[start..<end]), at: 0)
+        end = start
+    }
+    let grouped = groups.isEmpty ? last3 : groups.joined(separator: ",") + "," + last3
+    return parts.count > 1 ? "\(grouped).\(parts[1])" : grouped
+}
+
 #Preview("Gallery") {
-    GalleryView(initialPage: 0)
+    GalleryView(initialPage: 1)
 }
 #endif

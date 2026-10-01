@@ -1,165 +1,201 @@
 #if DEBUG
 import SwiftUI
 
-struct GalleryOtherButtonsPage: View {
-    private let textStyles: [(String, PBTextButton.Style)] = [("Skip", .primary), ("Skip", .secondary), ("Delete", .destructive)]
-    private let iconStyles: [(String, PBIconButton.Style)] = [("Plain", .plain), ("Filled", .filled), ("Glass", .glass), ("Inverse", .inverse)]
+// MARK: - Buttons
+
+struct GalleryButtonsPage: View {
+    private static let styles: [(String, PBButton.Style)] = [
+        ("Primary", .primary), ("Secondary", .secondary), ("OnCard", .onCard), ("Destructive", .destructive),
+    ]
+    private static let textStyles: [PBTextButton.Style] = [.primary, .secondary, .destructive]
+    private static let iconStyles: [(String, PBIconButton.Style)] = [
+        ("Plain", .plain), ("Filled", .filled), ("Glass", .glass), ("Inverse", .inverse),
+    ]
 
     var body: some View {
         GalleryPageScroll {
-            GallerySection("Button / Text Primary · Secondary · Destructive: Default · Pressed · Disabled · chevron") {
-                ForEach(textStyles, id: \.1) { name, style in
-                    HStack(spacing: PBSpace.s20) {
-                        PBTextButton(name, style: style) {}
-                        PBTextButton(name, style: style) {}.pbPreviewInteraction(.pressed)
-                        PBTextButton(name, style: style) {}.disabled(true)
-                        PBTextButton("See all", style: style, showsChevron: true) {}
+            ForEach(Self.styles, id: \.0) { name, style in
+                GallerySection("Button / \(name)") {
+                    if style == .onCard {
+                        GalleryOnCard { states(style) }
+                    } else {
+                        states(style)
                     }
                 }
             }
-            GallerySection("Button / Icon: Default · Pressed · Badge") {
-                ForEach(iconStyles, id: \.0) { name, style in
-                    HStack(spacing: PBSpace.s16) {
-                        PBIconButton(.bell, accessibilityLabel: "Notifications", style: style) {}
-                        PBIconButton(.bell, accessibilityLabel: "Notifications", style: style) {}.pbPreviewInteraction(.pressed)
-                        PBIconButton(.bell, accessibilityLabel: "Notifications", style: style, showsBadge: true) {}
-                        PBIconButton(.chevronLeft, accessibilityLabel: "Back", style: style) {}
-                        Text(name).textStyle(.footnote).foregroundStyle(PBColor.textSecondary)
+            GallerySection("Stretched with brand icons (Get Started)") {
+                PBButton("Continue with Apple", icon: .apple, fillsWidth: true) {}
+                PBButton("Continue with Google", style: .secondary, icon: .google, fillsWidth: true) {}
+            }
+            GallerySection("Button / Text") {
+                ForEach(Self.textStyles, id: \.self) { style in
+                    GalleryStateRow { _ in
+                        PBTextButton(style == .secondary ? "Skip" : "See all", style: style, showsChevron: style != .secondary) {}
                     }
-                    .padding(.vertical, 2)
-                    .background(style == .glass ? PBColor.bgCardPressed : .clear)
                 }
             }
-            GallerySection("Button / Add: Default · Pressed") {
+            GallerySection("Button / Icon: default · pressed · badge") {
+                ForEach(Self.iconStyles, id: \.0) { name, style in
+                    if style == .glass {
+                        ZStack(alignment: .leading) {
+                            GalleryStripes()
+                            iconRow(name, style)
+                                .padding(.horizontal, PBSpace.s12)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 76)
+                    } else {
+                        iconRow(name, style)
+                    }
+                }
+            }
+            GallerySection("Button / Add: default · pressed") {
                 HStack(spacing: PBSpace.s16) {
                     PBAddButton {}
-                    PBAddButton {}.pbPreviewInteraction(.pressed)
+                    PBAddButton {}
+                        .pbPreviewInteraction(.pressed)
                 }
             }
         }
     }
+
+    /// Large and Small × Default · Pressed · Disabled, then Small with a leading icon.
+    @ViewBuilder
+    private func states(_ style: PBButton.Style) -> some View {
+        let label = style == .destructive ? "Delete" : "Continue"
+        ForEach([PBButton.Size.large, .small], id: \.self) { size in
+            GalleryStateRow { _ in
+                PBButton(label, style: style, size: size) {}
+            }
+        }
+        GalleryStateRow { _ in
+            PBButton(label, style: style, size: .small, icon: .plus) {}
+        }
+    }
+
+    private func iconRow(_ name: String, _ style: PBIconButton.Style) -> some View {
+        HStack(spacing: PBSpace.s16) {
+            PBIconButton(.bell, accessibilityLabel: "Notifications", style: style) {}
+            PBIconButton(.bell, accessibilityLabel: "Notifications", style: style) {}
+                .pbPreviewInteraction(.pressed)
+            PBIconButton(.bell, accessibilityLabel: "Notifications", style: style, showsBadge: true) {}
+            GalleryLabel(name)
+        }
+    }
 }
 
-struct GalleryBadgesAvatarsPage: View {
-    private let diameters = [PBSize.avatarXs, PBSize.avatarSm, PBSize.avatarMd, PBSize.avatarLg]
+// MARK: - Badges, avatars, controls
+
+struct GalleryControlsPage: View {
+    @State private var activeDot = 1
+    @State private var segments = [0, 0, 0]
+
+    private static let badgeStyles: [(String, PBBadge.Style)] = [
+        ("Muted", .muted), ("OnCard", .onCard), ("MutedOnCard", .mutedOnCard), ("Inverse", .inverse), ("Overdue", .overdue),
+    ]
+    private static let diameters: [CGFloat] = [PBSize.avatarXs, PBSize.avatarSm, PBSize.avatarMd, PBSize.avatarLg]
+    private static let segmentOptions: [(options: [String], width: CGFloat)] = [
+        (["Groups", "Friends"], 240),
+        (["All", "Upcoming", "Overdue"], 330),
+        (["Equally", "Exact", "%", "Shares"], 362),
+    ]
 
     var body: some View {
         GalleryPageScroll {
-            GallerySection("Badge / Pill: Muted · On Card · Inverse · Overdue") {
-                HStack(spacing: PBSpace.s8) {
-                    PBBadge("Due Fri")
-                    PBBadge("Due Fri", icon: .calendar)
-                    PBBadge("Paid", style: .inverse)
-                    PBBadge("Overdue", style: .overdue, icon: .calendar)
+            GallerySection("Badge / Pill") {
+                ForEach(Self.badgeStyles, id: \.0) { name, style in
+                    if style == .onCard {
+                        GalleryOnCard { badgeRow(name, style) }
+                    } else {
+                        badgeRow(name, style)
+                    }
                 }
-                HStack(spacing: PBSpace.s8) {
-                    PBBadge("Due Fri", style: .onCard)
-                    PBBadge("Due Fri", style: .onCard, icon: .calendar)
-                }
-                .padding(PBSpace.s12)
-                .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
             }
-            GallerySection("Avatar / Circle 24 · 32 · 40 · 56: Art · Initials · Icon · Icon On Card") {
-                HStack(alignment: .top, spacing: PBSpace.s16) {
-                    avatarColumn { PBAvatar(.art(.arjun), diameter: $0) }
-                    avatarColumn { PBAvatar(.initials("AK"), diameter: $0) }
-                    avatarColumn { PBAvatar(.icon(.groups), diameter: $0) }
-                    avatarColumn { PBAvatar(.icon(.groups), diameter: $0, isOnCard: true) }
-                        .padding(PBSpace.s8)
-                        .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
+            GallerySection("Avatar / Circle: Art · Initials · Icon at 24 · 32 · 40 · 56") {
+                ForEach(Self.diameters, id: \.self) { diameter in
+                    HStack(spacing: PBSpace.s12) {
+                        PBAvatar(.art(.arjun), diameter: diameter)
+                        PBAvatar(.initials("AM"), diameter: diameter)
+                        PBAvatar(.icon(.groups), diameter: diameter)
+                        GalleryLabel("\(Int(diameter))")
+                    }
+                }
+                GalleryOnCard {
+                    HStack(spacing: PBSpace.s12) {
+                        PBAvatar(.art(.rohan), isOnCard: true)
+                        PBAvatar(.initials("AM"), isOnCard: true)
+                        PBAvatar(.icon(.groups), isOnCard: true)
+                        GalleryLabel("On card (Icon On Card)")
+                    }
                 }
             }
             GallerySection("Avatar / Stack: 2 · 3 · 4") {
                 HStack(spacing: PBSpace.s24) {
-                    PBAvatarStack(heads: [.arjun, .priya])
-                    PBAvatarStack(heads: [.arjun, .priya, .rohan])
-                    PBAvatarStack(heads: [.arjun, .priya, .rohan, .esha])
+                    ForEach(2...4, id: \.self) { count in
+                        PBAvatarStack(heads: Array(PBPeepHead.presets.prefix(count)))
+                    }
                 }
             }
-        }
-    }
-
-    private func avatarColumn(@ViewBuilder _ avatar: @escaping (CGFloat) -> some View) -> some View {
-        VStack(spacing: PBSpace.s8) {
-            ForEach(diameters, id: \.self) { avatar($0) }
-        }
-    }
-}
-
-struct GalleryControlsPage: View {
-    @State private var activeDot = 1
-    @State private var two = 0
-    @State private var three = 1
-    @State private var four = 2
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Control / Page Dots: Active 1 · 2 · 3, then live") {
-                HStack(spacing: PBSpace.s24) {
-                    PBPageDots(active: 1)
-                    PBPageDots(active: 2)
-                    PBPageDots(active: 3)
+            GallerySection("Control / Page Dots") {
+                ForEach(1...3, id: \.self) { active in
+                    PBPageDots(active: active)
                 }
-                HStack(spacing: PBSpace.s24) {
+                HStack(spacing: PBSpace.s16) {
                     PBPageDots(active: activeDot)
                     PBButton("Next dot", style: .secondary, size: .small) { activeDot = activeDot % 3 + 1 }
                 }
             }
-            GallerySection("Control / Segmented: 2 · 3 · 4 options (tap to slide)") {
-                PBSegmentedControl(options: ["Groups", "Friends"], selection: $two).frame(width: 240)
-                PBSegmentedControl(options: ["All", "Upcoming", "Overdue"], selection: $three).frame(width: 330)
-                PBSegmentedControl(options: ["Equally", "Exact", "%", "Shares"], selection: $four)
+            GallerySection("Control / Segmented (tap to select)") {
+                ForEach(Self.segmentOptions.indices, id: \.self) { index in
+                    PBSegmentedControl(options: Self.segmentOptions[index].options, selection: $segments[index])
+                        .frame(width: Self.segmentOptions[index].width)
+                }
             }
             GallerySection("Divider / Line: None · Leading") {
                 PBDivider()
-                HStack(spacing: PBSpace.s12) {
-                    PBAvatar(.art(.priya))
-                    Text("Row text").textStyle(.headline)
-                }
                 PBDivider(inset: .leading)
             }
         }
     }
-}
 
-struct GalleryInputsPage: View {
-    @State private var empty = ""
-    @State private var email = "you@example.com"
-    @State private var live = ""
-
-    private let helper = "We’ll send a 6-digit code."
-
-    var body: some View {
-        GalleryPageScroll {
-            GalleryItem("Default (placeholder) · Focused") {
-                VStack(spacing: PBSpace.s12) {
-                    PBTextField("Email", text: $empty, prompt: "you@example.com", helper: helper)
-                    PBTextField("Email", text: $email, prompt: "you@example.com", helper: helper)
-                        .pbPreviewInteraction(.focused)
-                }
-            }
-            GalleryItem("Filled · Error · Disabled") {
-                VStack(spacing: PBSpace.s12) {
-                    PBTextField("Email", text: $email, prompt: "you@example.com", helper: helper)
-                    PBTextField("Email", text: $email, prompt: "you@example.com", error: helper)
-                    PBTextField("Email", text: $empty, prompt: "you@example.com", helper: helper)
-                        .disabled(true)
-                }
-            }
-            GalleryItem("No label or helper, leading icon (live: tap to type)") {
-                PBTextField(nil, text: $live, prompt: "Search currencies", icon: .search)
-            }
+    private func badgeRow(_ name: String, _ style: PBBadge.Style) -> some View {
+        HStack(spacing: PBSpace.s12) {
+            PBBadge("Due Fri", style: style)
+            PBBadge("Due Fri", style: style, icon: .calendar)
+            GalleryLabel(name)
         }
     }
 }
 
-struct GalleryCodePage: View {
-    @State private var typing = "4829"
-    @State private var wrong = "482917"
+// MARK: - Inputs and setup
+
+struct GalleryInputsPage: View {
     @State private var live = ""
+    @State private var code = ""
+    @State private var step = 1
+    @State private var avatar = 0
+    @State private var currency: String
+    @State private var toast: PBToastMessage?
+
+    private let suggested: (currency: Currency, isFromRegion: Bool)
+    private let popular: [Currency]
+    private let available: Int
+
+    private static let helper = "We’ll send a 6-digit code."
+
+    init() {
+        let suggested = Currency.suggested()
+        self.suggested = suggested
+        popular = Currency.popular(excluding: suggested.currency.code)
+        available = Currency.all().count
+        _currency = State(initialValue: suggested.currency.code)
+    }
 
     var body: some View {
         GalleryPageScroll {
+            GallerySection("Control / Input Field") {
+                textFields
+            }
             GallerySection("Control / Code Digit: Empty · Focused · Filled · Error") {
                 HStack(spacing: PBSpace.s12) {
                     PBCodeDigit(digit: nil, state: .empty)
@@ -168,113 +204,91 @@ struct GalleryCodePage: View {
                     PBCodeDigit(digit: "4", state: .error)
                 }
             }
-            GallerySection("Control / Code Input: Typing (362 wide, 14.8 gaps)") {
-                PBCodeField(code: $typing).pbPreviewInteraction(.focused)
+            GallerySection("Control / Code Input: Typing · Error · live") {
+                PBCodeField(code: .constant("4829"))
+                    .pbPreviewInteraction(.focused)
+                PBCodeField(code: .constant("482917"), isError: true)
+                PBCodeField(code: $code, isError: code.count == PBCodeField.length && code != "000000")
+                GalleryLabel("Live: 000000 is correct; any other six digits show the error.")
             }
-            GallerySection("Control / Code Input: Error") {
-                PBCodeField(code: $wrong, isError: true)
-            }
-            GallerySection("Live (tap to type; 000000 is right)") {
-                PBCodeField(code: $live, isError: live.count == PBCodeField.length && live != "000000")
-                PBCodeField(code: $live)
-                    .frame(width: 320)
-                Text("Narrow row: boxes shrink to keep 12 pt gaps")
-                    .textStyle(.caption2)
-                    .foregroundStyle(PBColor.textTertiary)
-            }
-        }
-    }
-}
-
-struct GalleryNavigationPage: View {
-    @State private var step = 2
-
-    var body: some View {
-        GalleryPageScroll {
             GallerySection("Navigation / Onboarding Top Bar") {
                 PBOnboardingTopBar(onSkip: {})
                 PBOnboardingTopBar(onBack: {})
-                PBOnboardingTopBar(onBack: {})
-                    .pbPreviewInteraction(.pressed)
+                PBOnboardingTopBar(onBack: {}, onSkip: {})
             }
-            GallerySection("Navigation / Setup Header: Step 1 · 4 (Skip)") {
-                PBSetupHeader(step: 1, onBack: {})
-                PBSetupHeader(step: 4, onBack: {}, onSkip: {})
-            }
-            GallerySection("Live: animated progress and step number") {
+            GallerySection("Navigation / Setup Header") {
+                ForEach(1...PBSetupHeader.stepCount, id: \.self) { index in
+                    PBSetupHeader(step: index, onBack: {}, onSkip: index >= 3 ? {} : nil)
+                }
+                GalleryLabel("Live: the next segment fills, the number slides, Skip fades")
                 PBSetupHeader(step: step, onBack: { step = max(1, step - 1) }, onSkip: step >= 3 ? {} : nil)
                 PBButton("Next step", style: .secondary, size: .small) { step = step % PBSetupHeader.stepCount + 1 }
             }
-        }
-    }
-}
-
-struct GalleryPickersPage: View {
-    @State private var avatar = 0
-    @State private var currency = "USD"
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Control / Avatar Option: Art selected · Art · Upload · Photo") {
-                HStack(spacing: 5) {
+            GallerySection("Control / Avatar Option (tap to select)") {
+                HStack(spacing: 0) {
                     ForEach(Array(PBPeepHead.presets.enumerated()), id: \.offset) { index, head in
                         PBAvatarOption(kind: .art(head), isSelected: avatar == index) { avatar = index }
+                        Spacer(minLength: 0)
                     }
                     PBAvatarOption(kind: .upload, isSelected: false) {}
                 }
-                PBAvatarOption(kind: .photo(PBPeepHead.meera.image), isSelected: true) {}
             }
-            GallerySection("Row / Currency: Selected · Not selected (Figma defaults)") {
-                VStack(spacing: 0) {
-                    PBCurrencyRow(symbol: "₹", title: "Indian Rupee", subtitle: "INR", isSelected: true) {}
-                    PBCurrencyRow(symbol: "₹", title: "Indian Rupee", subtitle: "INR", isSelected: false) {}
-                }
+            GallerySection("Row / Currency (tap to select)") {
+                currencyRows
             }
-            GallerySection("Currency model") {
-                Text(currencySummary)
-                    .textStyle(.footnote)
-                    .foregroundStyle(PBColor.textSecondary)
-            }
-            GallerySection("Symbol tile: ≤ 2 characters in Headline, else the code in Caption/1 (tap)") {
-                VStack(spacing: 0) {
-                    ForEach(["USD", "AED", "SGD", "CHF"].map { Currency(code: $0) }) { item in
-                        PBCurrencyRow(symbol: item.tileText, title: item.name, subtitle: item.code, isSelected: currency == item.code) {
-                            currency = item.code
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private var currencySummary: String {
-        let suggestion = Currency.suggested()
-        let source = suggestion.isFromRegion ? "from this region" : "fallback"
-        let popular = Currency.popular(excluding: suggestion.currency.code).map(\.code).joined(separator: ", ")
-        return "\(Currency.all().count) ISO currencies · suggested \(suggestion.currency.code) (\(source)) · popular \(popular)"
-    }
-}
-struct GalleryFeedbackPage: View {
-    @State private var toast: PBToastMessage?
-
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Row / Section Header: title · with See all") {
-                PBSectionHeader("Suggested")
-                PBSectionHeader("Recent activity") {}
-            }
-            GallerySection("Card / Payment Preview: UPI ID · none (hint, no copy)") {
+            GallerySection("Card / Payment Preview · Overlay / Toast") {
                 PBPaymentPreview(avatar: .art(.arjun), name: "Arjun Mehta", upiID: "arjun@okaxis") {
                     toast = PBToastMessage("UPI ID copied")
                 }
                 PBPaymentPreview(avatar: .initials("AM"), name: "Arjun Mehta", upiID: "") {}
-            }
-            GallerySection("Overlay / Toast: icon · no icon (copy above to see it live)") {
+                GalleryLabel("Copy shows the toast for 2 s")
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: PBSize.tap)
+                    .pbToast($toast, bottomPadding: 0)
                 PBToast("UPI ID copied")
-                PBToast("Payment recorded", icon: nil)
             }
         }
-        .pbToast($toast, bottomPadding: PBSpace.s48)
+    }
+
+    @ViewBuilder
+    private var textFields: some View {
+        GalleryLabel("Default")
+        PBTextField("Email", text: .constant(""), prompt: "you@example.com", helper: Self.helper)
+        GalleryLabel("Focused")
+        PBTextField("Email", text: .constant("you@example.com"), prompt: "you@example.com", helper: Self.helper)
+            .pbPreviewInteraction(.focused)
+        GalleryLabel("Filled")
+        PBTextField("Email", text: .constant("you@example.com"), prompt: "you@example.com", helper: Self.helper)
+        GalleryLabel("Error")
+        PBTextField("Email", text: .constant("you@example.com"), prompt: "you@example.com", error: Self.helper)
+        GalleryLabel("Disabled")
+        PBTextField("Email", text: .constant(""), prompt: "you@example.com", helper: Self.helper)
+            .disabled(true)
+        GalleryLabel("Leading icon, no label or helper")
+        PBTextField(nil, text: .constant(""), prompt: "Search currencies", icon: .search)
+        GalleryLabel("Live (type here)")
+        PBTextField("Email or phone", text: $live, prompt: "you@example.com", helper: Self.helper)
+            .keyboardType(.emailAddress)
+            .textInputAutocapitalization(.never)
+    }
+
+    private var currencyRows: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            PBSectionHeader("Suggested")
+            let region = suggested.isFromRegion ? " · Based on your region" : ""
+            PBCurrencyRow(symbol: suggested.currency.tileText, title: suggested.currency.name, subtitle: suggested.currency.code + region,
+                          isSelected: currency == suggested.currency.code) {
+                currency = suggested.currency.code
+            }
+            PBSectionHeader("Popular")
+            ForEach(popular) { item in
+                PBCurrencyRow(symbol: item.tileText, title: item.name, subtitle: item.code, isSelected: currency == item.code) {
+                    currency = item.code
+                }
+            }
+            GalleryLabel("\(available) ISO currencies in use today")
+        }
     }
 }
 #endif

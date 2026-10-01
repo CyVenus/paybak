@@ -1,67 +1,87 @@
 #if DEBUG
 import SwiftUI
 
-struct GalleryIconsPage: View {
+/// Icons, brand marks and the peep-head art.
+struct GalleryAssetsPage: View {
+    private static let tints: [(String, Color)] = [
+        ("primary", PBColor.iconPrimary), ("secondary", PBColor.iconSecondary),
+        ("tertiary", PBColor.iconTertiary), ("destructive", PBColor.iconDestructive),
+    ]
+
     var body: some View {
         GalleryPageScroll {
-            GallerySection("24 pt, icon/primary (brand logos keep their colours)") {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: 8), spacing: PBSpace.s4) {
+            GallerySection("Icons (\(PBIcon.allCases.count))") {
+                GalleryFlow(spacing: PBSpace.s8, rowSpacing: PBSpace.s12) {
                     ForEach(PBIcon.allCases) { icon in
-                        VStack(spacing: PBSpace.s2) {
+                        VStack(spacing: 0) {
                             PBIconView(icon)
                                 .foregroundStyle(PBColor.iconPrimary)
-                            Text(icon.rawValue)
+                            Text(icon.galleryName)
                                 .textStyle(.caption2)
-                                .foregroundStyle(PBColor.textTertiary)
+                                .foregroundStyle(PBColor.textSecondary)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.6)
                         }
-                        .frame(height: 42)
+                        .frame(width: 56)
                     }
                 }
             }
-            GallerySection("Sizes 24 · 20 · 16 · 14 (stroke 1.5 · 1.25 · 1.0 · 0.875) and tints") {
-                HStack(alignment: .bottom, spacing: PBSpace.s12) {
+            GallerySection("Icon sizes (stroke scales with the icon)") {
+                HStack(spacing: PBSpace.s16) {
                     ForEach([PBSize.iconLg, PBSize.iconMd, PBSize.iconSm, 14], id: \.self) { size in
-                        PBIconView(.bell, size: size)
+                        VStack(spacing: 0) {
+                            PBIconView(.calendar, size: size)
+                                .foregroundStyle(PBColor.iconPrimary)
+                            GalleryLabel("\(Int(size))")
+                        }
                     }
-                    PBIconView(.bell).foregroundStyle(PBColor.iconSecondary)
-                    PBIconView(.bell).foregroundStyle(PBColor.iconTertiary)
-                    PBIconView(.bell).foregroundStyle(PBColor.iconDestructive)
+                }
+            }
+            GallerySection("Icon tints") {
+                HStack(spacing: PBSpace.s16) {
+                    ForEach(Self.tints, id: \.0) { name, tint in
+                        VStack(spacing: 0) {
+                            PBIconView(.bell)
+                                .foregroundStyle(tint)
+                            GalleryLabel(name)
+                        }
+                    }
+                    VStack(spacing: 0) {
+                        PBIconView(.bell)
+                            .foregroundStyle(PBColor.iconInverse)
+                            .background(PBColor.bgInverse)
+                        GalleryLabel("inverse")
+                    }
+                }
+            }
+            GallerySection("Brand logos (never recoloured)") {
+                HStack(spacing: PBSpace.s16) {
+                    PBIconView(.apple)
+                        .foregroundStyle(PBColor.iconPrimary)
                     PBIconView(.apple)
                         .foregroundStyle(PBColor.iconInverse)
-                        .background(PBColor.bgInverse)
+                        .padding(PBSpace.s8)
+                        .background(PBColor.bgInverse, in: .circle)
                     PBIconView(.google)
-                        .foregroundStyle(PBColor.iconInverse)
-                }
-                .foregroundStyle(PBColor.iconPrimary)
-            }
-        }
-    }
-}
-
-struct GalleryBrandPage: View {
-    var body: some View {
-        GalleryPageScroll {
-            GallerySection("Brand / App Mark 160 · 96 · 40 · 28") {
-                HStack(alignment: .bottom, spacing: PBSpace.s8) {
-                    PBAppMark(size: 160)
-                    PBAppMark(size: 96)
-                    PBAppMark(size: 40)
-                    PBAppMark(size: 28)
+                    PBIconView(.whatsapp)
                 }
             }
-            GallerySection("Brand / Logo: Horizontal, Stacked") {
-                HStack(alignment: .top, spacing: PBSpace.s32) {
-                    PBLogo(layout: .horizontal)
-                    PBLogo(layout: .stacked)
+            GallerySection("Brand / App Mark: 160 · 96 · 40 · 28") {
+                HStack(alignment: .bottom, spacing: PBSpace.s16) {
+                    ForEach([160, 96, 40, 28] as [CGFloat], id: \.self) { size in
+                        PBAppMark(size: size)
+                    }
                 }
+            }
+            GallerySection("Brand / Logo") {
+                PBLogo(layout: .horizontal)
+                PBLogo(layout: .stacked)
             }
             GallerySection("Art / Peep Head (avatar-1…7)") {
-                HStack(spacing: PBSpace.s4) {
+                GalleryFlow(spacing: PBSpace.s12, rowSpacing: PBSpace.s12) {
                     ForEach(PBPeepHead.allCases) { head in
-                        GalleryItem(head.name) {
-                            PBAvatar(.art(head), diameter: 46)
+                        VStack(spacing: 0) {
+                            PBAvatar(.art(head), diameter: PBSize.avatarLg)
+                            GalleryLabel(head.name)
                         }
                     }
                 }
@@ -70,48 +90,12 @@ struct GalleryBrandPage: View {
     }
 }
 
-/// Figma's component-set layout: Large Default / Pressed / Disabled on the left, Small on the right.
-struct GalleryPillButtonsPage: View {
-    let styles: [PBButton.Style]
-    var showsCTAs = false
-
-    var body: some View {
-        GalleryPageScroll {
-            ForEach(styles, id: \.self) { style in
-                GallerySection("\(name(of: style)): Default · Pressed · Disabled") {
-                    HStack(alignment: .top, spacing: PBSpace.s24) {
-                        states(style, size: .large)
-                        states(style, size: .small)
-                    }
-                    .padding(style == .onCard ? PBSpace.s16 : 0)
-                    .background(style == .onCard ? PBColor.bgCard : .clear, in: .rect(cornerRadius: PBRadius.card))
-                }
-            }
-            if showsCTAs {
-                GallerySection("Get Started CTAs: 362 wide, leading icon 20") {
-                    PBButton("Continue with Apple", icon: .apple, fillsWidth: true) {}
-                    PBButton("Continue with Google", style: .secondary, icon: .google, fillsWidth: true) {}
-                }
-            }
-        }
-    }
-
-    private func states(_ style: PBButton.Style, size: PBButton.Size) -> some View {
-        let label = style == .destructive ? "Delete" : "Continue"
-        return VStack(alignment: .leading, spacing: PBSpace.s8) {
-            PBButton(label, style: style, size: size) {}
-            PBButton(label, style: style, size: size) {}.pbPreviewInteraction(.pressed)
-            PBButton(label, style: style, size: size) {}.disabled(true)
-        }
-    }
-
-    private func name(of style: PBButton.Style) -> String {
-        switch style {
-        case .primary: "Primary"
-        case .secondary: "Secondary"
-        case .onCard: "On Card (on a #F5F5F5 card)"
-        case .destructive: "Destructive"
-        }
+private extension PBIcon {
+    /// The icon's name as the design system spells it: "ChevronRight", "QrCode", "WhatsApp".
+    var galleryName: String {
+        if self == .whatsapp { return "WhatsApp" }
+        let name = String(describing: self)
+        return name.prefix(1).uppercased() + name.dropFirst()
     }
 }
 #endif

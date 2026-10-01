@@ -19,11 +19,12 @@ extension LedgerStore {
         replace(with: loaded.books.ledger)
     }
 
-    /// Applies one more seed scenario to the current data, as of the clock's now.
+    /// Runs one more seed scenario on today's ledger ("Apply <name>", `-scenario`): its `D` dates
+    /// resolve against the clock's today.
     func applyScenario(_ name: String) throws {
         let seed = try DemoSeed.bundled()
         var books = books
-        try seed.apply(name, to: &books, anchor: DebugState.demoAnchor ?? clock.today)
+        try seed.apply(name, to: &books, anchor: clock.today)
         if books.now != clock.now {
             DebugState.pinnedClock = books.now
             clock.pin(books.now)
