@@ -1,11 +1,10 @@
 import UserNotifications
 import os
 
-// Lane A fills this service (scheduling from the store's `revision`, the reminder schedule, the
-// 60-item cap, permission status) and keeps these names. M2 posts right away, for the debug menu and
-// the lock-screen start screens.
-/// Local notifications: reminders at the schedule's time, claims with Confirm / Not received,
-/// overdue alerts, the monthly summary and recurring drafts. Each carries a deep link in `link`.
+/// Local notifications (screens-activity §7, domain.md §10.1): payment reminders at the schedule's
+/// time, overdue alerts, the month-end summary and recurring drafts are scheduled ahead after every
+/// ledger change (`reschedule`); a friend's claim posts "Payment to confirm" with Confirm / Not
+/// received at once. Each carries its deep link in `link`; `AppDelegate` handles taps and actions.
 enum NotificationService {
     static let linkKey = "link"
     static let confirmCategory = "PAYMENT_CONFIRM"
@@ -13,6 +12,8 @@ enum NotificationService {
     static let notReceivedAction = "NOT_RECEIVED"
 
     private static let log = Logger(subsystem: "app.paybak.paybak", category: "Notifications")
+    /// Scheduled requests carry this prefix (`UpcomingAlert.id`), so stale ones can be told apart.
+    private static let alertPrefix = "alert-"
 
     /// "Payment to confirm" with Confirm (background) and Not received (opens the app).
     static var categories: Set<UNNotificationCategory> {
@@ -21,8 +22,35 @@ enum NotificationService {
         return [UNNotificationCategory(identifier: confirmCategory, actions: [confirm, notReceived], intentIdentifiers: [])]
     }
 
-    /// Re-schedules every upcoming notification for the ledger's open items (after each change).
-    static func reschedule(for books: Books) async {}
+    /// Whether the system lets Paybak post (the Setup 4 or Settings permission).
+    static func isAuthorized() async -> Bool {
+        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        case .authorized, .provisional, .ephemeral: true
+        default: false
+        }
+    }
+
+    /// Re-schedules every upcoming alert for the ledger as it is now (after each change): adds or
+    /// replaces the nearest 60 and removes the ones that no longer apply (a debt was settled, a toggle
+    /// was turned off).
+    static func reschedule(for books: Books) async {
+        let center = UNUserNotificationCenter.current()
+        let alerts = await Task.detached(priority: .utility) { books.upcomingAlerts() }.value
+        let wanted = Set(alerts.map(\.id))
+        let stale = await center.pendingNotificationRequests().map(\.identifier)
+            .filter { $0.hasPrefix(alertPrefix) && !wanted.contains($0) }
+        center.removePendingNotificationRequests(withIdentifiers: stale)
+        guard !Task.isCancelled, await isAuthorized() else { return }
+        for alert in alerts {
+            let components = books.calendar.dateComponents([.year, .month, .day, .hour, .minute], from: alert.fireAt)
+            let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+            do {
+                try await center.add(UNNotificationRequest(identifier: alert.id, content: content(for: alert, in: books), trigger: trigger))
+            } catch {
+                log.error("Could not schedule \(alert.id, privacy: .public): \(String(describing: error), privacy: .public)")
+            }
+        }
+    }
 
     /// Posts "Payment to confirm" for a friend's claim (screens-activity §7.1).
     static func postClaim(_ claim: PendingClaim, after delay: TimeInterval = 1) async {
@@ -41,6 +69,27 @@ enum NotificationService {
         content.body = row.body
         if let link { content.userInfo = [linkKey: link.text] }
         await post(content, id: row.id, after: delay)
+    }
+
+    /// Posts an upcoming alert now instead of at its moment (debug "Deliver the next notification").
+    static func postEarly(_ alert: UpcomingAlert, in books: Books, after delay: TimeInterval) async {
+        await post(content(for: alert, in: books), id: "early-\(alert.id)", after: delay)
+    }
+
+    private static func content(for alert: UpcomingAlert, in books: Books) -> UNMutableNotificationContent {
+        let content = UNMutableNotificationContent()
+        let link: DeepLink?
+        switch alert.content {
+        case .inbox(let item):
+            (content.title, content.body) = books.inboxText(item)
+            link = DeepLink(item)
+        case .draft(let draft):
+            (content.title, content.body) = books.draftAlertText(draft)
+            link = .recurringDraft(draft.id)
+        }
+        if let link { content.userInfo = [linkKey: link.text] }
+        content.sound = .default
+        return content
     }
 
     private static func post(_ content: UNMutableNotificationContent, id: String, after delay: TimeInterval) async {

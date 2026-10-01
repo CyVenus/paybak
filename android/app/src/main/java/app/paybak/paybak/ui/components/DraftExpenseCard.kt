@@ -44,7 +44,7 @@ private const val SAVE_MILLIS = 250
  * motion). Nothing is saved without the tap, and the chat stays put: no toast, no navigation. Parts
  * are tagged "[testTag].save", "[testTag].edit" and "[testTag].view".
  *
- * @param members 2–4 heads for the split's avatar stack.
+ * @param members The split's 2–4 avatars (you first): Peep heads, your photo or character.
  */
 @Composable
 fun PbDraftExpenseCard(
@@ -54,7 +54,7 @@ fun PbDraftExpenseCard(
     paidLine: String,
     splitLine: String,
     eachLine: String,
-    members: List<PbPeepHead>,
+    members: List<PbAvatarContent>,
     saved: Boolean,
     onSave: () -> Unit,
     onEdit: () -> Unit,
@@ -174,7 +174,9 @@ private fun PbDraftExpenseCardPreview() {
                 paidLine = "Paid by you · Today",
                 splitLine = "Split equally with Esha and Dev",
                 eachLine = "₹200 each",
-                members = listOf(PbPeepHead.Arjun, PbPeepHead.Esha, PbPeepHead.Dev),
+                members =
+                    listOf(PbPeepHead.Arjun, PbPeepHead.Esha, PbPeepHead.Dev)
+                        .map(PbAvatarContent::Art),
                 saved = saved,
                 onSave = {},
                 onEdit = {},

@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// Row / Activity (Figma 13:477, components-home §10, activity §9): a timeline or recent-activity row,
-/// 64 tall at least. A category icon or a person's avatar in a 40 pt circle; a 1-line title, a subtitle
-/// of up to 2 lines (3 for notification bodies) and an optional detail line; then the amount and date,
-/// a status badge, or a small action. Money in is black, money out gray with "−". Plain rows sit on
+/// 64 tall at least. A category icon or a person's avatar in a 40 pt circle; a title (1 line, 2 on the
+/// timeline), a subtitle of up to 2 lines (3 for notification bodies) and an optional detail line of
+/// up to 2; then the amount and date, a date alone, a status badge, or a small action. Money in is black, money out gray with "−". Plain rows sit on
 /// white (#F5F5F5 circle); On Card rows sit inside a #F5F5F5 card (white circle).
 struct PBActivityRow: View {
     enum Leading {
@@ -19,8 +19,10 @@ struct PBActivityRow: View {
     enum Trailing {
         /// The amount (already signed) and a date caption.
         case amount(String, date: String?, isIncoming: Bool)
-        /// A status pill ("Pending", "Draft").
-        case badge(String)
+        /// A date caption alone (notifications: "9:00 pm", "Yesterday").
+        case date(String)
+        /// A status pill ("Pending", "Draft"); muted (white on a card) unless a style is given.
+        case badge(String, style: PBBadge.Style? = nil)
         /// A small button ("Restore").
         case action(String, perform: () -> Void)
         case none
@@ -32,6 +34,8 @@ struct PBActivityRow: View {
     var detail: String?
     var trailing: Trailing = .none
     var surface: Surface = .plain
+    /// Timeline titles wrap to 2 lines.
+    var titleLines = 1
     /// Notification bodies wrap to 3 lines; timeline subtitles to 2.
     var subtitleLines = 2
     var isUnread = false
@@ -44,7 +48,7 @@ struct PBActivityRow: View {
                 Text(title)
                     .textStyle(.headline)
                     .foregroundStyle(PBColor.textPrimary)
-                    .lineLimit(1)
+                    .lineLimit(titleLines)
                 Text(subtitle)
                     .textStyle(.subheadline)
                     .foregroundStyle(PBColor.textSecondary)
@@ -53,7 +57,7 @@ struct PBActivityRow: View {
                     Text(detail)
                         .textStyle(.footnote)
                         .foregroundStyle(PBColor.textTertiary)
-                        .lineLimit(1)
+                        .lineLimit(2)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -74,7 +78,13 @@ struct PBActivityRow: View {
                     .padding(.leading, 52)
             }
         }
-        .accessibilityElement(children: .combine)
+        // A row with its own button keeps the button reachable; the others read as one element.
+        .accessibilityElement(children: hasAction ? .contain : .combine)
+    }
+
+    private var hasAction: Bool {
+        if case .action = trailing { return true }
+        return false
     }
 
     @ViewBuilder
@@ -107,8 +117,15 @@ struct PBActivityRow: View {
             }
             .lineLimit(1)
             .fixedSize()
-        case .badge(let text):
-            PBBadge(text, style: surface == .onCard ? .onCard : .muted)
+        case .date(let date):
+            Text(date)
+                .textStyle(.footnote)
+                .foregroundStyle(PBColor.textTertiary)
+                .lineLimit(1)
+                .fixedSize()
+        case .badge(let text, let style):
+            PBBadge(text, style: style ?? (surface == .onCard ? .onCard : .muted))
+                .fixedSize()
         case .action(let label, let perform):
             PBButton(label, style: surface == .onCard ? .onCard : .secondary, size: .small, action: perform)
         case .none:
@@ -127,6 +144,11 @@ struct PBActivityRow: View {
                       trailing: .amount("₹1,050", date: "Yesterday", isIncoming: true))
         PBActivityRow(leading: .icon(.flame), title: "Cooking gas draft created", subtitle: "Flat 302 · Needs an amount",
                       trailing: .badge("Draft"))
+        PBActivityRow(leading: .icon(.calendar), title: "Payment reminder", subtitle: "You owe Kabir ₹1,400 for Goa Trip. It’s due Friday.",
+                      trailing: .date("9:00 pm"), subtitleLines: 3, isUnread: true)
+        PBActivityRow(leading: .avatar(.art(.rohan)), title: "Payment overdue",
+                      subtitle: "Rohan owes you ₹800 for Movie tickets. It was due on 27 Sep.",
+                      trailing: .badge("Overdue", style: .overdue), subtitleLines: 3)
         PBActivityRow(leading: .icon(.food), title: "Snacks", subtitle: "₹300 · Goa Trip", detail: "Deleted by Priya on 24 Sep · 24 days left",
                       trailing: .action("Restore") {}, isUnread: true)
         VStack(spacing: 0) {

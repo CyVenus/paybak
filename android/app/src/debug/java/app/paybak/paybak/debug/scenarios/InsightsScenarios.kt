@@ -2,10 +2,13 @@ package app.paybak.paybak.debug.scenarios
 
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ExpenseDraft
+import app.paybak.paybak.domain.model.Frequency
 import app.paybak.paybak.domain.model.Itemized
 import app.paybak.paybak.domain.model.ItemizedItem
 import app.paybak.paybak.domain.model.ItemizedLine
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.Receipt
+import app.paybak.paybak.domain.model.RepeatRule
 import app.paybak.paybak.domain.model.Split
 import app.paybak.paybak.domain.model.SplitMode
 import app.paybak.paybak.domain.model.SplitRow
@@ -13,14 +16,23 @@ import app.paybak.paybak.navigation.ActivitySegment
 import app.paybak.paybak.navigation.AddExpenseArgs
 import app.paybak.paybak.navigation.Route
 import app.paybak.paybak.navigation.Tab
+import java.time.Instant
 import java.time.LocalDate
 
-/** The Leopold Cafe receipt read and assigned (insights §4.5): ₹2,300 itemized among 3 people. */
+/**
+ * The Leopold Cafe receipt read and assigned (insights §4.5): ₹2,300 itemized among 3 people, the
+ * receipt attached (scanned on Wed 30 Sep at 1:15 pm).
+ */
 private val leopoldDraft =
     ExpenseDraft(
-        title = "Leopold Cafe",
+        title = "Lunch at Leopold Cafe",
         amount = 230_000,
         category = Category.Food.id,
+        receipt =
+            Receipt(
+                asset = "receipt-leopold-cafe",
+                addedAt = Instant.parse("2026-09-30T07:45:00Z"),
+            ),
         split = Split(SplitMode.Itemized, listOf(ME, "p-esha", "p-dev").map { SplitRow(it) }),
         itemized =
             Itemized(
@@ -38,10 +50,31 @@ private val leopoldDraft =
             ),
     )
 
-/** The Cooking gas draft of Flat 302 the Repeat sheet opens over (insights §5.3). */
+/** Lunch with Esha and Dev: the Add expense form the scan opens over, then the scan itself. */
+private val scanStack =
+    listOf(
+        Route.AddExpense(
+            AddExpenseArgs(
+                draft = ExpenseDraft.equal(listOf(ME, "p-esha", "p-dev")),
+                focusAmount = false,
+            )
+        ),
+        Route.ScanReceipt(DebugRequest, personIds = listOf(ME, "p-esha", "p-dev")),
+    )
+
+/** Cooking gas repeating monthly on the 28th, waiting for its amount each time (insights §5.3). */
+private val cookingGasRepeat =
+    RepeatRule(Frequency.Monthly, LocalDate.of(2026, 9, 28), variable = true)
+
+/** The Cooking gas draft of Flat 302 the Repeat sheet opens over. */
 private val cookingGasDraft =
     ExpenseDraft.equal(listOf(ME, "p-meera", "p-kabir"))
-        .copy(title = "Cooking gas", groupId = "g-flat302", category = Category.Bills.id)
+        .copy(
+            title = "Cooking gas",
+            groupId = "g-flat302",
+            category = Category.Bills.id,
+            repeat = cookingGasRepeat,
+        )
 
 /** Insights and AI (lane C, M9; app-architecture §1.9). */
 internal val InsightsScenarios: Map<String, Scenario> =
@@ -55,21 +88,9 @@ internal val InsightsScenarios: Map<String, Scenario> =
         "askStart" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
         "askAnswer" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
         "askConfirm" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
-        "scanCamera" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
-        "scanReview" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
-        "scanAssign" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
+        "scanCamera" to Scenario(demo().pro(), stack = scanStack),
+        "scanReview" to Scenario(demo().pro(), stack = scanStack),
+        "scanAssign" to Scenario(demo().pro(), stack = scanStack),
         "scanAddExpense" to
             Scenario(
                 demo().pro(),
@@ -93,7 +114,12 @@ internal val InsightsScenarios: Map<String, Scenario> =
                             AddExpenseArgs(draft = cookingGasDraft, focusAmount = false)
                         )
                     ),
-                sheet = Route.RepeatRule(DebugRequest, startDate = LocalDate.of(2026, 9, 28)),
+                sheet =
+                    Route.RepeatRule(
+                        DebugRequest,
+                        current = cookingGasRepeat,
+                        startDate = LocalDate.of(2026, 9, 28),
+                    ),
             ),
         "recurringEnterAmount" to
             Scenario(demo().pro(), stack = listOf(Route.EnterDraftAmount("d-gas-09"))),
