@@ -1,17 +1,25 @@
 import SwiftUI
 
-/// One FAQ answer (screens-settings §11 proposal): the question as the title, the answer in Body.
+/// One FAQ answer (screens-settings §11 proposal): the whole question as a Title/3 heading (a long
+/// one would truncate in the push header), the answer in Body.
 struct HelpAnswerScreen: View {
     let index: Int
 
     var body: some View {
         let faq = HelpFAQ.all.indices.contains(index) ? HelpFAQ.all[index] : HelpFAQ.all[0]
-        SettingsScaffold(title: faq.question, testIDPrefix: "helpAnswer") {
-            Text(faq.answer)
-                .textStyle(.body)
-                .foregroundStyle(PBColor.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .accessibilityIdentifier("helpAnswer.body")
+        SettingsScaffold(title: "Help", testIDPrefix: "helpAnswer") {
+            VStack(alignment: .leading, spacing: PBSpace.s12) {
+                Text(faq.question)
+                    .textStyle(.title3)
+                    .foregroundStyle(PBColor.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("helpAnswer.question")
+                Text(faq.answer)
+                    .textStyle(.body)
+                    .foregroundStyle(PBColor.textPrimary)
+                    .accessibilityIdentifier("helpAnswer.body")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
