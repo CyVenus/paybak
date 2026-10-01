@@ -139,12 +139,18 @@ struct PeoplePickerScreen: View {
     /// Friends in the picker's order, filtered by the search.
     private var matches: [Person] {
         let people = order.compactMap { store.ledger.person($0) }.filter { request.allowsGuests || !$0.isGuest }
-        let needle = query.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "@", with: "")
-        guard !needle.isEmpty else { return people }
-        return people.filter { person in
-            [person.name, person.username, person.contact].compactMap(\.self).contains {
-                $0.range(of: needle, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-            }
+        return people.filter { Self.matches($0, query: query) }
+    }
+
+    /// Whether `person`'s name, username or contact contains the search, ignoring case and accents;
+    /// a blank search matches everyone. A leading "@" ("@priya") searches usernames, which are kept
+    /// without it; an email's "@" stays, so it still finds the contact.
+    nonisolated static func matches(_ person: Person, query: String) -> Bool {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        let needle = (trimmed.hasPrefix("@") ? String(trimmed.dropFirst()) : trimmed).trimmingCharacters(in: .whitespaces)
+        guard !needle.isEmpty else { return true }
+        return [person.name, person.username, person.contact].compactMap(\.self).contains {
+            $0.range(of: needle, options: [.caseInsensitive, .diacriticInsensitive]) != nil
         }
     }
 

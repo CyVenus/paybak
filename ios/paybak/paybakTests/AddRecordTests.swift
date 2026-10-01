@@ -231,6 +231,18 @@ struct AddRecordTests {
         #expect(!form.canSave(split: books.previewSplit(form.draft)))
     }
 
+    /// Split with's search: a leading "@" searches usernames; an email keeps its "@".
+    @Test func peopleSearch() {
+        let priya = Person(id: "p-priya", name: "Priya Sharma", username: "priya", contact: "priya.s@example.com",
+                           addedAt: DemoFixture.figmaNow)
+        #expect(PeoplePickerScreen.matches(priya, query: "@priya"))
+        #expect(PeoplePickerScreen.matches(priya, query: " @Pri "))
+        #expect(!PeoplePickerScreen.matches(priya, query: "@kabir"))
+        #expect(PeoplePickerScreen.matches(priya, query: "@"))
+        #expect(PeoplePickerScreen.matches(priya, query: "sharma"))
+        #expect(PeoplePickerScreen.matches(priya, query: "priya.s@example.com"))
+    }
+
     @MainActor
     @Test func groupFormShares() {
         let form = GroupForm(mode: .project, currency: "INR")
