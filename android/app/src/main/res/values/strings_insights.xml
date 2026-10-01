@@ -99,6 +99,5 @@
         <item quantity="one">%1$d item left</item>
         <item quantity="other">%1$d items left</item>
     </plurals>
-    <string name="insights_scan_includes_tax">Includes GST and tip</string>
     <string name="insights_scan_continue">Continue</string>
 </resources>

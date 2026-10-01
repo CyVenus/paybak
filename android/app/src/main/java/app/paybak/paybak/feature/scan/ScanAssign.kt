@@ -190,7 +190,7 @@ internal fun ScanAssign(
                             totals.unassigned,
                             totals.unassigned,
                         ),
-                note = stringResource(R.string.insights_scan_includes_tax),
+                note = ReceiptSplit.chargesNote(scan),
                 totals =
                     people.mapIndexed { i, (name, avatar) ->
                         PbPersonTotal(

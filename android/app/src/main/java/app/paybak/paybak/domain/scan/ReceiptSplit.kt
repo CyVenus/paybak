@@ -2,6 +2,7 @@ package app.paybak.paybak.domain.scan
 
 import app.paybak.paybak.domain.ask.ExpensePhrase
 import app.paybak.paybak.domain.calc.Splits
+import app.paybak.paybak.domain.calc.joinNames
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ExpenseDraft
 import app.paybak.paybak.domain.model.Itemized
@@ -69,6 +70,23 @@ object ReceiptSplit {
             scan.items.size - picked.size,
         )
     }
+
+    /**
+     * Assign items' note, "Includes GST and tip": each tax line's and the tip's name without its
+     * rate; acronyms keep their capitals. Null when the receipt has neither.
+     */
+    fun chargesNote(scan: ReceiptScan): String? {
+        val labels = scan.taxes.map { it.label } + listOfNotNull(scan.tip?.let { tipLabel(scan) })
+        val names =
+            labels.map { label ->
+                val name = label.replace(chargeRate, "")
+                if (name == name.uppercase()) name else name.lowercase()
+            }
+        return if (names.isEmpty()) null else "Includes ${joinNames(names)}"
+    }
+
+    /** A charge's trailing rate: "GST 5%", "Tip 10%", "CGST 2.5 %". */
+    private val chargeRate = Regex("""\s*\d+(\.\d+)?\s*%$""")
 
     /** "Shared by 3 · ₹80 each" splits [price] evenly among [count]; the share before rotation. */
     fun eachShare(price: Long, count: Int): Long = if (count == 0) 0 else price / count

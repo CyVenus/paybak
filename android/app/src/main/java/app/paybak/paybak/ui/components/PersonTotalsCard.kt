@@ -29,13 +29,13 @@ data class PbPersonTotal(val name: String, val amount: String, val avatar: PbAva
 
 /**
  * `Card / Person Totals` (`PBPersonTotalsCard`): the live per-person totals pinned above Continue
- * on Assign items: a status line (with a check once [complete]) and a right-aligned [note], then a
- * column per person with their share. TalkBack announces updates.
+ * on Assign items: a status line (with a check once [complete]) and a right-aligned [note] (none
+ * when null), then a column per person with their share. TalkBack announces updates.
  */
 @Composable
 fun PbPersonTotalsCard(
     status: String,
-    note: String,
+    note: String?,
     totals: List<PbPersonTotal>,
     modifier: Modifier = Modifier,
     complete: Boolean = true,
@@ -57,15 +57,17 @@ fun PbPersonTotalsCard(
                 PbIconImage(PbIcon.CheckCircle, contentDescription = null, size = PbSize.IconSm)
             }
             Text(status, style = PbTextStyles.Footnote, color = PbColors.Text.Primary, maxLines = 1)
-            Text(
-                text = note,
-                modifier = Modifier.weight(1f),
-                style = PbTextStyles.Footnote,
-                color = PbColors.Text.Secondary,
-                textAlign = TextAlign.End,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (note != null) {
+                Text(
+                    text = note,
+                    modifier = Modifier.weight(1f),
+                    style = PbTextStyles.Footnote,
+                    color = PbColors.Text.Secondary,
+                    textAlign = TextAlign.End,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
             totals.forEach { total ->

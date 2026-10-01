@@ -112,6 +112,15 @@ class ReceiptScanTest {
     }
 
     @Test
+    fun theNoteNamesTheReceiptsOwnCharges() {
+        assertEquals("Includes GST and tip", ReceiptSplit.chargesNote(leopold))
+        assertEquals("Includes GST", ReceiptSplit.chargesNote(leopold.copy(tip = null)))
+        val service = leopold.copy(taxes = listOf(ScanTax("Service charge 10%", 1_000, 20_000)))
+        assertEquals("Includes service charge and tip", ReceiptSplit.chargesNote(service))
+        assertNull(ReceiptSplit.chargesNote(leopold.copy(taxes = emptyList(), tip = null)))
+    }
+
+    @Test
     fun theScanEndsInLunchAtLeopoldCafe() {
         val draft = ReceiptSplit.draft(leopold, drawn, people, LocalDate.of(2026, 9, 30))
         assertEquals("Lunch at Leopold Cafe", draft.title)
