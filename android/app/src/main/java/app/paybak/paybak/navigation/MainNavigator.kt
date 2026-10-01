@@ -216,11 +216,15 @@ class MainNavigator(state: MainState = MainState(), private val isPro: () -> Boo
         toast(toast)
     }
 
-    /** New group's Create: closes the modals, shows the Groups tab with the new group pushed. */
+    /**
+     * New group's Create: closes the modals, shows the Groups tab on its Groups list with the new
+     * group pushed.
+     */
     fun didCreateGroup(groupId: String, isProject: Boolean) {
         motion = NavMotion.ModalDown
         removeFrom(1)
         selectedTab = Tab.Groups
+        groupsSegment = GroupsSegment.Groups
         entries += NavEntry(if (isProject) Route.Project(groupId) else Route.Group(groupId))
         toast(if (isProject) "Project created" else "Group created")
     }

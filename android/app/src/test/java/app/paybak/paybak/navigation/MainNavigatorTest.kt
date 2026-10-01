@@ -65,10 +65,14 @@ class MainNavigatorTest {
 
     @Test
     fun didCreateGroupShowsItOnTheGroupsTab() {
-        val navigator = MainNavigator(MainState(selectedTab = Tab.Activity))
+        val navigator =
+            MainNavigator(
+                MainState(selectedTab = Tab.Activity, groupsSegment = GroupsSegment.Friends)
+            )
         navigator.open(Route.NewGroup(NewGroupMode.Project))
         navigator.didCreateGroup("pj-new", isProject = true)
         assertEquals(Tab.Groups, navigator.selectedTab)
+        assertEquals(GroupsSegment.Groups, navigator.groupsSegment)
         assertEquals(listOf(Route.Tabs, Route.Project("pj-new")), navigator.routes())
     }
 
