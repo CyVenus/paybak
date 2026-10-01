@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import app.paybak.paybak.R
 import app.paybak.paybak.ui.icons.PbIcon
@@ -96,6 +97,9 @@ fun PbBudgetCard(
     }
 }
 
+/** The over-budget warning as Figma draws it (10-03): Subheadline's size in Bold. */
+private val WarningStyle = PbTextStyles.Subheadline.copy(fontWeight = FontWeight.Bold)
+
 @Composable
 private fun BudgetStats(state: PbBudgetState) {
     when (state) {
@@ -112,11 +116,7 @@ private fun BudgetStats(state: PbBudgetState) {
                     size = PbSize.IconSm,
                     tint = PbColors.Icon.Destructive,
                 )
-                Text(
-                    state.warning,
-                    style = PbTextStyles.Subheadline,
-                    color = PbColors.Text.Destructive,
-                )
+                Text(state.warning, style = WarningStyle, color = PbColors.Text.Destructive)
             }
     }
 }
