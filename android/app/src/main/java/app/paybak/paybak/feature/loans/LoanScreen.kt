@@ -6,16 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.addrecord.LoanSchedule
@@ -28,9 +22,9 @@ import app.paybak.paybak.feature.pickers.rememberPeopleDirectory
 import app.paybak.paybak.navigation.LendMoneyArgs
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
-import app.paybak.paybak.navigation.MainNavigator
 import app.paybak.paybak.navigation.RecordPaymentArgs
 import app.paybak.paybak.navigation.Route
+import app.paybak.paybak.navigation.pinnedFooter
 import app.paybak.paybak.ui.components.PbActivityRow
 import app.paybak.paybak.ui.components.PbAmountHero
 import app.paybak.paybak.ui.components.PbAvatarContent
@@ -92,7 +86,7 @@ fun LoanScreen(route: Route.Loan) {
             if (loan != null && !paidBack) {
                 {
                     Column(
-                        Modifier.pinnedFooter(navigator),
+                        Modifier.pinnedFooter(),
                         verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
                     ) {
                         if (overdue && lent) {
@@ -201,20 +195,5 @@ fun LoanScreen(route: Route.Loan) {
                 }
             }
         }
-    }
-}
-
-/**
- * Reports how far the pinned buttons reach above the screen's bottom edge, so the app's toast
- * ("Loan added", "Reminder sent to Dev") sits 12 dp above them; cleared when the screen goes.
- */
-@Composable
-private fun Modifier.pinnedFooter(navigator: MainNavigator): Modifier {
-    val density = LocalDensity.current
-    val view = LocalView.current
-    DisposableEffect(navigator) { onDispose { navigator.pinnedFooterHeight = 0.dp } }
-    return onGloballyPositioned { coordinates ->
-        val top = coordinates.positionInWindow().y
-        navigator.pinnedFooterHeight = with(density) { (view.height - top).toDp() }
     }
 }

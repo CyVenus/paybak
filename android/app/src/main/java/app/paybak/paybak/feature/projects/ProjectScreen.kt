@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,10 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -52,6 +47,7 @@ import app.paybak.paybak.navigation.ActivityFilter
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
 import app.paybak.paybak.navigation.Route
+import app.paybak.paybak.navigation.pinnedFooter
 import app.paybak.paybak.navigation.rememberDebugStartScreen
 import app.paybak.paybak.ui.components.PbAlert
 import app.paybak.paybak.ui.components.PbAvatarContent
@@ -161,7 +157,8 @@ fun ProjectScreen(route: Route.Project) {
                 },
                 onDelete = { flow = current.copy(step = ComponentStep.Deleting) },
                 onDismiss = {
-                    flow = if (current.dirty) current.copy(step = ComponentStep.Discarding) else null
+                    flow =
+                        if (current.dirty) current.copy(step = ComponentStep.Discarding) else null
                 },
             )
         ComponentStep.Discarding ->
@@ -243,8 +240,9 @@ private fun ProjectContent(
                 Modifier.testTag("project.title"),
                 subtitle = page.subtitle,
                 tag =
-                    stringResource(R.string.projects_archived)
-                        .takeIf { page.state == ProjectState.Archived },
+                    stringResource(R.string.projects_archived).takeIf {
+                        page.state == ProjectState.Archived
+                    },
                 memberAvatars = avatars.take(project.memberIds.size),
             )
             page.notice?.let { NoticeCard(it, PbIcon.Lock, "project.notice") }
@@ -326,24 +324,10 @@ private fun PinnedAddButton(modifier: Modifier, onClick: () -> Unit) {
             PbButton(
                 stringResource(R.string.projects_add_component),
                 onClick = onClick,
-                modifier =
-                    Modifier.fillMaxWidth().testTag("project.addComponent").toastAbove(),
+                modifier = Modifier.fillMaxWidth().testTag("project.addComponent").pinnedFooter(),
                 leadingIcon = PbIcon.Plus,
             )
             Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
         }
-    }
-}
-
-/** Reports how far the pinned button reaches above the bottom edge, so toasts sit 12 dp above it. */
-@Composable
-private fun Modifier.toastAbove(): Modifier {
-    val navigator = LocalMainNavigator.current
-    val density = LocalDensity.current
-    val view = LocalView.current
-    DisposableEffect(navigator) { onDispose { navigator.pinnedFooterHeight = 0.dp } }
-    return onGloballyPositioned { coordinates ->
-        val top = coordinates.positionInWindow().y
-        navigator.pinnedFooterHeight = with(density) { (view.height - top).toDp() }
     }
 }
