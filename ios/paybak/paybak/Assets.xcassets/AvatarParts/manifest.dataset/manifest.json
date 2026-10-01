@@ -1,0 +1,817 @@
+{
+  "version": 1,
+  "source": "Figma 2SPNUpHlG8bCO62YfwRuRi, page \"05 Profile\" (53:892), section \"Avatar Parts\" (53:896): Boy parts 53:899, Girl parts 53:900, Avatar / Character / Boy 61:100, / Girl 61:145, set Avatar / Character 61:272 (Gender=Boy|Girl).",
+  "rig": {
+    "width": 772,
+    "height": 842,
+    "note": "Every part file is a full 772x842 canvas (viewBox 0 0 772 842), exported 1:1 from its Figma part component with the REST images API (format svg, scale 1). Draw every layer at the same origin and scale, bottom to top in `layers` order; no per-part offsets are needed. A few outfit/hair-back parts run past y 842 in Figma (up to 883); the files are clipped to the 842 viewBox, which no crop used by the app ever reaches."
+  },
+  "crops": {
+    "head": {
+      "rigRect": [
+        72,
+        60,
+        600,
+        600
+      ],
+      "use": "Avatar circles (Profile header 120, any Avatar / Circle), editor tiles for Hair/Beard/Eyewear/Eyes/Mouth/Accessory. Scale = side/600; rig origin at (-72*s, -60*s). Tile 112 -> s 0.186667, origin (-13.44, -11.2); circle 120 -> s 0.2, origin (-14.4, -12)."
+    },
+    "bust": {
+      "rigRect": [
+        61,
+        192,
+        650,
+        650
+      ],
+      "use": "Editor tiles for Outfit (and the Outfit row of the Figma parts sheets). Tile 112 -> s 0.172308, origin (-10.51, -33.08)."
+    },
+    "stage": {
+      "rigRect": [
+        null,
+        60,
+        null,
+        782
+      ],
+      "use": "Avatar / Stage 362x300: s = 300/782 = 0.383632, rig bottom on the stage bottom, centred horizontally -> origin (32.92, -23.02) for a 362 wide stage."
+    }
+  },
+  "genders": {
+    "boy": {
+      "figmaCharacter": "61:100",
+      "categories": [
+        {
+          "id": "hair",
+          "label": "Hair",
+          "tileCrop": "head",
+          "default": "curly",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "curly",
+              "name": "Curly",
+              "file": "boy/hair/curly.svg",
+              "figmaNode": "54:120"
+            },
+            {
+              "id": "quiff",
+              "name": "Quiff",
+              "file": "boy/hair/quiff.svg",
+              "figmaNode": "60:102"
+            },
+            {
+              "id": "side-part",
+              "name": "Side part",
+              "file": "boy/hair/side-part.svg",
+              "figmaNode": "60:100"
+            },
+            {
+              "id": "spiky",
+              "name": "Spiky",
+              "file": "boy/hair/spiky.svg",
+              "figmaNode": "60:101"
+            },
+            {
+              "id": "man-bun",
+              "name": "Man bun",
+              "file": "boy/hair/man-bun.svg",
+              "figmaNode": "60:103"
+            },
+            {
+              "id": "crew-cut",
+              "name": "Crew cut",
+              "file": "boy/hair/crew-cut.svg",
+              "figmaNode": "60:105"
+            }
+          ],
+          "figmaProperty": "Hair#61:0"
+        },
+        {
+          "id": "beard",
+          "label": "Beard",
+          "tileCrop": "head",
+          "default": "none",
+          "hasNone": true,
+          "options": [
+            {
+              "id": "none",
+              "name": "None",
+              "file": null,
+              "figmaNode": "60:104",
+              "none": true
+            },
+            {
+              "id": "stubble",
+              "name": "Stubble",
+              "file": "boy/beard/stubble.svg",
+              "figmaNode": "60:106"
+            },
+            {
+              "id": "goatee",
+              "name": "Goatee",
+              "file": "boy/beard/goatee.svg",
+              "figmaNode": "60:107"
+            },
+            {
+              "id": "full",
+              "name": "Full",
+              "file": "boy/beard/full.svg",
+              "figmaNode": "60:108"
+            },
+            {
+              "id": "mustache",
+              "name": "Mustache",
+              "file": "boy/beard/mustache.svg",
+              "figmaNode": "60:109"
+            },
+            {
+              "id": "handlebar",
+              "name": "Handlebar",
+              "file": "boy/beard/handlebar.svg",
+              "figmaNode": "60:110"
+            }
+          ],
+          "figmaProperty": "Beard#61:1"
+        },
+        {
+          "id": "eyewear",
+          "label": "Eyewear",
+          "tileCrop": "head",
+          "default": "round",
+          "hasNone": true,
+          "options": [
+            {
+              "id": "none",
+              "name": "None",
+              "file": null,
+              "figmaNode": "60:112",
+              "none": true
+            },
+            {
+              "id": "round",
+              "name": "Round",
+              "file": "boy/eyewear/round.svg",
+              "figmaNode": "60:111"
+            },
+            {
+              "id": "square",
+              "name": "Square",
+              "file": "boy/eyewear/square.svg",
+              "figmaNode": "60:113"
+            },
+            {
+              "id": "rimless",
+              "name": "Rimless",
+              "file": "boy/eyewear/rimless.svg",
+              "figmaNode": "60:114"
+            },
+            {
+              "id": "shades",
+              "name": "Shades",
+              "file": "boy/eyewear/shades.svg",
+              "figmaNode": "60:116"
+            },
+            {
+              "id": "round-shades",
+              "name": "Round shades",
+              "file": "boy/eyewear/round-shades.svg",
+              "figmaNode": "60:115"
+            }
+          ],
+          "figmaProperty": "Eyewear#61:2"
+        },
+        {
+          "id": "eyes",
+          "label": "Eyes",
+          "tileCrop": "head",
+          "default": "dots",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "dots",
+              "name": "Dots",
+              "file": "boy/eyes/dots.svg",
+              "figmaNode": "60:117"
+            },
+            {
+              "id": "happy",
+              "name": "Happy",
+              "file": "boy/eyes/happy.svg",
+              "figmaNode": "60:120"
+            },
+            {
+              "id": "wink",
+              "name": "Wink",
+              "file": "boy/eyes/wink.svg",
+              "figmaNode": "60:118"
+            },
+            {
+              "id": "squint",
+              "name": "Squint",
+              "file": "boy/eyes/squint.svg",
+              "figmaNode": "60:119"
+            },
+            {
+              "id": "wide",
+              "name": "Wide",
+              "file": "boy/eyes/wide.svg",
+              "figmaNode": "60:121"
+            },
+            {
+              "id": "sleepy",
+              "name": "Sleepy",
+              "file": "boy/eyes/sleepy.svg",
+              "figmaNode": "60:122"
+            }
+          ],
+          "figmaProperty": "Eyes#61:3"
+        },
+        {
+          "id": "mouth",
+          "label": "Mouth",
+          "tileCrop": "head",
+          "default": "smile",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "smile",
+              "name": "Smile",
+              "file": "boy/mouth/smile.svg",
+              "figmaNode": "60:126"
+            },
+            {
+              "id": "grin",
+              "name": "Grin",
+              "file": "boy/mouth/grin.svg",
+              "figmaNode": "60:123"
+            },
+            {
+              "id": "neutral",
+              "name": "Neutral",
+              "file": "boy/mouth/neutral.svg",
+              "figmaNode": "60:124"
+            },
+            {
+              "id": "smirk",
+              "name": "Smirk",
+              "file": "boy/mouth/smirk.svg",
+              "figmaNode": "60:125"
+            },
+            {
+              "id": "open",
+              "name": "Open",
+              "file": "boy/mouth/open.svg",
+              "figmaNode": "60:127"
+            },
+            {
+              "id": "tongue",
+              "name": "Tongue",
+              "file": "boy/mouth/tongue.svg",
+              "figmaNode": "60:128"
+            }
+          ],
+          "figmaProperty": "Mouth#61:4"
+        },
+        {
+          "id": "outfit",
+          "label": "Outfit",
+          "tileCrop": "bust",
+          "default": "hoodie",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "hoodie",
+              "name": "Hoodie",
+              "file": "boy/outfit/hoodie.svg",
+              "figmaNode": "60:129",
+              "backFile": "boy/outfit-back/hoodie.svg",
+              "backFigmaNode": "60:135"
+            },
+            {
+              "id": "t-shirt",
+              "name": "T-shirt",
+              "file": "boy/outfit/t-shirt.svg",
+              "figmaNode": "60:131",
+              "backFile": null,
+              "backFigmaNode": "60:136"
+            },
+            {
+              "id": "polo",
+              "name": "Polo",
+              "file": "boy/outfit/polo.svg",
+              "figmaNode": "60:130",
+              "backFile": null,
+              "backFigmaNode": "60:137"
+            },
+            {
+              "id": "sweater",
+              "name": "Sweater",
+              "file": "boy/outfit/sweater.svg",
+              "figmaNode": "60:134",
+              "backFile": null,
+              "backFigmaNode": "60:138"
+            },
+            {
+              "id": "jacket",
+              "name": "Jacket",
+              "file": "boy/outfit/jacket.svg",
+              "figmaNode": "60:132",
+              "backFile": null,
+              "backFigmaNode": "60:140"
+            },
+            {
+              "id": "shirt",
+              "name": "Shirt",
+              "file": "boy/outfit/shirt.svg",
+              "figmaNode": "60:133",
+              "backFile": null,
+              "backFigmaNode": "60:139"
+            }
+          ],
+          "figmaProperty": "Outfit#61:5",
+          "figmaBackProperty": "Outfit (back)#61:6"
+        }
+      ],
+      "base": {
+        "face": {
+          "file": "boy/base/face.svg",
+          "figmaNode": "54:103"
+        },
+        "nose": {
+          "file": "boy/base/nose.svg",
+          "figmaNode": "54:107"
+        },
+        "shadow": {
+          "file": "boy/base/shadow.svg",
+          "figmaNode": "54:111"
+        },
+        "body": {
+          "file": "boy/base/body.svg",
+          "figmaNode": "54:115"
+        }
+      },
+      "layers": [
+        {
+          "layer": "outfit-back",
+          "category": "outfit",
+          "uses": "backFile"
+        },
+        {
+          "layer": "body",
+          "base": "body"
+        },
+        {
+          "layer": "outfit-front",
+          "category": "outfit",
+          "uses": "file"
+        },
+        {
+          "layer": "shadow",
+          "base": "shadow"
+        },
+        {
+          "layer": "face",
+          "base": "face"
+        },
+        {
+          "layer": "beard",
+          "category": "beard",
+          "uses": "file"
+        },
+        {
+          "layer": "hair-front",
+          "category": "hair",
+          "uses": "file"
+        },
+        {
+          "layer": "mouth",
+          "category": "mouth",
+          "uses": "file"
+        },
+        {
+          "layer": "nose",
+          "base": "nose"
+        },
+        {
+          "layer": "eyes",
+          "category": "eyes",
+          "uses": "file"
+        },
+        {
+          "layer": "eyewear",
+          "category": "eyewear",
+          "uses": "file"
+        }
+      ],
+      "defaults": {
+        "hair": "curly",
+        "beard": "none",
+        "eyewear": "round",
+        "eyes": "dots",
+        "mouth": "smile",
+        "outfit": "hoodie"
+      }
+    },
+    "girl": {
+      "figmaCharacter": "61:145",
+      "categories": [
+        {
+          "id": "hair",
+          "label": "Hair",
+          "tileCrop": "head",
+          "default": "long-wavy",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "long-wavy",
+              "name": "Long wavy",
+              "file": "girl/hair/long-wavy.svg",
+              "figmaNode": "54:140",
+              "backFile": "girl/hair-back/long-wavy.svg",
+              "backFigmaNode": "54:144"
+            },
+            {
+              "id": "long-straight",
+              "name": "Long straight",
+              "file": "girl/hair/long-straight.svg",
+              "figmaNode": "60:141",
+              "backFile": "girl/hair-back/long-straight.svg",
+              "backFigmaNode": "60:146"
+            },
+            {
+              "id": "bob",
+              "name": "Bob",
+              "file": "girl/hair/bob.svg",
+              "figmaNode": "60:143",
+              "backFile": "girl/hair-back/bob.svg",
+              "backFigmaNode": "60:147"
+            },
+            {
+              "id": "top-bun",
+              "name": "Top bun",
+              "file": "girl/hair/top-bun.svg",
+              "figmaNode": "60:142",
+              "backFile": "girl/hair-back/top-bun.svg",
+              "backFigmaNode": "60:148"
+            },
+            {
+              "id": "ponytail",
+              "name": "Ponytail",
+              "file": "girl/hair/ponytail.svg",
+              "figmaNode": "60:144",
+              "backFile": "girl/hair-back/ponytail.svg",
+              "backFigmaNode": "60:153"
+            },
+            {
+              "id": "messy-bun",
+              "name": "Messy bun",
+              "file": "girl/hair/messy-bun.svg",
+              "figmaNode": "60:145",
+              "backFile": "girl/hair-back/messy-bun.svg",
+              "backFigmaNode": "60:155"
+            }
+          ],
+          "figmaProperty": "Hair#61:7",
+          "figmaBackProperty": "Hair (back)#61:8"
+        },
+        {
+          "id": "accessory",
+          "label": "Accessory",
+          "tileCrop": "head",
+          "default": "none",
+          "hasNone": true,
+          "options": [
+            {
+              "id": "none",
+              "name": "None",
+              "file": null,
+              "figmaNode": "60:150",
+              "none": true
+            },
+            {
+              "id": "headband",
+              "name": "Headband",
+              "file": "girl/accessory/headband.svg",
+              "figmaNode": "60:152"
+            },
+            {
+              "id": "bow",
+              "name": "Bow",
+              "file": "girl/accessory/bow.svg",
+              "figmaNode": "60:151"
+            },
+            {
+              "id": "flower-clip",
+              "name": "Flower clip",
+              "file": "girl/accessory/flower-clip.svg",
+              "figmaNode": "60:154"
+            },
+            {
+              "id": "hair-clips",
+              "name": "Hair clips",
+              "file": "girl/accessory/hair-clips.svg",
+              "figmaNode": "60:149"
+            },
+            {
+              "id": "beanie",
+              "name": "Beanie",
+              "file": "girl/accessory/beanie.svg",
+              "figmaNode": "60:156"
+            }
+          ],
+          "figmaProperty": "Accessory#61:9"
+        },
+        {
+          "id": "eyewear",
+          "label": "Eyewear",
+          "tileCrop": "head",
+          "default": "round",
+          "hasNone": true,
+          "options": [
+            {
+              "id": "none",
+              "name": "None",
+              "file": null,
+              "figmaNode": "60:158",
+              "none": true
+            },
+            {
+              "id": "round",
+              "name": "Round",
+              "file": "girl/eyewear/round.svg",
+              "figmaNode": "60:157"
+            },
+            {
+              "id": "square",
+              "name": "Square",
+              "file": "girl/eyewear/square.svg",
+              "figmaNode": "60:160"
+            },
+            {
+              "id": "shades",
+              "name": "Shades",
+              "file": "girl/eyewear/shades.svg",
+              "figmaNode": "60:159"
+            },
+            {
+              "id": "heart-shades",
+              "name": "Heart shades",
+              "file": "girl/eyewear/heart-shades.svg",
+              "figmaNode": "60:161"
+            },
+            {
+              "id": "cat-eye",
+              "name": "Cat-eye",
+              "file": "girl/eyewear/cat-eye.svg",
+              "figmaNode": "60:162"
+            }
+          ],
+          "figmaProperty": "Eyewear#61:10"
+        },
+        {
+          "id": "eyes",
+          "label": "Eyes",
+          "tileCrop": "head",
+          "default": "dots",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "dots",
+              "name": "Dots",
+              "file": "girl/eyes/dots.svg",
+              "figmaNode": "60:163"
+            },
+            {
+              "id": "happy",
+              "name": "Happy",
+              "file": "girl/eyes/happy.svg",
+              "figmaNode": "60:165"
+            },
+            {
+              "id": "wink",
+              "name": "Wink",
+              "file": "girl/eyes/wink.svg",
+              "figmaNode": "60:164"
+            },
+            {
+              "id": "squint",
+              "name": "Squint",
+              "file": "girl/eyes/squint.svg",
+              "figmaNode": "60:168"
+            },
+            {
+              "id": "wide",
+              "name": "Wide",
+              "file": "girl/eyes/wide.svg",
+              "figmaNode": "60:166"
+            },
+            {
+              "id": "sleepy",
+              "name": "Sleepy",
+              "file": "girl/eyes/sleepy.svg",
+              "figmaNode": "60:167"
+            }
+          ],
+          "figmaProperty": "Eyes#61:11"
+        },
+        {
+          "id": "mouth",
+          "label": "Mouth",
+          "tileCrop": "head",
+          "default": "smile",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "smile",
+              "name": "Smile",
+              "file": "girl/mouth/smile.svg",
+              "figmaNode": "60:169"
+            },
+            {
+              "id": "grin",
+              "name": "Grin",
+              "file": "girl/mouth/grin.svg",
+              "figmaNode": "60:172"
+            },
+            {
+              "id": "neutral",
+              "name": "Neutral",
+              "file": "girl/mouth/neutral.svg",
+              "figmaNode": "60:170"
+            },
+            {
+              "id": "smirk",
+              "name": "Smirk",
+              "file": "girl/mouth/smirk.svg",
+              "figmaNode": "60:171"
+            },
+            {
+              "id": "open",
+              "name": "Open",
+              "file": "girl/mouth/open.svg",
+              "figmaNode": "60:176"
+            },
+            {
+              "id": "tongue",
+              "name": "Tongue",
+              "file": "girl/mouth/tongue.svg",
+              "figmaNode": "60:173"
+            }
+          ],
+          "figmaProperty": "Mouth#61:12"
+        },
+        {
+          "id": "outfit",
+          "label": "Outfit",
+          "tileCrop": "bust",
+          "default": "t-shirt",
+          "hasNone": false,
+          "options": [
+            {
+              "id": "t-shirt",
+              "name": "T-shirt",
+              "file": "girl/outfit/t-shirt.svg",
+              "figmaNode": "60:174",
+              "backFile": null,
+              "backFigmaNode": "60:181"
+            },
+            {
+              "id": "hoodie",
+              "name": "Hoodie",
+              "file": "girl/outfit/hoodie.svg",
+              "figmaNode": "60:175",
+              "backFile": "girl/outfit-back/hoodie.svg",
+              "backFigmaNode": "60:182"
+            },
+            {
+              "id": "collar-shirt",
+              "name": "Collar shirt",
+              "file": "girl/outfit/collar-shirt.svg",
+              "figmaNode": "60:177",
+              "backFile": null,
+              "backFigmaNode": "60:183"
+            },
+            {
+              "id": "sweater",
+              "name": "Sweater",
+              "file": "girl/outfit/sweater.svg",
+              "figmaNode": "60:178",
+              "backFile": null,
+              "backFigmaNode": "60:184"
+            },
+            {
+              "id": "blazer",
+              "name": "Blazer",
+              "file": "girl/outfit/blazer.svg",
+              "figmaNode": "60:179",
+              "backFile": null,
+              "backFigmaNode": "60:185"
+            },
+            {
+              "id": "striped-tee",
+              "name": "Striped tee",
+              "file": "girl/outfit/striped-tee.svg",
+              "figmaNode": "60:180",
+              "backFile": null,
+              "backFigmaNode": "60:186"
+            }
+          ],
+          "figmaProperty": "Outfit#61:13",
+          "figmaBackProperty": "Outfit (back)#61:14"
+        }
+      ],
+      "base": {
+        "face": {
+          "file": "girl/base/face.svg",
+          "figmaNode": "54:124"
+        },
+        "nose": {
+          "file": "girl/base/nose.svg",
+          "figmaNode": "54:128"
+        },
+        "shadow": {
+          "file": "girl/base/shadow.svg",
+          "figmaNode": "54:132"
+        },
+        "body": {
+          "file": "girl/base/body.svg",
+          "figmaNode": "54:136"
+        }
+      },
+      "layers": [
+        {
+          "layer": "hair-back",
+          "category": "hair",
+          "uses": "backFile"
+        },
+        {
+          "layer": "outfit-back",
+          "category": "outfit",
+          "uses": "backFile"
+        },
+        {
+          "layer": "body",
+          "base": "body"
+        },
+        {
+          "layer": "outfit-front",
+          "category": "outfit",
+          "uses": "file"
+        },
+        {
+          "layer": "shadow",
+          "base": "shadow"
+        },
+        {
+          "layer": "face",
+          "base": "face"
+        },
+        {
+          "layer": "hair-front",
+          "category": "hair",
+          "uses": "file"
+        },
+        {
+          "layer": "accessory",
+          "category": "accessory",
+          "uses": "file"
+        },
+        {
+          "layer": "mouth",
+          "category": "mouth",
+          "uses": "file"
+        },
+        {
+          "layer": "nose",
+          "base": "nose"
+        },
+        {
+          "layer": "eyes",
+          "category": "eyes",
+          "uses": "file"
+        },
+        {
+          "layer": "eyewear",
+          "category": "eyewear",
+          "uses": "file"
+        }
+      ],
+      "defaults": {
+        "hair": "long-wavy",
+        "accessory": "none",
+        "eyewear": "round",
+        "eyes": "dots",
+        "mouth": "smile",
+        "outfit": "t-shirt"
+      }
+    }
+  },
+  "rules": [
+    "Boy | Girl: each gender keeps its own picks (switching gender never resets the other gender's look). The saved avatar = {gender, picks of that gender}.",
+    "Outfit drives two layers: outfit-back (file `backFile`, drawn first, behind the body) and outfit-front (`file`). Most outfits have an empty back layer (backFile null); only Hoodie has one.",
+    "Girl Hair drives two layers: hair-back (`backFile`, the very bottom layer, behind the outfit) and hair-front (`file`). Every girl hair style has both.",
+    "Options with `none: true` (Beard None, Eyewear None, Accessory None) draw nothing for that layer.",
+    "\"Buns show through the beanie by design\": Top bun and Messy bun draw the bun in the hair-back layer (reaching up to rig y 85 / 76) while the Beanie (accessory layer, above hair-front) starts at y 112, so the bun pokes out above the beanie. Just draw the layers in order; never hide or mask anything when Beanie is picked.",
+    "Base layers (body, shadow, face, nose) are always drawn.",
+    "Line colour #0A0A0A and white fills are baked into the art (same as the Open Peeps heads); never tint."
+  ]
+}

@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the settle module (app-architecture §7.1): names start with "settle_". Only its lane edits this file. -->
 <resources>
+    <!-- Breakdowns (screens-settle §1–2) -->
+    <string name="settle_who_owes_you">Who owes you</string>
+    <string name="settle_who_you_owe">Who you owe</string>
+
+    <!-- Settle up (§3) -->
+    <string name="settle_notice">Paybak simplifies balances into the fewest payments. Everyone ends up in the same place.</string>
+    <string name="settle_settle">Settle</string>
+    <string name="settle_remind">Remind</string>
+    <string name="settle_all_square_title">You’re all square.</string>
+    <string name="settle_all_square_body">No one owes anyone right now.</string>
+
+    <!-- Remind sheet (§6) -->
+    <string name="settle_tone">Tone</string>
+    <string name="settle_tone_friendly">Friendly</string>
+    <string name="settle_tone_neutral">Neutral</string>
+    <string name="settle_message">Message</string>
+    <string name="settle_message_helper">You can edit this message.</string>
+    <string name="settle_send_in_paybak">Send in Paybak</string>
+    <string name="settle_share">Share…</string>
+    <string name="settle_reminder_sent">Reminder sent to %1$s</string>
+
+    <!-- Not received sheet (§8) -->
+    <string name="settle_note">Note</string>
+    <string name="settle_cancel">Cancel</string>
 </resources>

@@ -3,6 +3,7 @@ import SwiftUI
 /// Card / Payment Preview (Figma 37:675), with the plain copy icon (Setup 3): how your UPI ID
 /// appears to friends. "What friends see", your avatar on a white circle, your name and UPI ID, and a
 /// copy button. Without a UPI ID the line shows the "yourname@bank" hint and the copy button hides.
+/// Screens that title the card with a section header (Payment details) turn the caption off.
 struct PBPaymentPreview: View {
     let avatar: PBAvatar.Content
     let name: String
@@ -10,14 +11,17 @@ struct PBPaymentPreview: View {
     let onCopy: () -> Void
     /// The screen part of the copy button's test id (flow.md): `<prefix>.copy`.
     var testIDPrefix: String?
+    var showsCaption = true
 
     static let upiPlaceholder = "yourname@bank"
 
     var body: some View {
         VStack(alignment: .leading, spacing: PBSpace.s12) {
-            Text("What friends see")
-                .textStyle(.footnote)
-                .foregroundStyle(PBColor.textTertiary)
+            if showsCaption {
+                Text("What friends see")
+                    .textStyle(.footnote)
+                    .foregroundStyle(PBColor.textTertiary)
+            }
             HStack(spacing: PBSpace.s12) {
                 PBAvatar(avatar, diameter: PBSize.avatarMd, isOnCard: true)
                 VStack(alignment: .leading, spacing: PBSpace.s2) {
@@ -51,6 +55,7 @@ struct PBPaymentPreview: View {
     VStack(spacing: PBSpace.s16) {
         PBPaymentPreview(avatar: .art(.arjun), name: "Arjun Mehta", upiID: "arjun@okaxis") {}
         PBPaymentPreview(avatar: .initials("PS"), name: "Priya Shah", upiID: "") {}
+        PBPaymentPreview(avatar: .art(.arjun), name: "Arjun Mehta", upiID: "arjun@okaxis", onCopy: {}, showsCaption: false)
     }
     .padding(PBLayout.screenMargin)
 }

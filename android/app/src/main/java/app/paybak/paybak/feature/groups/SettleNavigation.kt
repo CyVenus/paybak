@@ -2,10 +2,9 @@ package app.paybak.paybak.feature.groups
 
 import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.groups.GroupSettle
-import app.paybak.paybak.domain.model.ME
-import app.paybak.paybak.domain.model.PaymentMethod
+import app.paybak.paybak.domain.model.ReminderContext
+import app.paybak.paybak.feature.settle.recordPaymentTo
 import app.paybak.paybak.navigation.MainNavigator
-import app.paybak.paybak.navigation.RecordPaymentArgs
 import app.paybak.paybak.navigation.Route
 
 /**
@@ -16,15 +15,11 @@ internal fun MainNavigator.settle(view: LedgerView, settle: GroupSettle) {
     when (settle) {
         is GroupSettle.Pay ->
             open(
-                Route.RecordPayment(
-                    RecordPaymentArgs(
-                        fromId = ME,
-                        toId = settle.toId,
-                        amount = settle.amount,
-                        currency = settle.currency,
-                        method = PaymentMethod.Upi.takeIf { view.person(settle.toId)?.upi != null },
-                        groupId = settle.groupId,
-                    )
+                view.recordPaymentTo(
+                    settle.toId,
+                    settle.amount,
+                    settle.currency,
+                    ReminderContext(groupId = settle.groupId),
                 )
             )
         is GroupSettle.Plan -> open(Route.SettleUp(settle.groupId))

@@ -3,7 +3,8 @@ import SwiftUI
 /// Control / Input Field (Figma 12:296): an optional label, a 52 pt `bg/card` field with 14 pt corners,
 /// and an optional helper line. Focused = 1.5 pt black ring; error = red ring and the error message in
 /// red in place of the helper. Disable it with `.disabled(true)`. With `showsClearButton` a 20 pt ✕
-/// clears the text while there is some (the currency search).
+/// clears the text while there is some (the currency search). With `errorShowsIcon` the error reads
+/// as a Caption/1 line after a 16 pt alert icon (the Add payment method sheet).
 ///
 /// The ring is an inside overlay, so the text keeps its 16 pt inset in every state (Figma shifts it to
 /// 17.5 because the stroke counts in its layout; README rule 6).
@@ -16,6 +17,7 @@ struct PBTextField: View {
     var error: String?
     var icon: PBIcon?
     var showsClearButton = false
+    var errorShowsIcon = false
 
     private let externalFocus: FocusState<Bool>.Binding?
     @FocusState private var ownFocus: Bool
@@ -34,6 +36,7 @@ struct PBTextField: View {
         error: String? = nil,
         icon: PBIcon? = nil,
         showsClearButton: Bool = false,
+        errorShowsIcon: Bool = false,
         focus: FocusState<Bool>.Binding? = nil
     ) {
         self.label = label
@@ -43,6 +46,7 @@ struct PBTextField: View {
         self.error = error
         self.icon = icon
         self.showsClearButton = showsClearButton
+        self.errorShowsIcon = errorShowsIcon
         self.externalFocus = focus
     }
 
@@ -58,7 +62,17 @@ struct PBTextField: View {
                     .accessibilityHidden(true)
             }
             field
-            if let footnote = error ?? helper {
+            if let error, errorShowsIcon {
+                HStack(spacing: PBSpace.s4) {
+                    PBIconView(.alert, size: PBSize.iconSm)
+                        .foregroundStyle(PBColor.iconDestructive)
+                    Text(error)
+                        .textStyle(.caption1)
+                        .foregroundStyle(PBColor.textDestructive)
+                }
+                .frame(height: 18)
+                .accessibilityHidden(true)
+            } else if let footnote = error ?? helper {
                 Text(footnote)
                     .textStyle(.footnote)
                     .foregroundStyle(footnoteColor)
@@ -135,6 +149,7 @@ struct PBTextField: View {
         PBTextField("Email", text: $filled, prompt: "you@example.com", helper: "We’ll send a 6-digit code.")
             .pbPreviewInteraction(.focused)
         PBTextField("Email", text: $filled, prompt: "you@example.com", error: "Enter a valid email or phone number.")
+        PBTextField("UPI ID", text: $filled, prompt: "yourname@bank", error: "Enter a UPI ID like name@bank", icon: .wallet, errorShowsIcon: true)
         PBTextField(nil, text: $filled, prompt: "Search currencies", icon: .search, showsClearButton: true)
         PBTextField("Email", text: $empty, prompt: "you@example.com", helper: "We’ll send a 6-digit code.")
             .disabled(true)
