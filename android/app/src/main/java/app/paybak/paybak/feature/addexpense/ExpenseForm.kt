@@ -62,16 +62,23 @@ data class ExpenseForm(
     val payerChoices: List<String>
         get() = listOf(ME) + others
 
-    /** Sets who is on the expense, keeping the split, payers and values of those who stay. */
+    /**
+     * Sets who is on the expense, keeping the split, payers and values of those who stay. A
+     * receipt's items stay only while the people don't change; otherwise the split goes back to
+     * Equally.
+     */
     fun withPeople(next: List<String>): ExpenseForm {
         val ordered = next.filter { it == ME } + next.filter { it != ME }.distinct()
         val choices = listOf(ME) + ordered.filter { it != ME }
+        val byItem = split.mode == SplitMode.Itemized
+        val keepsItems = byItem && ordered == people
+        val kept = split.keepOnly(ordered)
         return copy(
             people = ordered,
-            split = split.keepOnly(ordered),
+            split = if (byItem && !keepsItems) kept.copy(mode = SplitMode.Equal) else kept,
             payerId = payerId.takeIf { it in choices } ?: ME,
             payerAmounts = payerAmounts?.filterKeys { it in choices },
-            itemized = itemized.takeIf { split.mode == SplitMode.Itemized && ordered == people },
+            itemized = itemized.takeIf { keepsItems },
         )
     }
 
@@ -97,12 +104,15 @@ data class ExpenseForm(
                 else rate ?: rates.rate(currency, defaultCurrency)
         )
 
-    /** A receipt scan's result: its amount, items and split, and the photo attached. */
-    fun applying(result: RouteResult.Receipt, now: Instant): ExpenseForm {
+    /**
+     * A receipt scan's result: its amount, items and split, and the photo attached. The amounts
+     * were read in [defaultCurrency], so the form switches to it (with no rate).
+     */
+    fun applying(result: RouteResult.Receipt, now: Instant, defaultCurrency: String): ExpenseForm {
         val photo = result.result.photo?.let { Receipt(photo = it, addedAt = now) } ?: receipt
         // An unreadable receipt ("Attach photo") only attaches the photo; the typed form stays.
         if (result.result.scan == null) return copy(receipt = photo)
-        val scanned = new(result.result.draft, currency, date)
+        val scanned = new(result.result.draft, defaultCurrency, date)
         return scanned.copy(
             groupId = groupId,
             dueDate = dueDate,

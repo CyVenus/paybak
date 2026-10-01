@@ -179,7 +179,9 @@ fun AddExpenseScreen(route: Route.AddExpense) {
         (result as? RouteResult.Repeat)?.let { form = form.copy(repeat = it.rule) }
     }
     RouteResultEffect("$requestId.receipt") { result ->
-        (result as? RouteResult.Receipt)?.let { form = form.applying(it, ledger.clock.now()) }
+        (result as? RouteResult.Receipt)?.let {
+            form = form.applying(it, ledger.clock.now(), defaultCurrency)
+        }
     }
     val pickPhoto = rememberPhotoPicker { file ->
         form = form.copy(receipt = Receipt(photo = file, addedAt = ledger.clock.now()))
