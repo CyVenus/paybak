@@ -92,7 +92,7 @@ fun FriendScreen(route: Route.Friend) {
             return@PbPushedPage
         }
         Spacer(Modifier.height(if (page.guest) PbSpace.S24 else PbSpace.S16))
-        BalanceAndActions(page, balance)
+        BalanceAndActions(page, balance, snapshot.view.defaultCurrency)
         if (page.history.isNotEmpty()) {
             Spacer(Modifier.height(PbSpace.S24))
             History(page)
@@ -136,9 +136,12 @@ fun FriendScreen(route: Route.Friend) {
     }
 }
 
-/** The balance card, then Remind + Record payment (they owe you) or Settle up (you owe). */
+/**
+ * The balance card, then Remind + Record payment (they owe you) or Settle up (you owe). The payment
+ * is the net between you, in [currency] (your default one).
+ */
 @Composable
-private fun BalanceAndActions(page: FriendPageModel, balance: FriendBalanceCard) {
+private fun BalanceAndActions(page: FriendPageModel, balance: FriendBalanceCard, currency: String) {
     val navigator = LocalMainNavigator.current
     val person = page.person
     val context = page.paymentContext
@@ -148,6 +151,7 @@ private fun BalanceAndActions(page: FriendPageModel, balance: FriendBalanceCard)
                 fromId = fromId,
                 toId = toId,
                 amount = kotlin.math.abs(page.net),
+                currency = currency,
                 method = PaymentMethod.Upi.takeIf { fromId == ME && person.upi != null },
                 groupId = context.groupId,
                 loanId = context.loanId,

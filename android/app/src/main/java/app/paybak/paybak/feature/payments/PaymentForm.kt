@@ -50,6 +50,23 @@ data class PaymentForm(
     val toId: String?
         get() = if (youPaid) friendId else ME
 
+    /**
+     * The person picked on the side that was tapped. You there puts the friend on the other side;
+     * anyone else becomes the friend, with you on the other side. A different friend starts over
+     * with nothing to file it under.
+     */
+    fun picked(personId: String, tappedFrom: Boolean): PaymentForm {
+        if (personId == ME) return copy(youPaid = tappedFrom)
+        val sameFriend = personId == friendId
+        return copy(
+            friendId = personId,
+            youPaid = !tappedFrom,
+            groupId = groupId.takeIf { sameFriend },
+            loanId = loanId.takeIf { sameFriend },
+            expenseId = expenseId.takeIf { sameFriend },
+        )
+    }
+
     /** Refills the amount and currency from the open balance, unless the amount was typed. */
     fun refilled(view: LedgerView): PaymentForm {
         val friend = friendId ?: return this
@@ -119,7 +136,8 @@ data class PaymentForm(
                     expenseId = args.expenseId,
                     date = today,
                 )
-            return form.refilled(view)
+            // An amount the route gives in its own currency stays in that currency.
+            return if (args.amount != null && args.currency != null) form else form.refilled(view)
         }
 
         val Saver: Saver<PaymentForm, String> =

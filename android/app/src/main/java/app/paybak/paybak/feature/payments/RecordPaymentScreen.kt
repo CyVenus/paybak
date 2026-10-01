@@ -118,20 +118,7 @@ fun RecordPaymentScreen(route: Route.RecordPayment) {
 
     RouteResultEffect("$requestId.person") { result ->
         val picked = (result as? RouteResult.Person)?.personId ?: return@RouteResultEffect
-        val tappedFrom = picking == "from"
-        form =
-            when {
-                picked == ME -> form.copy(youPaid = tappedFrom)
-                else -> {
-                    val sameFriend = picked == form.friendId
-                    form.copy(
-                        friendId = picked,
-                        youPaid = !tappedFrom,
-                        groupId = form.groupId.takeIf { sameFriend },
-                        loanId = form.loanId.takeIf { sameFriend },
-                    )
-                }
-            }.refilled(view)
+        form = form.picked(picked, tappedFrom = picking == "from").refilled(view)
     }
     RouteResultEffect("$requestId.currency") { result ->
         (result as? RouteResult.Currency)?.let {
