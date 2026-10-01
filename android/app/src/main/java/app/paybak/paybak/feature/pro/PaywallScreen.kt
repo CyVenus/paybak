@@ -82,7 +82,8 @@ fun PaywallScreen(route: Route.Paywall) {
                 )
             } else {
                 StorePaywall(
-                    onDismiss = navigator::dismissModal,
+                    // RevenueCatUI also asks to close right after a purchase: stay for the Welcome.
+                    onDismiss = { if (!welcome) navigator.dismissModal() },
                     onUnlocked = {
                         haptics.perform(HapticKind.Success)
                         welcome = true
@@ -117,11 +118,12 @@ private fun StorePaywall(
     onUnlocked: () -> Unit,
     onNothingToRestore: () -> Unit,
 ) {
+    val dismiss by rememberUpdatedState(onDismiss)
     val unlocked by rememberUpdatedState(onUnlocked)
     val nothingToRestore by rememberUpdatedState(onNothingToRestore)
     val options =
-        remember(onDismiss) {
-            PaywallOptions.Builder(dismissRequest = onDismiss)
+        remember {
+            PaywallOptions.Builder(dismissRequest = { dismiss() })
                 .setShouldDisplayDismissButton(true)
                 .setListener(
                     object : PaywallListener {
