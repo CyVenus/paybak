@@ -18,8 +18,9 @@ import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 
 /**
- * `allSet`: setup is done (screens-setup.md §5). It greets the user by first name; tapping a person
- * or the badge makes them jump. There is no way back into setup from here.
+ * `allSet`: setup is done (screens-setup.md §5). It greets the user by first name ("You’re all
+ * set." without one); tapping a person or the badge makes them jump. There is no way back into
+ * setup from here.
  */
 @Composable
 fun AllSetScreen(firstName: String, onGoHome: () -> Unit) {
@@ -41,7 +42,9 @@ fun AllSetScreen(firstName: String, onGoHome: () -> Unit) {
         )
         Spacer(Modifier.height(PbSpace.S32))
         PbTitleBlock(
-            title = stringResource(R.string.all_set_headline, firstName),
+            title =
+                if (firstName.isEmpty()) stringResource(R.string.all_set_headline_no_name)
+                else stringResource(R.string.all_set_headline, firstName),
             body = stringResource(R.string.all_set_body),
         )
     }

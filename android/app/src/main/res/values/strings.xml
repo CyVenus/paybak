@@ -126,6 +126,8 @@
 
     <!-- All set (screens-setup.md §5) -->
     <string name="all_set_headline">You’re all set, %1$s.</string>
+    <!-- Without a first name -->
+    <string name="all_set_headline_no_name">You’re all set.</string>
     <string name="all_set_body">Add your first expense or\ninvite friends to start splitting.</string>
     <string name="all_set_go_home">Go to Home</string>
 </resources>
