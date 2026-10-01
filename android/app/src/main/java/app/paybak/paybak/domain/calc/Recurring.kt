@@ -5,16 +5,21 @@ import app.paybak.paybak.domain.model.Draft
 import app.paybak.paybak.domain.model.Frequency
 import app.paybak.paybak.domain.model.RecurringRule
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
-/** The occurrence after [after] (§10): the anchor's day of month, weekday or day and month. */
+/**
+ * The occurrence after [after] (§10): the anchor's day of month, weekday or day and month. Every 2
+ * weeks steps 14 days from the anchor, so it lands on the anchor's weekday every other week.
+ */
 fun nextOccurrence(rule: RecurringRule, after: LocalDate): LocalDate {
     val anchor = rule.anchorDate
     return when (rule.frequency) {
-        Frequency.Weekly,
-        Frequency.Biweekly -> {
+        Frequency.Weekly -> {
             val delta = Math.floorMod(anchor.dayOfWeek.value - after.dayOfWeek.value - 1, 7) + 1
             after.plusDays(delta.toLong())
         }
+        Frequency.Biweekly ->
+            after.plusDays(14 - Math.floorMod(ChronoUnit.DAYS.between(anchor, after), 14L))
         Frequency.Yearly -> {
             val candidate = anchor.withYear(after.year)
             if (candidate.isAfter(after)) candidate else anchor.withYear(after.year + 1)

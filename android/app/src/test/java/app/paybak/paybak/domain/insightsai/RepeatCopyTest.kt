@@ -44,4 +44,27 @@ class RepeatCopyTest {
         )
         assertEquals(LocalDate.of(2027, 9, 30), RepeatCopy.next(yearly, today, today))
     }
+
+    @Test
+    fun everyTwoWeeksStepsFourteenDaysFromTheAnchor() {
+        val monday = LocalDate.of(2026, 10, 5)
+        val biweekly = RepeatRule(Frequency.Biweekly, monday)
+        assertEquals("Monday", RepeatCopy.anchorValue(biweekly))
+        assertEquals("Paybak adds this expense every other Monday.", RepeatCopy.helper(biweekly))
+        assertEquals(
+            "Paybak adds a draft every other Monday and asks you for the amount.",
+            RepeatCopy.helper(biweekly.copy(variable = true)),
+        )
+        assertEquals(monday, RepeatCopy.next(biweekly, today, today))
+        // Not the Monday in between.
+        assertEquals(LocalDate.of(2026, 10, 19), RepeatCopy.next(biweekly, monday, today))
+        assertEquals(
+            LocalDate.of(2026, 10, 19),
+            RepeatCopy.next(biweekly, LocalDate.of(2026, 10, 12), today),
+        )
+        assertEquals(
+            LocalDate.of(2026, 11, 2),
+            RepeatCopy.next(biweekly, LocalDate.of(2026, 10, 19), today),
+        )
+    }
 }

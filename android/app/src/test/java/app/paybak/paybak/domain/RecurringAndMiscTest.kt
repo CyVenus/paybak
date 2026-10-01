@@ -7,8 +7,12 @@ import app.paybak.paybak.domain.calc.exportDefaultTicks
 import app.paybak.paybak.domain.calc.nextOccurrence
 import app.paybak.paybak.domain.calc.recurring
 import app.paybak.paybak.domain.format.Dates
+import app.paybak.paybak.domain.model.Frequency
 import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.domain.model.Plan
+import app.paybak.paybak.domain.model.RecurringRule
+import app.paybak.paybak.domain.model.RuleSplit
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
@@ -41,6 +45,37 @@ class RecurringAndMiscTest {
             ledger.recurring("g-flat302").rules.map { it.nextLabel },
         )
         assertEquals("Monthly on the 28th", ledger.recurring("g-flat302").rules.last().schedule)
+    }
+
+    @Test
+    fun everyTwoWeeksCatchesUpEveryOtherWeek() {
+        val monday = LocalDate.of(2026, 9, 28)
+        val cleaner =
+            RecurringRule(
+                id = "r-cleaner",
+                groupId = "g-flat302",
+                title = "Cleaner",
+                amount = rupee(600),
+                currency = "INR",
+                frequency = Frequency.Biweekly,
+                anchorDate = monday,
+                startDate = monday,
+                lastOccurrence = monday,
+                split = RuleSplit(personIds = listOf(ME, "p-meera", "p-kabir")),
+                createdAt = ledger.now,
+            )
+        val caughtUp =
+            ledger.ledger
+                .copy(recurringRules = ledger.ledger.recurringRules + cleaner)
+                .tick(ActionContext(ledger.now.plus(Duration.ofDays(42)), Demo.zone, "INR"))
+        assertEquals(
+            listOf(
+                LocalDate.of(2026, 10, 12),
+                LocalDate.of(2026, 10, 26),
+                LocalDate.of(2026, 11, 9),
+            ),
+            caughtUp.expenses.filter { it.recurringRuleId == cleaner.id }.map { it.date },
+        )
     }
 
     @Test
