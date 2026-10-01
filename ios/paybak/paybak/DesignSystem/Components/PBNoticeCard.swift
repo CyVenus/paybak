@@ -20,10 +20,12 @@ struct PBNoticeCard: View {
 
         /// A leading icon (the single large button only, e.g. Share on "Send invite").
         var icon: PBIcon?
+        var testID: String?
 
-        init(_ label: String, icon: PBIcon? = nil, action: @escaping () -> Void) {
+        init(_ label: String, icon: PBIcon? = nil, testID: String? = nil, action: @escaping () -> Void) {
             self.label = label
             self.icon = icon
+            self.testID = testID
             self.action = action
         }
     }
@@ -104,10 +106,13 @@ struct PBNoticeCard: View {
         if let secondary {
             HStack(spacing: PBSpace.s8) {
                 PBButton(primary.label, size: .small, fillsWidth: true, action: primary.action)
+                    .accessibilityIdentifier(primary.testID ?? "")
                 PBButton(secondary.label, style: .onCard, size: .small, fillsWidth: true, action: secondary.action)
+                    .accessibilityIdentifier(secondary.testID ?? "")
             }
         } else {
             PBButton(primary.label, icon: primary.icon, fillsWidth: true, action: primary.action)
+                .accessibilityIdentifier(primary.testID ?? "")
         }
     }
 }
