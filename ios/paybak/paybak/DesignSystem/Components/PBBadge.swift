@@ -8,6 +8,8 @@ struct PBBadge: View {
         case muted
         /// White pill on #F5F5F5 cards.
         case onCard
+        /// `bg/card-pressed` pill on #F5F5F5 cards, quieter than On Card (a planned project part).
+        case mutedOnCard
         case inverse
         /// The only coloured badge.
         case overdue
@@ -44,6 +46,7 @@ private extension PBBadge.Style {
         switch self {
         case .muted: PBColor.bgCard
         case .onCard: PBColor.bgPrimary
+        case .mutedOnCard: PBColor.bgCardPressed
         case .inverse: PBColor.bgInverse
         case .overdue: PBColor.bgDestructive
         }
@@ -52,7 +55,7 @@ private extension PBBadge.Style {
     /// Label and icon share the colour (`text/secondary` + `icon/secondary`, and so on).
     var content: Color {
         switch self {
-        case .muted, .onCard: PBColor.textSecondary
+        case .muted, .onCard, .mutedOnCard: PBColor.textSecondary
         case .inverse, .overdue: PBColor.textInverse
         }
     }
@@ -66,8 +69,11 @@ private extension PBBadge.Style {
             PBBadge("Settled", style: .inverse)
             PBBadge("Overdue", style: .overdue)
         }
-        PBBadge("Due Fri", style: .onCard, icon: .calendar)
-            .padding(PBSpace.s16)
-            .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
+        HStack {
+            PBBadge("Due Fri", style: .onCard, icon: .calendar)
+            PBBadge("Planned", style: .mutedOnCard)
+        }
+        .padding(PBSpace.s16)
+        .background(PBColor.bgCard, in: .rect(cornerRadius: PBRadius.card))
     }
 }
