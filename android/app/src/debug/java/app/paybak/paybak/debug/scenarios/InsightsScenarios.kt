@@ -7,6 +7,7 @@ import app.paybak.paybak.domain.model.Itemized
 import app.paybak.paybak.domain.model.ItemizedItem
 import app.paybak.paybak.domain.model.ItemizedLine
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.Receipt
 import app.paybak.paybak.domain.model.RepeatRule
 import app.paybak.paybak.domain.model.Split
 import app.paybak.paybak.domain.model.SplitMode
@@ -15,14 +16,23 @@ import app.paybak.paybak.navigation.ActivitySegment
 import app.paybak.paybak.navigation.AddExpenseArgs
 import app.paybak.paybak.navigation.Route
 import app.paybak.paybak.navigation.Tab
+import java.time.Instant
 import java.time.LocalDate
 
-/** The Leopold Cafe receipt read and assigned (insights §4.5): ₹2,300 itemized among 3 people. */
+/**
+ * The Leopold Cafe receipt read and assigned (insights §4.5): ₹2,300 itemized among 3 people, the
+ * receipt attached (scanned on Wed 30 Sep at 1:15 pm).
+ */
 private val leopoldDraft =
     ExpenseDraft(
-        title = "Leopold Cafe",
+        title = "Lunch at Leopold Cafe",
         amount = 230_000,
         category = Category.Food.id,
+        receipt =
+            Receipt(
+                asset = "receipt-leopold-cafe",
+                addedAt = Instant.parse("2026-09-30T07:45:00Z"),
+            ),
         split = Split(SplitMode.Itemized, listOf(ME, "p-esha", "p-dev").map { SplitRow(it) }),
         itemized =
             Itemized(
