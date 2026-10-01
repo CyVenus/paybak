@@ -10,13 +10,14 @@ struct AvatarDraft: Equatable {
     /// The selected category chip ("hair", "beard" …).
     var category = "hair"
 
-    /// Opens on the saved character, or on the defaults with a gender guessed from the Setup 1 preset
-    /// (Priya and Esha's heads → Girl, everything else → Boy; §1.7 proposal). Always starts at Hair.
+    /// Opens on the saved character (unknown picks back to their defaults), or on the defaults with a
+    /// gender guessed from the Setup 1 preset (Priya and Esha's heads → Girl, everything else → Boy;
+    /// §1.7 proposal). Always starts at Hair.
     init(avatar: UserProfile.Avatar?) {
         var look: AvatarLook
         switch avatar {
         case .character(let saved):
-            look = saved
+            look = saved.normalized()
         case .preset(let index):
             look = AvatarLook()
             look.gender = [1, 3].contains(index) ? .girl : .boy

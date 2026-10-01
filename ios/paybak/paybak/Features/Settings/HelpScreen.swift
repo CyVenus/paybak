@@ -14,8 +14,8 @@ struct HelpScreen: View {
             SettingsSection(title: "Common questions") {
                 VStack(spacing: 0) {
                     ForEach(HelpFAQ.all.indices, id: \.self) { index in
-                        PBSettingRow(HelpFAQ.all[index].rowTitle, icon: .help, showsDivider: index < HelpFAQ.all.count - 1,
-                                     titleLineLimit: 3) { router.open(.helpAnswer(index: index)) }
+                        PBSettingRow(HelpFAQ.all[index].question, icon: .help, showsDivider: index < HelpFAQ.all.count - 1,
+                                     titleLineLimit: 2) { router.open(.helpAnswer(index: index)) }
                             .accessibilityIdentifier("helpFeedback.faq.\(index)")
                     }
                 }

@@ -45,10 +45,10 @@ struct ProfileScreen: View {
     private var header: some View {
         VStack(spacing: PBSpace.s16) {
             Button { router.open(.editAvatar) } label: {
-                PBUserAvatar(diameter: 120)
+                avatar
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Edit avatar")
+            .buttonStyle(AvatarButtonStyle())
+            .accessibilityLabel("Your avatar. Edit avatar")
             .accessibilityIdentifier("profile.avatar")
             VStack(spacing: PBSpace.s2) {
                 Text(profile.name)
@@ -59,15 +59,24 @@ struct ProfileScreen: View {
                     Text(handle)
                         .textStyle(.subheadline)
                         .foregroundStyle(PBColor.textSecondary)
+                        .truncationMode(.middle)
                         .accessibilityIdentifier("profile.handle")
                 }
             }
             .lineLimit(1)
+            .multilineTextAlignment(.center)
             PBButton("Edit avatar", style: .secondary, size: .small) { router.open(.editAvatar) }
                 .accessibilityIdentifier("profile.editAvatar")
         }
         .frame(maxWidth: .infinity)
     }
+
+    /// The 120 pt circle (initials in Title/1).
+    private var avatar: some View {
+        PBUserAvatar(diameter: Self.avatarSize)
+    }
+
+    private static let avatarSize: CGFloat = 120
 
     private var settings: some View {
         VStack(spacing: 0) {
@@ -104,6 +113,14 @@ struct ProfileScreen: View {
     private func signOut() {
         profileStore.signOut()
         router.signOut()
+    }
+}
+
+/// The avatar circle opens the editor without a pressed look.
+private struct AvatarButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(.circle)
     }
 }
 

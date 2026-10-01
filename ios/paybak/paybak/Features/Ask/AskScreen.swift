@@ -65,8 +65,9 @@ struct AskScreen: View {
             .padding(.horizontal, PBLayout.screenMargin)
             .phoneContentWidth()
             .background(alignment: .top) {
-                // The scroll-edge fade: white to 60 % of 150 pt from the screen top, then clear (§3.4).
-                if isScrolled {
+                // The chat's scroll-edge fade: white to 60 % of 150 pt from the screen top, then clear
+                // (§3.4).
+                if isScrolled && !conversation.turns.isEmpty {
                     LinearGradient(stops: [.init(color: PBColor.bgPrimary, location: 0.6),
                                            .init(color: PBColor.bgPrimary.opacity(0), location: 1)],
                                    startPoint: .top, endPoint: .bottom)
@@ -76,12 +77,11 @@ struct AskScreen: View {
                         .transition(.opacity)
                 }
             }
-            .animation(.easeOut(duration: 0.15), value: isScrolled)
     }
 
     private var composer: some View {
         VStack(spacing: 14) {
-            if conversation.turns.isEmpty && !isComposerFocused {
+            if conversation.turns.isEmpty {
                 HStack(spacing: PBSpace.s6) {
                     PBIconView(.lock, size: PBSize.iconSm)
                         .foregroundStyle(PBColor.iconTertiary)
@@ -107,7 +107,7 @@ struct AskScreen: View {
             VStack(alignment: .leading, spacing: PBSpace.s16) {
                 PBAvatar(.icon(.sparkles), diameter: PBSize.avatarLg)
                 VStack(alignment: .leading, spacing: PBSpace.s8) {
-                    Text("What can I help with, \(profileStore.profile.firstName)?")
+                    Text(greeting)
                         .textStyle(.title2)
                         .foregroundStyle(PBColor.textPrimary)
                         .accessibilityAddTraits(.isHeader)
@@ -117,14 +117,22 @@ struct AskScreen: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)
             }
-            VStack(alignment: .leading, spacing: PBSpace.s8) {
-                Text("Try asking")
-                    .textStyle(.footnote)
-                    .foregroundStyle(PBColor.textTertiary)
-                AskSuggestionsCard(onSend: send)
+            if !ledgerStore.books.suggestedPrompts().isEmpty {
+                VStack(alignment: .leading, spacing: PBSpace.s8) {
+                    Text("Try asking")
+                        .textStyle(.footnote)
+                        .foregroundStyle(PBColor.textTertiary)
+                    AskSuggestionsCard(onSend: send)
+                }
             }
         }
         .padding(.top, 64)
+    }
+
+    /// "What can I help with, Arjun?", or without a name "What can I help with?".
+    private var greeting: String {
+        let name = profileStore.profile.firstName
+        return name.isEmpty ? "What can I help with?" : "What can I help with, \(name)?"
     }
 
     // MARK: Chat
@@ -141,6 +149,8 @@ struct AskScreen: View {
     // MARK: Actions
 
     private func send(_ prompt: String) {
+        let prompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !prompt.isEmpty else { return }
         dictation?.cancel()
         let upi = profileStore.profile.upiID
         followsNewest = true
@@ -155,7 +165,7 @@ struct AskScreen: View {
                 try await SpeechInput.dictate { text = $0 }
             } catch is CancellationError {
             } catch {
-                router.toast("Dictation isn’t available right now")
+                router.toast("Dictation isn’t available on this device")
             }
         }
     }

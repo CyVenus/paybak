@@ -52,11 +52,16 @@ struct CurrencySettingsScreen: View {
         router.open(.pickCurrency(pickRequest))
     }
 
-    /// This screen's copy: "Indian rupee", "US dollar" (the last word of a multi-word name in lower case).
+    /// This screen's own casing (screens-settings §6): "Indian Rupee" → "Indian rupee", "US Dollar" →
+    /// "US dollar". Every word after the first is lower-cased; acronyms stay upper case.
     static func sentenceCase(_ name: String) -> String {
-        var words = name.split(separator: " ").map(String.init)
-        guard words.count > 1, let last = words.popLast() else { return name }
-        return (words + [last.lowercased()]).joined(separator: " ")
+        name.split(separator: " ", omittingEmptySubsequences: false)
+            .enumerated()
+            .map { index, word in
+                let isAcronym = word.allSatisfy { !$0.isLetter || $0.isUppercase }
+                return index == 0 || isAcronym ? String(word) : word.lowercased()
+            }
+            .joined(separator: " ")
     }
 }
 

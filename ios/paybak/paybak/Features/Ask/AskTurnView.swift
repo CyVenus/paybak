@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// One exchange in Ask Paybak (§3.3–§3.4): your bubble, the assistant's reply and further messages,
-/// its card (people, a category bar, a draft expense or the suggestions) and the action chips.
+/// One exchange in Ask Paybak (§3.3–§3.4): your bubble, the assistant's reply 16 below it, then 12
+/// apart its card (people, a category bar, the drafted reminder, a draft expense or the suggestions)
+/// and the action chips.
 struct AskTurnView: View {
     let turn: AskConversation.Turn
     let conversation: AskConversation
@@ -13,13 +14,23 @@ struct AskTurnView: View {
 
     private var reply: AssistantReply { turn.reply }
 
+    /// A reminder reply carries the drafted message, shown in its own card; anything else the reply
+    /// adds ("I couldn’t find Kabir.") continues its one bubble.
+    private var isReminder: Bool {
+        reply.card == nil && reply.chips.contains { if case .remind = $0 { true } else { false } }
+    }
+
+    private var replyText: String {
+        isReminder ? reply.text : ([reply.text] + reply.more).joined(separator: " ")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: PBSpace.s16) {
             PBChatBubble(role: .user, text: turn.prompt)
                 .accessibilityIdentifier("ask.message.\(turn.id).prompt")
-            PBChatBubble(role: .assistant, text: reply.text) {
-                ForEach(reply.more, id: \.self) { message in
-                    PBChatBubble(role: .assistant, text: message)
+            PBChatBubble(role: .assistant, text: replyText) {
+                if isReminder {
+                    ForEach(reply.more, id: \.self, content: reminderCard)
                 }
                 if let card = reply.card {
                     cardView(card)
@@ -56,13 +67,12 @@ struct AskTurnView: View {
             PBBarRow(leading: .icon(PBIcon(rawValue: row.leading.iconName ?? "") ?? .tag), title: row.title, caption: row.caption,
                      amount: row.amount, progress: row.progress, isOnCard: true)
                 .padding(.horizontal, PBSpace.s16)
-                .padding(.vertical, PBSpace.s4)
                 .pbCard(padding: 0)
                 .accessibilityIdentifier("ask.answerCard")
         case .draft(let draft):
             PBDraftExpenseCard(
                 icon: PBIcon(rawValue: draft.icon) ?? .tag, title: draft.title, amount: draft.amount, paidLine: draft.paidLine,
-                splitLine: draft.splitLine, members: draft.people.compactMap(head), eachLine: draft.eachLine,
+                splitLine: draft.splitLine, memberAvatars: draft.people.prefix(4).map(member), eachLine: draft.eachLine,
                 isSaved: turn.savedExpense != nil, testIDPrefix: "ask.draft",
                 onSave: { save(draft) }, onEdit: { edit(draft) }, onView: view
             )
@@ -71,6 +81,17 @@ struct AskTurnView: View {
         case .suggestions:
             AskSuggestionsCard(onSend: onSend)
         }
+    }
+
+    /// The drafted reminder, as the Remind sheet will send it.
+    private func reminderCard(_ message: String) -> some View {
+        Text(message)
+            .textStyle(.body)
+            .foregroundStyle(PBColor.textPrimary)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .pbCard()
+            .accessibilityIdentifier("ask.reminder")
     }
 
     // MARK: Chips
@@ -91,10 +112,12 @@ struct AskTurnView: View {
             }
             .accessibilityIdentifier("ask.chip.insights")
         case .settleUp(let id):
-            PBButton("Settle up", style: .secondary, size: .small) { leaveChat(for: .settleUp(groupId: id)) }
+            PBButton("Settle up", style: .secondary, size: .small, icon: .wallet) { leaveChat(for: .settleUp(groupId: id)) }
                 .accessibilityIdentifier("ask.chip.settleUp")
         case .openGroup(let id, let name, let isProject):
-            PBButton("Open \(name)", style: .secondary, size: .small) { leaveChat(for: isProject ? .project(id) : .group(id)) }
+            PBButton("Open \(name)", style: .secondary, size: .small, icon: .groups) {
+                leaveChat(for: isProject ? .project(id) : .group(id))
+            }
                 .accessibilityIdentifier("ask.chip.openGroup")
         }
     }
@@ -112,7 +135,7 @@ struct AskTurnView: View {
     /// Edit opens the full form over the chat; if it saves, the card turns Saved.
     private func edit(_ draft: AssistantReply.DraftCard) {
         conversation.beginEditing(turn.id, ledger: ledgerStore.ledger)
-        router.open(.addExpense(AddExpenseArgs(draft: draft.draft, focusAmount: false)))
+        router.open(.addExpense(AddExpenseArgs(draft: draft.draft)))
     }
 
     private func view() {
@@ -130,7 +153,7 @@ struct AskTurnView: View {
         switch item.kind {
         case .direct: .expense(item.ref)
         case .group, .project: .group(item.ref)
-        case .loan: .loan(item.ref)
+        case .loan: .loan(item.ref, installment: item.installment)
         }
     }
 
@@ -138,8 +161,10 @@ struct AskTurnView: View {
         id == Person.me ? profileStore.avatarContent : ledgerStore.ledger.person(id)?.avatarContent ?? .icon(.profile)
     }
 
-    private func head(_ id: PersonID) -> PBPeepHead? {
-        if case .art(let head) = avatar(id) { head } else { nil }
+    /// You as your own avatar, a friend's head or initials, "?" for someone no longer in the ledger.
+    private func member(_ id: PersonID) -> PBAvatarStack.Member {
+        if id == Person.me { return .user }
+        return .content(ledgerStore.ledger.person(id)?.avatarContent ?? .initials("?"))
     }
 }
 

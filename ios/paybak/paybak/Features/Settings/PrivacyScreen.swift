@@ -40,7 +40,7 @@ struct PrivacyScreen: View {
                 }
                 .pbCard(padding: 0)
             }
-            VStack(alignment: .leading, spacing: PBSpace.s8) {
+            SettingsSection(footer: "Your past records stay in friends’ groups, shown as a former member.") {
                 PBSettingRow("Delete account", icon: .delete, trailing: .none, tone: .destructive, showsDivider: false) {
                     if totals.owe != 0 || totals.owed != 0 {
                         isBlockedAlertPresented = true
@@ -50,7 +50,6 @@ struct PrivacyScreen: View {
                 }
                 .pbCard(padding: 0)
                 .accessibilityIdentifier("privacyData.deleteAccount")
-                SettingsFooter("Your past records stay in friends’ groups, shown as a former\nmember.", wrapsLikeFigma: true)
             }
         }
         .pbAlert(
@@ -71,15 +70,18 @@ struct PrivacyScreen: View {
             testIDPrefix: "privacyData.deleteAlert",
             onAction: deleteAccount
         )
-        .alert("Contacts access is off", isPresented: $isContactsDeniedPresented) {
-            Button("Not now", role: .cancel) {}
-            Button("Open Settings") {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+        .pbAlert(
+            isPresented: $isContactsDeniedPresented,
+            title: "Contacts are off",
+            message: "Allow Paybak to read your contacts in Settings to turn on Contacts sync.",
+            cancelLabel: "Cancel",
+            actionLabel: "Open Settings",
+            role: .primary,
+            testIDPrefix: "privacyData.contactsAlert"
+        ) {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
             }
-        } message: {
-            Text("Turn on Contacts for Paybak in Settings to find friends already on Paybak.")
         }
         .onStartScreen([.privacyDeleteBlocked]) { _ in isBlockedAlertPresented = true }
     }
@@ -96,15 +98,18 @@ struct PrivacyScreen: View {
         }
     }
 
-    /// Turning sync on asks for contacts access; refused, it flips back off and says how to allow it.
+    /// Turning sync on without contacts access asks for it first: the switch turns on only once it's
+    /// granted; refused, it stays off and the alert says how to allow it.
     private var contactsSync: Binding<Bool> {
         Binding { discovery.contactsSync } set: { isOn in
-            ledgerStore.updateSettings { $0.discovery.contactsSync = isOn }
-            guard isOn else { return }
+            guard isOn, !ContactsDirectory.isAuthorized else {
+                ledgerStore.updateSettings { $0.discovery.contactsSync = isOn }
+                return
+            }
             Task {
-                guard await !ContactsDirectory.requestAccess() else { return }
-                ledgerStore.updateSettings { $0.discovery.contactsSync = false }
-                isContactsDeniedPresented = true
+                let isGranted = await ContactsDirectory.requestAccess()
+                ledgerStore.updateSettings { $0.discovery.contactsSync = isGranted }
+                isContactsDeniedPresented = !isGranted
             }
         }
     }

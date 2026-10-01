@@ -27,32 +27,29 @@ struct PaywallScreen: View {
         }
         .phoneContentWidth()
         .background(PBColor.bgPrimary)
-        .sensoryFeedback(.success, trigger: showsWelcome) { _, shows in shows == true }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.paywall")
-        .alert("No purchases to restore.", isPresented: $isNothingToRestorePresented) {
-            Button("OK", role: .cancel) {}
-        }
+        .proNotice("No purchases to restore.", isPresented: $isNothingToRestorePresented)
     }
 
+    /// The pitch and the five features scroll under the ✕; the plans, the CTA, its small print and the
+    /// legal links stay at the bottom, at least 24 pt below them.
     private var paywall: some View {
-        VStack(spacing: PBSpace.s4) {
-            HStack {
-                PBGlassCloseButton(action: router.dismissModal)
-                    .accessibilityIdentifier("paywall.close")
-                Spacer()
-            }
-            .padding(.horizontal, PBLayout.screenMargin)
+        VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: PBSpace.s20) {
+                VStack(spacing: 0) {
+                    PBModalHeader(testIDPrefix: "paywall", onClose: router.dismissModal)
                     hero
+                        .padding(.top, PBSpace.s4)
                     features
-                    purchaseBlock
+                        .padding(.top, PBSpace.s20)
                 }
                 .padding(.horizontal, PBLayout.screenMargin)
-                .padding(.bottom, PBSpace.s8)
             }
             .scrollBounceBehavior(.basedOnSize)
+            purchaseBlock
+                .padding(.top, PBSpace.s24)
+                .padding(.horizontal, PBLayout.screenMargin)
         }
     }
 
@@ -106,7 +103,6 @@ struct PaywallScreen: View {
                         .accessibilityIdentifier("paywall.plan.\(option == .yearly ? "yearly" : "monthly")")
                 }
             }
-            .sensoryFeedback(.selection, trigger: plan)
             VStack(spacing: 10) {
                 PBButton(plan.callToAction, fillsWidth: true, action: buy)
                     .accessibilityIdentifier("paywall.cta")
@@ -125,33 +121,38 @@ struct PaywallScreen: View {
                 }
             }
         }
+        .padding(.bottom, PBSpace.s24)
     }
 
-    /// Footnote links in `text/tertiary`, 18 pt tall with a 44 pt hit area.
+    /// Footnote links in `text/tertiary`, 18 pt tall with a 44 pt hit area; half opacity while pressed.
     private func legalLink(_ title: String, id: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .textStyle(.footnote)
                 .foregroundStyle(PBColor.textTertiary)
+                .lineLimit(1)
                 .frame(height: 18)
                 .padding(.vertical, 13)
                 .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LegalLinkStyle())
         .padding(.vertical, -13)
         .accessibilityIdentifier(id)
     }
 
-    private var statusLine: String {
+    /// The plan's status under the Welcome title; nil on the free plan.
+    private var statusLine: String? {
         ledgerStore.ledger.settings.entitlement.statusLine(today: ledgerStore.clock.today, calendar: ledgerStore.clock.calendar)
     }
 
-    /// The mock purchase: Yearly starts the trial, Monthly subscribes; then Welcome cross-fades in.
+    /// The mock purchase: Yearly starts the trial, Monthly subscribes; a success tick, then Welcome
+    /// cross-fades in.
     private func buy() {
         switch plan {
         case .yearly: ledgerStore.startTrial(.yearly)
         case .monthly: ledgerStore.subscribe(.monthly)
         }
+        Haptics.success()
         showWelcome()
     }
 
@@ -169,6 +170,15 @@ struct PaywallScreen: View {
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.3)) {
             showsWelcome = true
         }
+    }
+}
+
+/// Text links fade to half while pressed (README rule 11).
+private struct LegalLinkStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.5 : 1)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

@@ -50,17 +50,15 @@ struct ExportScreen: View {
                     }
                 }
                 .pbCard(padding: 0)
-                SettingsFooter("Includes expenses, payments and loans, with each person’s\nshare.", wrapsLikeFigma: true)
+                SettingsFooter("Includes expenses, payments and loans, with each person’s share.")
             }
         } bottom: {
             PBButton("Export", fillsWidth: true, action: export)
                 .disabled(selection.isEmpty)
                 .accessibilityIdentifier("privacyExport.export")
                 .padding(.horizontal, PBLayout.screenMargin)
-                .padding(.top, PBSpace.s12)
                 .background(PBColor.bgPrimary)
         }
-        .sensoryFeedback(.selection, trigger: selection)
         .systemShare(item: $share)
     }
 
@@ -81,7 +79,7 @@ struct ExportScreen: View {
                                           format: format == 0 ? .pdf : .csv)
             share = ShareItem(url: url)
         } catch {
-            router.toast("Couldn’t export the records")
+            router.toast("Couldn’t export your records")
         }
     }
 }

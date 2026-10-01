@@ -4,7 +4,8 @@ import SwiftUI
 /// the trial or renewal line, and what's now unlocked. Done is the only way out (no close, no swipe).
 /// It's a state of the paywall route (`screen.paywall`), marked by the hidden `paywall.state.welcome`.
 struct ProWelcomeView: View {
-    let statusLine: String
+    /// Nil on the free plan, which hides the line.
+    let statusLine: String?
     let onDone: () -> Void
 
     var body: some View {
@@ -19,10 +20,12 @@ struct ProWelcomeView: View {
                         .foregroundStyle(PBColor.textPrimary)
                         .accessibilityAddTraits(.isHeader)
                         .accessibilityIdentifier("proWelcome.title")
-                    Text(statusLine)
-                        .textStyle(.body)
-                        .foregroundStyle(PBColor.textSecondary)
-                        .accessibilityIdentifier("proWelcome.body")
+                    if let statusLine {
+                        Text(statusLine)
+                            .textStyle(.body)
+                            .foregroundStyle(PBColor.textSecondary)
+                            .accessibilityIdentifier("proWelcome.body")
+                    }
                 }
                 VStack(spacing: PBSpace.s8) {
                     PBSectionHeader("Now unlocked")

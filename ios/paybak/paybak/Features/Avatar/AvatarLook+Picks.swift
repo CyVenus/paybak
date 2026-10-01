@@ -45,6 +45,21 @@ extension AvatarLook {
         }
     }
 
+    /// Unknown option ids (after an asset update) fall back to their category's default (§7), for both
+    /// characters; the gender on show stays.
+    func normalized(catalog: AvatarCatalog = .shared) -> AvatarLook {
+        var look = self
+        for gender in Gender.allCases {
+            look.gender = gender
+            for category in catalog.character(gender).categories
+            where !category.options.contains(where: { $0.id == look.pick(category.id) }) {
+                look.setPick(category.defaultOption, for: category.id)
+            }
+        }
+        look.gender = self.gender
+        return look
+    }
+
     /// This look with one pick changed (the editor's tiles).
     func setting(_ option: String, for category: String) -> AvatarLook {
         var look = self

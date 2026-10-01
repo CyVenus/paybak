@@ -38,9 +38,11 @@ struct ProFeature: Identifiable {
 }
 
 extension Entitlement {
-    /// The Welcome / status line (§3 "Dynamic text"): the trial's end while it runs, otherwise the
-    /// next renewal after `today` and the plan's price.
-    func statusLine(today: LocalDay, calendar: Calendar) -> String {
+    /// The Welcome / status line (§3 "Dynamic text"), nil on the free plan: the trial's end while it
+    /// runs, otherwise the next renewal after `today` with the plan's price ("Renews Thu 7 Oct 2027.
+    /// ₹799/year.", "Your subscription renews Fri 30 Oct. ₹99/month.").
+    func statusLine(today: LocalDay, calendar: Calendar) -> String? {
+        guard isPro else { return nil }
         if let trialEndsAt, trialEndsAt >= today {
             return "Your free trial ends \(Format.day(trialEndsAt)). Then ₹799/year."
         }
@@ -52,6 +54,8 @@ extension Entitlement {
             months += step
         }
         renewal = renewal.adding(months: months)
-        return "Your subscription renews \(Format.day(renewal)). \(isMonthly ? "₹99/month" : "₹799/year")."
+        return isMonthly
+            ? "Your subscription renews \(Format.day(renewal)). ₹99/month."
+            : "Renews \(Format.day(renewal)). ₹799/year."
     }
 }

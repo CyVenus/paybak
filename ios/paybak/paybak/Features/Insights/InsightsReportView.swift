@@ -1,38 +1,31 @@
 import SwiftUI
 
 /// The month's report under the month row (screens-insights-ai §2.2–§2.4): the hero card with the
-/// trend and the six-month chart, By category, Who you spent with (Groups | Friends) and Lent vs
-/// borrowed. Locked, the summary, chart and category rows are blurred (§2.5).
+/// trend and the six-month chart, By category, Who you spent with (Groups | Friends; not for a month
+/// without shared expenses) and Lent vs borrowed. Locked (§2.5), only the hero card and By category
+/// show, their text, chart and rows blurred while the card's fill stays sharp.
 struct InsightsReportView: View {
     let page: InsightsPage
     let isLocked: Bool
 
     @Environment(AppRouter.self) private var router
     @Environment(LedgerStore.self) private var ledgerStore
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var who = 0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             hero
-            if page.isEmpty {
-                Text(page.emptyLine)
-                    .textStyle(.footnote)
-                    .foregroundStyle(PBColor.textTertiary)
-                    .padding(.top, PBSpace.s24)
-            } else {
-                byCategory
-                    .padding(.top, PBSpace.s24)
-                    .lockedBlur(isLocked)
-                whoYouSpentWith
-                    .padding(.top, PBSpace.s24)
-                    .lockedBlur(isLocked)
-            }
-            lentVsBorrowed
+            byCategory
                 .padding(.top, PBSpace.s24)
-                .lockedBlur(isLocked)
+            if !isLocked {
+                if !page.isEmpty {
+                    whoYouSpentWith
+                        .padding(.top, PBSpace.s24)
+                }
+                lentVsBorrowed
+                    .padding(.top, PBSpace.s24)
+            }
         }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: page)
     }
 
     // MARK: Hero
@@ -47,7 +40,6 @@ struct InsightsReportView: View {
                     Text(page.total)
                         .textStyle(.title1)
                         .foregroundStyle(PBColor.textPrimary)
-                        .contentTransition(.numericText())
                         .accessibilityIdentifier("insights.total")
                     if let trend = page.trend {
                         PBBadge(trend, style: .onCard)
@@ -71,10 +63,21 @@ struct InsightsReportView: View {
 
     // MARK: Lists
 
+    /// The header and one bar per category, largest first; a month without shared expenses says so
+    /// under the header instead.
     private var byCategory: some View {
         VStack(alignment: .leading, spacing: 0) {
             PBSectionHeader("By category")
-            rows(page.categories, prefix: "insights.category")
+                .lockedBlur(isLocked)
+            if page.isEmpty {
+                Text(page.emptyLine)
+                    .textStyle(.footnote)
+                    .foregroundStyle(PBColor.textTertiary)
+                    .padding(.top, PBSpace.s8)
+            } else {
+                rows(page.categories, prefix: "insights.category")
+                    .lockedBlur(isLocked)
+            }
         }
     }
 
@@ -156,7 +159,7 @@ struct InsightsReportView: View {
     }
 
     private func total(_ label: String, _ amount: String, testID: String) -> some View {
-        VStack(alignment: .leading, spacing: PBSpace.s2) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(label)
                 .textStyle(.footnote)
                 .foregroundStyle(PBColor.textSecondary)
@@ -172,8 +175,9 @@ struct InsightsReportView: View {
     private func loanRow(_ loan: InsightsPage.LoanRow) -> some View {
         Button { router.open(.loan(loan.id)) } label: {
             HStack(spacing: PBSpace.s8) {
-                PBAvatar(ledgerStore.ledger.person(loan.personId)?.avatarContent ?? .icon(.profile),
-                         diameter: PBSize.avatarXs, isOnCard: true)
+                if let person = ledgerStore.ledger.person(loan.personId) {
+                    PBAvatar(person.avatarContent, diameter: PBSize.avatarXs, isOnCard: true)
+                }
                 Text(loan.text)
                     .textStyle(.footnote)
                     .foregroundStyle(PBColor.textSecondary)
@@ -183,9 +187,8 @@ struct InsightsReportView: View {
                     PBBadge(badge, style: badgeStyle(loan.status))
                 }
             }
-            .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(LoanRowButtonStyle())
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("insights.loan.\(loan.id)")
     }
@@ -196,6 +199,16 @@ struct InsightsReportView: View {
         case .overdue: .overdue
         case .due, .open: .onCard
         }
+    }
+}
+
+/// A loan line on the card: the pill behind it fills `bg/selected` while pressed.
+private struct LoanRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .contentShape(.capsule)
+            .background(configuration.isPressed ? PBColor.bgSelected : .clear, in: .capsule)
+            .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 

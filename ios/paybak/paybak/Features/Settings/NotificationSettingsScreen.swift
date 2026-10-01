@@ -62,7 +62,6 @@ struct NotificationSettingsScreen: View {
                 .accessibilityIdentifier("settingsNotifications.muted")
             }
         }
-        .sensoryFeedback(.selection, trigger: settings.reminderSchedule)
     }
 
     /// "None", "1 friend", "{n} friends".

@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// Edit avatar (screens-profile §3–4): the live stage with Shuffle, Boy | Girl, the category chips and
-/// a 3-column grid of tiles previewing the look with each option. Save commits the look as the user's
-/// avatar and pops; Back with unsaved changes asks first (and the edge swipe is off while it would).
+/// a 3-column grid of tiles previewing the look with each option. The header scrolls with the editor.
+/// Save makes the look the user's avatar and pops; Back with unsaved changes asks first (and the edge
+/// swipe is off while it would). Every shuffle, Boy | Girl, chip and tile tap ticks.
 struct EditAvatarScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(ProfileStore.self) private var profileStore
@@ -10,20 +11,23 @@ struct EditAvatarScreen: View {
 
     @State private var draft: AvatarDraft?
     @State private var isDiscardAlertPresented = false
+    /// Bumped for each selection haptic.
+    @State private var tick = 0
 
     var body: some View {
-        VStack(spacing: PBSpace.s16) {
-            PBPushHeader("Edit avatar", trailing: .text("Save", action: save), testIDPrefix: "editAvatar", onBack: back)
-                .padding(.horizontal, PBLayout.screenMargin)
-            if let draft {
-                ScrollView {
-                    editor(draft)
-                        .padding(.horizontal, PBLayout.screenMargin)
-                        .padding(.bottom, PBSpace.s24)
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: PBSpace.s16) {
+                    PBPushHeader("Edit avatar", trailing: .text("Save", action: save), testIDPrefix: "editAvatar", onBack: back)
+                    if let draft {
+                        editor(draft)
+                    }
                 }
-                .scrollBounceBehavior(.basedOnSize)
+                .padding(.horizontal, PBLayout.screenMargin)
             }
-            Spacer(minLength: 0)
+            .scrollBounceBehavior(.basedOnSize)
+            // The editor ends at least 24 pt above the bottom edge.
+            Color.clear.frame(height: PBSpace.s24)
         }
         .phoneContentWidth()
         .background(PBColor.bgPrimary)
@@ -37,8 +41,7 @@ struct EditAvatarScreen: View {
             testIDPrefix: "editAvatar.discard",
             onAction: router.back
         )
-        // A tick for each pick or shuffle, not for the draft appearing.
-        .sensoryFeedback(.selection, trigger: draft?.look) { old, _ in old != nil }
+        .sensoryFeedback(.selection, trigger: tick)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.editAvatar")
         .onAppear(perform: openDraft)
@@ -54,6 +57,7 @@ struct EditAvatarScreen: View {
     private func editor(_ draft: AvatarDraft) -> some View {
         VStack(spacing: PBSpace.s16) {
             PBAvatarStage(look: draft.look, testIDPrefix: "editAvatar") {
+                tick += 1
                 self.draft?.shuffle()
             }
             PBSegmentedControl(
@@ -61,6 +65,7 @@ struct EditAvatarScreen: View {
                 selection: Binding {
                     draft.look.gender == .boy ? 0 : 1
                 } set: { index in
+                    tick += 1
                     withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
                         self.draft?.select(index == 0 ? .boy : .girl)
                     }
@@ -68,6 +73,7 @@ struct EditAvatarScreen: View {
                 testIDPrefix: "editAvatar.gender"
             )
             AvatarCategoryChips(categories: draft.categories, selection: draft.category) { category in
+                tick += 1
                 withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
                     self.draft?.category = category
                 }
@@ -88,6 +94,7 @@ struct EditAvatarScreen: View {
                     name: option.name,
                     isSelected: category.option(look.pick(category.id)).id == option.id
                 ) {
+                    tick += 1
                     draft?.pick(option.id)
                 }
                 .accessibilityIdentifier("editAvatar.option.\(option.id)")
@@ -112,9 +119,9 @@ struct EditAvatarScreen: View {
         }
     }
 
-    /// Makes the look the user's avatar (both characters' picks are kept) and pops.
+    /// Makes the look the user's avatar (both characters' picks are kept), changed or not, and pops.
     private func save() {
-        if let draft, draft.isDirty {
+        if let draft {
             profileStore.update { $0.avatar = .character(draft.look) }
         }
         router.back()
@@ -170,7 +177,8 @@ extension AvatarDraft {
             (.editAvatarGirlOutfit, "outfit", "striped-tee"),
         ]
         let target = screen == .editAvatarDiscard ? .editAvatarBoyOutfit : screen
-        look = original
+        // The story starts from the default looks, whatever was saved.
+        look = AvatarLook()
         look.gender = .boy
         for (id, category, option) in boySteps {
             look.setPick(option, for: category)

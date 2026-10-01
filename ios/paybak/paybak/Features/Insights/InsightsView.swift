@@ -11,9 +11,6 @@ struct InsightsView: View {
     @State private var isTitleCollapsed = false
     @State private var scrollPosition = ScrollPosition()
 
-    /// Figma ends the report 144 pt above the screen's bottom edge, so it scrolls exactly 676 pt (§2.4).
-    private static let bottomInset: CGFloat = 144
-
     var body: some View {
         let books = ledgerStore.books
         let page = books.insightsPage(router.insightsMonth ?? YearMonth(books.today))
@@ -29,7 +26,7 @@ struct InsightsView: View {
                     }
             }
             .padding(.horizontal, PBLayout.screenMargin)
-            .padding(.bottom, Self.bottomInset)
+            .padding(.bottom, PBTabBar.contentInset)
             .phoneContentWidth()
         }
         .scrollPosition($scrollPosition)
@@ -46,6 +43,7 @@ struct InsightsView: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.insights")
         .onStartScreen([.insightsScrolled]) { _ in
+            // Figma scrolls 676 pt; the column stops at its end if that's sooner.
             scrollPosition.scrollTo(y: 676)
         }
     }
@@ -75,7 +73,6 @@ struct InsightsView: View {
 
     private func select(_ month: YearMonth) {
         router.insightsMonth = month == YearMonth(ledgerStore.books.today) ? nil : month
-        Haptics.selection()
     }
 }
 
@@ -93,7 +90,6 @@ private struct InsightsMonthRow: View {
                 .textStyle(.headline)
                 .foregroundStyle(PBColor.textPrimary)
                 .frame(maxWidth: .infinity)
-                .contentTransition(.numericText())
                 .accessibilityIdentifier("insights.month")
             chevron(.chevronRight, label: "Next month", testID: "insights.monthNext",
                     isEnabled: page.canGoForward, to: page.month.adding(months: 1))

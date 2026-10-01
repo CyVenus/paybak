@@ -43,13 +43,10 @@ struct PaymentDetailsScreen: View {
             }
             SettingsInfoLine(icon: .lock, text: "Paybak never moves money. Friends copy these details and pay you in their own app.")
         }
-        .confirmationDialog(actionsFor?.title ?? "", isPresented: isPresented($actionsFor), titleVisibility: .visible,
-                            presenting: actionsFor) { method in
-            if !method.primary {
-                Button("Make primary") { profileStore.makePrimary(method.id) }
+        .pbSheet(isPresented: isPresented($actionsFor)) {
+            if let actionsFor {
+                actionsSheet(actionsFor)
             }
-            Button("Copy") { copy(method) }
-            Button("Remove", role: .destructive) { removing = method }
         }
         .pbAlert(
             isPresented: isPresented($removing),
@@ -93,9 +90,38 @@ struct PaymentDetailsScreen: View {
         }
     }
 
+    /// Make primary (not for the primary), Copy and Remove in a card, in a Medium sheet titled with the
+    /// method (§4, proposal). Each closes the sheet.
+    private func actionsSheet(_ method: PaymentMethod) -> some View {
+        PBSheet(title: method.title, testIDPrefix: "paymentDetails.actions", onClose: { actionsFor = nil }) {
+            VStack(spacing: 0) {
+                if !method.primary {
+                    PBSettingRow("Make primary", icon: .star, trailing: .none) {
+                        actionsFor = nil
+                        profileStore.makePrimary(method.id)
+                    }
+                    .accessibilityIdentifier("paymentDetails.actions.primary")
+                }
+                PBSettingRow("Copy", icon: .copy, trailing: .none) {
+                    actionsFor = nil
+                    copy(method)
+                }
+                .accessibilityIdentifier("paymentDetails.actions.copy")
+                PBSettingRow("Remove", icon: .delete, trailing: .none, tone: .destructive, showsDivider: false) {
+                    actionsFor = nil
+                    removing = method
+                }
+                .accessibilityIdentifier("paymentDetails.actions.remove")
+            }
+            .pbCard(padding: 0)
+        }
+    }
+
+    /// Copies the UPI ID, or the bank and last 4 digits, with a success tick and the toast.
     private func copy(_ method: PaymentMethod) {
         UIPasteboard.general.string = method.title
-        router.toast(method.kind == .upi ? "UPI ID copied" : "Bank details copied")
+        Haptics.success()
+        router.toast(method.kind == .upi ? "UPI ID copied" : "Details copied")
     }
 
     private func isPresented<Value>(_ item: Binding<Value?>) -> Binding<Bool> {
