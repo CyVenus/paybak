@@ -54,6 +54,10 @@ class TimelineLinksTest {
             Route.Recurring("g-flat302"),
             demo.route(event("Cooking gas draft created")),
         )
+        assertEquals(
+            PbAvatarContent.Symbol(PbIcon.Flame),
+            demo.leading(event("Cooking gas draft created")),
+        )
     }
 
     @Test

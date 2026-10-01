@@ -6,6 +6,7 @@ import app.paybak.paybak.domain.calc.TimelineKind
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.GroupKind
 import app.paybak.paybak.domain.model.Reminder
+import app.paybak.paybak.feature.recurring.ruleIcon
 import app.paybak.paybak.navigation.Route
 import app.paybak.paybak.ui.components.PbAvatarContent
 import app.paybak.paybak.ui.components.avatarContent
@@ -45,12 +46,19 @@ internal fun LedgerView.groupRoute(groupId: String): Route =
     if (group(groupId)?.kind == GroupKind.Project) Route.Project(groupId) else Route.Group(groupId)
 
 /**
- * The 40 dp circle: the bell for a reminder, the person for a payment or loan, the project's icon
- * for a part, else the category.
+ * The 40 dp circle: the bell for a reminder, the person for a payment or loan, the rule's icon for
+ * a recurring draft (the gas flame), the project's icon for a part, else the category.
  */
 internal fun LedgerView.leading(event: TimelineEvent): PbAvatarContent =
     when (event.kind) {
         TimelineKind.ReminderSent -> PbAvatarContent.Symbol(PbIcon.Bell)
+        TimelineKind.DraftCreated -> {
+            val rule = ledger.draft(event.ref)?.let { ledger.rule(it.ruleId) }
+            PbAvatarContent.Symbol(
+                rule?.let { ruleIcon(it.title, it.category) }
+                    ?: Category.of(event.category.orEmpty()).pbIcon
+            )
+        }
         TimelineKind.ComponentChanged ->
             PbAvatarContent.Symbol(iconForKey(event.groupId?.let { group(it)?.icon }.orEmpty()))
         TimelineKind.Payment,
