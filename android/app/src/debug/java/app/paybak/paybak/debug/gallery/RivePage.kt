@@ -45,7 +45,10 @@ private val replayTriggers =
 @Composable
 internal fun RivePage() {
     GalleryPage {
-        PaybakRiveAsset.entries.forEach { asset -> RiveSample(asset) }
+        // The payment scene is full screen, not an illustration.
+        PaybakRiveAsset.entries
+            .filter { it != PaybakRiveAsset.Payment }
+            .forEach { asset -> RiveSample(asset) }
     }
 }
 

@@ -93,18 +93,24 @@ class PaybakRiveController internal constructor(private val instance: ViewModelI
 
 /**
  * Renders the [artboard] of the raw `.riv` [resId], driven by its [stateMachine], with the
- * artboard's default view-model instance bound (auto-bind). Loading, binding and the first values
- * all happen before the first frame, and everything is closed when it leaves composition. It draws
- * only while the Activity is resumed, and pauses where infinite animations are paused (see
- * [rememberInfinitePlayback]). Decorative for TalkBack.
+ * artboard's default view-model instance bound (auto-bind) when the file has view models. Loading,
+ * binding and the first values all happen before the first frame, and everything is closed when it
+ * leaves composition. It draws only while the Activity is resumed, and pauses where infinite
+ * animations are paused (see [rememberInfinitePlayback]). Decorative for TalkBack.
  *
- * @param modifier Size it to the artboard (see [PaybakRiveAsset.viewSize]).
+ * @param modifier Size it to the artboard (see [PaybakRiveAsset.viewSize]), or fill a screen with
+ *   [Fit.Cover].
+ * @param fit How the artboard maps onto the view; centred either way.
+ * @param playing False holds the scene where it is (loaded, not advancing), e.g. until it shows.
  * @param pointerInputMode Touches always reach the file's listeners. [RivePointerInputMode.Consume]
  *   also blocks parent gestures; use [RivePointerInputMode.Observe] inside swipes and scrolls.
  * @param reduceMotion Written to `reduceMotion`; follows the system setting by default.
  * @param numbers Number properties kept in sync, e.g. `mapOf("step" to 2f)`.
  * @param observedTriggers Triggers to observe; each fire calls [onTrigger] with its name.
- * @param onReady Receives the controller once per load, before the first frame.
+ * @param onReady Receives the controller once per load, before the first frame (never for a file
+ *   without a view model).
+ * @param onLoaded Called once per load when the scene is ready to draw (true), or when it can't be
+ *   drawn at all (false: no worker, or the file failed to load).
  */
 @Composable
 fun PaybakRive(
@@ -112,21 +118,26 @@ fun PaybakRive(
     artboard: String,
     stateMachine: String,
     modifier: Modifier = Modifier,
+    fit: Fit = Fit.Contain(),
+    playing: Boolean = true,
     pointerInputMode: RivePointerInputMode = RivePointerInputMode.Consume,
     reduceMotion: Boolean = LocalReduceMotion.current,
     numbers: Map<String, Float> = emptyMap(),
     observedTriggers: List<String> = emptyList(),
     onTrigger: (trigger: String) -> Unit = {},
     onReady: (PaybakRiveController) -> Unit = {},
+    onLoaded: (drawn: Boolean) -> Unit = {},
 ) {
     val decorative = modifier.clearAndSetSemantics {}
     val worker = LocalRiveWorker.current
+    val currentOnLoaded by rememberUpdatedState(onLoaded)
     if (worker == null) {
+        LaunchedEffect(Unit) { currentOnLoaded(false) }
         Box(decorative)
         return
     }
 
-    val playing = rememberInfinitePlayback()
+    val mayPlay = rememberInfinitePlayback()
     val currentReduceMotion by rememberUpdatedState(reduceMotion)
     val currentNumbers by rememberUpdatedState(numbers)
     val currentOnReady by rememberUpdatedState(onReady)
@@ -139,9 +150,11 @@ fun PaybakRive(
     val scene = (sceneResult as? Result.Success)?.value
     if (scene == null) {
         // Loading or failed: keep the slot transparent. Failures are logged by rememberRiveScene.
+        if (sceneResult is Result.Error) LaunchedEffect(sceneResult) { currentOnLoaded(false) }
         Box(decorative)
         return
     }
+    LaunchedEffect(scene) { currentOnLoaded(true) }
 
     scene.controller?.let { controller ->
         LaunchedEffect(controller, reduceMotion) {
@@ -161,11 +174,11 @@ fun PaybakRive(
     Rive(
         file = scene.file,
         modifier = decorative,
-        playing = playing,
+        playing = playing && mayPlay,
         artboard = scene.artboard,
         stateMachine = scene.stateMachine,
         viewModelInstance = scene.viewModelInstance,
-        fit = Fit.Contain(),
+        fit = fit,
         pointerInputMode = pointerInputMode,
     )
 }
@@ -195,7 +208,10 @@ private class RiveScene(
     val file: RiveFile,
     val artboard: Artboard,
     val stateMachine: StateMachine,
-    /** Null only if no instance could be created; Rive then binds its own default. */
+    /**
+     * Null when the file has no view model (nothing to bind), or if no instance could be created
+     * (Rive then binds its own default).
+     */
     val viewModelInstance: ViewModelInstance?,
     val controller: PaybakRiveController?,
 )
@@ -247,12 +263,14 @@ private fun rememberRiveScene(
 
 /**
  * The artboard's default view model and its default instance (what other runtimes call auto-bind),
- * falling back to the first authored instance.
+ * falling back to the first authored instance. Null without a word when the file has no view
+ * models (the payment scene), as there is nothing to bind.
  */
 private suspend fun createDefaultViewModelInstance(
     file: RiveFile,
     artboard: Artboard,
 ): ViewModelInstance? {
+    if (file.getViewModelNames().isEmpty()) return null
     val viewModel = ViewModelSource.DefaultForArtboard(artboard)
     return try {
         ViewModelInstance.create(file, viewModel.defaultInstance())
