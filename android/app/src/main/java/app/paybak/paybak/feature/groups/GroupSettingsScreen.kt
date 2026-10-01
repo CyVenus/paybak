@@ -64,8 +64,8 @@ import app.paybak.paybak.ui.theme.PbTextStyles
 private val LeaveBlockedScroll = 26.dp
 
 /**
- * The `groupSettings` route (screens-groups §5): name and Settle by, the members (+ Add through
- * the people picker), currency, Simplify debts, Recurring expenses (Pro) and Leave group, which is
+ * The `groupSettings` route (screens-groups §5): name and Settle by, the members (+ Add through the
+ * people picker), currency, Simplify debts, Recurring expenses (Pro) and Leave group, which is
  * blocked while your balance there isn't 0 (§5.6) and asks first otherwise.
  */
 @Composable
@@ -145,6 +145,7 @@ fun GroupSettingsScreen(route: Route.GroupSettings) {
                         mode = PickMode.Multi,
                         selected = page.group.memberIds - ME,
                         title = addMembersTitle,
+                        includesYou = false,
                     )
                 )
             },

@@ -113,6 +113,7 @@ fun ProjectSettingsScreen(route: Route.ProjectSettings) {
                             mode = PickMode.Multi,
                             selected = project.memberIds - ME,
                             title = addMembersTitle,
+                            includesYou = false,
                         )
                     )
                 },
@@ -186,8 +187,8 @@ fun ProjectSettingsScreen(route: Route.ProjectSettings) {
 
 /**
  * Contribution rule: the segments, the helper (red with what's left while Percent or Fixed don't
- * add up) and the members card with each share and Add member. A rule that adds up is saved
- * through [onSave] at once; until then the saved one stays in force.
+ * add up) and the members card with each share and Add member. A rule that adds up is saved through
+ * [onSave] at once; until then the saved one stays in force.
  */
 @Composable
 private fun ContributionSection(
@@ -264,7 +265,9 @@ private fun ContributionSection(
                                         value = current.typed[id].orEmpty(),
                                         onValueChange = { text ->
                                             AmountEntry.accept(amountInput(text, true))?.let {
-                                                update(current.copy(typed = current.typed + (id to it)))
+                                                update(
+                                                    current.copy(typed = current.typed + (id to it))
+                                                )
                                             }
                                         },
                                         prefix =
@@ -273,7 +276,9 @@ private fun ContributionSection(
                                             } else {
                                                 ""
                                             },
-                                        suffix = if (current.rule == ContributionRule.Percent) "%" else "",
+                                        suffix =
+                                            if (current.rule == ContributionRule.Percent) "%"
+                                            else "",
                                         decimal = true,
                                     ),
                                     testTag = "projectSettings.member.$id.value",
