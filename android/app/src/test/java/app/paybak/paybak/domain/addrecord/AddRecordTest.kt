@@ -106,6 +106,18 @@ class AddRecordTest {
     }
 
     @Test
+    fun oneSharerIsOnePerson() {
+        val two = listOf(ME, "p-priya")
+        val exact =
+            SplitDraft(SplitMode.Exact, excluded = setOf("p-priya"), values = mapOf(ME to "900"))
+        val preview = exact.preview(rupee(900), two, "INR")
+        assertEquals(
+            SplitSummary("Exact · 1 person"),
+            exact.summary(preview, two, rupee(900), "INR"),
+        )
+    }
+
+    @Test
     fun leftoverPaiseRotateFairly() {
         val view = Demo.load()
         val context = ActionContext(view.now, Demo.zone, "INR")

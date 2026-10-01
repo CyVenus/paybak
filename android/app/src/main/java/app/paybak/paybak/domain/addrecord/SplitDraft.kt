@@ -151,6 +151,7 @@ data class SplitDraft(
     ): SplitSummary {
         val count = included(people).size
         if (!preview.balanced) return SplitSummary("Doesn’t add up", error = true)
+        val counted = "$count ${if (count == 1) "person" else "people"}"
         val text =
             when (mode) {
                 SplitMode.Equal ->
@@ -158,9 +159,9 @@ data class SplitDraft(
                         people.size < 2 || total == 0L -> "Equally"
                         total % count == 0L ->
                             "Equally · ${Money.format(total / count, currency)} each"
-                        else -> "Equally · $count people"
+                        else -> "Equally · $counted"
                     }
-                else -> "${mode.label} · $count people"
+                else -> "${mode.label} · $counted"
             }
         return SplitSummary(text)
     }
