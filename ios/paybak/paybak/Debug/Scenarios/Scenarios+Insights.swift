@@ -19,7 +19,7 @@ extension Scenario {
             .recurringFlat302: Scenario(seeds: pro(), tab: .groups, stack: [.group("g-flat302"), .recurring("g-flat302")]),
             .recurringRepeat: Scenario(seeds: pro(), modals: [Layer(
                 root: .addExpense(AddExpenseArgs(draft: cookingGasDraft(on: figma), focusAmount: false)),
-                sheet: .repeatRule(RepeatRuleRequest(current: RepeatRule(frequency: .monthly, anchorDate: figma), startDate: figma))
+                sheet: .repeatRule(RepeatRuleRequest(current: cookingGasRule(on: figma), startDate: figma))
             )]),
             .recurringEnterAmount: Scenario(seeds: pro(), modals: [Layer(root: .enterDraftAmount("d-gas-09"))]),
         ]
@@ -49,7 +49,12 @@ extension Scenario {
     /// Cooking gas for Flat 302, the Repeat sheet's example.
     static func cookingGasDraft(on day: LocalDay) -> ExpenseDraft {
         ExpenseDraft(groupId: "g-flat302", title: "Cooking gas", category: .bills, currency: "INR", date: day,
-                     rows: [Person.me, "p-meera", "p-kabir"].map { SplitRow(personId: $0) })
+                     rows: [Person.me, "p-meera", "p-kabir"].map { SplitRow(personId: $0) }, repeatRule: cookingGasRule(on: day))
+    }
+
+    /// Monthly on the 28th, amount changing each time (insights §5.3).
+    static func cookingGasRule(on day: LocalDay) -> RepeatRule {
+        RepeatRule(frequency: .monthly, anchorDate: day.adding(days: -2), variable: true)
     }
 }
 #endif
