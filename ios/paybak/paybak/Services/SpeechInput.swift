@@ -75,14 +75,21 @@ private nonisolated final class Recording: @unchecked Sendable {
         }
         let input = engine.inputNode
         let request = request
-        // iOS 27's throwing tap (the SDK doesn't refine its Swift name yet).
-        do {
-            try input.__installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0), error: ()) { buffer, _ in
+        let format = input.outputFormat(forBus: 0)
+        if #available(iOS 27, *) {
+            // iOS 27's throwing tap (the SDK doesn't refine its Swift name yet).
+            do {
+                try input.__installTap(onBus: 0, bufferSize: 1024, format: format, error: ()) { buffer, _ in
+                    request.append(buffer)
+                }
+            } catch {
+                task.cancel()
+                throw error
+            }
+        } else {
+            input.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in
                 request.append(buffer)
             }
-        } catch {
-            task.cancel()
-            throw error
         }
         engine.prepare()
         try engine.start()
