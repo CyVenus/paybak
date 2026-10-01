@@ -174,9 +174,12 @@ class ShellTest {
         all.take(all.size / 2).toSet()
     }
 
-    /** Launches each id and waits for the root its scenario shows. */
+    /**
+     * Launches each id and waits for the root its scenario shows. Ids that open system UI over the
+     * app ([systemUi]) are tested by their own module.
+     */
     private fun startAll(ids: List<String>) {
-        ids.forEach { id ->
+        (ids - systemUi).forEach { id ->
             launchPaybak(id).use { awaitTag(expectedRoot(id, ScreenIds.scenarios.getValue(id))) }
         }
     }
@@ -194,6 +197,9 @@ class ShellTest {
         if (tab == Tab.Home) "home.logo" else "screen.${tab.route.id}"
 
     private companion object {
+        /** settleRemindShare opens the share sheet, which hides the app (SettleTest covers it). */
+        val systemUi = setOf("settleRemindShare")
+
         /** Home's root carries its state: `screen.home<State>`. */
         val homeRoots =
             mapOf(
