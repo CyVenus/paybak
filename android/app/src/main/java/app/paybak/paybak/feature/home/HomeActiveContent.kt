@@ -50,9 +50,13 @@ internal fun HomeActiveContent(home: HomeSummary, view: LedgerView) {
     Column(verticalArrangement = Arrangement.spacedBy(PbLayout.SectionGap)) {
         PbBalanceSummary(
             owedAmount = Money.format(home.totals.owed, view.defaultCurrency, MoneySign.Signed),
-            owedCaption = home.totals.owedCaption,
+            owedCaption =
+                if (home.totals.owed > 0) home.totals.owedCaption
+                else stringResource(R.string.home_nothing_pending),
             oweAmount = Money.format(-home.totals.owe, view.defaultCurrency, MoneySign.Signed),
-            oweCaption = home.totals.oweCaption,
+            oweCaption =
+                if (home.totals.owe > 0) home.totals.oweCaption
+                else stringResource(R.string.home_nothing_to_pay),
             onOwed = { navigator.open(Route.OwedBreakdown) },
             onOwe = { navigator.open(Route.OweBreakdown) },
             onSettleUp = { navigator.open(Route.SettleUp()) },

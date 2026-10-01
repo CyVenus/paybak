@@ -11,6 +11,9 @@
     <string name="home_settle">Settle</string>
     <string name="home_recent_activity">Recent activity</string>
     <string name="home_see_all">See all</string>
+    <!-- Balance summary captions when that side is zero -->
+    <string name="home_nothing_pending">Nothing pending</string>
+    <string name="home_nothing_to_pay">Nothing to pay</string>
     <string name="home_first_day_title">Nothing here yet.</string>
     <string name="home_first_day_body">Add your first expense or invite a friend to get started.</string>
     <string name="home_add_expense">Add expense</string>
