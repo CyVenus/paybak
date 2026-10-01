@@ -19,7 +19,7 @@ struct GroupSettingsScreen: View {
     /// One request id per picker, so each result lands in the right row.
     @State private var settleByRequest = DatePickRequest(kind: .dueDate, allowsNone: true)
     @State private var currencyRequest = CurrencyPickRequest()
-    @State private var membersRequest = PeoplePickRequest(title: "Add members")
+    @State private var membersRequest = PeoplePickRequest(title: "Add members", showsYou: false)
 
     var body: some View {
         ScrollView {
@@ -109,7 +109,7 @@ struct GroupSettingsScreen: View {
     private func members(_ group: LedgerGroup) -> some View {
         VStack(alignment: .leading, spacing: PBSpace.s4) {
             PBSectionHeader("Members", actionTitle: "Add") {
-                membersRequest = PeoplePickRequest(selected: group.memberIds.filter { $0 != Person.me }, title: "Add members")
+                membersRequest = PeoplePickRequest(selected: group.memberIds.filter { $0 != Person.me }, title: "Add members", showsYou: false)
                 router.open(.pickPeople(membersRequest))
             }
             .accessibilityElement(children: .contain)
