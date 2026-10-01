@@ -15,6 +15,7 @@ final class LedgerStore {
     let clock: AppClock
     @ObservationIgnored let profileStore: ProfileStore
     @ObservationIgnored private let file: LedgerFile
+    @ObservationIgnored private var changeObservers: [(_ old: Ledger, _ new: Ledger) -> Void] = []
 
     init(file: LedgerFile = .standard, clock: AppClock = AppClock(), profileStore: ProfileStore) {
         self.file = file
@@ -45,13 +46,25 @@ final class LedgerStore {
     }
 
     /// The only write path: applies `change` to the books at the clock's now; when it doesn't throw,
-    /// keeps the result, recomputes the snapshot, saves and bumps `revision`.
+    /// keeps the result, recomputes the snapshot, saves and bumps `revision`, then tells the change
+    /// observers.
     @discardableResult
     func mutate<Result>(_ change: (inout Books) throws -> Result) rethrows -> Result {
+        let old = ledger
         var books = books
         let result = try change(&books)
         commit(books.ledger)
+        for observer in changeObservers {
+            observer(old, ledger)
+        }
         return result
+    }
+
+    /// Calls `observer` after every `mutate` with the ledger before and after (payment approvals,
+    /// the debug auto-approver). `replace` and `reset` swap the whole ledger (demo loading, a new
+    /// account) and aren't reported.
+    func observeChanges(_ observer: @escaping (_ old: Ledger, _ new: Ledger) -> Void) {
+        changeObservers.append(observer)
     }
 
     /// Runs the scheduler up to now (launch, foreground, after the clock moves).

@@ -95,6 +95,21 @@ struct LedgerStoreTests {
         #expect(throws: LedgerError.self) { try store.leaveGroup("g-goa") }
     }
 
+    @Test func changeObserversSeeEveryMutateButNotWholeLedgers() throws {
+        let store = makeStore()
+        var approvals: [[PaymentID]] = []
+        store.observeChanges { old, new in
+            approvals.append(PaymentApprovals.approved(from: old, to: new).map(\.id))
+        }
+        store.replace(with: DemoFixture.load("paymentToMeeraPending").ledger)
+        #expect(approvals.isEmpty)
+        try store.confirmPayment("pay-me-meera")
+        #expect(approvals == [["pay-me-meera"]])
+        store.replace(with: DemoFixture.load("paymentToMeeraPending").ledger)
+        store.reset()
+        #expect(approvals.count == 1)
+    }
+
     @Test func snapshotIsQuick() {
         let books = DemoFixture.load("eshaClaimsPayment")
         let clock = ContinuousClock()
