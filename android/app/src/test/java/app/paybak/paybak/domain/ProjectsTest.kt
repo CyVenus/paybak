@@ -5,6 +5,7 @@ import app.paybak.paybak.domain.actions.confirmPayment
 import app.paybak.paybak.domain.actions.recordPayment
 import app.paybak.paybak.domain.actions.tick
 import app.paybak.paybak.domain.calc.projectReport
+import app.paybak.paybak.domain.calc.timeline
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.format.Money
 import app.paybak.paybak.domain.model.PaymentDraft
@@ -12,6 +13,7 @@ import app.paybak.paybak.domain.model.PaymentMethod
 import app.paybak.paybak.domain.model.ProjectStatus
 import kotlin.math.roundToInt
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** verify.py `check_projects`. */
@@ -83,6 +85,9 @@ class ProjectsTest {
             mapOf("You" to -2375L, "Dev" to 19625L, "Priya" to -6375L, "Rohan" to -10875L),
             over.groupNets("pj-drone").mapKeys { over.first(it.key) }.mapValues { it.value / 100 },
         )
+        // Dev bought it, so the log says so (not "You bought GPS module").
+        assertEquals("p-dev", over.ledger.component("c-drone-gps")!!.history.last().by)
+        assertTrue(over.timeline().any { it.title == "Dev bought GPS module" })
     }
 
     @Test

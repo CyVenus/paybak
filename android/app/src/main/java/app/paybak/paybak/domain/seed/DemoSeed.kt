@@ -200,6 +200,8 @@ class DemoSeed(json: String) {
                     status = decode<ComponentStatus>(step.getValue("status")),
                     actualCost = step.getValue("actualCost").jsonPrimitive.content.toLong(),
                     paidBy = text("paidBy"),
+                    // The payer bought it (Dev buys the GPS module), not you.
+                    by = text("paidBy"),
                 )
             "closeProject" -> ledger.closeProject(text("projectId"), ctx)
             "createGroup" -> {
