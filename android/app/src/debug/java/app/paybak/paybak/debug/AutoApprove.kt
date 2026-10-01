@@ -20,13 +20,16 @@ import kotlinx.coroutines.launch
 object AutoApprove {
     private const val PREFS = "debug"
     private const val KEY_ON = "auto_approve"
-    private const val DELAY_MILLIS = 5_000L
+    private const val DELAY_SECONDS = 5
 
     /**
      * The last `autoApprove` launch extra (DebugLaunch), over the saved setting until the process
      * ends, so a relaunch without it (the debug menu's) keeps it.
      */
     @Volatile internal var launchOverride: Boolean? = null
+
+    /** The last `autoApproveAfter` launch extra: how many seconds friends take instead of 5. */
+    @Volatile internal var launchDelaySeconds: Int? = null
 
     /** On unless turned off in the debug menu. */
     fun isOn(app: PaybakApplication): Boolean =
@@ -45,7 +48,7 @@ object AutoApprove {
             ledger.changes.collect { change ->
                 PaymentApprovals.recorded(change.before, change.after).forEach { payment ->
                     scope.launch {
-                        delay(DELAY_MILLIS)
+                        delay((launchDelaySeconds ?: DELAY_SECONDS) * 1_000L)
                         val current = ledger.ledger.value.payment(payment.id)
                         if (isOn(app) && current?.status == PaymentStatus.Pending) {
                             ledger.confirmPayment(payment.id)

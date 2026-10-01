@@ -24,7 +24,8 @@ import java.time.LocalDateTime
  *   clock; `--es pro YES|NO` (or `--ez pro`) overrides the plan last.
  * - `--es link paybak://…` opens an internal link, as a notification tap does (MainActivity).
  * - `--ez autoApprove false` (or `--es autoApprove NO`) stops friends confirming your new payments
- *   after 5 s until the process ends ([AutoApprove]; UI tests pass false).
+ *   after 5 s until the process ends ([AutoApprove]; UI tests pass false); `--ei autoApproveAfter 12`
+ *   makes them take 12 s instead.
  */
 object DebugLaunch {
     private const val TAG = "DebugLaunch"
@@ -36,6 +37,7 @@ object DebugLaunch {
     private const val EXTRA_NOW = "now"
     private const val EXTRA_PRO = "pro"
     private const val EXTRA_AUTO_APPROVE = "autoApprove"
+    private const val EXTRA_AUTO_APPROVE_AFTER = "autoApproveAfter"
     const val GALLERY_ID = "gallery"
 
     /** Screens before sign-in don't read the profile, so starting there doesn't seed it. */
@@ -47,6 +49,7 @@ object DebugLaunch {
      */
     fun startTarget(intent: Intent, app: PaybakApplication, firstLaunch: Boolean): StartTarget? {
         flag(intent, EXTRA_AUTO_APPROVE)?.let { AutoApprove.launchOverride = it }
+        seconds(intent, EXTRA_AUTO_APPROVE_AFTER)?.let { AutoApprove.launchDelaySeconds = it }
         if (firstLaunch && intent.getBooleanExtra(EXTRA_RESET_ONBOARDING, false)) {
             app.resetAccount()
             DebugClock.pin(app, null)
@@ -117,6 +120,13 @@ object DebugLaunch {
                 DemoData.apply(app, it)
             }
         flag(intent, EXTRA_PRO)?.let(app.ledger::setPro)
+    }
+
+    /** `--ei key 12` or `--es key 12`: a positive number of seconds. */
+    private fun seconds(intent: Intent, key: String): Int? {
+        if (intent.extras?.containsKey(key) != true) return null
+        val value = intent.getStringExtra(key)?.toIntOrNull() ?: intent.getIntExtra(key, 0)
+        return value.takeIf { it > 0 }
     }
 
     /** `--ez key true` or `--es key YES|NO|true|false`. */

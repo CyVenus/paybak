@@ -20,6 +20,7 @@ import app.paybak.paybak.data.UserProfile
  * @param link Opens an internal link as a notification tap would.
  * @param autoApprove Whether friends confirm the payments you record after 5 s (debug builds). Off
  *   unless a test asks, so a payment you record stays pending.
+ * @param autoApproveAfter How many seconds they take instead of 5.
  */
 fun launchPaybak(
     startScreen: String? = null,
@@ -30,6 +31,7 @@ fun launchPaybak(
     pro: Boolean? = null,
     link: String? = null,
     autoApprove: Boolean = false,
+    autoApproveAfter: Int? = null,
 ): ActivityScenario<MainActivity> {
     val intent =
         Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
@@ -41,6 +43,7 @@ fun launchPaybak(
     now?.let { intent.putExtra("now", it) }
     pro?.let { intent.putExtra("pro", it) }
     link?.let { intent.putExtra("link", it) }
+    autoApproveAfter?.let { intent.putExtra("autoApproveAfter", it) }
     return ActivityScenario.launch(intent)
 }
 
