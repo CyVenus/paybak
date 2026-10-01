@@ -5,8 +5,9 @@
 //  Everything is main-actor isolated (the target's default). Rive calls the auto-bind and trigger
 //  callbacks synchronously on the main thread.
 //
-//  Note: the current .riv files carry Rive's export watermark, so rive-ios plays a ~2 s black "RIVE"
-//  pre-roll on every new artboard instance. The fix is clean re-exports, not code.
+//  Note: the six illustration .riv files carry Rive's export watermark, so rive-ios plays a ~2 s black
+//  "RIVE" pre-roll on every new artboard instance. The fix is clean re-exports, not code (the payment
+//  scene is already clean).
 
 import Combine
 import RiveRuntime
@@ -48,6 +49,8 @@ final class PaybakRiveController: ObservableObject {
     init(_ asset: PaybakRiveAsset, bundle: Bundle = .main) {
         self.asset = asset
         riveViewModel = Self.makeRiveViewModel(for: asset, bundle: bundle)
+        // A file without view models has nothing to bind or set.
+        guard asset.hasViewModel else { return }
         // Seeded before the first bind so the first advance already uses the right mode.
         // PaybakRiveView keeps it in sync with the Reduce Motion setting.
         boolValues[Self.reduceMotionProperty] = UIAccessibility.isReduceMotionEnabled
@@ -191,7 +194,7 @@ final class PaybakRiveController: ObservableObject {
             return RiveViewModel(
                 model,
                 stateMachineName: asset.stateMachine,
-                fit: .contain,
+                fit: riveFit(asset.fit),
                 alignment: .center,
                 autoPlay: true,
                 artboardName: asset.artboard
@@ -200,6 +203,15 @@ final class PaybakRiveController: ObservableObject {
             log.error("Rive load failed for \(asset.fileName, privacy: .public): \(String(describing: error), privacy: .public)")
             assertionFailure("Rive load failed for \(asset.fileName): \(error)")
             return nil
+        }
+    }
+
+    /// `.layout` keeps the automatic layout scale factor, the screen scale, so the artboard takes the
+    /// view's size in points.
+    private static func riveFit(_ fit: PaybakRiveFit) -> RiveFit {
+        switch fit {
+        case .contain: .contain
+        case .layout: .layout
         }
     }
 
@@ -268,6 +280,30 @@ struct PaybakRiveView: View {
         if let riveViewModel = controller.riveViewModel {
             RiveViewRepresentable(viewModel: riveViewModel)
         }
+    }
+}
+
+/// A full-bleed scene (the payment scene, `PaybakRiveFit.layout`): the artboard takes the whole space,
+/// under the safe areas too, and owns its controller. It ignores touches and is decorative for
+/// VoiceOver; it pauses while off screen.
+struct PaybakRiveScene: View {
+    @StateObject private var controller: PaybakRiveController
+
+    init(_ asset: PaybakRiveAsset) {
+        _controller = StateObject(wrappedValue: PaybakRiveController(asset))
+    }
+
+    var body: some View {
+        Group {
+            if let riveViewModel = controller.riveViewModel {
+                RiveViewRepresentable(viewModel: riveViewModel)
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .onAppear { controller.resume() }
+        .onDisappear { controller.pause() }
     }
 }
 
