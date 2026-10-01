@@ -24,8 +24,9 @@ struct ExpenseDetailScreen: View {
     @State private var didShowToast = false
 
     var body: some View {
+        let detail = store.books.expenseDetail(expenseId)
         Group {
-            if let detail = store.books.expenseDetail(expenseId) {
+            if let detail {
                 content(detail)
             } else {
                 missing
@@ -34,6 +35,16 @@ struct ExpenseDetailScreen: View {
         .pbPinnedHeader {
             PBPushHeader("Expense", trailing: canEdit ? .text("Edit", action: edit) : .none, testIDPrefix: "expense", onBack: router.back)
         }
+        // Over the pinned header too, so the scrim dims the whole screen.
+        .pbAlert(
+            isPresented: $showsDelete,
+            title: "Delete this expense?",
+            message: detail.map(deleteMessage),
+            cancelLabel: "Cancel",
+            actionLabel: "Delete",
+            testIDPrefix: "expense.alert",
+            onAction: delete
+        )
         .task {
             // A toast handed over with the route shows once, not again after a push comes back.
             if let toast, !didShowToast { router.toast(toast) }
@@ -111,15 +122,6 @@ struct ExpenseDetailScreen: View {
         .scrollDismissesKeyboard(.interactively)
         // Tapping outside the pinned composer puts the keyboard away (§4.6).
         .simultaneousGesture(TapGesture().onEnded { isComposerFocused = false }, isEnabled: isComposing)
-        .pbAlert(
-            isPresented: $showsDelete,
-            title: "Delete this expense?",
-            message: deleteMessage(detail),
-            cancelLabel: "Cancel",
-            actionLabel: "Delete",
-            testIDPrefix: "expense.alert",
-            onAction: delete
-        )
         .pbSheet(isPresented: $showsFlag) {
             FlagExpenseSheet(onClose: { showsFlag = false }) { note in
                 showsFlag = false

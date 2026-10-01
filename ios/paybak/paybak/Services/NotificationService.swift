@@ -82,7 +82,7 @@ enum NotificationService {
         switch alert.content {
         case .inbox(let item):
             (content.title, content.body) = books.inboxText(item)
-            link = DeepLink(item)
+            link = DeepLink(item, in: books.ledger)
         case .draft(let draft):
             (content.title, content.body) = books.draftAlertText(draft)
             link = .recurringDraft(draft.id)
@@ -104,13 +104,14 @@ enum NotificationService {
 }
 
 extension DeepLink {
-    /// Where an inbox item leads (domain.md §6.8).
-    init?(_ item: InboxItem) {
+    /// Where an inbox item leads (domain.md §6.8); a payment reminder pays by UPI as its inbox row does.
+    init?(_ item: InboxItem, in ledger: Ledger) {
         let p = item.params
         switch item.type {
         case .paymentReminder:
             guard let person = p.personId else { return nil }
-            self = .recordPayment(to: person, amount: p.amount, context: p.groupId.map { .group($0) })
+            self = .recordPayment(to: person, amount: p.amount, context: p.groupId.map { .group($0) },
+                                  method: ledger.reminderMethod(paying: person))
         case .monthlySummary:
             self = .insights(p.year.flatMap { year in p.month.map { YearMonth(year: year, month: $0) } })
         case .paymentConfirmed, .paymentNotReceived:

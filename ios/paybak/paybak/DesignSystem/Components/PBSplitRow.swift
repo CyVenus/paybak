@@ -23,8 +23,8 @@ struct PBSplitRow: View {
     let mode: Mode
     /// The person's share as display text ("₹700").
     let amount: String
-    /// The currency symbol shown in the Exact field and for excluded amounts.
-    var currencySymbol = "₹"
+    /// The currency of the Exact field and of excluded amounts.
+    var currency = "INR"
     @Binding var isIncluded: Bool
     var showsDivider = true
     var focus: FocusState<Bool>.Binding?
@@ -62,7 +62,7 @@ struct PBSplitRow: View {
                     .foregroundStyle(isIncluded ? PBColor.textPrimary : PBColor.textTertiary)
                     .lineLimit(1)
                 if showsAmountUnderName {
-                    Text(isIncluded ? amount : currencySymbol + "0")
+                    Text(isIncluded ? amount : zero)
                         .textStyle(.footnote)
                         .foregroundStyle(isIncluded ? PBColor.textSecondary : PBColor.textTertiary)
                 }
@@ -96,6 +96,9 @@ struct PBSplitRow: View {
         return false
     }
 
+    /// An excluded person's share: "₹0".
+    private var zero: String { Money.info(currency).symbol + "0" }
+
     private var showsAmountUnderName: Bool {
         switch mode {
         case .percent, .shares: true
@@ -107,14 +110,14 @@ struct PBSplitRow: View {
     private var trailing: some View {
         switch mode {
         case .equally:
-            Text(isIncluded ? amount : currencySymbol + "0")
+            Text(isIncluded ? amount : zero)
                 .textStyle(.headline)
                 .foregroundStyle(isIncluded ? PBColor.textPrimary : PBColor.textTertiary)
         case .exact(let value):
             PBInlineField(
                 text: isIncluded ? value : .constant("0"),
                 accessibilityLabel: "\(name)’s amount",
-                prefix: currencySymbol,
+                currency: currency,
                 isDimmed: !isIncluded,
                 focus: focus
             )

@@ -44,6 +44,9 @@ nonisolated struct Ledger: Codable, Hashable, Sendable {
     func rule(_ id: RuleID) -> RecurringRule? { recurringRules.first { $0.id == id } }
     func draft(_ id: DraftID) -> RecurringDraft? { drafts.first { $0.id == id } }
 
+    /// How a payment reminder pays `payee`: by UPI when they have a UPI ID, else the form's default.
+    func reminderMethod(paying payee: PersonID) -> PaymentMethodKind? { person(payee)?.upi == nil ? nil : .upi }
+
     // MARK: Decoding (tolerant: missing keys take their defaults, unknown keys are ignored)
 
     private enum CodingKeys: String, CodingKey {

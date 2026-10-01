@@ -120,7 +120,7 @@ struct ProjectSettingsScreen: View {
                             apply(next)
                         },
                         accessibilityLabel: "\(ledgerStore.books.firstName(id))’s share",
-                        prefix: isPercent ? nil : Money.info(currency).symbol,
+                        currency: isPercent ? nil : currency,
                         suffix: isPercent ? "%" : nil
                     )
                     .padding(.trailing, PBSpace.s16)

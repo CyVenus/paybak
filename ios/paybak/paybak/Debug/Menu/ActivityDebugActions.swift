@@ -25,7 +25,7 @@ enum ActivityDebugActions {
     private static func post(_ title: String, type: InboxItem.Kind) -> DebugAction {
         DebugAction(title: title) { context in
             guard let row = context.ledgerStore.snapshot.inbox.first(where: { $0.item.type == type }) else { return }
-            Task { await NotificationService.post(row, link: DeepLink(row.item)) }
+            Task { await NotificationService.post(row, link: DeepLink(row.item, in: context.ledgerStore.ledger)) }
         }
     }
 }

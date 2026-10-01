@@ -192,7 +192,7 @@ private struct ReceiptAmountRow: View {
     @State private var isEditing = false
 
     var body: some View {
-        PBReceiptLineRow(label: label, amount: $text, currencySymbol: Money.info(currency).symbol, isTotal: isTotal,
+        PBReceiptLineRow(label: label, amount: $text, currency: currency, isTotal: isTotal,
                          isEditing: $isEditing)
             .allowsHitTesting(!isTotal)
             .onAppear { text = grouped }

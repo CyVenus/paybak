@@ -149,7 +149,7 @@ enum DebugStart {
             Task { await NotificationService.postClaim(claim) }
         case .lockReminder:
             guard let row = snapshot.inbox.first(where: { $0.item.type == .paymentReminder }) else { return }
-            Task { await NotificationService.post(row, link: DeepLink(row.item)) }
+            Task { await NotificationService.post(row, link: DeepLink(row.item, in: ledgerStore.ledger)) }
         default:
             break
         }

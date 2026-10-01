@@ -13,23 +13,30 @@ struct ShareItem: Identifiable {
 }
 
 extension View {
+    /// Presents the share sheet the UIKit way, from the view's own controller, so a sheet that
+    /// shares (Remind) stays on screen under it (app-architecture §2.4).
     func systemShare(item: Binding<ShareItem?>) -> some View {
-        sheet(item: item) { share in
-            ActivitySheet(item: share)
-                .presentationDetents([.medium, .large])
-                .ignoresSafeArea()
-        }
+        background(SharePresenter(item: item))
     }
 }
 
-private struct ActivitySheet: UIViewControllerRepresentable {
-    let item: ShareItem
+private struct SharePresenter: UIViewControllerRepresentable {
+    @Binding var item: ShareItem?
 
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: item.activityItems, applicationActivities: nil)
-        controller.completionWithItemsHandler = { _, completed, _, _ in item.onComplete(completed) }
-        return controller
+    func makeUIViewController(context: Context) -> UIViewController {
+        let host = UIViewController()
+        host.view.isUserInteractionEnabled = false
+        return host
     }
 
-    func updateUIViewController(_ controller: UIActivityViewController, context: Context) {}
+    func updateUIViewController(_ host: UIViewController, context: Context) {
+        guard let share = item, host.presentedViewController == nil else { return }
+        let controller = UIActivityViewController(activityItems: share.activityItems, applicationActivities: nil)
+        controller.completionWithItemsHandler = { _, completed, _, _ in
+            item = nil
+            share.onComplete(completed)
+        }
+        controller.popoverPresentationController?.sourceView = host.view
+        host.present(controller, animated: true)
+    }
 }

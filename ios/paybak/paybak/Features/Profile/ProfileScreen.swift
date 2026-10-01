@@ -34,13 +34,9 @@ struct ProfileScreen: View {
         }
         .pbCollapsingTitle("Profile", isCollapsed: isTitleCollapsed)
         .background(PBColor.bgPrimary)
-        // The system alert, so the scrim covers the tab bar too (a tab root sits under the bar).
-        .alert("Sign out?", isPresented: $isSignOutAlertPresented) {
-            Button("Cancel", role: .cancel) {}
-            Button("Sign out", role: .destructive, action: signOut)
-        } message: {
-            Text("Your records stay on this device.")
-        }
+        // Full screen, so the scrim covers the tab bar too (a tab root sits under the bar).
+        .pbFullScreenAlert(isPresented: $isSignOutAlertPresented, title: "Sign out?", message: "Your records stay on this device.",
+                           cancelLabel: "Cancel", actionLabel: "Sign out", testIDPrefix: "profile.signOutAlert", onAction: signOut)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.profile")
         .onStartScreen([.profileSignOut]) { _ in isSignOutAlertPresented = true }

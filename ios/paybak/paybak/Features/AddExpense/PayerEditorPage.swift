@@ -35,7 +35,7 @@ struct PayerEditorPage: View {
                             avatar: person == Person.me ? profileStore.avatarContent : store.ledger.person(person)?.avatarContent ?? .icon(.profile),
                             mode: .exact(textBinding(person)),
                             amount: "",
-                            currencySymbol: Money.info(form.currency).symbol,
+                            currency: form.currency,
                             isIncluded: Binding { paying.contains(person) } set: { setPaying(person, $0) },
                             showsDivider: person != form.people.last
                         )

@@ -13,6 +13,14 @@ nonisolated enum MoneyInput {
         fixedText(minor, decimals: Money.info(currency).exponent)
     }
 
+    /// The typed text with its whole part grouped the currency's way, as amounts show it:
+    /// "2800" → "2,800"; "280000.5" → "2,80,000.5" for INR.
+    static func grouped(_ text: String, currency: String) -> String {
+        let whole = text.prefix { $0 != "." }
+        guard !whole.hasPrefix("0"), let value = UInt64(whole) else { return text }
+        return Money.groupDigits(value, code: currency) + text.dropFirst(whole.count)
+    }
+
     /// "25" → 2500 bps; "33.33" → 3333.
     static func basisPoints(_ text: String) -> Int64 {
         fixedPoint(text, decimals: 2)

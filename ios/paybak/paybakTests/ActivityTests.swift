@@ -33,6 +33,9 @@ struct ActivityTests {
         #expect(reminder.fireAt == DemoFixture.moment(2026, 10, 2, 21, 0))
         guard case .inbox(let item) = reminder.content else { return }
         #expect(books.inboxText(item) == ("Payment reminder", "You owe Kabir ₹1,400 for Goa Trip. It’s due today."))
+        // Its notification pays Kabir by UPI, as the inbox row does.
+        #expect(DeepLink(item, in: books.ledger)
+            == .recordPayment(to: "p-kabir", amount: 140_000, context: .group("g-goa"), method: .upi))
     }
 
     @Test func upcomingAlertsIncludeTheMonthEndSummaryAndTheGasDraft() {
@@ -98,6 +101,18 @@ struct ActivityTests {
         } else {
             Issue.record("Expected the camera's cost")
         }
+        #expect(camera?.route == .project("pj-drone"))
+        if case .icon(let icon) = camera?.leading { #expect(icon == .drone) } else { Issue.record("Expected the project's icon") }
+    }
+
+    /// Parts show in the whole timeline too; one only added (planned) has no actual cost yet.
+    @Test func timelineListsProjectParts() {
+        let books = DemoFixture.load("eshaClaimsPayment")
+        let items = books.activityDays(books.timelineDays(books.timeline())).flatMap(\.items)
+        let gps = items.first { $0.title == "You added GPS module" }
+        #expect(gps?.subtitle == "Build a Drone")
+        if case .amount = gps?.trailing { Issue.record("A planned part has no actual cost") }
+        #expect(items.contains { $0.title == "Dev bought Camera" })
     }
 
     @Test func categoryLogKeepsThatMonthsExpenses() {

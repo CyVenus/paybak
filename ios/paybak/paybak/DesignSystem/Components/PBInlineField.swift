@@ -4,7 +4,8 @@ import SwiftUI
 /// Row / Receipt Line (Editing). 36 pt tall, 14 pt corners, 12 pt side padding, at least `minWidth`
 /// wide and growing with longer values. Focused = 1.5 pt `border/strong` inside ring and the 2 × 20
 /// caret after the value. Dimmed shows the value in `text/tertiary` and can't be edited (an excluded
-/// person). `prefix` and `suffix` ("₹", "%") frame the typed number without being part of it.
+/// person). An amount names its `currency`, which puts the symbol before the typed number and groups
+/// its digits ("₹2,800" for "2800"); `suffix` ("%") follows it. Neither is part of the text.
 ///
 /// Like the code field, the number is typed into a hidden text field and drawn as text, so the
 /// value, caret and ring sit exactly where Figma puts them.
@@ -12,7 +13,7 @@ struct PBInlineField: View {
     @Binding var text: String
     /// Spoken by VoiceOver, e.g. "Priya's share".
     let accessibilityLabel: String
-    var prefix: String?
+    var currency: String?
     var suffix: String?
     var style: PBTextStyle = .headline
     var alignment: Alignment = .trailing
@@ -27,7 +28,7 @@ struct PBInlineField: View {
     init(
         text: Binding<String>,
         accessibilityLabel: String,
-        prefix: String? = nil,
+        currency: String? = nil,
         suffix: String? = nil,
         style: PBTextStyle = .headline,
         alignment: Alignment = .trailing,
@@ -38,7 +39,7 @@ struct PBInlineField: View {
     ) {
         _text = text
         self.accessibilityLabel = accessibilityLabel
-        self.prefix = prefix
+        self.currency = currency
         self.suffix = suffix
         self.style = style
         self.alignment = alignment
@@ -50,7 +51,11 @@ struct PBInlineField: View {
 
     private var focus: FocusState<Bool>.Binding { externalFocus ?? $ownFocus }
     private var isFocused: Bool { !isDimmed && (focus.wrappedValue || previewInteraction == .focused) }
-    private var display: String { (prefix ?? "") + (text.isEmpty ? "0" : text) + (suffix ?? "") }
+    private var display: String {
+        let number = text.isEmpty ? "0" : text
+        guard let currency else { return number + (suffix ?? "") }
+        return Money.info(currency).symbol + MoneyInput.grouped(number, currency: currency) + (suffix ?? "")
+    }
 
     var body: some View {
         HStack(spacing: PBSpace.s2) {
@@ -93,14 +98,14 @@ struct PBInlineField: View {
 }
 
 #Preview("PBInlineField") {
-    @Previewable @State var amount = "700"
+    @Previewable @State var amount = "2800"
     @Previewable @State var shares = "1"
     VStack(spacing: PBSpace.s12) {
-        PBInlineField(text: $amount, accessibilityLabel: "Priya's share", prefix: "₹")
-        PBInlineField(text: $amount, accessibilityLabel: "Priya's share", prefix: "₹").pbPreviewInteraction(.focused)
+        PBInlineField(text: $amount, accessibilityLabel: "Priya's share", currency: "INR")
+        PBInlineField(text: $amount, accessibilityLabel: "Priya's share", currency: "INR").pbPreviewInteraction(.focused)
         PBInlineField(text: .constant("25"), accessibilityLabel: "Priya's percent", suffix: "%")
         PBInlineField(text: $shares, accessibilityLabel: "Shares", alignment: .center, minWidth: 48, keyboard: .numberPad)
-        PBInlineField(text: .constant("0"), accessibilityLabel: "Priya's share", prefix: "₹", isDimmed: true)
+        PBInlineField(text: .constant("0"), accessibilityLabel: "Priya's share", currency: "INR", isDimmed: true)
     }
     .padding(PBSpace.s24)
     .background(PBColor.bgCard)

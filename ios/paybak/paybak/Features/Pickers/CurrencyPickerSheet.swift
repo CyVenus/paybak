@@ -74,11 +74,17 @@ struct CurrencyPickerSheet: View {
         }
     }
 
-    /// This sheet's sentence-case names ("Indian rupee", "UAE dirham"), the platform's for the rest.
+    /// This sheet's sentence-case names: the designed ones as Figma writes them ("Indian rupee", "UAE
+    /// dirham"), the platform's for the rest with the unit word in lower case ("Swiss franc").
     private static func currency(_ code: String) -> Currency {
+        if let designed = Money.currencies[code] {
+            return Currency(code: code, name: designed.name, symbol: designed.symbol)
+        }
         let base = Currency(code: code, locale: Locale(identifier: "en_US"))
-        guard let designed = Money.currencies[code] else { return base }
-        return Currency(code: code, name: designed.name, symbol: designed.symbol)
+        var words = base.name.split(separator: " ").map(String.init)
+        guard words.count > 1 else { return base }
+        words[words.count - 1] = words[words.count - 1].lowercased()
+        return Currency(code: code, name: words.joined(separator: " "), symbol: base.symbol)
     }
 }
 

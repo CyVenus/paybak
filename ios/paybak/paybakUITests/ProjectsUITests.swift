@@ -58,6 +58,29 @@ final class ProjectsUITests: XCTestCase {
         XCTAssertEqual(app.element("project.shareRule").label, "Equal split · ₹14,000 each so far")
     }
 
+    /// Closing a part you've typed into asks first: Keep editing stays, Discard closes the sheet.
+    @MainActor
+    func testClosingATypedPartAsksFirst() {
+        let app = XCUIApplication.launchPaybak(startScreen: .projectAddComponent)
+        let name = app.textFields["addComponent.name"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.tap()
+        app.typeText("Gimbal")
+        app.buttons["addComponent.close"].tap()
+        let keep = app.buttons["addComponent.discardAlert.cancel"]
+        XCTAssertTrue(keep.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["What you typed won’t be saved."].exists)
+        keep.tap()
+        XCTAssertTrue(keep.waitForNonExistence(timeout: 2))
+        XCTAssertTrue(name.exists)
+        app.buttons["addComponent.close"].tap()
+        let discard = app.buttons["addComponent.discardAlert.action"]
+        XCTAssertTrue(discard.waitForExistence(timeout: 3))
+        discard.tap()
+        XCTAssertTrue(name.waitForNonExistence(timeout: 3))
+        XCTAssertTrue(app.element("project.state.active").exists)
+    }
+
     @MainActor
     func testClosingShowsTheFinalPlan() {
         let app = XCUIApplication.launchPaybak(startScreen: .projectDrone)

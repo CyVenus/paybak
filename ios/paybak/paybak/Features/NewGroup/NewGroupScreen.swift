@@ -241,7 +241,7 @@ private struct GroupMembersCard: View {
                 form.shares[id] = PBAmountField.sanitize($0, allowsDecimals: true)
             },
             accessibilityLabel: "\(store.books.firstName(id))’s share",
-            prefix: isPercent ? nil : Money.info(form.currency).symbol,
+            currency: isPercent ? nil : form.currency,
             suffix: isPercent ? "%" : nil
         )
     }

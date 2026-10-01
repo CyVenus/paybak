@@ -94,10 +94,12 @@ struct RouterTests {
         #expect(DeepLink("paybak://activity?claim=pay-1&action=notReceived") == .claim("pay-1", notReceived: true))
         #expect(DeepLink("paybak://record-payment?to=p-kabir&amount=140000&context=group:g-goa")
             == .recordPayment(to: "p-kabir", amount: 140_000, context: .group("g-goa")))
+        #expect(DeepLink("paybak://record-payment?to=p-kabir&method=upi")
+            == .recordPayment(to: "p-kabir", amount: nil, context: nil, method: .upi))
         #expect(DeepLink("paybak://insights?month=2026-09") == .insights(YearMonth(year: 2026, month: 9)))
         #expect(DeepLink("paybak://expense/e-goa-villa") == .expense("e-goa-villa"))
         #expect(DeepLink("https://example.com") == nil)
-        for link in [DeepLink.claim("p", notReceived: false), .recordPayment(to: "p", amount: 5, context: .loan("l")), .remind("p"),
+        for link in [DeepLink.claim("p", notReceived: false), .recordPayment(to: "p", amount: 5, context: .loan("l"), method: .upi), .remind("p"),
                      .recurringDraft("d"), .payment("x"), .insights(YearMonth(year: 2026, month: 9))] {
             #expect(DeepLink(link.text) == link)
         }

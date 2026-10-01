@@ -74,11 +74,12 @@ struct LoanScreen: View {
                     }
                 }
             }
-            .padding(.bottom, PBSpace.s16)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .pbToast($toast, bottomPadding: PBSpace.s12)
-        .safeAreaInset(edge: .bottom) {
+        // No inset spacing, so the toast's 12 pt are measured from the buttons.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             if !detail.isPaidBack {
                 VStack(spacing: PBSpace.s12) {
                     if detail.isOverdue, detail.loan.lenderId == Person.me {

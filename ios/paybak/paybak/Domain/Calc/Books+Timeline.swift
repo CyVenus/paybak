@@ -9,6 +9,8 @@ nonisolated struct TimelineEvent: Hashable, Sendable, Identifiable {
         case reminderSent(ReminderID)
         case draftCreated(DraftID)
         case loanAdded(LoanID)
+        /// A project part added, bought or finished, by `by`.
+        case componentChanged(ComponentID, by: PersonID)
     }
 
     var id: String
@@ -108,10 +110,33 @@ nonisolated extension Books {
                 subtitle: loan.title, amount: Money.format(loan.amount, loan.currency), isPrimary: lent
             ))
         }
+        events += componentEvents()
         return events.enumerated()
             .filter { $0.element.at <= now }
             .sorted { $0.element.at != $1.element.at ? $0.element.at > $1.element.at : $0.offset < $1.offset }
             .map(\.element)
+    }
+
+    /// A part added, bought or finished in a project you're in (projects §3.7): "Dev bought Camera" ·
+    /// "Build a Drone" · its actual cost, which a part that was only added doesn't have yet.
+    private func componentEvents() -> [TimelineEvent] {
+        ledger.components.flatMap { component -> [TimelineEvent] in
+            guard let project = ledger.group(component.projectId), project.memberIds.contains(Person.me) else { return [] }
+            return component.history.enumerated().map { index, change in
+                let verb = switch change.kind {
+                case "bought": "bought"
+                case "done": "finished"
+                default: "added"
+                }
+                let cost = change.kind == "added" ? nil : component.actualCost
+                return TimelineEvent(
+                    id: "component:\(component.id):\(index)", at: change.at,
+                    kind: .componentChanged(component.id, by: change.by),
+                    title: "\(firstName(change.by)) \(verb) \(component.name)", subtitle: project.name,
+                    amount: cost.map { Money.format($0, project.currency) }, isPrimary: component.paidBy == Person.me
+                )
+            }
+        }
     }
 
     /// The timeline grouped by day, newest first.

@@ -44,8 +44,14 @@ struct RemindSheet: View {
         .onAppear {
             if message.isEmpty, let item { message = template(item, tone: tone, books: books) }
         }
-        // settleRemindShare: the share sheet over this one (runs after the message is written).
-        .onStartScreen([.settleRemindShare]) { _ in shareMessage(item) }
+        // settleRemindShare: the share sheet over this one, once this sheet has finished opening
+        // (UIKit can't present during a transition).
+        .onStartScreen([.settleRemindShare]) { _ in
+            Task {
+                try? await Task.sleep(for: .seconds(1))
+                shareMessage(item)
+            }
+        }
         .systemShare(item: $share)
         .sensoryFeedback(.selection, trigger: tone)
         .accessibilityElement(children: .contain)

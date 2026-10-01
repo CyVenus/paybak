@@ -5,7 +5,7 @@ import Foundation
 enum DeepLink: Hashable {
     /// The Activity timeline with a claim on top; `notReceived` also opens its sheet.
     case claim(PaymentID, notReceived: Bool)
-    case recordPayment(to: PersonID, amount: Int64?, context: PaymentContext?)
+    case recordPayment(to: PersonID, amount: Int64?, context: PaymentContext?, method: PaymentMethodKind? = nil)
     case insights(YearMonth?)
     case remind(PersonID)
     case expense(ExpenseID)
@@ -25,7 +25,8 @@ enum DeepLink: Hashable {
             self = .claim(claim, notReceived: query["action"] == "notReceived")
         case "record-payment":
             guard let to = query["to"] else { return nil }
-            self = .recordPayment(to: to, amount: query["amount"].flatMap { Int64($0) }, context: query["context"].flatMap { Self.context($0) })
+            self = .recordPayment(to: to, amount: query["amount"].flatMap { Int64($0) }, context: query["context"].flatMap { Self.context($0) },
+                                  method: query["method"].flatMap(PaymentMethodKind.init(rawValue:)))
         case "insights":
             let parts = query["month"]?.split(separator: "-").compactMap { Int($0) } ?? []
             self = .insights(parts.count == 2 ? YearMonth(year: parts[0], month: parts[1]) : nil)
@@ -50,8 +51,9 @@ enum DeepLink: Hashable {
     var text: String {
         switch self {
         case .claim(let id, let notReceived): "paybak://activity?claim=\(id)" + (notReceived ? "&action=notReceived" : "")
-        case .recordPayment(let to, let amount, let context):
+        case .recordPayment(let to, let amount, let context, let method):
             "paybak://record-payment?to=\(to)" + (amount.map { "&amount=\($0)" } ?? "") + (context.map { "&context=\(Self.text($0))" } ?? "")
+                + (method.map { "&method=\($0.rawValue)" } ?? "")
         case .insights(let month): "paybak://insights" + (month.map { "?month=\($0.key)" } ?? "")
         case .remind(let person): "paybak://remind?person=\(person)"
         case .expense(let id): "paybak://expense/\(id)"
@@ -89,9 +91,9 @@ extension AppRouter {
             select(.activity)
             activitySegment = .timeline
             if notReceived { open(Route.notReceived(id)) }
-        case .recordPayment(let to, let amount, let context):
+        case .recordPayment(let to, let amount, let context, let method):
             select(.home)
-            open(Route.recordPayment(RecordPaymentArgs(from: Person.me, to: to, amount: amount, context: context)))
+            open(Route.recordPayment(RecordPaymentArgs(from: Person.me, to: to, amount: amount, method: method, context: context)))
         case .insights(let month):
             select(.activity)
             activitySegment = .insights

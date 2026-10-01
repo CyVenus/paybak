@@ -158,7 +158,7 @@ struct PBSheetPresentation<Content: View>: View {
             case .large:
                 content()
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .presentationDetents([.large])
+                    .presentationDetents([.custom(LargeSheetDetent.self)])
             }
         }
         .presentationDragIndicator(.visible)
@@ -170,6 +170,14 @@ struct PBSheetPresentation<Content: View>: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
             isKeyboardShown = false
         }
+    }
+}
+
+/// Detent=Large: 8 pt below the top safe area (app-architecture §7.2), where the system's large
+/// detent reaches it.
+private struct LargeSheetDetent: CustomPresentationDetent {
+    static func height(in context: Context) -> CGFloat? {
+        context.maxDetentValue - PBSpace.s8
     }
 }
 

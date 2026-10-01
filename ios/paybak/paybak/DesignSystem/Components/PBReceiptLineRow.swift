@@ -8,13 +8,14 @@ struct PBReceiptLineRow: View {
     let label: String
     /// The amount without the currency symbol, as typed.
     @Binding var amount: String
-    var currencySymbol = "₹"
+    var currency = "INR"
     var isTotal = false
     @Binding var isEditing: Bool
 
     @FocusState private var isFocused: Bool
 
     private var style: PBTextStyle { isTotal ? .headline : .body }
+    private var atRest: String { Money.info(currency).symbol + amount }
 
     var body: some View {
         HStack(spacing: PBSpace.s12) {
@@ -24,11 +25,11 @@ struct PBReceiptLineRow: View {
                 .lineLimit(1)
                 .frame(maxWidth: .infinity, alignment: .leading)
             if isEditing {
-                PBInlineField(text: $amount, accessibilityLabel: label, prefix: currencySymbol, style: style, focus: $isFocused)
+                PBInlineField(text: $amount, accessibilityLabel: label, currency: currency, style: style, focus: $isFocused)
                     .onChange(of: isFocused) { if !isFocused { isEditing = false } }
             } else {
                 Button { isEditing = true } label: {
-                    Text(currencySymbol + amount)
+                    Text(atRest)
                         .textStyle(style)
                         .foregroundStyle(PBColor.textPrimary)
                         .frame(minHeight: PBSize.tap)
@@ -36,7 +37,7 @@ struct PBReceiptLineRow: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(label)
-                .accessibilityValue(currencySymbol + amount)
+                .accessibilityValue(atRest)
                 .accessibilityHint("Edit the amount")
             }
         }

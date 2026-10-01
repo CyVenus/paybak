@@ -109,7 +109,7 @@ struct NotificationsScreen: View {
             guard let payee = params.personId else { return }
             router.open(Route.recordPayment(RecordPaymentArgs(
                 from: Person.me, to: payee, amount: params.amount, currency: params.currency,
-                method: store.ledger.person(payee)?.upi == nil ? nil : .upi,
+                method: store.ledger.reminderMethod(paying: payee),
                 context: params.groupId.map { .group($0) }
             )))
         case .monthlySummary:

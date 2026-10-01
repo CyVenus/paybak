@@ -78,16 +78,11 @@ struct ComponentSheet: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.projectAddComponent")
         .interactiveDismissDisabled(isDirty)
-        .alert("Discard this component?", isPresented: $isDiscardShown) {
-            Button("Keep editing", role: .cancel) {}
-            Button("Discard", role: .destructive, action: onClose)
-        }
-        .alert("Delete \(original.trimmedName)?", isPresented: $isDeleteShown) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive, action: delete)
-        } message: {
-            Text("Its cost comes off the project.")
-        }
+        .pbFullScreenAlert(isPresented: $isDiscardShown, title: editing == nil ? "Discard this component?" : "Discard changes?",
+                           message: editing == nil ? "What you typed won’t be saved." : "Your changes to this component won’t be saved.",
+                           cancelLabel: "Keep editing", actionLabel: "Discard", testIDPrefix: "addComponent.discardAlert", onAction: onClose)
+        .pbFullScreenAlert(isPresented: $isDeleteShown, title: "Delete \(original.trimmedName)?", message: "Its cost comes off the project.",
+                           cancelLabel: "Cancel", actionLabel: "Delete", testIDPrefix: "addComponent.deleteAlert", onAction: delete)
         .pbSheet(isPresented: $isPayerPickerShown) {
             payerPicker
         }

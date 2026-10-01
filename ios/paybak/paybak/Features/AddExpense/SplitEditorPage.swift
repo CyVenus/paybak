@@ -63,7 +63,7 @@ struct SplitEditorPage: View {
                             avatar: avatar(person),
                             mode: rowMode(person, editor: editor),
                             amount: Money.format(preview.shares[person, default: 0], form.currency),
-                            currencySymbol: Money.info(form.currency).symbol,
+                            currency: form.currency,
                             isIncluded: Binding { editor.isIncluded(person) } set: { editor.setIncluded(person, $0) },
                             showsDivider: person != people.last,
                             personId: person,
@@ -129,7 +129,7 @@ private struct SplitEditorRow: View {
     let avatar: PBAvatar.Content
     let mode: PBSplitRow.Mode
     let amount: String
-    let currencySymbol: String
+    let currency: String
     @Binding var isIncluded: Bool
     let showsDivider: Bool
     let personId: PersonID
@@ -138,7 +138,7 @@ private struct SplitEditorRow: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        PBSplitRow(name: name, avatar: avatar, mode: mode, amount: amount, currencySymbol: currencySymbol,
+        PBSplitRow(name: name, avatar: avatar, mode: mode, amount: amount, currency: currency,
                    isIncluded: $isIncluded, showsDivider: showsDivider, focus: $isFocused)
             .onChange(of: isFocused) { _, now in
                 if now { focused = personId } else if focused == personId { focused = nil }

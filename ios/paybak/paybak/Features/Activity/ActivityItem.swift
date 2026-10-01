@@ -33,10 +33,7 @@ extension Books {
     /// The timeline narrowed to a person, a group, a project (with its parts' history) or a
     /// category's expenses in a month (activity §3.9, projects §3.7, insights drill-downs).
     func activityLog(_ filter: ActivityFilter) -> [ActivityDay] {
-        var items = timeline().filter { matches($0, filter) }.map(activityItem)
-        if case .project(let id) = filter {
-            items = (items + componentItems(project: id)).sorted { $0.at > $1.at }
-        }
+        let items = timeline().filter { matches($0, filter) }.map(activityItem)
         var days: [ActivityDay] = []
         for item in items {
             let day = day(of: item.at)
@@ -74,7 +71,7 @@ extension Books {
     // MARK: Presentation
 
     /// Expense rows show the category, payment and loan rows the friend; reminders open what they
-    /// were about, drafts their group's recurring rules.
+    /// were about, drafts their group's recurring rules, parts their project (with its icon).
     private func presentation(of kind: TimelineEvent.Kind) -> (PBActivityRow.Leading, Route?) {
         switch kind {
         case .expenseAdded(let id), .expenseEdited(let id):
@@ -98,6 +95,9 @@ extension Books {
             return (.icon(rule.map(icon) ?? .receipt), rule?.groupId.map { .recurring($0) })
         case .loanAdded(let id):
             return (avatar(ledger.loan(id)?.friendId), .loan(id))
+        case .componentChanged(let id, _):
+            let project = ledger.component(id).flatMap { ledger.group($0.projectId) }
+            return (.icon(project?.pbIcon ?? .package), project.map { .project($0.id) })
         }
     }
 
@@ -138,6 +138,7 @@ extension Books {
         case .reminderSent(let id): return Set(ledger.reminders.filter { $0.id == id }.map(\.toId))
         case .draftCreated: return []
         case .loanAdded(let id): return Set(ledger.loan(id).map { [$0.friendId] } ?? [])
+        case .componentChanged(_, let by): return [by]
         }
     }
 
@@ -150,30 +151,7 @@ extension Books {
             return reminder?.groupId ?? reminder?.expenseId.flatMap { ledger.expense($0)?.groupId }
         case .draftCreated(let id): return ledger.draft(id).flatMap { ledger.rule($0.ruleId)?.groupId }
         case .loanAdded: return nil
-        }
-    }
-
-    /// A project's parts as rows: "Dev bought Camera" with its cost (projects §3.7, proposal copy).
-    /// The log opens from the project, so they lead nowhere.
-    private func componentItems(project: GroupID) -> [ActivityItem] {
-        let currency = ledger.group(project)?.currency ?? defaultCurrency
-        let projectName = groupName(project)
-        return ledger.components.filter { $0.projectId == project }.flatMap { component in
-            component.history.enumerated().compactMap { index, entry -> ActivityItem? in
-                guard entry.at <= now else { return nil }
-                let (verb, amount): (String, Int64?) = switch entry.kind {
-                case "added": ("added", component.estimatedCost)
-                case "bought": ("bought", component.actualCost)
-                case "done": ("finished", nil)
-                default: (entry.kind, nil)
-                }
-                return ActivityItem(
-                    id: "component:\(component.id):\(index)", at: entry.at, leading: .icon(.package),
-                    title: "\(firstName(entry.by)) \(verb) \(component.name)", subtitle: projectName,
-                    trailing: amount.map { .amount(Money.format($0, currency), date: nil, isIncoming: component.paidBy == Person.me) } ?? .none,
-                    route: nil
-                )
-            }
+        case .componentChanged(let id, _): return ledger.component(id)?.projectId
         }
     }
 }

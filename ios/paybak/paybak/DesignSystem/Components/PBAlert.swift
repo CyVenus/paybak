@@ -92,6 +92,65 @@ extension View {
     }
 }
 
+extension View {
+    /// `pbAlert` for a view that can't cover the whole screen itself: a tab root (under the tab bar)
+    /// or a sheet. It draws in a clear full-screen cover above them, so the scrim dims everything.
+    /// `onAction` runs once the alert has gone.
+    func pbFullScreenAlert(
+        isPresented: Binding<Bool>,
+        title: String,
+        message: String? = nil,
+        cancelLabel: String,
+        actionLabel: String,
+        role: PBAlert.Role = .destructive,
+        testIDPrefix: String? = nil,
+        onAction: @escaping () -> Void
+    ) -> some View {
+        fullScreenCover(isPresented: isPresented) {
+            AlertCover(isPresented: isPresented) { dismiss in
+                PBAlert(
+                    title: title,
+                    message: message,
+                    cancelLabel: cancelLabel,
+                    actionLabel: actionLabel,
+                    role: role,
+                    testIDPrefix: testIDPrefix,
+                    onCancel: { dismiss(nil) },
+                    onAction: { dismiss(onAction) }
+                )
+            }
+            .presentationBackground(.clear)
+        }
+        // The cover appears and goes without its slide; the alert fades in and out inside it.
+        .transaction(value: isPresented.wrappedValue) { $0.disablesAnimations = true }
+    }
+}
+
+/// The alert inside its full-screen cover: shown on appear, faded out before the cover goes, and
+/// then the chosen action runs.
+private struct AlertCover<Alert: View>: View {
+    @Binding var isPresented: Bool
+    let alert: (_ dismiss: @escaping (_ then: (() -> Void)?) -> Void) -> Alert
+
+    @State private var isShown = false
+
+    var body: some View {
+        AlertPresenter(isPresented: $isShown) {
+            alert(dismiss)
+        }
+        .onAppear { isShown = true }
+    }
+
+    private func dismiss(then action: (() -> Void)?) {
+        isShown = false
+        Task {
+            try? await Task.sleep(for: .milliseconds(250))
+            isPresented = false
+            action?()
+        }
+    }
+}
+
 /// Fades the scrim and pops the card in like a system alert (scale 1.1 → 1, 0.25 s). The card is
 /// centred on the screen, not the safe area (Figma 102:1115 sits at y 356 of 874).
 private struct AlertPresenter<Alert: View>: View {

@@ -30,6 +30,10 @@ struct AddRecordTests {
         #expect(MoneyInput.basisPoints("33.33") == 3333)
         #expect(MoneyInput.percentText(2500) == "25")
         #expect(MoneyInput.percentText(1250) == "12.5")
+        #expect(MoneyInput.grouped("2800", currency: "INR") == "2,800")
+        #expect(MoneyInput.grouped("280000.5", currency: "INR") == "2,80,000.5")
+        #expect(MoneyInput.grouped("280000.", currency: "USD") == "280,000.")
+        #expect(MoneyInput.grouped("0.5", currency: "INR") == "0.5")
     }
 
     @Test func todaysRate() throws {
