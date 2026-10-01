@@ -17,7 +17,8 @@ internal val GroupsDebugActions: List<DebugAction> =
             val activity = activity as? ComponentActivity ?: return@DebugAction
             activity.lifecycleScope.launch {
                 val directory = ContactsDirectory.directory(app, app.ledger.ledger.value.people)
-                addFriendFromCode(MEERA_LINK, directory, app.ledger, navigator)
+                val own = app.profileStore.profile.value.username
+                addFriendFromCode(MEERA_LINK, own, directory, app.ledger, navigator)
             }
         },
         DebugAction("Ananya joins Paybak", "The guest loses the Guest tag") {

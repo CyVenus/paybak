@@ -75,6 +75,7 @@
     <string name="groups_copy_link">Copy link</string>
     <string name="groups_share_link">Share link</string>
     <string name="groups_link_copied">Link copied</string>
+    <string name="groups_own_code">That’s your own code</string>
     <string name="groups_not_a_code">That isn’t a Paybak code</string>
     <string name="groups_scan_unavailable">Scanning isn’t available on this device</string>
 </resources>

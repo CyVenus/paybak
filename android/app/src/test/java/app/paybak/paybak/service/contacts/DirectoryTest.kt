@@ -1,6 +1,8 @@
 package app.paybak.paybak.service.contacts
 
 import app.paybak.paybak.domain.Demo
+import app.paybak.paybak.feature.friends.ScannedCode
+import app.paybak.paybak.feature.friends.scannedCode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -68,5 +70,13 @@ class DirectoryTest {
         assertEquals("p-ananya", directory.byContact("+919876543210")?.id)
         assertEquals("9876543210", contactKey("+91 98765-43210"))
         assertNull(contactKey("Ananya"))
+    }
+
+    @Test
+    fun aScannedCodeIsSomeoneYourOwnOrNotPaybak() {
+        val meera = directory.scannedCode("https://paybak.app/i/meera", "arjun")
+        assertEquals("p-meera", (meera as ScannedCode.User).person.id)
+        assertEquals(ScannedCode.Own, directory.scannedCode("https://paybak.app/i/arjun", "arjun"))
+        assertEquals(ScannedCode.NotPaybak, directory.scannedCode("hello", "arjun"))
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -29,6 +30,7 @@ import app.paybak.paybak.data.ledger.actions.addGuest
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
+import app.paybak.paybak.navigation.LocalProfileStore
 import app.paybak.paybak.navigation.Route
 import app.paybak.paybak.navigation.rememberDebugStartScreen
 import app.paybak.paybak.service.contacts.AddFriendLists
@@ -80,6 +82,8 @@ fun AddFriendScreen(route: Route.AddFriend) {
         }
     val lists =
         remember(directory, contacts, query) { directory?.addFriendLists(contacts, query) }
+    val profile by LocalProfileStore.current.profile.collectAsState()
+    val ownCode = stringResource(R.string.groups_own_code)
     val notACode = stringResource(R.string.groups_not_a_code)
     val unavailable = stringResource(R.string.groups_scan_unavailable)
 
@@ -116,11 +120,17 @@ fun AddFriendScreen(route: Route.AddFriend) {
                     scope.launch {
                         when (val scan = QrScanner.scan(context)) {
                             is QrScan.Scanned -> {
-                                val found =
+                                val own = profile.username
+                                val code =
                                     directory?.let {
-                                        addFriendFromCode(scan.text, it, ledger, navigator)
-                                    } == true
-                                if (!found) navigator.toast(notACode)
+                                        addFriendFromCode(scan.text, own, it, ledger, navigator)
+                                    }
+                                when (code) {
+                                    is ScannedCode.User -> Unit
+                                    ScannedCode.Own -> navigator.toast(ownCode)
+                                    ScannedCode.NotPaybak,
+                                    null -> navigator.toast(notACode)
+                                }
                             }
                             QrScan.Unavailable -> navigator.toast(unavailable)
                             QrScan.Cancelled -> Unit
