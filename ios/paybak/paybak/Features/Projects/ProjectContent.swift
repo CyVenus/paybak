@@ -31,7 +31,9 @@ struct ProjectContent: View {
                 history
             case .archived:
                 plan(title: "Final settle-up plan")
-                members
+                if !page.members.isEmpty {
+                    members
+                }
                 components
                 history
             }
@@ -44,7 +46,7 @@ struct ProjectContent: View {
     private var summary: some View {
         VStack(spacing: PBSpace.s16) {
             PBTitleHeader(title: page.project.name, leading: .icon(page.project.pbIcon), subtitle: page.subtitle,
-                          tag: page.state == .archived ? "Archived" : nil, members: memberHeads)
+                          tag: page.state == .archived ? "Archived" : nil, memberAvatars: memberAvatars)
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("project.title")
             if let notice = page.notice {
@@ -57,20 +59,21 @@ struct ProjectContent: View {
         }
     }
 
-    /// Up to four member heads; guests without art are left out (as on a group).
-    private var memberHeads: [PBPeepHead] {
-        page.project.memberIds.compactMap { id in
-            if case .art(let head) = ledgerStore.memberAvatar(id) { return head }
-            return nil
+    /// Every member's avatar, yours included and guests by their initials; the header stacks the
+    /// first four, and none for a one-member project.
+    private var memberAvatars: [PBAvatarStack.Member] {
+        page.project.memberIds.map { id in
+            id == Person.me ? PBAvatarStack.Member.user : .content(ledgerStore.memberAvatar(id))
         }
     }
 
     private var budgetCard: some View {
         let budget = page.budget
-        let status: PBBudgetCard.Status = if !page.isEditable {
-            .closed
-        } else if budget.isOver {
+        // Over budget wins over closed: the red bar and warning stay once the project is locked.
+        let status: PBBudgetCard.Status = if budget.isOver {
             .overBudget(warning: budget.left ?? "")
+        } else if !page.isEditable {
+            .closed
         } else {
             .onTrack(projected: budget.projected)
         }
@@ -91,8 +94,9 @@ struct ProjectContent: View {
                             .textStyle(.subheadline)
                             .foregroundStyle(PBColor.textSecondary)
                             .multilineTextAlignment(.center)
+                            .padding(PBLayout.cardPadding)
                             .frame(maxWidth: .infinity, minHeight: 64)
-                            .padding(.horizontal, PBLayout.cardPadding)
+                            .accessibilityIdentifier("project.components.empty")
                     }
                     ForEach(page.components) { row in
                         componentRow(row, showsDivider: row.id != page.components.last?.id)
@@ -112,6 +116,8 @@ struct ProjectContent: View {
             trailing: .amountBadge(row.amount, badge: row.part.status.title, style: row.part.status.badgeStyle,
                                    isPlaceholder: !row.part.status.isSpent),
             surface: .onCard,
+            titleLines: 2,
+            subtitleLines: 3,
             showsDivider: showsDivider
         )
         .padding(.horizontal, PBLayout.cardPadding)
@@ -245,8 +251,10 @@ extension ProjectComponent.Status {
 }
 
 extension LedgerStore {
-    /// A member's circle on the project screens: your own avatar, a friend's art or their initials.
+    /// A member's circle on the project screens: your own avatar, a friend's art or their initials
+    /// (the first letter of their name when they're gone from the ledger).
     func memberAvatar(_ id: PersonID) -> PBAvatar.Content {
-        id == Person.me ? profileStore.avatarContent : ledger.person(id)?.avatarContent ?? .icon(.profile)
+        id == Person.me ? profileStore.avatarContent
+            : ledger.person(id)?.avatarContent ?? .initials(String(books.firstName(id).prefix(1)))
     }
 }

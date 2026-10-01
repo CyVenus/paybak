@@ -39,7 +39,7 @@ struct ActivityDayList<Pinned: View>: View {
     @ViewBuilder
     private func row(_ item: ActivityItem) -> some View {
         let content = PBActivityRow(leading: item.leading, title: item.title, subtitle: item.subtitle,
-                                    trailing: item.trailing, titleLines: 2)
+                                    trailing: item.trailing, titleLines: 2, subtitleLines: 3)
         if let route = item.route {
             Button { router.open(route) } label: { content }
                 .buttonStyle(PBRowButtonStyle())

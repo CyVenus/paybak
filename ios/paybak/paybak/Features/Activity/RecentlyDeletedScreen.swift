@@ -18,18 +18,18 @@ struct RecentlyDeletedScreen: View {
                     Text("Nothing here.")
                         .textStyle(.body)
                         .foregroundStyle(PBColor.textSecondary)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, PBSpace.s24)
                         .accessibilityIdentifier("recentlyDeleted.empty")
                 } else {
                     VStack(spacing: 0) {
                         ForEach(rows) { row in
                             PBActivityRow(leading: .icon(row.expense.category.pbIcon), title: row.expense.title,
-                                          subtitle: subtitle(row.expense), detail: row.detail,
+                                          subtitle: subtitle(row.expense), detail: detail(row),
                                           trailing: .action("Restore") { restore(row.expense) },
-                                          surface: .onCard, showsDivider: row.id != rows.last?.id)
+                                          surface: .onCard, titleLines: 2, subtitleLines: 3,
+                                          showsDivider: row.id != rows.last?.id)
                                 .accessibilityIdentifier("recentlyDeleted.row.\(row.id)")
-                                .transition(.opacity)
                         }
                     }
                     .padding(.vertical, PBSpace.s8)
@@ -38,28 +38,31 @@ struct RecentlyDeletedScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
+        .scrollIndicators(.hidden)
         .pbPinnedHeader {
             PBPushHeader("Recently deleted", testIDPrefix: "recentlyDeleted", onBack: router.back)
         }
         .routeTestRoot("recentlyDeleted")
     }
 
-    /// "₹300 · Goa Trip"; outside a group, the first other person on it.
+    /// "₹300 · Goa Trip", or just the amount outside a group.
     private func subtitle(_ expense: Expense) -> String {
-        let books = store.books
-        let place = expense.groupId.map(books.groupName)
-            ?? expense.participantIds.first { $0 != Person.me }.map(books.firstName) ?? ""
-        return [Money.format(expense.amount, expense.currency), place].filter { !$0.isEmpty }.joined(separator: " · ")
+        let group = expense.groupId.flatMap { store.ledger.group($0)?.name }
+        return [Money.format(expense.amount, expense.currency), group].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    /// "Deleted by Priya on 24 Sep · 24 days left", with "24 days left" wrapping as one piece.
+    private func detail(_ row: DeletedExpenseRow) -> String {
+        let left = "\(row.daysLeft) day\(row.daysLeft == 1 ? "" : "s") left"
+        return row.detail.replacingOccurrences(of: left, with: left.replacingOccurrences(of: " ", with: "\u{00A0}"))
     }
 
     private func restore(_ expense: Expense) {
         do {
-            try withAnimation(.easeOut(duration: 0.25)) {
-                try store.restoreExpense(expense.id)
-            }
-            Haptics.success()
+            try store.restoreExpense(expense.id)
             router.toast("Expense restored")
         } catch {
             Haptics.warning()

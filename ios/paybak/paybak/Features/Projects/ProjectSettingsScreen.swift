@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// Project settings (screens-projects §6): the contribution rule with each member's share, Add
-/// member, the budget, "Collect money upfront" and Close project. Every change saves as it's made;
-/// a Percent or Fixed rule applies only once it adds up. Closing asks first, then shows the project
-/// in its Closed state.
+/// member, the budget, "Collect money upfront" and, while the project is active, Close project. Every
+/// change saves as it's made, the budget as it's typed; a Percent or Fixed rule applies only once it
+/// adds up, and going back to the saved rule brings back its saved shares. Closing asks first, then
+/// shows the project in its Closed state.
 struct ProjectSettingsScreen: View {
     let groupId: GroupID
 
@@ -12,20 +13,21 @@ struct ProjectSettingsScreen: View {
 
     /// The rule as edited; nil shows the saved one.
     @State private var edit: ContributionEdit?
-    /// The budget's raw digits; nil shows the saved budget.
+    /// The budget's raw digits as typed; nil shows the saved budget.
     @State private var budgetText: String?
     @State private var isCloseShown = false
     @State private var membersRequest = PeoplePickRequest(title: "Add members", showsYou: false)
-    @FocusState private var isBudgetFocused: Bool
 
     var body: some View {
         let project = ledgerStore.ledger.group(groupId)
         ScrollView {
             if let project, let info = project.project {
                 content(project, info: info)
+                    .padding(.bottom, PBSpace.s24)
                     .pbPushContent()
             }
         }
+        .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .pbPinnedHeader {
             PBPushHeader("Project settings", testIDPrefix: "projectSettings", onBack: router.back)
@@ -37,10 +39,6 @@ struct ProjectSettingsScreen: View {
             guard case .people(let ids) = result, let project else { return }
             try? ledgerStore.addMembers(ids.filter { !project.memberIds.contains($0) }, to: groupId)
         }
-        .onChange(of: isBudgetFocused) { _, isFocused in
-            if !isFocused { saveBudget() }
-        }
-        .onDisappear(perform: saveBudget)
         .onStartScreen([.projectCloseAlert]) { _ in
             isCloseShown = true
         }
@@ -58,11 +56,13 @@ struct ProjectSettingsScreen: View {
                     .accessibilityIdentifier("projectSettings.pool")
                 footnote("When on, members pay into a pool first and purchases come out of it.")
             }
-            PBSettingRow("Close project", icon: .lock, trailing: .none, showsDivider: false) {
-                isCloseShown = true
+            if info.status == .active {
+                PBSettingRow("Close project", icon: .lock, trailing: .none, showsDivider: false) {
+                    isCloseShown = true
+                }
+                .pbCard(padding: 0)
+                .accessibilityIdentifier("projectSettings.close")
             }
-            .pbCard(padding: 0)
-            .accessibilityIdentifier("projectSettings.close")
         }
     }
 
@@ -78,10 +78,15 @@ struct ProjectSettingsScreen: View {
                 PBSegmentedControl(options: ["Equal", "Percent", "Fixed"], selection: Binding {
                     Self.rules.firstIndex(of: current.rule) ?? 0
                 } set: { index in
-                    guard Self.rules[index] != current.rule else { return }
+                    let rule = Self.rules[index]
+                    guard rule != current.rule else { return }
                     Haptics.selection()
-                    let spent = ledgerStore.books.projectSpent(groupId)
-                    apply(.prefill(Self.rules[index], members: members, budget: info.budget, spent: spent, currency: project.currency))
+                    if rule == info.contribution.rule {
+                        apply(ContributionEdit(info.contribution, members: members, currency: project.currency))
+                    } else {
+                        let spent = ledgerStore.books.projectSpent(groupId)
+                        apply(.prefill(rule, members: members, budget: info.budget, spent: spent, currency: project.currency))
+                    }
                 }, testIDPrefix: "projectSettings.rule")
                 footnote(check.helper, isError: !check.isValid)
                     .accessibilityIdentifier("projectSettings.ruleHelper")
@@ -149,21 +154,21 @@ struct ProjectSettingsScreen: View {
         return PBTextField("Budget", text: Binding {
             raw.isEmpty ? "" : PBAmountField.display(raw, currency: currency)
         } set: {
-            budgetText = PBAmountField.sanitize($0, allowsDecimals: Money.info(project.currency).exponent > 0)
-        }, prompt: "\(currency.symbol)0", helper: "You’ll see a warning if spending goes over.", focus: $isBudgetFocused)
+            saveBudget(PBAmountField.sanitize($0, allowsDecimals: Money.info(project.currency).exponent > 0))
+        }, prompt: PBAmountField.prefix(project.currency) + "0", helper: "You’ll see a warning if spending goes over.")
             .keyboardType(.decimalPad)
             .accessibilityIdentifier("projectSettings.budget")
     }
 
-    /// Saves the typed budget when the field loses focus; empty means no budget.
-    private func saveBudget() {
-        guard let budgetText, let project = ledgerStore.ledger.group(groupId), project.project?.status == .active else { return }
-        let budget = MoneyInput.minor(budgetText, currency: project.currency)
+    /// Keeps what was typed and saves it at once; empty or zero means no budget.
+    private func saveBudget(_ text: String) {
+        budgetText = text
+        guard let project = ledgerStore.ledger.group(groupId), project.project?.status == .active else { return }
+        let budget = MoneyInput.minor(text, currency: project.currency)
         let value = budget > 0 ? budget : nil
         if value != project.project?.budget {
             try? ledgerStore.setBudget(value, of: groupId)
         }
-        self.budgetText = nil
     }
 
     private func pool(_ info: ProjectInfo) -> Binding<Bool> {

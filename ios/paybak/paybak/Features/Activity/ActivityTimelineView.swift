@@ -8,7 +8,7 @@ struct ActivityTimelineView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// After Confirm, the list from before stays while the card plays its Confirmed state; then the
-    /// card folds away and the new "paid you" row takes its place (§3.6).
+    /// card fades and folds away and the new "paid you" row takes its place (§3.6).
     @State private var held: Held?
     /// The latest hold: a second Confirm during a hold restarts it.
     @State private var holdID = UUID()
@@ -39,7 +39,7 @@ struct ActivityTimelineView: View {
                             PendingClaimCard(claim: claim, testIDPrefix: "activity.claim.\(claim.id)") {
                                 hold(claims: claims, timeline: timeline)
                             }
-                            .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .top)))
+                            .transition(.opacity)
                         }
                     }
                 }
@@ -77,8 +77,8 @@ struct ActivityTimelineView: View {
         holdID = id
         held = Held(claims: claims, timeline: timeline)
         Task {
-            // The card's 250 ms Confirmed animation, then 0.8 s to read it.
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 800 : 1050))
+            // The card's 250 ms Confirmed animation, then 0.8 s to read it; none with Reduce Motion.
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 0 : 1050))
             guard holdID == id else { return }
             withAnimation(reduceMotion ? nil : .easeOut(duration: 0.25)) {
                 held = nil

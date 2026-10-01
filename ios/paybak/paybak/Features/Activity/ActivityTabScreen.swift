@@ -37,8 +37,7 @@ struct ActivityHeader: View {
         @Bindable var router = router
         VStack(spacing: PBSpace.s16) {
             PBNavHeader(title: "Activity", action: restore)
-            PBSegmentedControl(options: ["Timeline", "Insights"], selection: segment)
-                .accessibilityIdentifier("activity.segment")
+            PBSegmentedControl(options: ["Timeline", "Insights"], selection: segment, testIDPrefix: "activity.segment")
         }
         .padding(.bottom, PBSpace.s8)
     }

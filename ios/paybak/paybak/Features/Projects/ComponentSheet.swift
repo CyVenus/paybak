@@ -3,8 +3,9 @@ import SwiftUI
 
 /// Add component (screens-projects §5) and its edit twin (§1.5): name, estimated and actual cost,
 /// Planned / Bought / Done, who paid, a receipt photo. New parts start Planned with you as the payer;
-/// the button enables once there's a name (and, when bought or done, an actual cost). Typing an
-/// actual cost marks a planned part bought. Closing with typed changes asks first.
+/// the button enables once there's a name (and, when bought or done, an actual cost), and when
+/// editing, once something changed. Typing an actual cost marks a planned part bought. Closing with
+/// typed changes asks first.
 struct ComponentSheet: View {
     /// Which sheet is open on the dashboard.
     enum Mode: Hashable {
@@ -65,7 +66,7 @@ struct ComponentSheet: View {
                     .foregroundStyle(PBColor.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
                 PBButton(editing == nil ? "Add component" : "Save changes", fillsWidth: true, action: save)
-                    .disabled(!form.canSave(currency: currency))
+                    .disabled(!form.canSave(currency: currency) || (editing != nil && !isDirty))
                     .accessibilityIdentifier("addComponent.add")
                 if editing != nil {
                     PBTextButton("Delete component", style: .destructive) { isDeleteShown = true }
@@ -108,11 +109,11 @@ struct ComponentSheet: View {
         }
     }
 
-    /// "₹0".
-    private var prompt: String { "\(Money.info(currency).symbol)0" }
+    /// "₹0", or "AED 0" for a currency written by its code.
+    private var prompt: String { PBAmountField.prefix(currency) + "0" }
 
-    /// Shows the raw digits with the currency's symbol and grouping ("₹6,000") and keeps only what
-    /// the decimal pad may type.
+    /// Shows the raw digits with the currency's symbol and grouping ("₹6,000", "AED 6,000") and keeps
+    /// only what the decimal pad may type.
     private func costBinding(_ raw: String, set: @escaping (String) -> Void) -> Binding<String> {
         let currency = Currency(code: currency)
         let allowsDecimals = Money.info(currency.code).exponent > 0
@@ -137,23 +138,28 @@ struct ComponentSheet: View {
         }
     }
 
-    /// The project's members, one picked (Add expense's Paid by, 06-04).
+    /// The project's members by full name on the white sheet, you first as "You" with your name under
+    /// it; a pick closes the sheet. Test ids: `addComponent.payerSheet.close`, `addComponent.payer.<id>`.
     private var payerPicker: some View {
         let members = ledgerStore.ledger.group(projectId)?.memberIds ?? [Person.me]
-        return PBSheet(title: "Paid by", testIDPrefix: "paidBy", onClose: { isPayerPickerShown = false }) {
+        return PBSheet(title: "Paid by", testIDPrefix: "addComponent.payerSheet", onClose: { isPayerPickerShown = false }) {
             VStack(spacing: 0) {
                 ForEach(members, id: \.self) { id in
-                    PBPersonRow(name: ledgerStore.books.firstName(id), avatar: ledgerStore.memberAvatar(id), size: .compact,
+                    PBPersonRow(name: id == Person.me ? "You" : fullName(id), avatar: ledgerStore.memberAvatar(id),
+                                subtitle: id == Person.me ? fullName(id) : nil,
                                 trailing: id == form.paidBy ? .check : .none, showsDivider: id != members.last) {
-                        Haptics.selection()
                         form.paidBy = id
                         isPayerPickerShown = false
                     }
-                    .accessibilityIdentifier("paidBy.row.\(id)")
+                    .accessibilityIdentifier("addComponent.payer.\(id)")
                 }
             }
-            .pbCard(padding: 0)
         }
+    }
+
+    /// "Arjun Mehta" for you, "Priya Sharma" for a friend.
+    private func fullName(_ id: PersonID) -> String {
+        id == Person.me ? ledgerStore.profileStore.profile.name : ledgerStore.ledger.person(id)?.name ?? "Someone"
     }
 
 
@@ -181,7 +187,6 @@ struct ComponentSheet: View {
     private func delete() {
         guard let editing else { return }
         try? ledgerStore.deleteComponent(editing.id)
-        router.toast("Component deleted")
         onClose()
     }
 }

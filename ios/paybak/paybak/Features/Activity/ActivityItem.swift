@@ -46,10 +46,10 @@ extension Books {
         return days
     }
 
-    /// The log's header: "Rohan · History", "Build a Drone · History", "Food · September".
+    /// The log's header: "Rohan Verma · History", "Build a Drone · History", "Food · September".
     func activityLogTitle(_ filter: ActivityFilter) -> String {
         switch filter {
-        case .person(let id): "\(firstName(id)) · History"
+        case .person(let id): "\(ledger.person(id)?.name ?? firstName(id)) · History"
         case .group(let id), .project(let id): "\(groupName(id)) · History"
         case .category(let category, let month): "\(category.name) · \(Format.month(month.month))"
         }
@@ -70,29 +70,30 @@ extension Books {
 
     // MARK: Presentation
 
-    /// Expense rows show the category, payment and loan rows the friend; reminders open what they
-    /// were about, drafts their group's recurring rules, parts their project (with its icon).
+    /// Expense rows show the category, payment and loan rows the friend; reminders open the debt they
+    /// were about (an expense, a loan, else the group or project), drafts their group's recurring
+    /// rules, parts their project (with its icon).
     private func presentation(of kind: TimelineEvent.Kind) -> (PBActivityRow.Leading, Route?) {
         switch kind {
         case .expenseAdded(let id), .expenseEdited(let id):
-            return (.icon(ledger.expense(id)?.category.pbIcon ?? .receipt), .expense(id))
+            return (.icon((ledger.expense(id)?.category ?? .other).pbIcon), .expense(id))
         case .payment(let id):
             return (avatar(ledger.payment(id)?.otherPartyId), .payment(id))
         case .reminderSent(let id):
             let reminder = ledger.reminders.first { $0.id == id }
             let route: Route? = if let expenseId = reminder?.expenseId {
                 .expense(expenseId)
-            } else if let groupId = reminder?.groupId {
-                .group(groupId)
             } else if let loanId = reminder?.loanId {
                 .loan(loanId)
+            } else if let groupId = reminder?.groupId {
+                ledger.group(groupId)?.isProject == true ? Route.project(groupId) : Route.group(groupId)
             } else {
-                reminder.map { .friend($0.toId) }
+                nil
             }
             return (.icon(.bell), route)
         case .draftCreated(let id):
             let rule = ledger.draft(id).flatMap { ledger.rule($0.ruleId) }
-            return (.icon(rule.map(icon) ?? .receipt), rule?.groupId.map { .recurring($0) })
+            return (.icon(rule.map(icon) ?? ExpenseCategory.other.pbIcon), rule?.groupId.map { .recurring($0) })
         case .loanAdded(let id):
             return (avatar(ledger.loan(id)?.friendId), .loan(id))
         case .componentChanged(let id, _):
@@ -105,12 +106,14 @@ extension Books {
         .avatar(person.flatMap { ledger.person($0)?.avatarContent } ?? .icon(.profile))
     }
 
-    /// A recurring rule's icon: its utility where the title names one (Cooking gas → flame,
-    /// Wi-Fi), else its category's.
+    /// A recurring rule's icon: its utility where a word of the title names one (Cooking gas →
+    /// flame; Wi-Fi, internet, broadband), else its category's.
     private func icon(_ rule: RecurringRule) -> PBIcon {
-        let title = rule.title.lowercased()
-        if title.contains("gas") { return .flame }
-        if title.contains("wi-fi") || title.contains("wifi") || title.contains("internet") { return .wiFi }
+        let words = Set(rule.title.lowercased()
+            .split { !(($0 >= "a" && $0 <= "z") || $0 == "-") }
+            .map(String.init))
+        if words.contains("gas") { return .flame }
+        if !words.isDisjoint(with: ["wi-fi", "wifi", "internet", "broadband"]) { return .wiFi }
         return rule.category.pbIcon
     }
 
@@ -121,9 +124,14 @@ extension Books {
         case .person(let person): people(in: event.kind).contains(person)
         case .group(let id), .project(let id): groupId(of: event.kind) == id
         case .category(let category, let month):
-            if case .expenseAdded(let id) = event.kind, let expense = ledger.expense(id) {
-                expense.category == category && YearMonth(expense.date) == month
-            } else {
+            switch event.kind {
+            case .expenseAdded(let id), .expenseEdited(let id):
+                if let expense = ledger.expense(id) {
+                    expense.category == category && YearMonth(expense.date) == month
+                } else {
+                    false
+                }
+            default:
                 false
             }
         }

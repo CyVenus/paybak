@@ -19,9 +19,12 @@ struct ProjectScreen: View {
                 ProjectContent(page: page) { sheet = .edit($0) }
                     .padding(.horizontal, PBLayout.screenMargin)
                     .padding(.top, PBSpace.s12)
+                    // Active, the pinned button's inset leaves the 24 under the content.
+                    .padding(.bottom, page.isEditable ? 0 : PBSpace.s24)
                     .phoneContentWidth()
             }
         }
+        .scrollIndicators(.hidden)
         .pbPinnedHeader {
             PBPushHeader(testIDPrefix: "project", onBack: router.back)
                 .overlay(alignment: .trailing) {
@@ -69,19 +72,35 @@ struct ProjectScreen: View {
         return ledgerStore.ledger.components.first { $0.id == id }
     }
 
-    /// Pinned to the bottom safe-area line over the bottom 96 pt of white fade (§3.9).
+    /// The white fade under the pinned button reaches this far above it (Figma: 96 from the bottom).
+    private static let fadeAboveButton: CGFloat = 10
+
+    /// Pinned to the bottom safe-area line, 24 under the content's end, over a white fade that runs
+    /// from 10 above the button to the bottom edge (§3.9). The fade takes no taps.
     private var addButton: some View {
         PBButton("Add component", icon: .plus, fillsWidth: true) {
             sheet = .add
         }
         .accessibilityIdentifier("project.addComponent")
+        .pinnedFooter()
         .padding(.horizontal, PBLayout.screenMargin)
-        .padding(.top, PBSpace.s24)
         .phoneContentWidth()
-        .background(alignment: .bottom) {
-            PBScrollEdgeFade(height: 96)
-                .ignoresSafeArea(edges: .bottom)
+        .padding(.top, Self.fadeAboveButton)
+        .background {
+            LinearGradient(
+                stops: [
+                    .init(color: PBColor.bgPrimary.opacity(0), location: 0),
+                    .init(color: PBColor.bgPrimary.opacity(0.85), location: 0.45),
+                    .init(color: PBColor.bgPrimary, location: 1),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea(edges: .bottom)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
         }
+        .padding(.top, PBSpace.s24 - Self.fadeAboveButton)
     }
 }
 
