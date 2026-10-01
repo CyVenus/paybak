@@ -80,6 +80,7 @@
     <!-- Expense detail (screens-activity §4) -->
     <string name="add_expense">Expense</string>
     <string name="add_expense_gone">This expense isn’t available any more.</string>
+    <string name="add_photo_unavailable">This photo isn’t available.</string>
     <string name="add_edit_expense">Edit expense</string>
     <string name="add_resolve">Resolve</string>
     <string name="add_comments">Comments</string>
