@@ -1,5 +1,6 @@
 package app.paybak.paybak.feature.groups
 
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -58,12 +59,11 @@ class GroupsTest {
             compose.awaitScreen("group")
             compose.onNodeWithText("You owe Kabir · Due Fri 2 Oct").assertExists()
             tag("group.balances.row.p-kabir").assertExists()
-            compose
-                .onNodeWithText(
+            tag("group.simplifyNote")
+                .assertTextEquals(
                     "Simplify debts is on. You, Priya, Esha and Dev each pay Kabir directly."
                 )
-                .assertExists()
-            tap("group.action")
+            tap("group.settings")
             compose.awaitScreen("groupSettings")
             tap("groupSettings.leave")
             compose.awaitTag("groupSettings.leaveBlocked")
@@ -81,7 +81,7 @@ class GroupsTest {
     fun youCanLeaveASettledGroup() {
         launchPaybak("groupDubaiWeekend").use {
             compose.awaitScreen("group")
-            tap("group.action")
+            tap("group.settings")
             compose.awaitScreen("groupSettings")
             tap("groupSettings.leave")
             compose.awaitTag("groupSettings.leaveConfirm")

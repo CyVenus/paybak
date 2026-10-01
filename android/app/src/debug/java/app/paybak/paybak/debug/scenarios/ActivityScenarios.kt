@@ -34,7 +34,7 @@ internal val ActivityScenarios: Map<String, Scenario> =
                         Route.ActivityLog(ActivityFilter.Project("pj-drone")),
                     ),
             ),
-        // The Timeline posts these two notifications when started with their id (activity §7).
-        "lockConfirmRequest" to Scenario(demo(), tab = Tab.Activity),
-        "lockReminder" to Scenario(demo(), tab = Tab.Activity),
+        // DebugLaunch posts these two notifications over Home (activity §7).
+        "lockConfirmRequest" to Scenario(demo()),
+        "lockReminder" to Scenario(demo()),
     )

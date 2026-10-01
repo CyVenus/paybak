@@ -33,9 +33,10 @@ class GroupPageTest {
             page.members.map { listOf(it.name, it.subtitle, it.amount, it.label) },
         )
         assertEquals(
-            listOf("Simplify debts is on. You, Priya, Esha and Dev each pay Kabir directly."),
-            page.notes,
+            "Simplify debts is on. You, Priya, Esha and Dev each pay Kabir directly.",
+            page.simplifyNote,
         )
+        assertNull(page.totalNote)
         assertEquals(
             listOf("Fri 25 Sep", "Thu 24 Sep", "Wed 23 Sep", "Tue 22 Sep", "Mon 21 Sep"),
             page.days.map { it.label },
@@ -72,7 +73,8 @@ class GroupPageTest {
             page.members.map { it.subtitle },
         )
         assertTrue(page.members.all { it.standing == Standing.Settled })
-        assertEquals(listOf("Total AED 1,800 · ≈ ₹41,118 at saved rates"), page.notes)
+        assertNull(page.simplifyNote)
+        assertEquals("Total AED 1,800 · ≈ ₹41,118 at saved rates", page.totalNote)
         val rows = page.days.flatMap { it.rows }
         assertEquals(
             listOf("Dinner at the Marina", "Desert safari", "Hotel"),

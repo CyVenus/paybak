@@ -63,8 +63,10 @@ data class GroupPage(
     val memberIds: List<String>,
     val balance: GroupBalanceCard,
     val members: List<MemberBalanceRow>,
-    /** The simplify line, then the foreign-currency total line. */
-    val notes: List<String>,
+    /** "Simplify debts is on. …", when the group simplifies and someone owes. */
+    val simplifyNote: String?,
+    /** "Total AED 1,800 · ≈ ₹41,118 at saved rates", for a foreign-currency group. */
+    val totalNote: String?,
     val days: List<ExpenseDay>,
 ) {
     val isEmpty: Boolean
@@ -116,7 +118,8 @@ private fun LedgerView.groupPage(subtitle: String, sheet: GroupSheet): GroupPage
                         },
                 )
             },
-        notes = listOfNotNull(sheet.footnote, sheet.totalLine),
+        simplifyNote = sheet.footnote,
+        totalNote = sheet.totalLine,
         days =
             sheet.expenses
                 .groupBy { it.date }

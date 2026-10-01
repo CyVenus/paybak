@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
@@ -76,7 +78,7 @@ import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbSize
 import app.paybak.paybak.ui.theme.PbSpace
 import app.paybak.paybak.ui.theme.PbTextStyles
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 
 /**
  * The `expense` route: the Expense detail template (activity §4; `expenseAdded`, add-expense §11).
@@ -97,13 +99,13 @@ fun ExpenseDetailScreen(route: Route.Expense) {
     }
     var composing by rememberSaveable { mutableStateOf(start == "expenseComment") }
     val focusManager = LocalFocusManager.current
-    val commentsInView = remember { BringIntoViewRequester() }
+    val scroll = rememberScrollState()
+    val historyInView = remember { BringIntoViewRequester() }
     LaunchedEffect(composing) {
-        // Once the keyboard has resized the screen, show the comments above the composer.
-        if (composing) {
-            delay(KEYBOARD_SETTLE_MILLIS)
-            commentsInView.bringIntoView()
-        }
+        // As the keyboard (and the composer above it) shrinks the page, keep the comments and the
+        // history in view right above the composer (activity §4.6).
+        if (composing)
+            snapshotFlow { scroll.viewportSize }.collectLatest { historyInView.bringIntoView() }
     }
     val detail = snapshot.view.expenseDetail(route.expenseId)
     val deleted = stringResource(R.string.add_toast_expense_deleted)
@@ -132,6 +134,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
 
     PbPinnedHeaderScreen(
         testTag = "screen.expense",
+        scrollState = scroll,
         modifier =
             Modifier.pointerInput(composing) {
                 if (composing) detectTapGestures { focusManager.clearFocus() }
@@ -243,10 +246,7 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 }
             }
         }
-        Section(
-            stringResource(R.string.add_comments),
-            Modifier.bringIntoViewRequester(commentsInView),
-        ) {
+        Section(stringResource(R.string.add_comments)) {
             Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
                 Column {
                     detail.comments.forEach {
@@ -268,7 +268,10 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 }
             }
         }
-        Section(stringResource(R.string.add_history)) {
+        Section(
+            stringResource(R.string.add_history),
+            Modifier.bringIntoViewRequester(historyInView),
+        ) {
             Column {
                 detail.history.forEachIndexed { index, line ->
                     PbHistoryRow(line.text, line.date, last = index == detail.history.lastIndex)
@@ -322,9 +325,6 @@ fun ExpenseDetailScreen(route: Route.Expense) {
         FlagSheet(detail.expense.id) { flagging = false }
     }
 }
-
-/** The keyboard's slide-in, after which the screen has its final height. */
-private const val KEYBOARD_SETTLE_MILLIS = 350L
 
 /** Edit opens Add expense in edit mode, prefilled (activity §4.2). */
 private fun edit(open: (Route) -> Unit, detail: ExpenseDetail) =

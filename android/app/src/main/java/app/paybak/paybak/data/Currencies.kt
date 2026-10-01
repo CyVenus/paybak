@@ -2,6 +2,7 @@ package app.paybak.paybak.data
 
 import android.icu.text.Collator
 import android.icu.util.Currency as IcuCurrency
+import android.icu.util.ULocale
 import java.util.Date
 import java.util.Locale
 
@@ -41,13 +42,18 @@ object Currencies {
             "SGD" to ("Singapore Dollar" to "S$"),
         )
 
-    /** All ISO 4217 currencies that are legal tender today, sorted by name in [locale]. */
+    /**
+     * Every currency some region uses as legal tender today, sorted by name in [locale]. Asking
+     * region by region leaves out the funds and units of account (XUA, XDR, BOV, CHE…) that ICU
+     * also lists, like iOS's common ISO currency codes.
+     */
     fun all(locale: Locale = Locale.getDefault()): List<Currency> {
         val today = Date()
         val collator = Collator.getInstance(locale)
-        return IcuCurrency.getAvailableCurrencies()
-            .map { it.currencyCode }
-            .filter { IcuCurrency.isAvailable(it, today, today) }
+        return Locale.getISOCountries()
+            .flatMap {
+                IcuCurrency.getAvailableCurrencyCodes(ULocale("und_$it"), today).orEmpty().asList()
+            }
             .distinct()
             .map { currency(it, locale) }
             .sortedWith { a, b -> collator.compare(a.name, b.name) }

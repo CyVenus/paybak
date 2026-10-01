@@ -6,6 +6,7 @@ import app.paybak.paybak.PaybakApplication
 import app.paybak.paybak.StartTarget
 import app.paybak.paybak.data.ledger.actions.setPro
 import app.paybak.paybak.debug.gallery.GalleryScreen
+import app.paybak.paybak.domain.model.InboxType
 import app.paybak.paybak.navigation.Destination
 import java.time.LocalDateTime
 
@@ -53,8 +54,29 @@ object DebugLaunch {
             return StartTarget.Tool { GalleryScreen(initialPage = page) }
         }
         val target = id?.let { startAt(it, app, firstLaunch) }
-        if (firstLaunch) applyOverrides(intent, app, loadDemo = id == null)
+        if (firstLaunch) {
+            applyOverrides(intent, app, loadDemo = id == null)
+            postLockScreen(id, app)
+        }
         return target
+    }
+
+    /**
+     * `lockConfirmRequest` posts Esha's claim and `lockReminder` tonight's Kabir reminder, so they
+     * show over Home (activity §7).
+     */
+    private fun postLockScreen(id: String?, app: PaybakApplication) {
+        val snapshot = app.ledger.snapshot.value
+        when (id) {
+            "lockConfirmRequest" ->
+                snapshot.home.pendingClaims.firstOrNull()?.let {
+                    app.notifications.postPaymentToConfirm(it.payment.id)
+                }
+            "lockReminder" ->
+                snapshot.ledger.inbox
+                    .lastOrNull { it.type == InboxType.PaymentReminder }
+                    ?.let { app.notifications.postInboxItem(it.id) }
+        }
     }
 
     private fun startAt(id: String, app: PaybakApplication, firstLaunch: Boolean): StartTarget? {

@@ -2,11 +2,13 @@ package app.paybak.paybak.feature.addrecord
 
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -85,6 +87,21 @@ class AddExpenseTest {
             robot.tap("split.done")
             robot.await("addExpense.form")
             compose.onNodeWithText("Exact · 4 people").assertExists()
+        }
+    }
+
+    @Test
+    fun theMonthTitleOpensTheMonthAndYearWheels() {
+        launchPaybak("addExpenseDueDate").use {
+            robot.tap("dueDate.calendar.month")
+            robot.tap("dueDate.calendar.yearWheel.2027")
+            robot.tap("dueDate.calendar.monthWheel.12")
+            compose.waitUntil(5_000) {
+                compose.onAllNodesWithText("December 2027").fetchSemanticsNodes().isNotEmpty()
+            }
+            robot.tap("dueDate.calendar.month")
+            robot.tap("dueDate.calendar.day.2027-12-15")
+            robot.tag("dueDate.summary").assertTextEquals("Wed 15 Dec 2027 · in 441 days")
         }
     }
 

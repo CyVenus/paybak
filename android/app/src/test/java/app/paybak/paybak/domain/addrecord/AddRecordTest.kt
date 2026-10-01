@@ -129,6 +129,10 @@ class AddRecordTest {
             DateCopy.summary(LocalDate.of(2026, 10, 4), today, true),
         )
         assertEquals("Mon 28 Sep · 2 days ago", DateCopy.summary(today.minusDays(2), today, false))
+        assertEquals(
+            "Wed 15 Dec 2027 · in 441 days",
+            DateCopy.summary(LocalDate.of(2027, 12, 15), today, true),
+        )
         assertEquals("Today", DateCopy.label(today, today))
         assertEquals(
             "Paybak reminds them 2 days before, on the day, and every 3 days if it’s overdue.",

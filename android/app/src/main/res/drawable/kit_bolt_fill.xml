@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The kit glass flash (SF Symbol bolt.fill, Semibold 19) as Figma draws it on the camera's disc. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="28"
+    android:viewportHeight="28">
+    <path
+        android:fillColor="#FF0A0A0A"
+        android:strokeColor="#FF0A0A0A"
+        android:strokeWidth="0.8"
+        android:strokeLineJoin="round"
+        android:pathData="M16.6,1.3L18.7,1.9L14.7,11.9L22.7,12L11,27.3L9.5,27.1L12.9,16.4L5.3,16.4Z" />
+</vector>

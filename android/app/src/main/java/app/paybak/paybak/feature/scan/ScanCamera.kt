@@ -8,6 +8,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,12 +21,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -85,10 +86,13 @@ private val GuideArm = 36.dp
 private val GuideStroke = 4.dp
 private val GuideRadius = 12.dp
 
-/** The simulated feed: the receipt art inside the guides, turned −4° (Figma 59.1, 195.3). */
+/** The simulated feed: the receipt art centred in the guides, turned 4° clockwise (Figma). */
 private val ArtWidth = 257.dp
 private val ArtHeight = 392.4.dp
-private const val ART_TURN = -4f
+private const val ART_TURN = 4f
+
+/** The kit glass glyphs (SF Symbols at Semibold 19) are drawn on a 28 dp grid. */
+private val GlyphSize = 28.dp
 
 /** The glass discs on the camera read as mid grey (white 40 % over the dark backdrop). */
 private val ControlDisc = PbPalette.Gray0.copy(alpha = 0.4f)
@@ -145,7 +149,9 @@ internal fun ScanCamera(reading: Boolean, onClose: () -> Unit, onPhoto: (Bitmap,
                         painterResource(R.drawable.art_receipt_full),
                         contentDescription = null,
                         modifier =
-                            Modifier.offset(8.dp, 25.dp).size(ArtWidth, ArtHeight).rotate(ART_TURN),
+                            Modifier.align(Alignment.Center)
+                                .size(ArtWidth, ArtHeight)
+                                .rotate(ART_TURN),
                     )
                 }
                 Guides(Modifier.fillMaxSize())
@@ -194,7 +200,7 @@ internal fun ScanCamera(reading: Boolean, onClose: () -> Unit, onPhoto: (Bitmap,
 private fun TopBar(torch: Boolean, onClose: () -> Unit, onFlash: () -> Unit) {
     Box(Modifier.fillMaxWidth().height(PbSize.Tap).padding(horizontal = PbLayout.ScreenMargin)) {
         DiscButton(
-            PbIcon.Close,
+            R.drawable.kit_xmark,
             stringResource(R.string.pb_close),
             onClose,
             Modifier.align(Alignment.CenterStart).testTag("scan.close"),
@@ -206,7 +212,7 @@ private fun TopBar(torch: Boolean, onClose: () -> Unit, onFlash: () -> Unit) {
             color = PbColors.Text.Inverse,
         )
         DiscButton(
-            PbIcon.Bolt,
+            R.drawable.kit_bolt_fill,
             stringResource(R.string.insights_scan_flash),
             onFlash,
             Modifier.align(Alignment.CenterEnd).testTag("scan.flash"),
@@ -215,10 +221,10 @@ private fun TopBar(torch: Boolean, onClose: () -> Unit, onFlash: () -> Unit) {
     }
 }
 
-/** A 44 dp translucent disc with a white icon; [on] turns it white with a black icon (flash). */
+/** A 44 dp translucent disc with a white glyph; [on] turns it white with a black glyph (flash). */
 @Composable
 private fun DiscButton(
-    icon: PbIcon,
+    @DrawableRes glyph: Int,
     label: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -236,9 +242,10 @@ private fun DiscButton(
             },
         contentAlignment = Alignment.Center,
     ) {
-        PbIconImage(
-            icon,
+        Icon(
+            painterResource(glyph),
             contentDescription = null,
+            modifier = Modifier.size(GlyphSize),
             tint = if (on) PbColors.Icon.Primary else PbColors.Icon.Inverse,
         )
     }

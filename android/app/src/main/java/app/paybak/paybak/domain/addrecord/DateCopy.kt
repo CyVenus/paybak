@@ -42,7 +42,7 @@ object DateCopy {
 
     /**
      * The sheet's summary line: "Sun 4 Oct · in 4 days" for a due date, "Mon 28 Sep · 2 days ago"
-     * for when something happened.
+     * for when something happened; another year's day adds the year ("Wed 15 Dec 2027").
      */
     fun summary(date: LocalDate, today: LocalDate, due: Boolean): String {
         val days = ChronoUnit.DAYS.between(today, date)
@@ -54,7 +54,9 @@ object DateCopy {
                 days > 1 -> "in $days days"
                 else -> "${-days} days ago"
             }
-        return "${Dates.day(date)} · $relative"
+        val day =
+            if (date.year == today.year) Dates.day(date) else "${Dates.day(date)} ${date.year}"
+        return "$day · $relative"
     }
 
     /**

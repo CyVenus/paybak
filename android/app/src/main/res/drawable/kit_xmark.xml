@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The kit glass ✕ (SF Symbol xmark, Semibold 19) as Figma draws it on the camera's 44 dp disc. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="28"
+    android:viewportHeight="28">
+    <path
+        android:strokeColor="#FF0A0A0A"
+        android:strokeWidth="2.9"
+        android:strokeLineCap="round"
+        android:pathData="M6,6.25L22,22.25M22,6.25L6,22.25" />
+</vector>

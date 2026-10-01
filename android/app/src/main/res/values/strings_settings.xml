@@ -159,6 +159,7 @@
     <!-- Help & feedback (screens-settings §11) -->
     <string name="settings_help_title">Help &amp; feedback</string>
     <string name="settings_help_questions">Common questions</string>
+    <string name="settings_help_answer_title">Help</string>
     <string name="settings_help_touch">Get in touch</string>
     <string name="settings_help_contact">Contact us</string>
     <string name="settings_help_rate">Rate Paybak</string>

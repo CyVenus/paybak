@@ -68,6 +68,7 @@ fun GroupDetailScreen(route: Route.Group) {
             PbHeaderAction.Icon(PbIcon.Settings, stringResource(R.string.groups_settings)) {
                 navigator.open(Route.GroupSettings(route.groupId))
             },
+        actionTag = "settings",
     ) {
         if (page == null) return@PbPushedPage
         PbTitleHeader(
@@ -161,16 +162,20 @@ private fun Balances(page: GroupPage, view: LedgerView) {
                     )
                 }
             }
-            page.notes.forEachIndexed { index, note ->
-                Text(
-                    note,
-                    Modifier.testTag("group.note.$index"),
-                    style = PbTextStyles.Footnote,
-                    color = PbColors.Text.Secondary,
-                )
-            }
+            page.simplifyNote?.let { Note(it, "group.simplifyNote") }
+            page.totalNote?.let { Note(it, "group.totalNote") }
         }
     }
+}
+
+@Composable
+private fun Note(text: String, testTag: String) {
+    Text(
+        text,
+        Modifier.testTag(testTag),
+        style = PbTextStyles.Footnote,
+        color = PbColors.Text.Secondary,
+    )
 }
 
 @Composable

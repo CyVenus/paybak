@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -13,23 +12,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import app.paybak.paybak.PaybakApplication
 import app.paybak.paybak.R
 import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.LedgerSnapshot
 import app.paybak.paybak.domain.calc.TimelineDay
 import app.paybak.paybak.domain.format.Dates
-import app.paybak.paybak.domain.model.InboxType
 import app.paybak.paybak.feature.PendingClaimStack
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalTabBarPadding
-import app.paybak.paybak.navigation.rememberDebugStartScreen
 import app.paybak.paybak.ui.components.PbEmptyState
 import app.paybak.paybak.ui.theme.PbSpace
 
@@ -41,7 +36,6 @@ import app.paybak.paybak.ui.theme.PbSpace
 @Composable
 fun ActivityTimelineView(modifier: Modifier = Modifier) {
     val snapshot by LocalLedger.current.collectSnapshot()
-    PostDebugLockScreen(snapshot)
     val claims = snapshot.home.pendingClaims
     val days = remember(snapshot) { snapshot.withToday() }
     if (days.isEmpty()) {
@@ -87,28 +81,6 @@ private fun EmptyTimeline(modifier: Modifier) {
                 stringResource(R.string.activity_empty_title),
                 stringResource(R.string.activity_empty_body),
             )
-        }
-    }
-}
-
-/**
- * Debug start screens for the two lock-screen pushes (activity §7): `lockConfirmRequest` posts
- * Esha's claim and `lockReminder` tonight's Kabir reminder, so they show over the app.
- */
-@Composable
-private fun PostDebugLockScreen(snapshot: LedgerSnapshot) {
-    val start = rememberDebugStartScreen("lockConfirmRequest", "lockReminder") ?: return
-    val notifications = (LocalContext.current.applicationContext as PaybakApplication).notifications
-    LaunchedEffect(start) {
-        when (start) {
-            "lockConfirmRequest" ->
-                snapshot.home.pendingClaims.firstOrNull()?.let {
-                    notifications.postPaymentToConfirm(it.payment.id)
-                }
-            else ->
-                snapshot.ledger.inbox
-                    .lastOrNull { it.type == InboxType.PaymentReminder }
-                    ?.let { notifications.postInboxItem(it.id) }
         }
     }
 }
