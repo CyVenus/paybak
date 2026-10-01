@@ -15,6 +15,7 @@ import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.UserProfile
 import app.paybak.paybak.domain.model.AvatarLook
 import app.paybak.paybak.navigation.LocalProfileStore
+import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbSpace
 
 /**
@@ -36,7 +37,7 @@ fun PbUserAvatar(
 
 /**
  * What an avatar circle shows for the user: the initials are the fallback, also while a photo
- * loads.
+ * loads, and the profile icon before a name exists.
  */
 @Composable
 fun rememberUserAvatar(profile: UserProfile, profileStore: ProfileStore): PbAvatarContent {
@@ -54,9 +55,14 @@ fun rememberPhotoImage(photo: AvatarChoice.Photo?, profileStore: ProfileStore): 
     return image
 }
 
-/** What an avatar circle shows for this choice; [photo] is the photo's image once loaded. */
+/**
+ * What an avatar circle shows for this choice; [photo] is the photo's image once loaded. The
+ * fallback is the [initials], or the profile icon while there are none (no name yet).
+ */
 fun AvatarChoice.toAvatarContent(photo: ImageBitmap?, initials: String): PbAvatarContent {
-    val fallback = PbAvatarContent.Initials(initials)
+    val fallback =
+        if (initials.isEmpty()) PbAvatarContent.Symbol(PbIcon.Profile)
+        else PbAvatarContent.Initials(initials)
     return when (this) {
         AvatarChoice.None -> fallback
         is AvatarChoice.Preset ->
