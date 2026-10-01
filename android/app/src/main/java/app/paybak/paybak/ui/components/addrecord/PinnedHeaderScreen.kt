@@ -34,7 +34,8 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * A pushed or modal screen with a fixed 44 dp [header] (Push or Modal Header) over a solid white
  * band, and [content] scrolling under it: Figma's "Scroll edge (top)" band and "Header space". The
  * content starts [headerGap] below the header, with the 20 dp margins and [gap] between children;
- * [footer] (pinned buttons, the split total) stays at the bottom and rides the keyboard.
+ * [footer] (pinned buttons, the split total) stays at the bottom and rides the keyboard, and so
+ * does [bottomBar], edge to edge (the pinned comment composer).
  *
  * @param testTag The root's tag: `screen.<routeId>` for a route, a page tag for a local page.
  */
@@ -47,6 +48,7 @@ fun PbPinnedHeaderScreen(
     gap: Dp = PbSpace.S16,
     headerGap: Dp = PbSpace.S16,
     footer: (@Composable ColumnScope.() -> Unit)? = null,
+    bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Box(
@@ -82,6 +84,7 @@ fun PbPinnedHeaderScreen(
                     content = footer,
                 )
             }
+            bottomBar?.invoke()
         }
     }
 }

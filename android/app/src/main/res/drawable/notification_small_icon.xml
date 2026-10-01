@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Paybak "P" alone, for the status bar and the notification header (the system tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="17.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M55 122.5V37.5H81.25C88.5435 37.5 95.5382 40.3973 100.695 45.5546 105.853 50.7118 108.75 57.7065 108.75 65 108.75 72.2935 105.853 79.2882 100.695 84.4454 95.5382 89.6027 88.5435 92.5 81.25 92.5H55" />
+</vector>

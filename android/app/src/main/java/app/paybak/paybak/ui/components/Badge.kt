@@ -27,6 +27,9 @@ enum class PbBadgeStyle(val fill: Color, val content: Color) {
 
     /** On #F5F5F5 cards. */
     OnCard(PbColors.Bg.Primary, PbColors.Text.Secondary),
+
+    /** Muted inside a #F5F5F5 card, where white would read as On Card (a planned part, 10-01). */
+    MutedOnCard(PbColors.Bg.CardPressed, PbColors.Text.Secondary),
     Inverse(PbColors.Bg.Inverse, PbColors.Text.Inverse),
 
     /** Reserved for overdue items. */

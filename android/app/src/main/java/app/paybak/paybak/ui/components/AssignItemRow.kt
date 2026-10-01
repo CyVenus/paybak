@@ -3,6 +3,8 @@ package app.paybak.paybak.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,8 +24,10 @@ data class PbAssignee(val name: String, val avatar: PbAvatarContent, val selecte
 /**
  * `Row / Assign Item` (`PBAssignItemRow`): one receipt item on Assign items, on white with no side
  * padding: the item and its price, an optional [sharedCaption] ("Shared by 3 · ₹80 each"), and a
- * people chip per person, black when they had it. Tapping a chip calls [onToggle] with its index.
+ * people chip per person (wrapping when there are many), black when they had it. Tapping a chip
+ * calls [onToggle] with its index. Chips are tagged "[testTag].person.<name in lower case>".
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PbAssignItemRow(
     item: String,
@@ -33,8 +37,9 @@ fun PbAssignItemRow(
     modifier: Modifier = Modifier,
     sharedCaption: String? = null,
     showDivider: Boolean = true,
+    testTag: String? = null,
 ) {
-    Box(modifier.fillMaxWidth()) {
+    Box(modifier.fillMaxWidth().partTag(testTag)) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(vertical = PbSpace.S12),
             verticalArrangement = Arrangement.spacedBy(PbSpace.S8),
@@ -59,10 +64,14 @@ fun PbAssignItemRow(
                 }
                 Text(price, style = PbTextStyles.AmountMedium, color = PbColors.Text.Primary)
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(PbSpace.S8),
+                verticalArrangement = Arrangement.spacedBy(PbSpace.S8),
+            ) {
                 people.forEachIndexed { index, person ->
                     PbCategoryChip(
                         label = person.name,
+                        modifier = Modifier.partTag(testTag, "person.${person.name.lowercase()}"),
                         selected = person.selected,
                         onClick = { onToggle(index) },
                         leading = PbChipLeading.Avatar(person.avatar),

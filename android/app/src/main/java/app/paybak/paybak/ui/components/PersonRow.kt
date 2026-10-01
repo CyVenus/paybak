@@ -66,6 +66,9 @@ sealed interface PbPersonTrailing {
 
     /** A small pill ("Invite", "Remind") with its own tap. */
     data class Action(val label: String, val onClick: () -> Unit) : PbPersonTrailing
+
+    /** The value edited in place ("25" %, "₹15,000"): a project's Percent or Fixed rule. */
+    data class Field(val editor: PbAmountEditor, val testTag: String? = null) : PbPersonTrailing
 }
 
 /**
@@ -218,6 +221,13 @@ private fun PersonTrailing(trailing: PbPersonTrailing, onCard: Boolean) {
                 style = if (onCard) PbButtonStyle.OnCard else PbButtonStyle.Secondary,
                 size = PbButtonSize.Small,
             )
+        is PbPersonTrailing.Field ->
+            InlineAmountField(
+                trailing.editor,
+                PbTextStyles.Headline,
+                Modifier.partTag(trailing.testTag),
+                minWidth = 88.dp,
+            )
     }
 }
 
@@ -247,6 +257,12 @@ private fun PbPersonRowPreview() {
                 trailing = PbPersonTrailing.Select(selected = true),
                 size = PbPersonRowSize.Compact,
                 onClick = {},
+            )
+            PbPersonRow(
+                "Dev",
+                PbAvatarContent.Art(PbPeepHead.Dev),
+                trailing = PbPersonTrailing.Field(PbAmountEditor("25", {}, suffix = "%")),
+                size = PbPersonRowSize.Compact,
                 showDivider = false,
             )
         }
