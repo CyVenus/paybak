@@ -93,6 +93,19 @@ class ActivityTest {
     }
 
     @Test
+    fun confirmingFromTheInboxSettlesItOnHome() {
+        launchPaybak("notifications").use {
+            compose.awaitScreen("notifications")
+            tap("$CLAIM.confirm")
+            awaitGone(CLAIM)
+            tap("notifications.back")
+            compose.awaitScreen("homeActive")
+            compose.onNodeWithText("+₹2,200").assertExists()
+            compose.onNodeWithText("Esha paid you").assertExists()
+        }
+    }
+
+    @Test
     fun deletedVillaWaitsInRecentlyDeletedAndComesBack() {
         launchPaybak("expenseVilla").use {
             compose.awaitScreen("expense")
