@@ -71,6 +71,8 @@ enum DebugState {
     private static let anchorKey = "debug.demoAnchor"
     /// Also a launch argument: `-autoApprove NO` turns it off for that launch (UI tests).
     private static let autoApproveKey = "autoApprove"
+    /// Only a launch argument: `-autoApproveAfter 12` waits 12 s instead of 5.
+    private static let autoApproveAfterKey = "autoApproveAfter"
 
     /// Friends confirm the payments you record to them after 5 s (`DebugAutoApprover`). On until
     /// turned off in the debug menu. A launch argument arrives as the string "YES" or "NO", which
@@ -81,6 +83,12 @@ enum DebugState {
                 || UserDefaults.standard.bool(forKey: autoApproveKey)
         }
         set { UserDefaults.standard.set(newValue, forKey: autoApproveKey) }
+    }
+
+    /// How long a friend takes to confirm: 5 s, or the `-autoApproveAfter` launch argument.
+    static var autoApproveDelay: Duration {
+        let seconds = UserDefaults.standard.double(forKey: autoApproveAfterKey)
+        return seconds > 0 ? .seconds(seconds) : .seconds(5)
     }
 
     static var pinnedClock: Date? {

@@ -129,7 +129,8 @@ extension XCUIApplication {
     /// its demo scenario, `-now` pins the clock, `-pro` overrides the plan, `-scenario` applies seed
     /// scenarios and `-link` opens a deep link. `textSize` sets the app's Dynamic Type size without
     /// touching the device's settings. Friends don't auto-approve your payments (`-autoApprove`)
-    /// unless a test asks, so a payment you record stays pending.
+    /// unless a test asks, so a payment you record stays pending; `autoApproveAfter` is how many
+    /// seconds they take (5 by default).
     static func launchPaybak(
         startScreen: ScreenID? = nil,
         resetOnboarding: Bool = true,
@@ -138,10 +139,14 @@ extension XCUIApplication {
         pro: Bool? = nil,
         scenarios: [String] = [],
         link: String? = nil,
-        autoApprove: Bool = false
+        autoApprove: Bool = false,
+        autoApproveAfter: Int? = nil
     ) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments += ["-autoApprove", autoApprove ? "YES" : "NO"]
+        if let autoApproveAfter {
+            app.launchArguments += ["-autoApproveAfter", String(autoApproveAfter)]
+        }
         if resetOnboarding {
             app.launchArguments += ["-resetOnboarding", "YES"]
         }

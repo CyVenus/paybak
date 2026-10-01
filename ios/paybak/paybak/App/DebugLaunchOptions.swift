@@ -19,6 +19,7 @@ import os
 ///     -link <paybak://…>         open a deep link after launch, as a notification tap would
 ///     -autoApprove YES|NO        whether friends confirm your new payments after 5 s, for this launch
 ///                                only (`DebugState.autoApprovesPayments`; UI tests pass NO)
+///     -autoApproveAfter <s>      how many seconds they take instead of 5
 ///
 /// e.g. `xcrun simctl launch --terminate-running-process <udid> app.paybak.paybak -startScreen groupGoaTrip`.
 struct DebugLaunchOptions {

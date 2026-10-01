@@ -33,11 +33,13 @@ final class PaymentApprovalPresenter {
 
         // A window below the keyboard's can't cover it.
         scene.windows.forEach { $0.endEditing(true) }
-        let host = UIHostingController(rootView: PaymentApprovedOverlay(headline: headline) { [weak self] in
-            self?.finish()
+        let window = UIWindow(windowScene: scene)
+        // Tied to its own window: a fade-out that ends after `finishNow()` leaves a later scene up.
+        let host = UIHostingController(rootView: PaymentApprovedOverlay(headline: headline) { [weak self, weak window] in
+            guard let self, let window, window === self.window else { return }
+            finish()
         })
         host.view.backgroundColor = .clear
-        let window = UIWindow(windowScene: scene)
         window.windowLevel = .alert + 1
         window.backgroundColor = .clear
         window.rootViewController = host
