@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.domain.format.Money
 import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbMotion
 import app.paybak.paybak.ui.theme.PbShapes
@@ -52,6 +53,8 @@ import app.paybak.paybak.ui.theme.PbSpace
  * A number edited in place: a split person's amount, percent or shares, or a misread receipt line.
  * The field shows [prefix] + [value] + [suffix] ("₹700", "25%") and edits only the digits.
  *
+ * @param currency Groups the whole part as amounts in that currency show it ("₹2,800"); null for
+ *   percents and shares.
  * @param onDone Called when editing ends: the keyboard's Done, or focus moving elsewhere.
  * @param decimal Amounts with decimals get the decimal pad; counts and percents the number pad.
  * @param focusRequester Lets the screen focus the field (the next row, a start state).
@@ -61,6 +64,7 @@ data class PbAmountEditor(
     val onValueChange: (String) -> Unit,
     val prefix: String = "",
     val suffix: String = "",
+    val currency: String? = null,
     val onDone: () -> Unit = {},
     val decimal: Boolean = false,
     val focusRequester: FocusRequester? = null,
@@ -95,13 +99,16 @@ internal fun InlineAmountField(
     val onDone by rememberUpdatedState(editor.onDone)
     var hadFocus by remember { mutableStateOf(false) }
     val text = rememberEndCursorText(editor.value, editor.onValueChange)
-    val affixes = remember(editor.prefix, editor.suffix) { Affixes(editor.prefix, editor.suffix) }
+    val display =
+        remember(editor.prefix, editor.suffix, editor.currency) {
+            AmountDisplay(editor.prefix, editor.suffix, editor.currency)
+        }
     if (autoFocus) LaunchedEffect(Unit) { focus.requestFocus() }
     // A text field takes all the width it's offered, so size it to its text (and the caret); the
     // box
     // then aligns it and keeps the field's minimum width.
     val measurer = rememberTextMeasurer()
-    val shown = editor.prefix + editor.value + editor.suffix
+    val shown = display.filter(AnnotatedString(editor.value)).text.text
     val textWidth =
         with(LocalDensity.current) { measurer.measure(shown, textStyle).size.width.toDp() } +
             CaretWidth
@@ -143,27 +150,51 @@ internal fun InlineAmountField(
                 ),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             singleLine = true,
-            visualTransformation = affixes,
+            visualTransformation = display,
             interactionSource = source,
             cursorBrush = SolidColor(PbColors.Text.Primary),
         )
     }
 }
 
-/** Shows a prefix and suffix around the typed digits; the cursor never enters them. */
-private data class Affixes(val prefix: String, val suffix: String) : VisualTransformation {
+/**
+ * Shows a prefix and suffix around the typed digits, grouping the whole part when there's a
+ * [currency] ("2800" shows "₹2,800"); the cursor never enters the prefix, suffix or separators.
+ */
+private data class AmountDisplay(
+    val prefix: String,
+    val suffix: String,
+    val currency: String?,
+) : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
-        val shown = AnnotatedString(prefix + text.text + suffix)
-        val length = text.length
+        val typed = text.text
+        val whole = typed.substringBefore('.')
+        val grouped =
+            whole
+                .takeIf { currency != null && it.isNotEmpty() && !it.startsWith('0') }
+                ?.toLongOrNull()
+                ?.let { Money.groupDigits(it, currency!!) } ?: whole
+        val body = grouped + typed.substring(whole.length)
+        val shown = AnnotatedString(prefix + body + suffix)
+        // Where each typed character sits in [body]: separators push the later digits along.
+        val positions = IntArray(typed.length + 1)
+        var at = 0
+        for (index in whole.indices) {
+            while (grouped[at] == ',') at++
+            positions[index] = at++
+        }
+        for (index in whole.length..typed.length) {
+            positions[index] = grouped.length + index - whole.length
+        }
         return TransformedText(
             shown,
             object : OffsetMapping {
                 // The end of the digits maps past the suffix, so the caret follows "25%".
                 override fun originalToTransformed(offset: Int): Int =
-                    if (offset >= length) shown.length else prefix.length + offset
+                    if (offset >= typed.length) shown.length else prefix.length + positions[offset]
 
                 override fun transformedToOriginal(offset: Int): Int =
-                    (offset - prefix.length).coerceIn(0, length)
+                    positions.indexOfLast { prefix.length + it <= offset }.coerceIn(0, typed.length)
             },
         )
     }

@@ -422,6 +422,7 @@ private fun Members(
                                 onValueChange = { onShare(id, amountInput(it, true)) },
                                 prefix = if (percent) "" else AmountEntry.prefix(form.currency),
                                 suffix = if (percent) "%" else "",
+                                currency = form.currency.takeUnless { percent },
                                 decimal = true,
                             ),
                             PbTextStyles.Headline,

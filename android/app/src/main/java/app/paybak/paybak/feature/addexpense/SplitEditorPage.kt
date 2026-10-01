@@ -156,6 +156,7 @@ fun SplitEditorPage(
                         prefix =
                             if (draft.mode == SplitMode.Exact) AmountEntry.prefix(currency) else "",
                         suffix = if (draft.mode == SplitMode.Percent) "%" else "",
+                        currency = currency.takeIf { draft.mode == SplitMode.Exact },
                         decimal = decimals,
                         focusRequester = focusers[id],
                     )

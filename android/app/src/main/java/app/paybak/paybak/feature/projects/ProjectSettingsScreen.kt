@@ -279,6 +279,10 @@ private fun ContributionSection(
                                         suffix =
                                             if (current.rule == ContributionRule.Percent) "%"
                                             else "",
+                                        currency =
+                                            currency.takeIf {
+                                                current.rule == ContributionRule.Fixed
+                                            },
                                         decimal = true,
                                     ),
                                     testTag = "projectSettings.member.$id.value",

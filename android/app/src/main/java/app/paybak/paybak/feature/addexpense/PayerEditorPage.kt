@@ -117,6 +117,7 @@ fun PayerEditorPage(
                                     AmountEntry.accept(kept)?.let { amounts = amounts + (id to it) }
                                 },
                                 prefix = AmountEntry.prefix(form.currency),
+                                currency = form.currency,
                                 decimal = AmountEntry.allowsDecimals(form.currency),
                                 focusRequester = focusers[id],
                             )
