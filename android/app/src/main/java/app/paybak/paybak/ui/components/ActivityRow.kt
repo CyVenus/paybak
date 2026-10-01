@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,6 +37,7 @@ enum class PbRowSurface {
  * small [action]; [unread] adds the 8 dp dot and [showDivider] a leading-inset hairline.
  *
  * @param leading The 40 dp circle: a category icon ([PbAvatarContent.Symbol]) or a person.
+ * @param amountColor Overrides the amount's colour: the light grey "—" of a planned part.
  * @param badgeStyle The badge's pill; by default grey (Muted, or On Card inside a card). A loan
  *   installment that's overdue now uses the red Overdue pill.
  */
@@ -48,6 +50,7 @@ fun PbActivityRow(
     detail: String? = null,
     amount: String? = null,
     amountPrimary: Boolean = true,
+    amountColor: Color = if (amountPrimary) PbColors.Text.Primary else PbColors.Text.Secondary,
     date: String? = null,
     badge: String? = null,
     badgeStyle: PbBadgeStyle? = null,
@@ -105,7 +108,7 @@ fun PbActivityRow(
                     )
                 }
             }
-            Trailing(amount, amountPrimary, date, badge, badgeStyle, action, onAction, onCard)
+            Trailing(amount, amountColor, date, badge, badgeStyle, action, onAction, onCard)
             if (unread) Box(Modifier.size(8.dp).background(PbColors.Bg.Inverse, CircleShape))
         }
         if (showDivider)
@@ -116,7 +119,7 @@ fun PbActivityRow(
 @Composable
 private fun Trailing(
     amount: String?,
-    amountPrimary: Boolean,
+    amountColor: Color,
     date: String?,
     badge: String?,
     badgeStyle: PbBadgeStyle?,
@@ -133,7 +136,7 @@ private fun Trailing(
             Text(
                 amount,
                 style = PbTextStyles.AmountMedium,
-                color = if (amountPrimary) PbColors.Text.Primary else PbColors.Text.Secondary,
+                color = amountColor,
                 maxLines = 1,
             )
         }
@@ -181,6 +184,15 @@ private fun PbActivityRowPreview() {
             amount = "₹1,050",
             date = "Yesterday",
             unread = true,
+        )
+        PbActivityRow(
+            PbAvatarContent.Symbol(PbIcon.Tag),
+            "GPS module",
+            subtitle = "Est. ₹6,000",
+            amount = "—",
+            amountColor = PbColors.Text.Tertiary,
+            badge = "Planned",
+            badgeStyle = PbBadgeStyle.MutedOnCard,
         )
         PbActivityRow(
             PbAvatarContent.Symbol(PbIcon.Flame),
