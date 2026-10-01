@@ -26,12 +26,14 @@ fun LedgerView.notReceivedDraft(paymentId: String): NotReceivedDraft? {
     if (payment.toId != ME || payment.status != PaymentStatus.Pending) return null
     val name = first(payment.fromId)
     val amount = Money.format(payment.amount, payment.currency)
+    // "for Dinner at Olive Garden"; nothing for a payment that isn't for anything.
+    val named = payment.expenseId != null || payment.groupId != null || payment.loanId != null
+    val what = if (named) " for ${paymentFor(payment)}" else ""
     return NotReceivedDraft(
         paymentId,
         "Let $name know you haven’t received $amount?",
         claimCard(payment).detail,
-        "Hi $name, I haven’t received $amount for ${paymentFor(payment)} yet. " +
-            checkPhrase(payment.method),
+        "Hi $name, I haven’t received $amount$what yet. " + checkPhrase(payment.method),
         "$name still owes you $amount until a payment is confirmed.",
     )
 }

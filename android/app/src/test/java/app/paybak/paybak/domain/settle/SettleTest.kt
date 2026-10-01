@@ -1,6 +1,7 @@
 package app.paybak.paybak.domain.settle
 
 import app.paybak.paybak.domain.Demo
+import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.model.ReminderContext
 import app.paybak.paybak.domain.model.ReminderTone
 import org.junit.Assert.assertEquals
@@ -165,6 +166,23 @@ class SettleTest {
             assertEquals("Esha still owes you ₹700 until a payment is confirmed.", helper)
         }
         assertNull(Demo.load("eshaPaymentConfirmed").notReceivedDraft("pay-esha-olive"))
+    }
+
+    @Test
+    fun notReceivedLeavesOutWhatAPlainPaymentWasFor() {
+        val ledger = demo.ledger
+        val plain =
+            ledger.copy(
+                payments =
+                    ledger.payments.map {
+                        if (it.id == "pay-esha-olive") it.copy(expenseId = null) else it
+                    }
+            )
+        val view = LedgerView(plain, demo.defaultCurrency, demo.now, demo.zone)
+        assertEquals(
+            "Hi Esha, I haven’t received ₹700 yet. Could you check your UPI app?",
+            view.notReceivedDraft("pay-esha-olive")!!.note,
+        )
     }
 
     private fun RemindDraft.cells() = listOf(subtitle, amountText, dueLabel, overdue)
