@@ -42,8 +42,9 @@ import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.ask.AskAssistant
 import app.paybak.paybak.domain.ask.AskChip
 import app.paybak.paybak.domain.ask.AskPrompt
-import app.paybak.paybak.domain.ask.friendlyReminder
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.ReminderTone
+import app.paybak.paybak.domain.settle.remindDraft
 import app.paybak.paybak.navigation.ActivitySegment
 import app.paybak.paybak.navigation.AddExpenseArgs
 import app.paybak.paybak.navigation.LocalLedger
@@ -88,7 +89,11 @@ fun AskScreen(route: Route.Ask) {
     val haptics = rememberHaptics()
     val assistant =
         remember(snapshot, profile.upiId) {
-            AskAssistant(snapshot.view) { snapshot.view.friendlyReminder(it, profile.upiId) }
+            AskAssistant(snapshot.view) {
+                snapshot.view
+                    .remindDraft(it, context = null, profile.upiId)
+                    ?.message(ReminderTone.Friendly)
+            }
         }
     val turns = AskChat.turns
     fun ask(question: String) {
@@ -103,13 +108,16 @@ fun AskScreen(route: Route.Ask) {
         if (debugStart != "askStart") ask(AskAssistant.WHO_OWES_ME)
         if (debugStart == "askConfirm") ask(DEMO_DRAFT)
     }
-    // A draft opened in the Add expense form counts as saved once the form saves an expense.
+    // A draft opened in the Add expense form counts as saved once the form saves an expense
+    // (one that no other card in the chat has claimed).
     LaunchedEffect(snapshot) {
         turns.forEachIndexed { index, turn ->
             val since = turn.editStartedAt ?: return@forEachIndexed
+            val claimed = turns.mapNotNull { it.savedExpenseId }.toSet()
             val saved =
                 snapshot.ledger.expenses
                     .filter { it.createdBy == ME && it.createdAt >= since && it.deletedAt == null }
+                    .filter { it.id !in claimed }
                     .maxByOrNull { it.createdAt }
             if (saved != null)
                 turns[index] = turn.copy(savedExpenseId = saved.id, editStartedAt = null)

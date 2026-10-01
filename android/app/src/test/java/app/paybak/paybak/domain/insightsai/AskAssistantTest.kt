@@ -5,10 +5,11 @@ import app.paybak.paybak.domain.ask.AskAssistant
 import app.paybak.paybak.domain.ask.AskChip
 import app.paybak.paybak.domain.ask.ExpensePhrase
 import app.paybak.paybak.domain.ask.PromptKind
-import app.paybak.paybak.domain.ask.friendlyReminder
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.ReminderTone
 import app.paybak.paybak.domain.model.SplitMode
+import app.paybak.paybak.domain.settle.remindDraft
 import java.time.LocalDate
 import java.time.YearMonth
 import org.junit.Assert.assertEquals
@@ -19,7 +20,10 @@ import org.junit.Test
 /** Ask Paybak's on-device assistant (insights §3.6, app-architecture §4.3) on the demo. */
 class AskAssistantTest {
     private val view = Demo.load("eshaClaimsPayment")
-    private val assistant = AskAssistant(view) { view.friendlyReminder(it, "arjun@okaxis") }
+    private val assistant =
+        AskAssistant(view) {
+            view.remindDraft(it, context = null, "arjun@okaxis")?.message(ReminderTone.Friendly)
+        }
 
     @Test
     fun theFourSuggestionsMatchFigma() {
