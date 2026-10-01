@@ -28,6 +28,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // The release key from `release.storeFile`, `release.storePassword`, `release.keyAlias` and
+    // `release.keyPassword` in local.properties. Without them the release APK is left unsigned.
+    val releaseStoreFile = localProperty("release.storeFile")
+    if (releaseStoreFile.isNotBlank()) {
+        signingConfigs.create("release") {
+            storeFile = file(releaseStoreFile)
+            storePassword = localProperty("release.storePassword")
+            keyAlias = localProperty("release.keyAlias")
+            keyPassword = localProperty("release.keyPassword")
+        }
+    }
+
     buildTypes {
         debug {
             // RevenueCat Test Store key: fake purchases, no Play account needed. The SDK refuses
@@ -35,6 +47,7 @@ android {
             buildConfigField("String", "REVENUECAT_API_KEY", "\"test_ZodzFFhityYkLvLvsuepQmsAeqo\"")
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             optimization {
                 enable = false
             }
