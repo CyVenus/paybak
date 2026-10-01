@@ -27,7 +27,7 @@ internal enum class ProFeature(
 
 /**
  * Where a Pro member stands, for the Welcome line (§3): a yearly trial ends on a day; a
- * subscription renews a year or a month after it started.
+ * subscription renews a whole number of years or months after it started (or its trial ended).
  */
 internal sealed interface ProStatus {
     val day: LocalDate
@@ -37,16 +37,18 @@ internal sealed interface ProStatus {
     data class Renews(override val day: LocalDate, val period: PlanPeriod) : ProStatus
 }
 
-/** The status of this entitlement; [today] stands in for a missing start. Null on the free plan. */
+/**
+ * The status of this entitlement, null on the free plan: the trial's end while it runs, otherwise
+ * the next renewal after [today]. A subscription counts from its trial's end, else from [since];
+ * [today] stands in for a missing start.
+ */
 internal fun Entitlement.status(today: LocalDate, zone: ZoneId): ProStatus? {
     if (!isPro) return null
-    trialEndsAt?.let {
-        return ProStatus.TrialEnds(it)
-    }
-    val start = since?.atZone(zone)?.toLocalDate() ?: today
-    return when (period) {
-        PlanPeriod.Monthly -> ProStatus.Renews(start.plusMonths(1), PlanPeriod.Monthly)
-        PlanPeriod.Yearly,
-        null -> ProStatus.Renews(start.plusYears(1), PlanPeriod.Yearly)
-    }
+    trialEndsAt?.takeIf { it >= today }?.let { return ProStatus.TrialEnds(it) }
+    val plan = if (period == PlanPeriod.Monthly) PlanPeriod.Monthly else PlanPeriod.Yearly
+    val step = if (plan == PlanPeriod.Monthly) 1L else 12L
+    val start = trialEndsAt ?: since?.atZone(zone)?.toLocalDate() ?: today
+    var months = 0L
+    while (start.plusMonths(months) <= today) months += step
+    return ProStatus.Renews(start.plusMonths(months), plan)
 }
