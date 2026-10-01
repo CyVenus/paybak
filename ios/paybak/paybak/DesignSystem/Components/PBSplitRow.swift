@@ -7,6 +7,7 @@ import SwiftUI
 /// - Percent: the field shows the percentage; the amount is the Footnote under the name.
 /// - Shares: a 48 pt field with the share count plus the system stepper; amount under the name.
 /// Excluded people show ₹0 / 0% / 0 in gray and can't be edited. The divider starts at the name.
+/// Pass `focus` to focus the value field from code (a start state, dismissing on a tap outside).
 struct PBSplitRow: View {
     enum Mode {
         case equally
@@ -26,6 +27,7 @@ struct PBSplitRow: View {
     var currencySymbol = "₹"
     @Binding var isIncluded: Bool
     var showsDivider = true
+    var focus: FocusState<Bool>.Binding?
 
     var body: some View {
         Group {
@@ -113,14 +115,16 @@ struct PBSplitRow: View {
                 text: isIncluded ? value : .constant("0"),
                 accessibilityLabel: "\(name)’s amount",
                 prefix: currencySymbol,
-                isDimmed: !isIncluded
+                isDimmed: !isIncluded,
+                focus: focus
             )
         case .percent(let value):
             PBInlineField(
                 text: isIncluded ? value : .constant("0"),
                 accessibilityLabel: "\(name)’s percentage",
                 suffix: "%",
-                isDimmed: !isIncluded
+                isDimmed: !isIncluded,
+                focus: focus
             )
         case .shares(let count):
             HStack(spacing: PBSpace.s8) {
@@ -130,7 +134,8 @@ struct PBSplitRow: View {
                     alignment: .center,
                     minWidth: 48,
                     keyboard: .numberPad,
-                    isDimmed: !isIncluded
+                    isDimmed: !isIncluded,
+                    focus: focus
                 )
                 Stepper("\(name)’s shares", value: count, in: 0...99)
                     .labelsHidden()

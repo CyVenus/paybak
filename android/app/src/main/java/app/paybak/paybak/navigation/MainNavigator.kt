@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import app.paybak.paybak.domain.model.LedgerJson
 import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.domain.model.newId
@@ -37,7 +38,8 @@ data class MainState(
 
         fun decode(json: String): MainState? = runCatching {
             LedgerJson.decodeFromString(serializer(), json)
-        }.getOrNull()
+        }
+            .getOrNull()
     }
 }
 
@@ -73,6 +75,12 @@ class MainNavigator(state: MainState = MainState(), private val isPro: () -> Boo
 
     /** The app's one toast host (every layer shows it). */
     val toasts = PbToastState().apply { state.toast?.let(::show) }
+
+    /**
+     * How far above the screen's bottom edge the top screen's pinned buttons reach (0 without any);
+     * the toast then sits 12 dp above them instead of 50 dp above the bottom.
+     */
+    var pinnedFooterHeight by mutableStateOf(0.dp)
 
     var motion by mutableStateOf(NavMotion.None)
         private set

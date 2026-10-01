@@ -53,6 +53,8 @@ import app.paybak.paybak.ui.theme.PbSpace
  * The field shows [prefix] + [value] + [suffix] ("₹700", "25%") and edits only the digits.
  *
  * @param onDone Called when editing ends: the keyboard's Done, or focus moving elsewhere.
+ * @param decimal Amounts with decimals get the decimal pad; counts and percents the number pad.
+ * @param focusRequester Lets the screen focus the field (the next row, a start state).
  */
 data class PbAmountEditor(
     val value: String,
@@ -60,6 +62,8 @@ data class PbAmountEditor(
     val prefix: String = "",
     val suffix: String = "",
     val onDone: () -> Unit = {},
+    val decimal: Boolean = false,
+    val focusRequester: FocusRequester? = null,
 )
 
 /**
@@ -85,7 +89,8 @@ internal fun InlineAmountField(
             animationSpec = tween(PbMotion.FADE_MILLIS),
             label = "Inline field ring",
         )
-    val focus = remember { FocusRequester() }
+    val ownFocus = remember { FocusRequester() }
+    val focus = editor.focusRequester ?: ownFocus
     val focusManager = LocalFocusManager.current
     val onDone by rememberUpdatedState(editor.onDone)
     var hadFocus by remember { mutableStateOf(false) }
@@ -131,7 +136,11 @@ internal fun InlineAmountField(
                     color = if (enabled) PbColors.Text.Primary else PbColors.Text.Tertiary
                 ),
             keyboardOptions =
-                KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                KeyboardOptions(
+                    keyboardType =
+                        if (editor.decimal) KeyboardType.Decimal else KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                ),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             singleLine = true,
             visualTransformation = affixes,

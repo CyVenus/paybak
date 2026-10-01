@@ -115,10 +115,12 @@ struct PBSettingRow: View {
                 PBBadge(badge, style: .inverse)
             }
             if let value {
+                // The value keeps its width; a long title truncates first.
                 Text(value)
                     .textStyle(.body)
                     .foregroundStyle(PBColor.textSecondary)
                     .lineLimit(1)
+                    .layoutPriority(1)
             }
             trailingView
         }

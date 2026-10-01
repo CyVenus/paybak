@@ -66,7 +66,7 @@ class ShellTest {
                     awaitTag("home.addSheet.$row")
                     tag("home.addSheet.$row").performClick()
                     compose.awaitScreen(modal)
-                    tag("$modal.header.close").performClick()
+                    tag("$modal.close").performClick()
                     awaitGone("screen.$modal")
                     awaitTag(rootOf(tab))
                 }
@@ -96,11 +96,7 @@ class ShellTest {
 
     @Test
     fun savingAModalShowsTheDetailWithAToast() {
-        launchPaybak("addExpenseEmpty").use {
-            compose.awaitScreen("addExpense")
-            tag("addExpense.people").performClick()
-            compose.awaitScreen("pickPeople")
-            tag("pickPeople.done").performClick()
+        launchPaybak("addExpenseFilled").use {
             compose.awaitScreen("addExpense")
             tag("addExpense.save").performClick()
             compose.awaitScreen("expense")
@@ -116,17 +112,19 @@ class ShellTest {
             tag("newGroup.create").performClick()
             compose.awaitScreen("group")
             compose.onNodeWithText("Group created").assertExists()
-            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "New group" })
+            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "Weekend Trek" })
         }
     }
 
     @Test
     fun proFeaturesGoThroughThePaywall() {
-        launchPaybak("profile").use {
-            compose.awaitScreen("profile")
-            tag("profile.export").performClick()
+        launchPaybak("privacyData").use {
+            compose.awaitScreen("privacyData")
+            tag("privacyData.export").performClick()
             compose.awaitScreen("paywall")
-            tag("paywall.trial").performClick()
+            tag("paywall.cta").performClick()
+            awaitTag("proWelcome.done")
+            tag("proWelcome.done").performClick()
             compose.awaitScreen("privacyExport")
             assertTrue(paybakApp.ledger.snapshot.value.isPro)
         }
