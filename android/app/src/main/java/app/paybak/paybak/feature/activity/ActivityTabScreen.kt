@@ -49,9 +49,7 @@ fun ActivityTabScreen(route: Route.Activity) {
     Box(Modifier.fillMaxSize().background(PbColors.Bg.Primary).testTag("screen.activity")) {
         when (segment) {
             ActivitySegment.Timeline ->
-                Column(
-                    Modifier.statusBarsPadding().padding(horizontal = PbLayout.ScreenMargin)
-                ) {
+                Column(Modifier.statusBarsPadding().padding(horizontal = PbLayout.ScreenMargin)) {
                     header()
                     Spacer(Modifier.height(PbSpace.S24))
                     ActivityTimelineView(

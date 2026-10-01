@@ -148,9 +148,9 @@ private fun MonthButton(
         contentDescription = label,
         onClick = { if (enabled) onClick() },
         modifier =
-            Modifier.testTag(testTag)
-                .alpha(if (enabled) 1f else DISABLED_ALPHA)
-                .semantics { if (!enabled) disabled() },
+            Modifier.testTag(testTag).alpha(if (enabled) 1f else DISABLED_ALPHA).semantics {
+                if (!enabled) disabled()
+            },
         style = PbIconButtonStyle.Glass,
     )
 }

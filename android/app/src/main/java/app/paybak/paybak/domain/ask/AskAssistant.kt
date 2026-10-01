@@ -74,18 +74,23 @@ data class AskAnswer(
 )
 
 /**
- * The on-device assistant (insights §3.6, app-architecture §4.3): it answers from the live ledger in
- * [view] and never sends anything anywhere. [reminder] writes the Remind sheet's friendly message to
- * a friend (null when they owe you nothing), so the chat and the sheet say the same thing.
+ * The on-device assistant (insights §3.6, app-architecture §4.3): it answers from the live ledger
+ * in [view] and never sends anything anywhere. [reminder] writes the Remind sheet's friendly
+ * message to a friend (null when they owe you nothing), so the chat and the sheet say the same
+ * thing.
  */
-class AskAssistant(private val view: LedgerView, private val reminder: (personId: String) -> String?) {
+class AskAssistant(
+    private val view: LedgerView,
+    private val reminder: (personId: String) -> String?,
+) {
     private val friends: List<Person> = view.ledger.people.filter { it.id != ME }
 
     /** The four suggestions, for this account's own group and debtor; empty ones are left out. */
     fun prompts(): List<AskPrompt> {
         val plan = view.settlePlan()
         val dueGroup =
-            view.openItems()
+            view
+                .openItems()
                 .filter { it.kind == ObligationKind.Group && !it.owedToMe && it.due != null }
                 .minByOrNull { it.due!! }
                 ?.let { view.group(it.ref)?.name }
@@ -93,7 +98,9 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
         val food = view.monthTotals(YearMonth.from(view.today)).categories[Category.Food.id] ?: 0
         return listOfNotNull(
             AskPrompt(WHO_OWES_ME, PromptKind.WhoOwesMe).takeIf { plan.get.isNotEmpty() },
-            AskPrompt("How much did I spend on food this month?", PromptKind.Spend).takeIf { food > 0 },
+            AskPrompt("How much did I spend on food this month?", PromptKind.Spend).takeIf {
+                food > 0
+            },
             dueGroup?.let { AskPrompt("When is $it due?", PromptKind.Due) },
             debtor?.let { AskPrompt("Draft a reminder for $it", PromptKind.Reminder) },
         )
@@ -112,33 +119,39 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
     private fun whoOwesMe(text: String): AskAnswer? {
         if (!whoOwes.matches(text)) return null
         val rows = view.settlePlan().get
-        val people =
-            rows.map { row ->
-                OwedPerson(
-                    row.friendId,
-                    row.amount,
-                    row.due?.takeIf { Dates.isOverdue(it, view.today) }?.let { Dates.dueBadge(it, view.today) },
-                )
-            }
+        val people = rows.map { row ->
+            OwedPerson(
+                row.friendId,
+                row.amount,
+                row.due
+                    ?.takeIf { Dates.isOverdue(it, view.today) }
+                    ?.let { Dates.dueBadge(it, view.today) },
+            )
+        }
         return AskAnswer(
             text = view.whoOwesMeAnswer() ?: "No one owes you anything right now.",
             people = people,
             chips =
-                people.filter { it.overdue != null }.take(MAX_REMIND_CHIPS).map {
-                    AskChip.Remind(it.personId, view.first(it.personId))
-                },
+                people
+                    .filter { it.overdue != null }
+                    .take(MAX_REMIND_CHIPS)
+                    .map {
+                        AskChip.Remind(it.personId, view.first(it.personId))
+                    },
         )
     }
 
     private fun spend(text: String): AskAnswer? {
         val match = spendOn.matchEntire(text) ?: return null
         val category = categoryNamed(match.groupValues[1]) ?: return null
-        val month = monthNamed(match.groupValues[2], match.groupValues[3]) ?: YearMonth.from(view.today)
+        val month =
+            monthNamed(match.groupValues[2], match.groupValues[3]) ?: YearMonth.from(view.today)
         val share = view.insightsPage(month).categories.firstOrNull { it.key == category.id }
         val monthName = Dates.monthName(month.month)
         return AskAnswer(
             text =
-                if (share == null) "You didn’t spend anything on ${category.label.lowercase()} in $monthName."
+                if (share == null)
+                    "You didn’t spend anything on ${category.label.lowercase()} in $monthName."
                 else view.categorySpendAnswer(category, month),
             share = share,
             chips = listOf(AskChip.SeeInsights(month)),
@@ -146,7 +159,8 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
     }
 
     private fun groupDue(text: String): AskAnswer? {
-        val name = (dueQuestion.matchEntire(text) ?: payQuestion.matchEntire(text))?.groupValues?.get(1)
+        val name =
+            (dueQuestion.matchEntire(text) ?: payQuestion.matchEntire(text))?.groupValues?.get(1)
         val group = name?.let(::groupNamed) ?: return null
         val due = view.groupDueAnswer(group.id)
         return AskAnswer(
@@ -177,7 +191,8 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
         val group = phrase.group?.let(::groupNamed)
         val people = phrase.names.map { it to personNamed(it) }
         val found = people.mapNotNull { it.second }.distinctBy { it.id }
-        val missing = people.filter { it.second == null }.joinToString("") { " " + notFound(it.first) }
+        val missing =
+            people.filter { it.second == null }.joinToString("") { " " + notFound(it.first) }
         if (found.isEmpty()) return AskAnswer(NEEDS_PEOPLE + missing)
         val currency = group?.currency ?: view.defaultCurrency
         val amount =
@@ -208,7 +223,8 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
                     categoryIcon = category.icon,
                     paidLine = "Paid by you · Today",
                     splitLine = "Split equally with ${joinNames(found.map { view.first(it.id) })}",
-                    eachLine = if (shares.distinct().size == 1) "$each each" else "About $each each",
+                    eachLine =
+                        if (shares.distinct().size == 1) "$each each" else "About $each each",
                     personIds = everyone,
                 ),
         )
@@ -216,7 +232,9 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
 
     private fun personNamed(name: String): Person? {
         val wanted = normalize(name)
-        return friends.firstOrNull { it.firstName.lowercase() == wanted || it.name.lowercase() == wanted }
+        return friends.firstOrNull {
+            it.firstName.lowercase() == wanted || it.name.lowercase() == wanted
+        }
     }
 
     private fun groupNamed(name: String) =
@@ -231,12 +249,15 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
         if (name.isEmpty()) return null
         val month = Month.entries.firstOrNull { it.name.lowercase() == name } ?: return null
         val current = YearMonth.from(view.today)
-        year.toIntOrNull()?.let { return YearMonth.of(it, month) }
+        year.toIntOrNull()?.let {
+            return YearMonth.of(it, month)
+        }
         val thisYear = YearMonth.of(current.year, month)
         return if (thisYear > current) thisYear.minusYears(1) else thisYear
     }
 
-    private fun notFound(name: String) = "I couldn’t find ${name.trim().replaceFirstChar(Char::uppercaseChar)}."
+    private fun notFound(name: String) =
+        "I couldn’t find ${name.trim().replaceFirstChar(Char::uppercaseChar)}."
 
     companion object {
         const val WHO_OWES_ME = "Who owes me money?"
@@ -249,14 +270,17 @@ class AskAssistant(private val view: LedgerView, private val reminder: (personId
 
         private val whoOwes = Regex("""who owes me(?: money)?|what am i owed|how much am i owed""")
         private val spendOn =
-            Regex("""how much (?:did|have) i spen[dt] on (.+?)(?: this month| in ([a-z]+)(?: (\d{4}))?)?""")
+            Regex(
+                """how much (?:did|have) i spen[dt] on (.+?)(?: this month| in ([a-z]+)(?: (\d{4}))?)?"""
+            )
         private val dueQuestion = Regex("""when(?: is|'s) (.+?) due""")
         private val payQuestion = Regex("""when do i pay (.+)""")
         private val remindQuestion = Regex("""(?:draft a reminder (?:for|to)|remind) (.+)""")
 
         /** Lower case, single spaces, straight quotes, no closing "?" or ".". */
         fun normalize(text: String): String =
-            text.lowercase()
+            text
+                .lowercase()
                 .replace('’', '\'')
                 .replace('‘', '\'')
                 .replace(Regex("""\s+"""), " ")

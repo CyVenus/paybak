@@ -73,11 +73,11 @@ private val FadeSolid = 28.dp
 private val FadeClear = 88.dp
 
 /**
- * Ask Paybak (askStart, askAnswer, askConfirm; insights §3): a full-screen chat opened from the Home
- * sparkle. The start state greets you with suggested prompts; each question gets an answer from
- * the live ledger (the on-device [AskAssistant]), with its cards and action chips. A drafted expense
- * waits for Save, which adds it in place; nothing leaves the device. The conversation lasts for the
- * session. Tagged `screen.ask`, parts `ask.*`.
+ * Ask Paybak (askStart, askAnswer, askConfirm; insights §3): a full-screen chat opened from the
+ * Home sparkle. The start state greets you with suggested prompts; each question gets an answer
+ * from the live ledger (the on-device [AskAssistant]), with its cards and action chips. A drafted
+ * expense waits for Save, which adds it in place; nothing leaves the device. The conversation lasts
+ * for the session. Tagged `screen.ask`, parts `ask.*`.
  */
 @Composable
 fun AskScreen(route: Route.Ask) {
@@ -111,7 +111,8 @@ fun AskScreen(route: Route.Ask) {
                 snapshot.ledger.expenses
                     .filter { it.createdBy == ME && it.createdAt >= since && it.deletedAt == null }
                     .maxByOrNull { it.createdAt }
-            if (saved != null) turns[index] = turn.copy(savedExpenseId = saved.id, editStartedAt = null)
+            if (saved != null)
+                turns[index] = turn.copy(savedExpenseId = saved.id, editStartedAt = null)
         }
     }
 
@@ -166,7 +167,8 @@ fun AskScreen(route: Route.Ask) {
     val focus = remember { MutableInteractionSource() }
     val focused by focus.collectIsFocusedAsState()
     val unavailable = stringResource(R.string.insights_ask_no_dictation)
-    val dictate = rememberDictation(onText = { input = it }, onUnavailable = { navigator.toast(unavailable) })
+    val dictate =
+        rememberDictation(onText = { input = it }, onUnavailable = { navigator.toast(unavailable) })
     val scroll = rememberScrollState()
     LaunchedEffect(turns.size) {
         // Newest at the bottom: follow it once the new turn is laid out.
@@ -207,7 +209,9 @@ fun AskScreen(route: Route.Ask) {
                 placeholder = stringResource(R.string.insights_ask_placeholder),
                 modifier =
                     if (focused) Modifier
-                    else Modifier.navigationBarsPadding().padding(horizontal = PbLayout.ScreenMargin),
+                    else
+                        Modifier.navigationBarsPadding()
+                            .padding(horizontal = PbLayout.ScreenMargin),
                 pinned = focused,
                 onMic = dictate,
                 interactionSource = focus,
@@ -235,7 +239,8 @@ private fun AskStart(firstName: String, prompts: List<AskPrompt>, onPrompt: (Ask
                 PbAvatar(PbAvatarContent.Symbol(PbIcon.Sparkles), size = PbAvatarSize.Lg)
                 Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
                     Text(
-                        if (firstName.isEmpty()) stringResource(R.string.insights_ask_greeting_anonymous)
+                        if (firstName.isEmpty())
+                            stringResource(R.string.insights_ask_greeting_anonymous)
                         else stringResource(R.string.insights_ask_greeting, firstName),
                         style = PbTextStyles.Title2,
                         color = PbColors.Text.Primary,
@@ -302,7 +307,8 @@ private fun HeaderFade() {
 private fun rememberDictation(onText: (String) -> Unit, onUnavailable: () -> Unit): () -> Unit {
     val prompt = stringResource(R.string.insights_ask_placeholder)
     val launcher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result
+            ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data
                     ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)

@@ -64,15 +64,19 @@ internal interface TurnActions {
 /**
  * One exchange (insights §3.3–3.4): your bubble and the reply 16 below it, then what came with the
  * reply 12 apart: the people card, a share bar, the drafted reminder, the drafted expense, the
- * suggestions again, and the action chips. Parts are tagged `ask.message.<n>` (your question is
- * 2n, the reply 2n + 1), `ask.answerCard`, `ask.draft` and `ask.chip.remind.<name>`.
+ * suggestions again, and the action chips. Parts are tagged `ask.message.<n>` (your question is 2n,
+ * the reply 2n + 1), `ask.answerCard`, `ask.draft` and `ask.chip.remind.<name>`.
  */
 @Composable
 internal fun ChatTurnView(index: Int, turn: ChatTurn, actions: TurnActions) {
     val answer = turn.answer
     Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S12)) {
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S16)) {
-            PbChatBubble(turn.question, PbChatRole.User, Modifier.testTag("ask.message.${index * 2}"))
+            PbChatBubble(
+                turn.question,
+                PbChatRole.User,
+                Modifier.testTag("ask.message.${index * 2}"),
+            )
             PbChatBubble(
                 answer.text,
                 PbChatRole.Assistant,
@@ -212,9 +216,17 @@ private fun Chips(chips: List<AskChip>, onChip: (AskChip) -> Unit) {
                             "ask.chip.remind.${chip.name.lowercase()}",
                         )
                     is AskChip.SeeInsights ->
-                        Triple(stringResource(R.string.insights_ask_see_insights), PbIcon.Chart, "ask.chip.insights")
+                        Triple(
+                            stringResource(R.string.insights_ask_see_insights),
+                            PbIcon.Chart,
+                            "ask.chip.insights",
+                        )
                     is AskChip.SettleUp ->
-                        Triple(stringResource(R.string.pb_settle_up), PbIcon.Wallet, "ask.chip.settleUp")
+                        Triple(
+                            stringResource(R.string.pb_settle_up),
+                            PbIcon.Wallet,
+                            "ask.chip.settleUp",
+                        )
                     is AskChip.OpenGroup ->
                         Triple(
                             stringResource(R.string.insights_ask_open, chip.name),

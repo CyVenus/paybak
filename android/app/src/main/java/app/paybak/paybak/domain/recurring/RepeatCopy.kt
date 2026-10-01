@@ -10,8 +10,8 @@ import java.time.Instant
 import java.time.LocalDate
 
 /**
- * The Repeat sheet's copy (insights §5.3, §5.5) for a rule whose day comes from its anchor: what the
- * day row says, the helper under the card and the next occurrence.
+ * The Repeat sheet's copy (insights §5.3, §5.5) for a rule whose day comes from its anchor: what
+ * the day row says, the helper under the card and the next occurrence.
  */
 object RepeatCopy {
     /** "Day of month" · "Day of week" · "Date". */

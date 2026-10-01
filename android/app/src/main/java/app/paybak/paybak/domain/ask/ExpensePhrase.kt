@@ -24,22 +24,61 @@ data class ExpensePhrase(
 
     companion object {
         private val money =
-            Regex("""(?:₹\s*|\brs\.?\s*|\binr\s*)?(\d[\d,]*(?:\.\d{1,2})?)(?:\s*(?:rupees|rs\b|inr\b))?""", RegexOption.IGNORE_CASE)
+            Regex(
+                """(?:₹\s*|\brs\.?\s*|\binr\s*)?(\d[\d,]*(?:\.\d{1,2})?)(?:\s*(?:rupees|rs\b|inr\b))?""",
+                RegexOption.IGNORE_CASE,
+            )
         private val verb = Regex("""^(?:add|log|split)\b\s*""", RegexOption.IGNORE_CASE)
-        private val with = Regex("""(?:,\s*)?(?:\bsplit\s+)?\bwith\s+(.+?)(?=\s+for\s+|\s+in\s+|$)""", RegexOption.IGNORE_CASE)
+        private val with =
+            Regex(
+                """(?:,\s*)?(?:\bsplit\s+)?\bwith\s+(.+?)(?=\s+for\s+|\s+in\s+|$)""",
+                RegexOption.IGNORE_CASE,
+            )
         private val inGroup = Regex("""\s+in\s+(?:the\s+)?(.+?)$""", RegexOption.IGNORE_CASE)
-        private val forWhat = Regex("""\bfor\s+(?:(?:a|an|the)\s+)?(.+?)(?=\s*,|\s+split\b|\s+with\b|$)""", RegexOption.IGNORE_CASE)
+        private val forWhat =
+            Regex(
+                """\bfor\s+(?:(?:a|an|the)\s+)?(.+?)(?=\s*,|\s+split\b|\s+with\b|$)""",
+                RegexOption.IGNORE_CASE,
+            )
         private val nameSeparators = Regex("""\s*(?:,|&|\band\b)\s*""", RegexOption.IGNORE_CASE)
 
-        /** The category keywords of insights §3.6.6, with groceries under Food (domain.md §12 #9). */
+        /**
+         * The category keywords of insights §3.6.6, with groceries under Food (domain.md §12 #9).
+         */
         private val keywords: Map<Category, Set<String>> =
             linkedMapOf(
                 Category.Travel to
-                    setOf("cab", "taxi", "uber", "ola", "auto", "metro", "train", "bus", "flight", "fuel", "petrol", "parking"),
+                    setOf(
+                        "cab",
+                        "taxi",
+                        "uber",
+                        "ola",
+                        "auto",
+                        "metro",
+                        "train",
+                        "bus",
+                        "flight",
+                        "fuel",
+                        "petrol",
+                        "parking",
+                    ),
                 Category.Food to
-                    setOf("dinner", "lunch", "breakfast", "food", "coffee", "snack", "pizza", "biryani", "restaurant", "grocery", "groceries"),
+                    setOf(
+                        "dinner",
+                        "lunch",
+                        "breakfast",
+                        "food",
+                        "coffee",
+                        "snack",
+                        "pizza",
+                        "biryani",
+                        "restaurant",
+                        "grocery",
+                        "groceries",
+                    ),
                 Category.Rent to setOf("rent"),
-                Category.Bills to setOf("electricity", "wifi", "wi-fi", "internet", "gas", "water", "bill"),
+                Category.Bills to
+                    setOf("electricity", "wifi", "wi-fi", "internet", "gas", "water", "bill"),
                 Category.Fun to setOf("movie", "ticket", "concert", "game"),
                 Category.Stays to setOf("hotel", "stay", "hostel", "airbnb", "villa"),
                 Category.Shopping to setOf("shopping"),
@@ -49,7 +88,9 @@ data class ExpensePhrase(
         fun guessCategory(text: String): Category {
             val words = text.lowercase().split(Regex("[^a-z-]+")).filter { it.isNotEmpty() }
             return keywords.entries
-                .firstOrNull { (_, keys) -> words.any { it in keys || it.removeSuffix("s") in keys } }
+                .firstOrNull { (_, keys) ->
+                    words.any { it in keys || it.removeSuffix("s") in keys }
+                }
                 ?.key ?: Category.Other
         }
 
@@ -60,7 +101,8 @@ data class ExpensePhrase(
         fun parse(text: String, isGroup: (String) -> Boolean): ExpensePhrase? {
             var rest = text.trim().trimEnd('.', '!', '?').replace(verb, "")
             val amountMatch = money.find(rest) ?: return null
-            val amount = amountMatch.groupValues[1].replace(",", "").toBigDecimalOrNull() ?: return null
+            val amount =
+                amountMatch.groupValues[1].replace(",", "").toBigDecimalOrNull() ?: return null
             if (amount.signum() <= 0) return null
             rest = rest.removeRange(amountMatch.range).trim()
             val group = inGroup.find(rest)?.takeIf { isGroup(it.groupValues[1]) }
@@ -75,7 +117,10 @@ data class ExpensePhrase(
                     ?.filter(String::isNotEmpty)
                     .orEmpty()
             if (withMatch != null) rest = rest.removeRange(withMatch.range)
-            val what = forWhat.find(rest)?.groupValues?.get(1)?.trim()?.trimEnd(',')?.takeIf { it.isNotBlank() }
+            val what =
+                forWhat.find(rest)?.groupValues?.get(1)?.trim()?.trimEnd(',')?.takeIf {
+                    it.isNotBlank()
+                }
             return ExpensePhrase(amount, what, names, group?.groupValues?.get(1)?.trim())
         }
     }

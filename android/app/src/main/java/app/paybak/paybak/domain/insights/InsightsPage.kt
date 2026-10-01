@@ -1,11 +1,11 @@
 package app.paybak.paybak.domain.insights
 
+import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.calc.MonthBar
 import app.paybak.paybak.domain.calc.Splits
 import app.paybak.paybak.domain.calc.WITHOUT_A_GROUP
 import app.paybak.paybak.domain.calc.insightExpenses
 import app.paybak.paybak.domain.calc.insights
-import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.calc.loanDetail
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.format.Money
@@ -15,8 +15,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 /**
- * One bar row of Insights (insights §2.6): a category, a group ("Without a group" has no
- * [groupId]) or a friend. [percent]s add up to 100 across a list (largest remainder).
+ * One bar row of Insights (insights §2.6): a category, a group ("Without a group" has no [groupId])
+ * or a friend. [percent]s add up to 100 across a list (largest remainder).
  */
 data class InsightRow(
     val key: String,
@@ -39,7 +39,12 @@ sealed interface LoanBadge {
 }
 
 /** "Kabir · Bike service" with its badge. */
-data class LoanLine(val loanId: String, val personId: String, val label: String, val badge: LoanBadge?)
+data class LoanLine(
+    val loanId: String,
+    val personId: String,
+    val label: String,
+    val badge: LoanBadge?,
+)
 
 /** The Insights report for one month (insights §2.2–2.6), everything in the default currency. */
 data class InsightsPage(
@@ -95,12 +100,20 @@ fun LedgerView.insightsPage(month: YearMonth): InsightsPage {
         lentTitle =
             "Lent vs borrowed since ${Dates.monthName(since.month)}" +
                 if (since.year != month.year) " ${since.year}" else "",
-        lent = loans.filter { it.lenderId == ME }.sumOf { toDefault(it.amount, it.currency, it.rate) },
+        lent =
+            loans.filter { it.lenderId == ME }.sumOf { toDefault(it.amount, it.currency, it.rate) },
         borrowed =
-            loans.filter { it.borrowerId == ME }.sumOf { toDefault(it.amount, it.currency, it.rate) },
+            loans
+                .filter { it.borrowerId == ME }
+                .sumOf { toDefault(it.amount, it.currency, it.rate) },
         loans =
             loans.map { loan ->
-                LoanLine(loan.id, loan.friendId, "${first(loan.friendId)} · ${loan.title}", loanBadge(loan.id))
+                LoanLine(
+                    loan.id,
+                    loan.friendId,
+                    "${first(loan.friendId)} · ${loan.title}",
+                    loanBadge(loan.id),
+                )
             },
         hasPrevious = first != null && month > first,
         hasNext = month < current,
@@ -134,11 +147,14 @@ private fun LedgerView.friendRows(month: YearMonth): List<InsightRow> {
     val totals = LinkedHashMap<String, Long>()
     var counter = 0
     for ((expense, share) in insightExpenses(month)) {
-        val others = expense.split.rows.filter { it.included && it.personId != ME }.map { it.personId }
+        val others =
+            expense.split.rows.filter { it.included && it.personId != ME }.map { it.personId }
         if (others.isEmpty()) continue
         val split = Splits.equal(share, others, counter)
         counter = split.counter
-        split.shares.forEach { (person, amount) -> totals[person] = (totals[person] ?: 0L) + amount }
+        split.shares.forEach { (person, amount) ->
+            totals[person] = (totals[person] ?: 0L) + amount
+        }
     }
     return rows(totals) { key, amount, percent ->
         InsightRow(key, first(key), amount, percent, personId = key)
@@ -161,7 +177,10 @@ private fun LedgerView.loanBadge(loanId: String): LoanBadge? {
         detail.paidBackOn != null -> LoanBadge.PaidBack
         detail.rows.any { it.overdue } -> LoanBadge.Overdue
         else ->
-            detail.rows.firstOrNull { it.installment.paidOn == null }?.installment?.due
+            detail.rows
+                .firstOrNull { it.installment.paidOn == null }
+                ?.installment
+                ?.due
                 ?.let(LoanBadge::Due)
     }
 }

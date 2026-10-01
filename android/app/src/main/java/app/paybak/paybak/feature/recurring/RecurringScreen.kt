@@ -88,7 +88,8 @@ fun RecurringScreen(route: Route.Recurring) {
     RouteResultEffect(request.id) { result ->
         val ruleId = editing ?: return@RouteResultEffect
         val repeat = (result as? RouteResult.Repeat)?.rule
-        val rule = summary.rules.firstOrNull { it.rule.id == ruleId }?.rule ?: return@RouteResultEffect
+        val rule =
+            summary.rules.firstOrNull { it.rule.id == ruleId }?.rule ?: return@RouteResultEffect
         if (repeat == null) {
             ledger.deleteRecurringRule(ruleId)
             navigator.toast(stopped.format(rule.title))
@@ -113,19 +114,19 @@ fun RecurringScreen(route: Route.Recurring) {
                 PbHeaderAction.Text(
                     stringResource(R.string.pb_add),
                     onClick = {
-                    val today = ledger.clock.today()
-                    navigator.open(
-                        Route.AddExpense(
-                            AddExpenseArgs(
-                                draft =
-                                    ExpenseDraft.equal(group.memberIds)
-                                        .copy(
-                                            groupId = group.id,
-                                            repeat = RepeatRule(Frequency.Monthly, today),
-                                        )
+                        val today = ledger.clock.today()
+                        navigator.open(
+                            Route.AddExpense(
+                                AddExpenseArgs(
+                                    draft =
+                                        ExpenseDraft.equal(group.memberIds)
+                                            .copy(
+                                                groupId = group.id,
+                                                repeat = RepeatRule(Frequency.Monthly, today),
+                                            )
+                                )
                             )
                         )
-                    )
                     },
                 ),
             testTag = "recurring",
@@ -189,7 +190,11 @@ fun RecurringScreen(route: Route.Recurring) {
                             navigator.open(
                                 Route.RepeatRule(
                                     request,
-                                    RepeatRule(row.rule.frequency, row.rule.anchorDate, row.rule.variable),
+                                    RepeatRule(
+                                        row.rule.frequency,
+                                        row.rule.anchorDate,
+                                        row.rule.variable,
+                                    ),
                                     startDate = row.rule.lastOccurrence ?: row.rule.startDate,
                                 )
                             )
@@ -216,11 +221,15 @@ private fun DraftRowView(row: DraftRow, onEnterAmount: () -> Unit) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(PbSpace.S6)) {
             Text(
                 buildAnnotatedString {
-                    withStyle(PbTextStyles.Headline.toSpanStyle().copy(color = PbColors.Text.Primary)) {
+                    withStyle(
+                        PbTextStyles.Headline.toSpanStyle().copy(color = PbColors.Text.Primary)
+                    ) {
                         append(row.rule.title)
                     }
                     append("\n")
-                    withStyle(PbTextStyles.Footnote.toSpanStyle().copy(color = PbColors.Text.Secondary)) {
+                    withStyle(
+                        PbTextStyles.Footnote.toSpanStyle().copy(color = PbColors.Text.Secondary)
+                    ) {
                         append(row.label)
                     }
                 }

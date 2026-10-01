@@ -34,8 +34,8 @@ private val NoticeOffset = 132.dp
 /**
  * The free plan's Insights (insights §2.5): the real report stays underneath but unreadable (its
  * text and bars blurred at 40 %, the hero card's fill sharp) under a white 60 % veil that blocks
- * taps, with the centred Pro notice on top. "See Pro" opens the paywall; once Pro, the report
- * shows in place.
+ * taps, with the centred Pro notice on top. "See Pro" opens the paywall; once Pro, the report shows
+ * in place.
  */
 @Composable
 internal fun LockedReport(page: InsightsPage, onSeePro: () -> Unit) {
@@ -46,9 +46,9 @@ internal fun LockedReport(page: InsightsPage, onSeePro: () -> Unit) {
             CategorySection(page, rows = Modifier.unreadable())
         }
         Box(
-            Modifier.matchParentSize()
-                .background(PbPalette.White60)
-                .pointerInput(Unit) { detectTapGestures {} }
+            Modifier.matchParentSize().background(PbPalette.White60).pointerInput(Unit) {
+                detectTapGestures {}
+            }
         )
         PbNoticeCard(
             body = stringResource(R.string.insights_locked_body),
@@ -64,18 +64,18 @@ internal fun LockedReport(page: InsightsPage, onSeePro: () -> Unit) {
 }
 
 /**
- * Figma's opacity 0.4 + layer blur 16. Android 11 and older have no blur, so the parts fade
- * further instead. Hidden from TalkBack.
+ * Figma's opacity 0.4 + layer blur 16. Android 11 and older have no blur, so the parts fade further
+ * instead. Hidden from TalkBack.
  */
 private fun Modifier.unreadable(): Modifier =
     clearAndSetSemantics {}
-        .then(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                Modifier.alpha(BLURRED_ALPHA).blur(16.dp, BlurredEdgeTreatment.Unbounded)
-            } else {
-                Modifier.alpha(FADED_ALPHA)
-            }
-        )
+    .then(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Modifier.alpha(BLURRED_ALPHA).blur(16.dp, BlurredEdgeTreatment.Unbounded)
+        } else {
+            Modifier.alpha(FADED_ALPHA)
+        }
+    )
 
 private const val BLURRED_ALPHA = 0.4f
 private const val FADED_ALPHA = 0.15f

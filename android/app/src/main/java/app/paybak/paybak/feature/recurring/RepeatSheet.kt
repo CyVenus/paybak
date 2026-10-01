@@ -98,7 +98,9 @@ fun RepeatSheet(route: Route.RepeatRule) {
                             else PbSettingTrailing.Chevron,
                         onClick =
                             if (rule.frequency == Frequency.Yearly) null
-                            else { { picking = !picking } },
+                            else {
+                                { picking = !picking }
+                            },
                         icon = PbIcon.Calendar,
                         value = RepeatCopy.anchorValue(rule),
                     )
@@ -144,7 +146,8 @@ fun RepeatSheet(route: Route.RepeatRule) {
             PbButton(
                 stringResource(R.string.insights_done),
                 onClick = dismiss,
-                modifier = Modifier.fillMaxWidth().padding(top = PbSpace.S24).testTag("repeatSheet.done"),
+                modifier =
+                    Modifier.fillMaxWidth().padding(top = PbSpace.S24).testTag("repeatSheet.done"),
             )
         }
     }
@@ -170,8 +173,8 @@ private fun FrequencyChips(selected: Choice, onSelect: (Choice) -> Unit) {
 }
 
 /**
- * The day under the day row: 1–31 for a monthly rule (a shorter month uses its last day), Monday
- * to Sunday for a weekly one. Picking moves the anchor to that day: in the first month from the
+ * The day under the day row: 1–31 for a monthly rule (a shorter month uses its last day), Monday to
+ * Sunday for a weekly one. Picking moves the anchor to that day: in the first month from the
  * anchor's that has it, or in the anchor's week.
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -179,7 +182,8 @@ private fun FrequencyChips(selected: Choice, onSelect: (Choice) -> Unit) {
 private fun AnchorPicker(rule: RepeatRule, onPick: (LocalDate) -> Unit) {
     val anchor = rule.anchorDate
     FlowRow(
-        Modifier.fillMaxWidth().padding(start = PbSpace.S16, end = PbSpace.S16, bottom = PbSpace.S12),
+        Modifier.fillMaxWidth()
+            .padding(start = PbSpace.S16, end = PbSpace.S16, bottom = PbSpace.S12),
         horizontalArrangement = Arrangement.spacedBy(PbSpace.S8),
         verticalArrangement = Arrangement.spacedBy(PbSpace.S8),
     ) {
