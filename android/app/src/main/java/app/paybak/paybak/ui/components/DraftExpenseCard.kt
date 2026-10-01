@@ -44,7 +44,8 @@ private const val SAVE_MILLIS = 250
  * motion). Nothing is saved without the tap, and the chat stays put: no toast, no navigation. Parts
  * are tagged "[testTag].save", "[testTag].edit" and "[testTag].view".
  *
- * @param members The split's 2–4 avatars (you first): Peep heads, your photo or character.
+ * @param members The split's avatars (you first): Peep heads, your photo or character. The first
+ *   four show as a stack, and only when there are at least two.
  */
 @Composable
 fun PbDraftExpenseCard(
@@ -100,7 +101,8 @@ fun PbDraftExpenseCard(
                     style = PbTextStyles.Subheadline,
                     color = PbColors.Text.Secondary,
                 )
-                PbAvatarStack(members)
+                val stack = members.take(4)
+                if (stack.size >= 2) PbAvatarStack(stack)
             }
             Text(eachLine, style = PbTextStyles.Subheadline, color = PbColors.Text.Primary)
         }
