@@ -42,6 +42,11 @@ final class ProfileStore {
         if profile.upiID != oldUPI {
             profile.syncPrimaryUPI()
         }
+        // A named user without a username gets their lowercase first name, kept from then on (as on
+        // Android), so a later rename doesn't change the invite link.
+        if (profile.username ?? "").isEmpty, !profile.firstName.isEmpty {
+            profile.username = UserProfile.defaultUsername(for: profile.name)
+        }
         if hadPhoto, profile.avatar != .photo {
             photo = nil
             try? FileManager.default.removeItem(at: photoURL)

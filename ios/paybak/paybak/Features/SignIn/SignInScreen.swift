@@ -3,13 +3,13 @@ import SwiftUI
 /// Sign in — Email or phone (screens-signin.md §1): one field that takes an email or a phone
 /// number. "Send code" (or Return) is enabled for a plausible contact; it saves the sign-in method and
 /// contact and pushes Verify. The field is focused on appear and the CTA rides 12 pt above the
-/// keyboard. Back returns to Get Started; coming back from Verify keeps what was typed.
+/// keyboard. Back returns to Get Started; coming back from Verify ("Change") shows the contact the
+/// code went to, as Android does (a phone number with its "+91 ").
 struct SignInScreen: View {
     @Environment(AppRouter.self) private var router
     @Environment(ProfileStore.self) private var profileStore
 
     @State private var input = ""
-    @State private var hasPrefilled = false
     @FocusState private var isFieldFocused: Bool
 
     private var contact: SignInContact? { SignInContact(input) }
@@ -57,10 +57,9 @@ struct SignInScreen: View {
         }
     }
 
-    /// Starts from the saved email or phone (the debug seed, or a second visit after a relaunch).
+    /// Starts from the saved email or phone on every arrival: the debug seed, a second visit after a
+    /// relaunch, or the contact the code last went to when "Change" or Back returns from Verify.
     private func prefillSavedContact() {
-        guard !hasPrefilled else { return }
-        hasPrefilled = true
         let profile = profileStore.profile
         if profile.signInMethod == .email || profile.signInMethod == .phone, let saved = profile.contact {
             input = saved

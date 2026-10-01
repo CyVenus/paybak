@@ -50,6 +50,9 @@ final class AppRouter {
     /// Picker results waiting for the screen that asked (`onRouteResult`).
     var results: [String: RouteResult] = [:]
     var toast: PBToastMessage?
+    /// The top screen's pinned bottom buttons (`pinnedFooter()`): the toast then sits 12 pt above
+    /// them instead of 50 pt above the bottom edge.
+    var pinnedFooter: PinnedFooterMark?
     /// Opened once the current sheet has gone (`replaceSheet(with:)`).
     @ObservationIgnored var routeAfterSheet: Route?
     /// Whether the user has Pro (`requirePro`); set by the app from the ledger store.
@@ -64,8 +67,12 @@ final class AppRouter {
     /// The 0.4 s ease-out dissolve used by Splash → next and All set → Home.
     private static let dissolve = Animation.easeOut(duration: 0.4)
 
-    /// Splash → Home if onboarding is complete, otherwise Welcome step 1.
+    /// Splash → Home if onboarding is complete, otherwise Welcome step 1 (dropping any link waiting
+    /// for the app: links are ignored during onboarding, as on Android).
     func finishSplash(onboardingComplete: Bool) {
+        if !onboardingComplete {
+            pendingLink = nil
+        }
         withAnimation(Self.dissolve) {
             root = onboardingComplete ? .main : .onboarding
         }
@@ -119,6 +126,7 @@ final class AppRouter {
         insightsMonth = nil
         results = [:]
         routeAfterSheet = nil
+        pinnedFooter = nil
     }
 
     /// Shows the main app on its current state (debug start screens, deep links).

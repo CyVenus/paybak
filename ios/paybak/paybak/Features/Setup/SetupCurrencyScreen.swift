@@ -64,9 +64,11 @@ struct SetupCurrencyScreen: View {
         .ignoresSafeArea(.keyboard, edges: .bottom)
         .screenIdentifier(.setup2)
         .onAppear {
-            guard selection == nil else { return }
+            // Back from Setup 3 starts the list over from the saved currency, as on Android.
+            query = ""
+            pinnedCode = nil
             let saved = profileStore.profile.currencyCode
-            select(saved ?? Self.suggestion.currency.code)
+            select(saved ?? selection ?? Self.suggestion.currency.code)
         }
     }
 

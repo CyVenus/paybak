@@ -13,12 +13,11 @@ extension ProfileStore {
 }
 
 extension UserProfile {
-    /// The line under the name on Profile (§2.2): the primary UPI ID (or any UPI ID), else the sign-in
-    /// email or phone; nil hides the line.
+    /// The line under the name on Profile (§2.2): the primary UPI ID, else the sign-in email or phone;
+    /// nil hides the line (as on Android: a UPI ID that isn't primary doesn't show).
     var handle: String? {
-        let upi = [primaryPaymentMethod].compactMap(\.self).filter { $0.kind == .upi } + paymentMethods.filter { $0.kind == .upi }
-        if let value = upi.first?.value, !value.isEmpty {
-            return value
+        if !upiID.isEmpty {
+            return upiID
         }
         return contact.flatMap { $0.isEmpty ? nil : $0 }
     }

@@ -11,7 +11,6 @@ struct SetupPaymentScreen: View {
 
     @State private var upiID = ""
     @State private var isInvalid = false
-    @State private var hasLoadedProfile = false
     @State private var toast: PBToastMessage?
     @FocusState private var isFieldFocused: Bool
 
@@ -42,7 +41,7 @@ struct SetupPaymentScreen: View {
         .contentShape(.rect)
         .onTapGesture { isFieldFocused = false }
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        .sensoryFeedback(.impact(weight: .light), trigger: toast) { _, toast in toast != nil }
+        .sensoryFeedback(.success, trigger: toast) { _, toast in toast != nil }
         .screenIdentifier(.setup3)
         .onChange(of: upiID) { isInvalid = false }
         .onAppear(perform: loadProfile)
@@ -85,11 +84,11 @@ struct SetupPaymentScreen: View {
         }
     }
 
-    /// Starts from the saved UPI ID (coming back later, or the debug seed).
+    /// Starts from the saved UPI ID on every arrival (the debug seed, or Back from Setup 4, which
+    /// drops text that Skip didn't save), as on Android.
     private func loadProfile() {
-        guard !hasLoadedProfile else { return }
-        hasLoadedProfile = true
         upiID = profileStore.profile.upiID
+        isInvalid = false
     }
 
     /// Copying ends editing, so the keyboard doesn't hide the toast.

@@ -10,6 +10,7 @@ struct HomeActiveContent: View {
 
     @Environment(AppRouter.self) private var router
     @Environment(LedgerStore.self) private var ledgerStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         let books = ledgerStore.books
@@ -19,10 +20,10 @@ struct HomeActiveContent: View {
                     PendingClaimCard(claim: claim, testIDPrefix: "home.confirmCard", onConfirmed: onClaimConfirmed)
                         .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("home.confirmCard")
-                        .transition(.collapse)
+                        .transition(cardTransition)
                 }
             }
-            .transition(.collapse)
+            .transition(cardTransition)
         }
         PBBalanceSummary(
             totals: home.totals,
@@ -39,6 +40,11 @@ struct HomeActiveContent: View {
         if !home.recent.isEmpty {
             recentActivity(books)
         }
+    }
+
+    /// A confirmed card collapses; with Reduce Motion it only fades, as on Android.
+    private var cardTransition: AnyTransition {
+        reduceMotion ? .opacity : .collapse
     }
 
     private func dueSoon(_ books: Books) -> some View {
@@ -112,8 +118,9 @@ private extension AnyTransition {
         .asymmetric(insertion: .opacity, removal: .modifier(active: Collapse(progress: 0), identity: Collapse(progress: 1)))
     }
 
-    /// A new activity row (the payment just confirmed) fades in once the rows around it have moved.
+    /// A new activity row (the payment just confirmed) fades in while the rows around it move, in the
+    /// 250 ms of the card's collapse, as on Android.
     static var newRow: AnyTransition {
-        .asymmetric(insertion: .opacity.animation(.easeOut(duration: 0.2).delay(0.25)), removal: .opacity)
+        .asymmetric(insertion: .opacity.animation(.easeOut(duration: 0.25)), removal: .opacity)
     }
 }

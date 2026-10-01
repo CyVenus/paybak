@@ -43,12 +43,17 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         }
     }
 
+    /// Opens the link in the app, or once Splash hands over to it. Links are ignored during
+    /// onboarding, as on Android.
     private func open(_ link: DeepLink) {
         guard let router else { return }
-        if router.root == .main {
+        switch router.root {
+        case .main:
             router.open(link)
-        } else {
+        case .splash:
             router.pendingLink = link
+        default:
+            break
         }
     }
 }

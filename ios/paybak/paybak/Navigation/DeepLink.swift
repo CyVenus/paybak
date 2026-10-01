@@ -105,6 +105,8 @@ extension AppRouter {
             select(.activity)
             open(Route.expense(id))
         case .recurringDraft(let id):
+            // Over the current tab's root, with whatever was open closed first (as on Android).
+            select(selectedTab)
             open(Route.enterDraftAmount(id))
         case .payment(let id):
             select(.activity)

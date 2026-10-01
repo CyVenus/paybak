@@ -115,6 +115,7 @@ private struct ModalLayerView: View {
             .routeSheet(sheet, onDismiss: router.sheetDidDismiss)
             .toastHost(level: level + 1)
             .modalLayers(from: level + 1)
+            .environment(\.toastLayer, level + 1)
         }
     }
 
@@ -137,7 +138,8 @@ private struct ModalLayerView: View {
 
 extension View {
     /// The app toast on layer `level` (0 = main), shown only while that layer is on top: 16 above the
-    /// tab bar on tab roots, 50 above the bottom edge elsewhere (app-architecture §7.2).
+    /// tab bar on tab roots, 12 above a screen's pinned buttons (`pinnedFooter()`), 50 above the
+    /// bottom edge elsewhere (app-architecture §7.2).
     fileprivate func toastHost(level: Int) -> some View {
         modifier(ToastHost(level: level))
     }
@@ -150,16 +152,27 @@ private struct ToastHost: ViewModifier {
     func body(content: Content) -> some View {
         @Bindable var router = router
         let isTop = router.modals.count == level
-        let bottom: CGFloat = level == 0 && router.mainPath.isEmpty
-            ? PBTabBar.bottomOffset + PBSize.tabbar + PBSpace.s16
-            : 50
         content.overlay {
             if isTop {
-                Color.clear
-                    .allowsHitTesting(false)
-                    .pbToast($router.toast, bottomPadding: bottom)
-                    .ignoresSafeArea(.container, edges: .bottom)
+                GeometryReader { proxy in
+                    Color.clear
+                        .allowsHitTesting(false)
+                        .pbToast($router.toast, bottomPadding: bottomPadding(bottomEdge: proxy.frame(in: .global).maxY))
+                }
+                .allowsHitTesting(false)
+                .ignoresSafeArea(.container, edges: .bottom)
             }
         }
+    }
+
+    /// `bottomEdge`: the toast area's bottom in global coordinates (the screen's, or the keyboard's top).
+    private func bottomPadding(bottomEdge: CGFloat) -> CGFloat {
+        if level == 0 && router.mainPath.isEmpty {
+            return PBTabBar.bottomOffset + PBSize.tabbar + PBSpace.s16
+        }
+        if let footer = router.pinnedFooter, footer.layer == level {
+            return max(bottomEdge - footer.top, 0) + PBSpace.s12
+        }
+        return 50
     }
 }

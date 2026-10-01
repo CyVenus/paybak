@@ -13,8 +13,10 @@ struct SetupNotificationsScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             PBSetupHeader(step: 4, onBack: router.pop, onSkip: notNow)
-            // The artboard is the 362 × 300 slot plus 12 pt of bleed on each side.
+            // The artboard is the 362 × 300 slot plus 12 pt of bleed on each side, centred in the
+            // content width on wider phones.
             PaybakRiveIllustration(.notifications)
+                .frame(maxWidth: .infinity)
                 .padding(.top, PBSpace.s24)
             VStack(alignment: .leading, spacing: PBSpace.s12) {
                 Text("Get gentle reminders")

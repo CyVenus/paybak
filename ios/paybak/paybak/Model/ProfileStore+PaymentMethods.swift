@@ -78,10 +78,13 @@ extension UserProfile {
         upiID = primaryPaymentMethod.flatMap { $0.kind == .upi ? $0.value : nil } ?? ""
     }
 
-    /// The Add sheet's prefill (§5 caption 12-04): the primary UPI ID's name at the handle of a bank
-    /// that has no UPI ID yet ("arjun" + HDFC → "arjun@okhdfcbank"); "" when there's nothing to derive.
+    /// The Add sheet's prefill (§5 caption 12-04): the primary UPI ID's name (else the username) at
+    /// the handle of a bank that has no UPI ID yet ("arjun" + HDFC → "arjun@okhdfcbank"); "" when
+    /// there's nothing to derive.
     var suggestedUPIID: String {
-        guard let name = paymentMethods.first(where: { $0.kind == .upi })?.value?.split(separator: "@").first else { return "" }
+        let upiName = upiID.split(separator: "@", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? ""
+        let name = upiName.isEmpty ? (username ?? Self.defaultUsername(for: self.name)) : upiName
+        guard !name.isEmpty else { return "" }
         let taken = Set(paymentMethods.compactMap { $0.kind == .upi ? $0.value?.lowercased() : nil })
         for bank in paymentMethods where bank.kind == .bank {
             guard let handle = bank.bankName.flatMap(PaymentMethod.upiHandle(forBank:)) else { continue }
@@ -118,7 +121,7 @@ nonisolated extension PaymentMethod {
     /// The UPI handle of a bank's own app (HDFC → okhdfcbank), for the Add sheet's prefill.
     static func upiHandle(forBank name: String) -> String? {
         let folded = name.lowercased()
-        let handles = [("hdfc", "okhdfcbank"), ("icici", "okicici"), ("sbi", "oksbi"), ("state bank", "oksbi"), ("axis", "okaxis")]
+        let handles = [("hdfc", "okhdfcbank"), ("icici", "okicici"), ("sbi", "oksbi"), ("axis", "okaxis")]
         return handles.first { folded.contains($0.0) }?.1
     }
 }

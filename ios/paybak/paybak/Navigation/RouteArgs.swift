@@ -56,7 +56,8 @@ enum NewGroupMode: String, Hashable, Codable {
 enum ReminderContext: Hashable, Codable {
     case expense(ExpenseID)
     case group(GroupID)
-    case loan(LoanID)
+    /// A loan, or just one of its installments (1-based) when `installment` is set.
+    case loan(LoanID, installment: Int? = nil)
 }
 
 /// Which records an activity log lists.

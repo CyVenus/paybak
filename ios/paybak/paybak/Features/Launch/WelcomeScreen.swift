@@ -19,7 +19,9 @@ struct WelcomeScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             PBOnboardingTopBar(onSkip: isLastStep ? nil : { skip() }, testIDPrefix: "welcome")
+            // Centred in the content width, like Android's, on phones wider than its 362 pt slot.
             PaybakRiveView(controller: illustration)
+                .frame(maxWidth: .infinity)
                 .padding(.top, PBSpace.s8)
             WelcomeText(step: step)
                 .padding(.top, PBSpace.s32)
@@ -123,17 +125,18 @@ struct WelcomeScreen: View {
     }
 }
 
-/// The headline and body of each step, verbatim from Figma. Headlines break where Figma wraps them
-/// at 362 pt, so every step's text block is two lines tall: the first one measures 361.3 pt and
-/// would otherwise just fit on one line, and the body would jump between steps.
+/// The headline and body of each step, verbatim from Figma. Step 1 breaks where Figma does in the
+/// string itself: it measures 361.3 pt and would otherwise just fit on one line at 362 pt. The others
+/// wrap by themselves within the 362 pt measure (a hard break would give them three lines on narrow
+/// phones), as on Android.
 private struct WelcomeCopy {
     let headline: String
     let body: String
 
     static let all = [
         WelcomeCopy(headline: "Split any bill in\nseconds.", body: "Add it once. Paybak does the math for everyone."),
-        WelcomeCopy(headline: "Know who owes what,\nand by when.", body: "Clear balances and due dates, all in one place."),
-        WelcomeCopy(headline: "Settle up without the\nawkward chat.", body: "Record payments and send gentle reminders."),
+        WelcomeCopy(headline: "Know who owes what, and by when.", body: "Clear balances and due dates, all in one place."),
+        WelcomeCopy(headline: "Settle up without the awkward chat.", body: "Record payments and send gentle reminders."),
     ]
 }
 
@@ -153,19 +156,31 @@ private struct WelcomeText: View {
         _shownStep = State(initialValue: step)
     }
 
+    /// Figma's 362 content width, so the headlines break where the designs do on wider phones.
+    private static let measure: CGFloat = 362
+
     var body: some View {
         let copy = WelcomeCopy.all[shownStep - 1]
         VStack(alignment: .leading, spacing: PBSpace.s12) {
-            Text(copy.headline)
-                .textStyle(.title1)
-                .foregroundStyle(PBColor.textPrimary)
-                .accessibilityAddTraits(.isHeader)
-                .accessibilityIdentifier("welcome.headline")
+            // Every headline keeps at least two lines, so the body stays put between steps even if
+            // one fits on a line (at a smaller text size, say).
+            ZStack(alignment: .topLeading) {
+                Text(verbatim: " \n ")
+                    .textStyle(.title1)
+                    .hidden()
+                    .accessibilityHidden(true)
+                Text(copy.headline)
+                    .textStyle(.title1)
+                    .foregroundStyle(PBColor.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("welcome.headline")
+            }
             Text(copy.body)
                 .textStyle(.body)
                 .foregroundStyle(PBColor.textSecondary)
                 .accessibilityIdentifier("welcome.body")
         }
+        .frame(maxWidth: Self.measure, alignment: .leading)
         .frame(maxWidth: .infinity, alignment: .leading)
         .offset(x: shift)
         .opacity(opacity)

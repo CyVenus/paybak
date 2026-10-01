@@ -14,8 +14,9 @@ struct AllSetScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Figma keeps the 44 pt a header would take.
+            // Figma keeps the 44 pt a header would take. Centred in the content width on wider phones.
             PaybakRiveIllustration(.allSet)
+                .frame(maxWidth: .infinity)
                 .padding(.top, PBSize.tap)
             VStack(alignment: .leading, spacing: PBSpace.s12) {
                 Text(headline)

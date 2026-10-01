@@ -50,7 +50,9 @@ struct UserProfile: Codable, Equatable {
     /// The default currency, INR until onboarding picks one.
     var defaultCurrency: String { currencyCode ?? Currency.fallbackCode }
 
-    var primaryPaymentMethod: PaymentMethod? { paymentMethods.first(where: \.primary) ?? paymentMethods.first }
+    /// The method friends see; nil when none is primary (Setup 3 cleared a primary UPI ID that sat
+    /// beside other methods), as on Android.
+    var primaryPaymentMethod: PaymentMethod? { paymentMethods.first(where: \.primary) }
 
     /// The first whitespace-separated word of the trimmed name ("Arjun Mehta" → "Arjun").
     var firstName: String {
@@ -100,7 +102,9 @@ extension UserProfile {
         }
     }
 
-    /// Setup 3 edits `upiID`: the primary UPI method follows it (or becomes it when there's none).
+    /// Setup 3 edits `upiID`: the primary UPI method follows it (removed when it's cleared). With no
+    /// primary UPI method, a new UPI ID goes first as the primary method and the others step down, as
+    /// on Android.
     mutating func syncPrimaryUPI() {
         let upi = upiID.trimmingCharacters(in: .whitespaces)
         if let index = paymentMethods.firstIndex(where: { $0.primary && $0.kind == .upi }) {
@@ -109,8 +113,12 @@ extension UserProfile {
             } else {
                 paymentMethods[index].value = upi
             }
-        } else {
-            migrateUPI()
+        } else if !upi.isEmpty {
+            for index in paymentMethods.indices {
+                paymentMethods[index].primary = false
+            }
+            let id = paymentMethods.contains { $0.id == "pm-upi" } ? RecordID.make() : "pm-upi"
+            paymentMethods.insert(PaymentMethod(id: id, kind: .upi, value: upi, primary: true), at: 0)
         }
     }
 

@@ -14,6 +14,7 @@ struct VerifyScreen: View {
     @State private var countdown: ResendCountdown
     @State private var secondsLeft: Int
     @State private var pendingCheck: Task<Void, Never>?
+    @State private var hasAppeared = false
     @FocusState private var isCodeFocused: Bool
 
     /// - Parameter showsError: Opens in the wrong-code state with "482917" entered and the countdown
@@ -53,7 +54,16 @@ struct VerifyScreen: View {
             isWrong = false
         }
         .task(id: countdown) { await runCountdown() }
-        .onAppear { isCodeFocused = true }
+        .onAppear {
+            // Back from Setup 1 opens the screen afresh, as on Android: empty boxes and a new
+            // 30 s countdown.
+            if hasAppeared {
+                resend()
+            } else {
+                hasAppeared = true
+                isCodeFocused = true
+            }
+        }
     }
 
     /// Under the code row (the designed layouts keep the label tops at y 308 / 342):

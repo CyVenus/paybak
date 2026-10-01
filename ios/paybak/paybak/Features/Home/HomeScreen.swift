@@ -90,18 +90,17 @@ struct HomeScreen: View {
     }
 
     /// Holds `before` (the summary the card was confirmed on) through the Confirmed state and a short
-    /// read, then lets the card collapse and the new balances and activity row in.
+    /// read, then lets the card collapse and the new balances and activity row in (250 ms, ease out).
+    /// With Reduce Motion there's no hold and the card only fades, as on Android.
     private func hold(_ before: HomeSummary) {
         let id = UUID()
         holdID = id
         heldSummary = before
         Task {
             // The card's 250 ms Confirmed animation, then 0.8 s to read it.
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 800 : 1050))
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 0 : 1050))
             guard holdID == id else { return }
-            var transaction = Transaction(animation: reduceMotion ? nil : .easeOut(duration: 0.25))
-            transaction.disablesAnimations = reduceMotion
-            withTransaction(transaction) {
+            withAnimation(.easeOut(duration: 0.25)) {
                 heldSummary = nil
             }
         }

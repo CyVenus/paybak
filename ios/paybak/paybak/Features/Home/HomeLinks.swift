@@ -39,7 +39,7 @@ extension Obligation {
         switch kind {
         case .direct: .expense(ref)
         case .group, .project: .group(ref)
-        case .loan: .loan(ref)
+        case .loan: .loan(ref, installment: installment)
         }
     }
 
