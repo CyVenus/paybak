@@ -69,7 +69,12 @@ enum CoreDebugActions {
     static func friendsSide(_ ledger: Ledger) -> DebugSection {
         let pending = ledger.payments.last { $0.fromId == Person.me && $0.status == .pending }
         let payee = pending.flatMap { ledger.person($0.toId)?.firstName } ?? "Payee"
-        var actions: [DebugAction] = []
+        let autoApproves = DebugState.autoApprovesPayments
+        var actions = [
+            DebugAction(title: "Auto-approve my payments", detail: "Friends confirm after 5 s · Now: \(autoApproves ? "On" : "Off")") { _ in
+                DebugState.autoApprovesPayments = !autoApproves
+            },
+        ]
         if ledger.person(esha) != nil {
             actions.append(claim(from: esha, title: "Esha says she paid ₹700", detail: "A pending claim for Dinner at Olive Garden"))
         }

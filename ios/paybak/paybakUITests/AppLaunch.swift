@@ -128,7 +128,8 @@ extension XCUIApplication {
     /// §3.10): `-resetOnboarding` clears the profile and ledger, `-startScreen` opens a screen with
     /// its demo scenario, `-now` pins the clock, `-pro` overrides the plan, `-scenario` applies seed
     /// scenarios and `-link` opens a deep link. `textSize` sets the app's Dynamic Type size without
-    /// touching the device's settings.
+    /// touching the device's settings. Friends don't auto-approve your payments (`-autoApprove`)
+    /// unless a test asks, so a payment you record stays pending.
     static func launchPaybak(
         startScreen: ScreenID? = nil,
         resetOnboarding: Bool = true,
@@ -136,9 +137,11 @@ extension XCUIApplication {
         now: String? = nil,
         pro: Bool? = nil,
         scenarios: [String] = [],
-        link: String? = nil
+        link: String? = nil,
+        autoApprove: Bool = false
     ) -> XCUIApplication {
         let app = XCUIApplication()
+        app.launchArguments += ["-autoApprove", autoApprove ? "YES" : "NO"]
         if resetOnboarding {
             app.launchArguments += ["-resetOnboarding", "YES"]
         }
@@ -177,6 +180,18 @@ extension XCUIApplication {
     /// The first element labelled `label`, whatever its type (e.g. a toast).
     func element(label: String) -> XCUIElement {
         descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+    }
+
+    /// Scrolls the debug menu down to the row titled `title` (the module sections follow the long
+    /// Scenarios and Load screen lists), then taps it.
+    func tapDebugRow(_ title: String) {
+        let row = buttons["debugMenu.\(title)"]
+        var swipes = 0
+        while !(row.exists && row.isHittable), swipes < 60 {
+            element("screen.debugMenu").swipeUp(velocity: .slow)
+            swipes += 1
+        }
+        row.tap()
     }
 
     /// The iOS back gesture: a drag from the left screen edge (onboarding screens have no nav bar).

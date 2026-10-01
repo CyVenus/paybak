@@ -124,18 +124,6 @@ private extension XCUIApplication {
         element("screen.projectAddComponent").swipeUp()
         button.tap()
     }
-
-    /// Scrolls the debug menu down to the row titled `title` (the module sections follow the long
-    /// Scenarios and Load screen lists), then taps it.
-    func tapDebugRow(_ title: String) {
-        let row = buttons["debugMenu.\(title)"]
-        var swipes = 0
-        while !(row.exists && row.isHittable), swipes < 60 {
-            element("screen.debugMenu").swipeUp(velocity: .slow)
-            swipes += 1
-        }
-        row.tap()
-    }
 }
 
 private extension XCUIElement {

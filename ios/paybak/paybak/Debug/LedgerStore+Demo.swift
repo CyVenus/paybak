@@ -64,10 +64,24 @@ extension ProfileStore {
     }
 }
 
-/// Debug state that survives relaunches: the pinned clock and the demo's load day.
+/// Debug state that survives relaunches: the pinned clock, the demo's load day and the friends'
+/// auto-approve.
 enum DebugState {
     private static let clockKey = "debug.pinnedClock"
     private static let anchorKey = "debug.demoAnchor"
+    /// Also a launch argument: `-autoApprove NO` turns it off for that launch (UI tests).
+    private static let autoApproveKey = "autoApprove"
+
+    /// Friends confirm the payments you record to them after 5 s (`DebugAutoApprover`). On until
+    /// turned off in the debug menu. A launch argument arrives as the string "YES" or "NO", which
+    /// `bool(forKey:)` reads.
+    static var autoApprovesPayments: Bool {
+        get {
+            UserDefaults.standard.object(forKey: autoApproveKey) == nil
+                || UserDefaults.standard.bool(forKey: autoApproveKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: autoApproveKey) }
+    }
 
     static var pinnedClock: Date? {
         get { UserDefaults.standard.object(forKey: clockKey) as? Date }

@@ -17,6 +17,8 @@ import os
 ///     -scenario <a>[,<b>…]       then apply seed scenarios to today's ledger
 ///     -pro YES|NO                override the plan last
 ///     -link <paybak://…>         open a deep link after launch, as a notification tap would
+///     -autoApprove YES|NO        whether friends confirm your new payments after 5 s, for this launch
+///                                only (`DebugState.autoApprovesPayments`; UI tests pass NO)
 ///
 /// e.g. `xcrun simctl launch --terminate-running-process <udid> app.paybak.paybak -startScreen groupGoaTrip`.
 struct DebugLaunchOptions {
