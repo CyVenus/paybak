@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Row / Currency (Figma 37:673): a 56 pt row with a 40 pt symbol tile, name and code, and a radio.
-/// The whole row is the tap target; selection is single-choice across the list.
+/// The whole row is the tap target; selection is single-choice across the list. Inside a #F5F5F5
+/// card (Settings › Currency) set `isOnCard` so the symbol tile turns white.
 struct PBCurrencyRow: View {
     /// "₹", "$", "S$"… Symbols longer than two characters are shown as the ISO code in Caption/1
     /// (the AED row), so pass the code for those.
@@ -9,6 +10,7 @@ struct PBCurrencyRow: View {
     let title: String
     let subtitle: String
     let isSelected: Bool
+    var isOnCard = false
     let action: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -21,7 +23,7 @@ struct PBCurrencyRow: View {
                     .foregroundStyle(PBColor.textPrimary)
                     .lineLimit(1)
                     .frame(width: PBSize.avatarMd, height: PBSize.avatarMd)
-                    .background(PBColor.bgCard, in: .circle)
+                    .background(isOnCard ? PBColor.bgPrimary : PBColor.bgCard, in: .circle)
                 VStack(alignment: .leading, spacing: PBSpace.s2) {
                     Text(title)
                         .textStyle(.headline)
@@ -71,6 +73,9 @@ private struct PBRadio: View {
         PBCurrencyRow(symbol: "$", title: "US Dollar", subtitle: "USD", isSelected: selection == "USD") { selection = "USD" }
         PBCurrencyRow(symbol: "AED", title: "UAE Dirham", subtitle: "AED", isSelected: selection == "AED") { selection = "AED" }
         PBCurrencyRow(symbol: "S$", title: "Singapore Dollar", subtitle: "SGD", isSelected: selection == "SGD") { selection = "SGD" }
+        PBCurrencyRow(symbol: "₹", title: "INR", subtitle: "Indian rupee", isSelected: true, isOnCard: true) {}
+            .padding(.horizontal, PBSpace.s16)
+            .pbCard(padding: 0)
     }
     .padding(PBLayout.screenMargin)
 }
