@@ -34,6 +34,8 @@ struct PaybakApp: App {
                 .environment(ledgerStore)
                 .environment(router)
                 .onAppear { appDelegate.connect(ledgerStore: ledgerStore, router: router) }
+                // Every change re-plans the scheduled notifications (a newer change cancels this run).
+                .task(id: ledgerStore.revision) { await NotificationService.reschedule(for: ledgerStore.books) }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
