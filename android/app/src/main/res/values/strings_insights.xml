@@ -33,4 +33,33 @@
     <string name="insights_ask_remind">Remind %1$s</string>
     <string name="insights_ask_see_insights">See Insights</string>
     <string name="insights_ask_open">Open %1$s</string>
+
+    <!-- Recurring (screens-insights-ai §5) -->
+    <string name="insights_recurring_title">Recurring</string>
+    <string name="insights_recurring_intro">Paybak adds these to %1$s on schedule.</string>
+    <string name="insights_recurring_needs_amount">Needs your amount</string>
+    <string name="insights_recurring_drafts_note">Drafts don’t affect balances.</string>
+    <string name="insights_recurring_rules">Rules</string>
+    <string name="insights_recurring_empty">Nothing repeats in %1$s yet. Add rent, bills or anything that comes back each month.</string>
+    <string name="insights_recurring_stopped">%1$s won’t repeat</string>
+    <string name="insights_draft">Draft</string>
+    <string name="insights_enter_amount">Enter amount</string>
+    <string name="insights_paid_by_you">Paid by you</string>
+    <string name="insights_paid_by">Paid by %1$s</string>
+    <string name="insights_varies">Varies</string>
+    <string name="insights_repeat_title">Repeat</string>
+    <string name="insights_repeat_never">Never</string>
+    <string name="insights_repeat_weekly">Weekly</string>
+    <string name="insights_repeat_monthly">Monthly</string>
+    <string name="insights_repeat_yearly">Yearly</string>
+    <string name="insights_repeat_custom">Custom</string>
+    <string name="insights_repeat_variable">Amount changes each time</string>
+    <string name="insights_done">Done</string>
+    <string name="insights_expense_added">Expense added</string>
+    <string name="insights_draft_helper">Drafts don’t count until you add the amount.</string>
+    <string name="insights_paid_by_title">Paid by</string>
+    <string name="insights_you">You</string>
+    <string name="insights_split">Split</string>
+    <string name="insights_split_equally">Equally · %1$d people</string>
+    <string name="insights_date">Date</string>
 </resources>

@@ -2,10 +2,12 @@ package app.paybak.paybak.debug.scenarios
 
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ExpenseDraft
+import app.paybak.paybak.domain.model.Frequency
 import app.paybak.paybak.domain.model.Itemized
 import app.paybak.paybak.domain.model.ItemizedItem
 import app.paybak.paybak.domain.model.ItemizedLine
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.RepeatRule
 import app.paybak.paybak.domain.model.Split
 import app.paybak.paybak.domain.model.SplitMode
 import app.paybak.paybak.domain.model.SplitRow
@@ -38,10 +40,18 @@ private val leopoldDraft =
             ),
     )
 
-/** The Cooking gas draft of Flat 302 the Repeat sheet opens over (insights §5.3). */
+/** Cooking gas repeating monthly on the 28th, waiting for its amount each time (insights §5.3). */
+private val cookingGasRepeat = RepeatRule(Frequency.Monthly, LocalDate.of(2026, 9, 28), variable = true)
+
+/** The Cooking gas draft of Flat 302 the Repeat sheet opens over. */
 private val cookingGasDraft =
     ExpenseDraft.equal(listOf(ME, "p-meera", "p-kabir"))
-        .copy(title = "Cooking gas", groupId = "g-flat302", category = Category.Bills.id)
+        .copy(
+            title = "Cooking gas",
+            groupId = "g-flat302",
+            category = Category.Bills.id,
+            repeat = cookingGasRepeat,
+        )
 
 /** Insights and AI (lane C, M9; app-architecture §1.9). */
 internal val InsightsScenarios: Map<String, Scenario> =
@@ -93,7 +103,12 @@ internal val InsightsScenarios: Map<String, Scenario> =
                             AddExpenseArgs(draft = cookingGasDraft, focusAmount = false)
                         )
                     ),
-                sheet = Route.RepeatRule(DebugRequest, startDate = LocalDate.of(2026, 9, 28)),
+                sheet =
+                    Route.RepeatRule(
+                        DebugRequest,
+                        current = cookingGasRepeat,
+                        startDate = LocalDate.of(2026, 9, 28),
+                    ),
             ),
         "recurringEnterAmount" to
             Scenario(demo().pro(), stack = listOf(Route.EnterDraftAmount("d-gas-09"))),
