@@ -144,6 +144,9 @@ class AskAssistantTest {
         assertEquals(AskAssistant.FALLBACK, answer.text)
         assertEquals(4, answer.suggestions.size)
         assertNull(answer.draft)
+        val dated = assistant.answer("what happened on 28 sep")
+        assertEquals(AskAssistant.FALLBACK, dated.text)
+        assertEquals(4, dated.suggestions.size)
     }
 
     @Test
@@ -155,6 +158,11 @@ class AskAssistantTest {
         assertEquals(Category.Food, phrase.category)
         assertEquals(listOf("Esha"), phrase.names)
         assertNull(ExpensePhrase.parse("who owes me money") { false })
+        // A bare number needs a verb, a currency word, or "for" / "with" after it.
+        assertNull(ExpensePhrase.parse("what happened on 28 sep") { false })
+        assertEquals(listOf("Esha"), ExpensePhrase.parse("600 with Esha") { false }?.names)
+        assertEquals("600", ExpensePhrase.parse("Paid 600 cab") { false }?.amount?.toPlainString())
+        assertEquals("600", ExpensePhrase.parse("₹600 cab") { false }?.amount?.toPlainString())
         assertTrue(ExpensePhrase.guessCategory("movie tickets") == Category.Fun)
         assertEquals(Category.Other, ExpensePhrase.guessCategory("plants"))
     }

@@ -25,10 +25,15 @@ data class ExpensePhrase(
     companion object {
         private val money =
             Regex(
-                """(?:₹\s*|\brs\.?\s*|\binr\s*)?(\d[\d,]*(?:\.\d{1,2})?)(?:\s*(?:rupees|rs\b|inr\b))?""",
+                """(₹\s*|\brs\.?\s*|\binr\s*)?(\d[\d,]*(?:\.\d{1,2})?)(\s*(?:rupees|rs\b|inr\b))?""",
                 RegexOption.IGNORE_CASE,
             )
         private val verb = Regex("""^(?:add|log|split)\b\s*""", RegexOption.IGNORE_CASE)
+        /** A verb that makes a bare number an expense ("Paid 600 …"). */
+        private val expenseVerb =
+            Regex("""^(?:add|log|split|record|spent|paid)\s""", RegexOption.IGNORE_CASE)
+        /** "for …" or "with …" right after the amount. */
+        private val forOrWith = Regex("""^\s+(?:for|with)\s""", RegexOption.IGNORE_CASE)
         private val with =
             Regex(
                 """(?:,\s*)?(?:\bsplit\s+)?\bwith\s+(.+?)(?=\s+for\s+|\s+in\s+|$)""",
@@ -95,15 +100,22 @@ data class ExpensePhrase(
         }
 
         /**
-         * Reads [text] as an expense, or null when it names no amount. [isGroup] says whether a
-         * trailing "in …" names one of your groups (otherwise it stays part of what it was for).
+         * Reads [text] as an expense, or null when it names no amount. A bare number only counts
+         * after a verb, with a currency word, or followed by "for" / "with", so "what happened on
+         * 28 sep" is not an expense. [isGroup] says whether a trailing "in …" names one of your
+         * groups (otherwise it stays part of what it was for).
          */
         fun parse(text: String, isGroup: (String) -> Boolean): ExpensePhrase? {
-            var rest = text.trim().trimEnd('.', '!', '?').replace(verb, "")
+            val written = text.trim().trimEnd('.', '!', '?')
+            val hasVerb = expenseVerb.containsMatchIn(written)
+            var rest = written.replace(verb, "")
             val amountMatch = money.find(rest) ?: return null
             val amount =
-                amountMatch.groupValues[1].replace(",", "").toBigDecimalOrNull() ?: return null
+                amountMatch.groupValues[2].replace(",", "").toBigDecimalOrNull() ?: return null
             if (amount.signum() <= 0) return null
+            val hasCurrency = amountMatch.groups[1] != null || amountMatch.groups[3] != null
+            val after = rest.substring(amountMatch.range.last + 1)
+            if (!hasVerb && !hasCurrency && !forOrWith.containsMatchIn(after)) return null
             rest = rest.removeRange(amountMatch.range).trim()
             val group = inGroup.find(rest)?.takeIf { isGroup(it.groupValues[1]) }
             if (group != null) rest = rest.removeRange(group.range)
