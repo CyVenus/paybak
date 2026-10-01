@@ -26,10 +26,12 @@ import app.paybak.paybak.domain.LedgerSnapshot
 import app.paybak.paybak.domain.calc.TimelineDay
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.model.InboxType
+import app.paybak.paybak.feature.PendingClaimStack
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalTabBarPadding
 import app.paybak.paybak.navigation.rememberDebugStartScreen
 import app.paybak.paybak.ui.components.PbEmptyState
+import app.paybak.paybak.ui.theme.PbSpace
 
 /**
  * The Activity tab's Timeline segment (activityTimeline, activityEmpty; activity §3): everything
@@ -51,7 +53,7 @@ fun ActivityTimelineView(modifier: Modifier = Modifier) {
         snapshot.view,
         screen = "activity",
         modifier = modifier.testTag("activity.timeline"),
-        onTop = { ClaimStack(claims) },
+        onTop = { PendingClaimStack(claims, gap = PbSpace.S8) },
     )
 }
 

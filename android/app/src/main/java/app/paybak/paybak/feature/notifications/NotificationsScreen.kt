@@ -16,7 +16,7 @@ import app.paybak.paybak.domain.calc.InboxRow
 import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.model.InboxType
-import app.paybak.paybak.feature.activity.ClaimStack
+import app.paybak.paybak.feature.PendingClaimStack
 import app.paybak.paybak.navigation.DeepLink
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
@@ -65,7 +65,7 @@ fun NotificationsScreen(route: Route.Notifications) {
     ) {
         if (today.isNotEmpty() || claims.isNotEmpty()) {
             InboxSection(Dates.dayHeader(view.today, view.today), today, view) {
-                ClaimStack(claims)
+                PendingClaimStack(claims, gap = PbSpace.S8)
             }
         }
         if (earlier.isNotEmpty()) {

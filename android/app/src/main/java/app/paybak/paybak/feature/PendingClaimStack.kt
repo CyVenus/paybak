@@ -1,4 +1,4 @@
-package app.paybak.paybak.feature.activity
+package app.paybak.paybak.feature
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -10,6 +10,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,23 +19,24 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import app.paybak.paybak.domain.calc.ClaimCard
-import app.paybak.paybak.feature.PendingClaimCard
 import app.paybak.paybak.ui.theme.LocalReduceMotion
 import app.paybak.paybak.ui.theme.PbMotion
-import app.paybak.paybak.ui.theme.PbSpace
 
-/** The rows below slide up as a handled card collapses (activity §3.6): 250 ms, ease out. */
+/** The collapse after Confirm or Not received (home-v2 §3.9, activity §3.6): 250 ms, ease out. */
 private const val COLLAPSE_MILLIS = 250
 
 /**
- * The Confirm cards on top of the Timeline and the inbox, one per pending claim, newest first, 8 dp
- * above the rows (activity §3.6, §6). A claim confirmed or refused anywhere stays in place while
- * its card finishes, then collapses; a new claim grows in. Under reduce motion both only fade.
+ * The Confirm cards for the pending claims, newest first, each [gap] above the next (Home 12 dp,
+ * Activity and the inbox 8 dp). A claim that leaves the ledger's pending list (confirmed anywhere,
+ * or marked not received) stays in place while its card finishes, then collapses while the content
+ * below moves up; a new claim grows in. Under reduce motion both only fade. With [gapBelow] the
+ * stack ends with one more [gap] while it shows any card (Home's section spacing).
  */
 @Composable
-internal fun ClaimStack(claims: List<ClaimCard>) {
+fun PendingClaimStack(claims: List<ClaimCard>, gap: Dp, gapBelow: Boolean = false) {
     val live = claims.map { it.payment.id }.toSet()
     val firstIds = remember { live }
     val shown = remember { mutableStateListOf(*claims.toTypedArray()) }
@@ -58,11 +61,16 @@ internal fun ClaimStack(claims: List<ClaimCard>) {
                 val visibility = remember { MutableTransitionState(id in firstIds) }
                 visibility.targetState = id in live
                 AnimatedVisibility(visibility, enter = enter, exit = exit) {
-                    PendingClaimCard(claim, Modifier.padding(bottom = PbSpace.S8))
+                    PendingClaimCard(claim, Modifier.padding(bottom = gap))
                 }
                 if (visibility.isIdle && !visibility.currentState && id !in live) {
                     LaunchedEffect(Unit) { shown.removeAll { it.payment.id == id } }
                 }
+            }
+        }
+        if (gapBelow) {
+            AnimatedVisibility(live.isNotEmpty(), enter = enter, exit = exit) {
+                Spacer(Modifier.height(gap))
             }
         }
     }

@@ -28,6 +28,7 @@ import app.paybak.paybak.data.ledger.collectSnapshot
 import app.paybak.paybak.domain.calc.HomeState
 import app.paybak.paybak.domain.calc.HomeSummary
 import app.paybak.paybak.domain.format.Dates
+import app.paybak.paybak.feature.PendingClaimStack
 import app.paybak.paybak.navigation.AddExpenseArgs
 import app.paybak.paybak.navigation.LocalAppClock
 import app.paybak.paybak.navigation.LocalLedger
@@ -45,6 +46,7 @@ import app.paybak.paybak.ui.components.home.PbHomeScrollFade
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbLayout
+import app.paybak.paybak.ui.theme.PbSpace
 
 /**
  * The `home` tab root (screens-home, screens-home-v2): the header, any pending claims, then First
@@ -86,12 +88,11 @@ fun HomeScreen(route: Route.Home) {
                 unread = snapshot.unreadCount > 0,
                 onAssistant = { navigator.requirePro(Route.Ask) },
                 onNotifications = { navigator.open(Route.Notifications) },
-                onLogoLongPress =
-                    { navigator.open(Route.DebugMenu) }.takeIf { BuildConfig.DEBUG },
+                onLogoLongPress = { navigator.open(Route.DebugMenu) }.takeIf { BuildConfig.DEBUG },
                 testTag = "home",
             )
             Spacer(Modifier.height(PbLayout.SectionGap))
-            HomeClaimStack(home.pendingClaims)
+            PendingClaimStack(home.pendingClaims, gap = PbSpace.S12, gapBelow = true)
             when (home.state) {
                 HomeState.FirstDay -> FirstDayCard()
                 HomeState.AllSettled -> AllSettledCard()
