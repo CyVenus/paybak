@@ -34,7 +34,7 @@ import app.paybak.paybak.data.ledger.actions.addGroup
 import app.paybak.paybak.domain.actions.LedgerRuleException
 import app.paybak.paybak.domain.addrecord.AmountEntry
 import app.paybak.paybak.domain.addrecord.ContributionDraft
-import app.paybak.paybak.domain.format.Money
+import app.paybak.paybak.domain.groups.currencyLabel
 import app.paybak.paybak.domain.model.ContributionRule
 import app.paybak.paybak.domain.model.GroupType
 import app.paybak.paybak.domain.model.ME
@@ -273,7 +273,7 @@ fun NewGroupScreen(route: Route.NewGroup) {
                     stringResource(R.string.add_currency),
                     Modifier.testTag("newGroup.currency"),
                     icon = PbIcon.Exchange,
-                    value = "${form.currency} ${Money.currency(form.currency).symbol}",
+                    value = currencyLabel(form.currency),
                     onClick = {
                         focusManager.clearFocus()
                         navigator.open(
