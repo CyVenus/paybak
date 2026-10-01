@@ -8,7 +8,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import app.paybak.paybak.awaitScreen
 import app.paybak.paybak.awaitTag
 import app.paybak.paybak.domain.calc.TimelineKind
@@ -217,6 +219,25 @@ class SettleTest {
             compose.awaitScreen("owedBreakdown")
             compose.onNodeWithText("from 3 people").assertExists()
             tag("owedBreakdown.row.p-esha").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun shareHandsTheMessageToTheSystemShareSheet() {
+        launchPaybak("settleRemindShare").use { app ->
+            // The share sheet comes up over the app, which stops being the resumed activity.
+            val deadline = System.currentTimeMillis() + 10_000
+            while (app.state == Lifecycle.State.RESUMED && System.currentTimeMillis() < deadline) {
+                Thread.sleep(100)
+            }
+            assertTrue(app.state != Lifecycle.State.RESUMED)
+            // Backing out of it returns to the Remind sheet, still open, with nothing logged.
+            InstrumentationRegistry.getInstrumentation()
+                .uiAutomation
+                .executeShellCommand("input keyevent KEYCODE_BACK")
+                .close()
+            compose.awaitTag("screen.remind")
+            assertTrue(ledger.reminders.none { !it.automatic })
         }
     }
 }
