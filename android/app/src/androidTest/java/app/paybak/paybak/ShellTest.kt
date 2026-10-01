@@ -66,7 +66,7 @@ class ShellTest {
                     awaitTag("home.addSheet.$row")
                     tag("home.addSheet.$row").performClick()
                     compose.awaitScreen(modal)
-                    tag("$modal.header.close").performClick()
+                    tag("$modal.close").performClick()
                     awaitGone("screen.$modal")
                     awaitTag(rootOf(tab))
                 }
@@ -96,11 +96,7 @@ class ShellTest {
 
     @Test
     fun savingAModalShowsTheDetailWithAToast() {
-        launchPaybak("addExpenseEmpty").use {
-            compose.awaitScreen("addExpense")
-            tag("addExpense.people").performClick()
-            compose.awaitScreen("pickPeople")
-            tag("pickPeople.done").performClick()
+        launchPaybak("addExpenseFilled").use {
             compose.awaitScreen("addExpense")
             tag("addExpense.save").performClick()
             compose.awaitScreen("expense")
@@ -116,7 +112,7 @@ class ShellTest {
             tag("newGroup.create").performClick()
             compose.awaitScreen("group")
             compose.onNodeWithText("Group created").assertExists()
-            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "New group" })
+            assertTrue(paybakApp.ledger.ledger.value.groups.any { it.name == "Weekend Trek" })
         }
     }
 
@@ -178,9 +174,12 @@ class ShellTest {
         all.take(all.size / 2).toSet()
     }
 
-    /** Launches each id and waits for the root its scenario shows. */
+    /**
+     * Launches each id and waits for the root its scenario shows. Ids that open system UI over the
+     * app ([systemUi]) are tested by their own module.
+     */
     private fun startAll(ids: List<String>) {
-        ids.forEach { id ->
+        (ids - systemUi).forEach { id ->
             launchPaybak(id).use { awaitTag(expectedRoot(id, ScreenIds.scenarios.getValue(id))) }
         }
     }
@@ -198,6 +197,9 @@ class ShellTest {
         if (tab == Tab.Home) "home.logo" else "screen.${tab.route.id}"
 
     private companion object {
+        /** settleRemindShare opens the share sheet, which hides the app (SettleTest covers it). */
+        val systemUi = setOf("settleRemindShare")
+
         /** Home's root carries its state: `screen.home<State>`. */
         val homeRoots =
             mapOf(

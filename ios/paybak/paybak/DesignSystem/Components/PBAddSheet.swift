@@ -59,29 +59,36 @@ struct PBAddSheet: View {
 }
 
 /// Sheet / Action Row (Figma 17:641, components-home §13): a 72 pt row with a 44 pt icon tile, a
-/// title and subtitle, and a chevron. Pressed fills the row `bg/card` and turns the tile white.
+/// title and an optional subtitle ("Add a new friend" has none), and a chevron. Pressed fills the
+/// row `bg/card` and turns the tile white. Lists on a screen override the height and side padding
+/// (Payment details: 64 tall, no padding).
 struct PBSheetRow: View {
     let title: String
-    let subtitle: String
+    let subtitle: String?
     let icon: PBIcon
     var showsChevron = true
+    var height: CGFloat = 72
+    var horizontalPadding: CGFloat = PBSpace.s12
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             EmptyView()
         }
-        .buttonStyle(PBSheetRowStyle(title: title, subtitle: subtitle, icon: icon, showsChevron: showsChevron))
+        .buttonStyle(PBSheetRowStyle(title: title, subtitle: subtitle, icon: icon, showsChevron: showsChevron,
+                                     height: height, horizontalPadding: horizontalPadding))
         .accessibilityLabel(title)
-        .accessibilityHint(subtitle)
+        .accessibilityHint(subtitle ?? "")
     }
 }
 
 private struct PBSheetRowStyle: ButtonStyle {
     let title: String
-    let subtitle: String
+    let subtitle: String?
     let icon: PBIcon
     let showsChevron: Bool
+    let height: CGFloat
+    let horizontalPadding: CGFloat
 
     @Environment(\.pbPreviewInteraction) private var previewInteraction
 
@@ -96,9 +103,11 @@ private struct PBSheetRowStyle: ButtonStyle {
                 Text(title)
                     .textStyle(.headline)
                     .foregroundStyle(PBColor.textPrimary)
-                Text(subtitle)
-                    .textStyle(.subheadline)
-                    .foregroundStyle(PBColor.textSecondary)
+                if let subtitle {
+                    Text(subtitle)
+                        .textStyle(.subheadline)
+                        .foregroundStyle(PBColor.textSecondary)
+                }
             }
             .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -107,8 +116,8 @@ private struct PBSheetRowStyle: ButtonStyle {
                     .foregroundStyle(PBColor.iconTertiary)
             }
         }
-        .padding(.horizontal, PBSpace.s12)
-        .frame(height: 72)
+        .padding(.horizontal, horizontalPadding)
+        .frame(height: height)
         .background(isPressed ? PBColor.bgCard : .clear, in: .rect(cornerRadius: PBRadius.card))
         .contentShape(.rect)
         .animation(.easeOut(duration: 0.1), value: isPressed)
@@ -128,6 +137,7 @@ private struct PBSheetRowStyle: ButtonStyle {
         PBSheetRow(title: "Add expense", subtitle: "Split a bill with friends or a group", icon: .receipt) {}
         PBSheetRow(title: "Record payment", subtitle: "Log money you paid or received", icon: .exchange) {}
             .pbPreviewInteraction(.pressed)
+        PBSheetRow(title: "arjun@okaxis", subtitle: "UPI · Primary", icon: .wallet, height: 64, horizontalPadding: 0) {}
     }
     .padding(PBSpace.s16)
 }

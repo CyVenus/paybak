@@ -53,6 +53,8 @@ struct PBButton: View {
                 Text(title)
                     .textStyle(size.textStyle)
                     .lineLimit(1)
+                    // Two alert pills share 260 pt; "Cancel payment" shrinks a little instead of truncating.
+                    .minimumScaleFactor(fillsWidth ? 0.8 : 1)
             }
         }
         .buttonStyle(PBPillButtonStyle(style: style, size: size, fillsWidth: fillsWidth))

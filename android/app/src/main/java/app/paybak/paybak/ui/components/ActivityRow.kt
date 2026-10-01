@@ -36,6 +36,8 @@ enum class PbRowSurface {
  * small [action]; [unread] adds the 8 dp dot and [showDivider] a leading-inset hairline.
  *
  * @param leading The 40 dp circle: a category icon ([PbAvatarContent.Symbol]) or a person.
+ * @param badgeStyle The badge's pill; by default grey (Muted, or On Card inside a card). A loan
+ *   installment that's overdue now uses the red Overdue pill.
  */
 @Composable
 fun PbActivityRow(
@@ -48,6 +50,7 @@ fun PbActivityRow(
     amountPrimary: Boolean = true,
     date: String? = null,
     badge: String? = null,
+    badgeStyle: PbBadgeStyle? = null,
     action: String? = null,
     onAction: () -> Unit = {},
     unread: Boolean = false,
@@ -102,7 +105,7 @@ fun PbActivityRow(
                     )
                 }
             }
-            Trailing(amount, amountPrimary, date, badge, action, onAction, onCard)
+            Trailing(amount, amountPrimary, date, badge, badgeStyle, action, onAction, onCard)
             if (unread) Box(Modifier.size(8.dp).background(PbColors.Bg.Inverse, CircleShape))
         }
         if (showDivider)
@@ -116,6 +119,7 @@ private fun Trailing(
     amountPrimary: Boolean,
     date: String?,
     badge: String?,
+    badgeStyle: PbBadgeStyle?,
     action: String?,
     onAction: () -> Unit,
     onCard: Boolean,
@@ -136,7 +140,10 @@ private fun Trailing(
         if (date != null)
             Text(date, style = PbTextStyles.Footnote, color = PbColors.Text.Tertiary, maxLines = 1)
         if (badge != null)
-            PbBadge(badge, style = if (onCard) PbBadgeStyle.OnCard else PbBadgeStyle.Muted)
+            PbBadge(
+                badge,
+                style = badgeStyle ?: if (onCard) PbBadgeStyle.OnCard else PbBadgeStyle.Muted,
+            )
         if (action != null) {
             PbButton(
                 action,

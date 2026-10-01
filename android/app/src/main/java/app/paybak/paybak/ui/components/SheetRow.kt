@@ -30,12 +30,13 @@ import app.paybak.paybak.ui.theme.PbTextStyles
 
 /**
  * `Sheet / Action Row` (`PBSheetRow`): a 72 dp row of the Add sheet: a 44 dp icon tile, title and
- * subtitle, and a chevron. Pressed fills the row #F5F5F5 and turns the tile white.
+ * subtitle (none on "Add a new friend"), and a chevron. Pressed fills the row #F5F5F5 and turns the
+ * tile white.
  */
 @Composable
 fun PbSheetRow(
     title: String,
-    subtitle: String,
+    subtitle: String?,
     icon: PbIcon,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -77,13 +78,15 @@ fun PbSheetRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                subtitle,
-                style = PbTextStyles.Subheadline,
-                color = PbColors.Text.Secondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (subtitle != null) {
+                Text(
+                    subtitle,
+                    style = PbTextStyles.Subheadline,
+                    color = PbColors.Text.Secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         if (showChevron) {
             PbIconImage(
