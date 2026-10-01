@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The Expense detail template (screens-activity §4, add-expense §11): hero, your share, the split,
 /// the receipt, comments, the edit history and the actions, all from `Books.expenseDetail`. Edit
-/// opens Add expense in edit mode; the group chip row opens the group.
+/// opens Add expense in edit mode; the group chip row opens the group. Tapping the comment field
+/// pins the composer above the keyboard (§4.6); Send posts and puts the keyboard away.
 struct ExpenseDetailScreen: View {
     let expenseId: ExpenseID
     let toast: String?
@@ -12,6 +13,9 @@ struct ExpenseDetailScreen: View {
     @Environment(LedgerStore.self) private var store
     @Environment(ProfileStore.self) private var profileStore
     @State private var comment = ""
+    /// The composer is pinned above the keyboard (the in-content one hides meanwhile).
+    @State private var isComposing = false
+    @FocusState private var isComposerFocused: Bool
     @State private var showsDelete = false
     @State private var showsFlag = false
     @State private var showsPhotoPicker = false
@@ -35,6 +39,14 @@ struct ExpenseDetailScreen: View {
             if let toast, !didShowToast { router.toast(toast) }
             didShowToast = true
         }
+        .onStartScreen([.expenseComment, .expenseDelete]) { screen in
+            if screen == .expenseDelete {
+                showsDelete = true
+            } else {
+                comment = "Thanks, that works for me."
+                isComposing = true
+            }
+        }
         .routeTestRoot("expense")
     }
 
@@ -45,6 +57,29 @@ struct ExpenseDetailScreen: View {
     }
 
     private func content(_ detail: ExpenseDetail) -> some View {
+        ScrollViewReader { proxy in
+            scroll(detail)
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    if isComposing {
+                        PBComposer(text: $comment, placeholder: "Add a comment", isPinned: true,
+                                   testIDPrefix: "expense.composer", focus: $isComposerFocused, onSend: send)
+                            .onAppear { isComposerFocused = true }
+                            .transition(.opacity)
+                    }
+                }
+                .onChange(of: isComposing) { _, composing in
+                    guard composing else { return }
+                    withAnimation(.easeOut(duration: 0.3)) { proxy.scrollTo(Self.commentsAnchor, anchor: .center) }
+                }
+        }
+        .onChange(of: isComposerFocused) { _, focused in
+            if !focused { isComposing = false }
+        }
+    }
+
+    private static let commentsAnchor = "comments"
+
+    private func scroll(_ detail: ExpenseDetail) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PBLayout.sectionGap) {
                 VStack(alignment: .leading, spacing: PBSpace.s16) {
@@ -74,6 +109,8 @@ struct ExpenseDetailScreen: View {
             .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
+        // Tapping outside the pinned composer puts the keyboard away (§4.6).
+        .simultaneousGesture(TapGesture().onEnded { isComposerFocused = false }, isEnabled: isComposing)
         .pbAlert(
             isPresented: $showsDelete,
             title: "Delete this expense?",
@@ -187,6 +224,7 @@ struct ExpenseDetailScreen: View {
         }
     }
 
+    /// Oldest first, then the composer. While composing, the composer rides the keyboard instead.
     private func comments(_ detail: ExpenseDetail) -> some View {
         VStack(alignment: .leading, spacing: PBSpace.s8) {
             PBSectionHeader("Comments")
@@ -195,14 +233,34 @@ struct ExpenseDetailScreen: View {
                     VStack(spacing: 0) {
                         ForEach(detail.comments) { line in
                             PBCommentRow(name: line.name, avatar: avatar(line.personId), date: line.date, text: line.text)
+                                .accessibilityIdentifier("expense.comment.\(line.id)")
                         }
                     }
                 }
-                PBComposer(text: $comment, placeholder: "Add a comment", testIDPrefix: "expense.composer") { text in
-                    try? store.addComment(to: expenseId, text: text)
+                if !isComposing {
+                    inlineComposer
                 }
             }
         }
+        .id(Self.commentsAnchor)
+    }
+
+    /// The composer in the page: it shows the draft (and sends it), and a tap on the field pins the
+    /// real one above the keyboard.
+    private var inlineComposer: some View {
+        let hasDraft = !comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return PBComposer(text: $comment, placeholder: "Add a comment", onSend: send)
+            .accessibilityHidden(true)
+            .overlay {
+                Button { isComposing = true } label: {
+                    Color.clear.contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+                // Leaves the draft's send button its own taps.
+                .padding(.trailing, hasDraft ? PBSize.buttonSm + PBSpace.s8 : 0)
+                .accessibilityLabel(comment.isEmpty ? "Add a comment" : comment)
+                .accessibilityIdentifier("expense.composer.field")
+            }
     }
 
     private func history(_ detail: ExpenseDetail) -> some View {
@@ -251,6 +309,18 @@ struct ExpenseDetailScreen: View {
         router.open(.addExpense(AddExpenseArgs(editing: expenseId, focusAmount: false)))
     }
 
+    private func send(_ text: String) {
+        do {
+            try withAnimation(.easeOut(duration: 0.25)) {
+                try store.addComment(to: expenseId, text: text)
+            }
+            Haptics.success()
+            isComposerFocused = false
+        } catch {
+            Haptics.warning()
+        }
+    }
+
     private func resolve() {
         try? store.resolveFlag(expenseId)
         Haptics.success()
@@ -288,26 +358,5 @@ struct ExpenseDetailScreen: View {
         draft.receipt = Receipt(photo: name, asset: nil, addedBy: Person.me, addedAt: store.clock.now)
         try? store.updateExpense(expenseId, with: draft)
         pickedPhoto = nil
-    }
-}
-
-/// Flag an issue (screens-activity §4.3-G, proposal): what looks wrong, then "Flag expense".
-private struct FlagExpenseSheet: View {
-    let onClose: () -> Void
-    let onFlag: (String) -> Void
-
-    @State private var note = ""
-    @FocusState private var isFocused: Bool
-
-    var body: some View {
-        PBSheet(title: "Flag an issue", testIDPrefix: "flag", onClose: onClose) {
-            VStack(spacing: PBSpace.s16) {
-                PBTextArea(nil, text: $note, prompt: "What looks wrong?", focus: $isFocused)
-                PBButton("Flag expense", fillsWidth: true) { onFlag(note.trimmingCharacters(in: .whitespacesAndNewlines)) }
-                    .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .accessibilityIdentifier("flag.send")
-            }
-        }
-        .task { isFocused = true }
     }
 }
