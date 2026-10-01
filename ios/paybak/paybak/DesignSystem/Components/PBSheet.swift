@@ -53,6 +53,9 @@ struct PBSheet<Content: View>: View {
 enum PBSheetDetent {
     /// Detent=Medium: as tall as its content, floating 8 pt from the screen edges.
     case fitted
+    /// Like `.fitted`, but the content scrolls when the keyboard leaves less room than it needs (a
+    /// form taller than the space above the keyboard), so the focused field stays in view.
+    case fittedScrolling
     /// Detent=Large: the tall sheet whose content fills the height and scrolls.
     case large
 }
@@ -96,6 +99,16 @@ struct PBSheetPresentation<Content: View>: View {
                     .frame(maxHeight: .infinity, alignment: .top)
                     .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = max(bottomInset, $0) }
                     .presentationDetents([.height(height)])
+            case .fittedScrolling:
+                ScrollView {
+                    content()
+                        .padding(.bottom, max(0, PBSpace.s28 - bottomInset))
+                        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
+                }
+                .scrollBounceBehavior(.basedOnSize)
+                .scrollDismissesKeyboard(.interactively)
+                .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = max(bottomInset, $0) }
+                .presentationDetents([.height(height)])
             case .large:
                 content()
                     .frame(maxHeight: .infinity, alignment: .top)
