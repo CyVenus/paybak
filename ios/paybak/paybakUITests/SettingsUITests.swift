@@ -6,22 +6,22 @@ final class SettingsUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// Free plan: Export records → paywall → Start trial → Welcome (trial ends Wed 7 Oct) → Done
-    /// continues to Export.
+    /// Free plan: Export records opens the RevenueCat paywall (the purchase itself isn't automated).
     @MainActor
-    func testPaywallTrialContinuesToExport() {
-        let app = XCUIApplication.launchPaybak(startScreen: .privacyData)
+    func testExportOnTheFreePlanOpensThePaywall() {
+        let app = XCUIApplication.launchPaybak(startScreen: .privacyData, pro: false)
         XCTAssertTrue(app.element("screen.privacyData").waitForExistence(timeout: 5))
         app.buttons["privacyData.export"].tap()
         XCTAssertTrue(app.element("screen.paywall").waitForExistence(timeout: 3))
-        app.buttons["paywall.plan.monthly"].tap()
-        XCTAssertEqual(app.buttons["paywall.cta"].label, "Subscribe for ₹99/month")
-        app.buttons["paywall.plan.yearly"].tap()
-        XCTAssertEqual(app.buttons["paywall.cta"].label, "Start 7-day free trial")
-        app.buttons["paywall.cta"].tap()
-        XCTAssertTrue(app.element("paywall.state.welcome").waitForExistence(timeout: 3))
-        XCTAssertEqual(app.element("proWelcome.body").label, "Your free trial ends Wed 7 Oct. Then ₹799/year.")
-        app.buttons["proWelcome.done"].tap()
+        XCTAssertFalse(app.element("screen.privacyExport").exists)
+    }
+
+    /// Pro: Export records opens Export, last month and the busiest group preselected.
+    @MainActor
+    func testExportWithProOpensExport() {
+        let app = XCUIApplication.launchPaybak(startScreen: .privacyData, pro: true)
+        XCTAssertTrue(app.element("screen.privacyData").waitForExistence(timeout: 5))
+        app.buttons["privacyData.export"].tap()
         XCTAssertTrue(app.element("screen.privacyExport").waitForExistence(timeout: 3))
         XCTAssertEqual(app.element("privacyExport.rangeLabel").label, "1 Sep – 30 Sep 2026")
         XCTAssertTrue(app.buttons["privacyExport.group.g-goa"].isSelected)

@@ -75,8 +75,6 @@ final class ProfileUITests: XCTestCase {
         }
         app.buttons["profile.row.pro"].tap()
         XCTAssertTrue(app.element("screen.paywall").waitForExistence(timeout: 3))
-        app.buttons["paywall.close"].tap()
-        XCTAssertTrue(app.screen(.profile).waitForExistence(timeout: 3))
     }
 
     @MainActor

@@ -441,15 +441,6 @@ nonisolated extension Books {
 
     // MARK: Pro and settings
 
-    /// The yearly plan's 7-day trial ("Your free trial ends Wed 7 Oct.").
-    mutating func startTrial(_ period: Entitlement.Period = .yearly, at moment: Date) {
-        ledger.settings.entitlement = Entitlement(plan: .pro, period: period, trialEndsAt: day(of: moment).adding(days: 7), since: moment)
-    }
-
-    mutating func subscribe(_ period: Entitlement.Period, at moment: Date) {
-        ledger.settings.entitlement = Entitlement(plan: .pro, period: period, trialEndsAt: nil, since: moment)
-    }
-
     mutating func setPro(_ isPro: Bool, at moment: Date) {
         ledger.settings.entitlement = isPro
             ? Entitlement(plan: .pro, period: .yearly, trialEndsAt: nil, since: moment)

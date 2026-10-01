@@ -6,10 +6,12 @@ struct PaybakApp: App {
     @State private var profileStore: ProfileStore
     @State private var ledgerStore: LedgerStore
     @State private var router: AppRouter
+    @State private var subscriptionStore: SubscriptionStore
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
         PBFont.registerAll()
+        SubscriptionStore.configure()
         let profileStore = ProfileStore()
         var pinned: Date?
         #if DEBUG
@@ -25,6 +27,7 @@ struct PaybakApp: App {
         _profileStore = State(initialValue: profileStore)
         _ledgerStore = State(initialValue: ledgerStore)
         _router = State(initialValue: router)
+        _subscriptionStore = State(initialValue: SubscriptionStore())
     }
 
     var body: some Scene {
@@ -33,6 +36,11 @@ struct PaybakApp: App {
                 .environment(profileStore)
                 .environment(ledgerStore)
                 .environment(router)
+                .environment(subscriptionStore)
+                .task { await subscriptionStore.observe() }
+                .onChange(of: subscriptionStore.isPro, initial: true) { _, isPro in
+                    ledgerStore.hasStoreEntitlement = isPro
+                }
                 .onAppear { appDelegate.connect(ledgerStore: ledgerStore, router: router) }
                 // Every change re-plans the scheduled notifications (a newer change cancels this run).
                 .task(id: ledgerStore.revision) { await NotificationService.reschedule(for: ledgerStore.books) }

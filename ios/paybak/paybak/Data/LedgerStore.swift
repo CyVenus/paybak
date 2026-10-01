@@ -31,7 +31,18 @@ final class LedgerStore {
         Books(ledger: ledger, now: clock.now, calendar: clock.calendar, defaultCurrency: profileStore.profile.defaultCurrency)
     }
 
-    var isPro: Bool { ledger.settings.entitlement.isPro }
+    /// The active RevenueCat `paybak_pro` entitlement, mirrored from `SubscriptionStore`.
+    var hasStoreEntitlement = false
+
+    /// Whether Pro is unlocked. Debug builds also honour the ledger's mock entitlement (the debug menu,
+    /// `-pro`, seed scenarios), so the gates can be tested without a purchase.
+    var isPro: Bool {
+        #if DEBUG
+        hasStoreEntitlement || ledger.settings.entitlement.isPro
+        #else
+        hasStoreEntitlement
+        #endif
+    }
 
     /// The only write path: applies `change` to the books at the clock's now; when it doesn't throw,
     /// keeps the result, recomputes the snapshot, saves and bumps `revision`.

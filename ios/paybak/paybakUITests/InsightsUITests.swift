@@ -6,17 +6,20 @@ final class InsightsUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// Free plan: the report is locked; See Pro → trial → Done unlocks it in place.
+    /// Free plan: the report is locked and See Pro opens the RevenueCat paywall.
     @MainActor
-    func testLockedInsightsUnlockWithTheTrial() {
-        let app = XCUIApplication.launchPaybak(startScreen: .insightsLocked)
+    func testLockedInsightsOpenThePaywall() {
+        let app = XCUIApplication.launchPaybak(startScreen: .insightsLocked, pro: false)
         XCTAssertTrue(app.element("insights.locked").waitForExistence(timeout: 5))
         app.buttons["insights.seePro"].tap()
         XCTAssertTrue(app.element("screen.paywall").waitForExistence(timeout: 3))
-        app.buttons["paywall.cta"].tap()
-        XCTAssertTrue(app.element("paywall.state.welcome").waitForExistence(timeout: 3))
-        app.buttons["proWelcome.done"].tap()
-        XCTAssertTrue(app.element("insights.total").waitForLabel("₹23,300"))
+    }
+
+    /// Pro: the same screen shows the report, unlocked.
+    @MainActor
+    func testInsightsWithProShowTheReport() {
+        let app = XCUIApplication.launchPaybak(startScreen: .insightsLocked, pro: true)
+        XCTAssertTrue(app.element("insights.total").waitForLabel("₹23,300", timeout: 5))
         XCTAssertFalse(app.element("insights.locked").exists)
     }
 

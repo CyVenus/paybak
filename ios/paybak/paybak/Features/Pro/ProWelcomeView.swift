@@ -1,12 +1,18 @@
+import RevenueCatUI
 import SwiftUI
 
 /// Paybak Pro — Welcome (screens-settings §3): the All set art at 2/3 scale, "You’re on Paybak Pro",
 /// the trial or renewal line, and what's now unlocked. Done is the only way out (no close, no swipe).
+/// A store subscription adds Manage subscription, which opens RevenueCat's Customer Center.
 /// It's a state of the paywall route (`screen.paywall`), marked by the hidden `paywall.state.welcome`.
 struct ProWelcomeView: View {
     /// Nil on the free plan, which hides the line.
     let statusLine: String?
+    /// Whether the plan is a RevenueCat subscription (not the debug mock), which shows Manage subscription.
+    var managesSubscription = false
     let onDone: () -> Void
+
+    @State private var isCustomerCenterPresented = false
 
     var body: some View {
         ScrollView {
@@ -44,12 +50,21 @@ struct ProWelcomeView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            PBButton("Done", fillsWidth: true, action: onDone)
-                .accessibilityIdentifier("proWelcome.done")
-                .padding(.horizontal, PBLayout.screenMargin)
-                .padding(.bottom, PBSpace.s16)
-                .background(PBColor.bgPrimary)
+            VStack(spacing: PBSpace.s8) {
+                if managesSubscription {
+                    PBButton("Manage subscription", style: .secondary, fillsWidth: true) {
+                        isCustomerCenterPresented = true
+                    }
+                    .accessibilityIdentifier("proWelcome.manage")
+                }
+                PBButton("Done", fillsWidth: true, action: onDone)
+                    .accessibilityIdentifier("proWelcome.done")
+            }
+            .padding(.horizontal, PBLayout.screenMargin)
+            .padding(.bottom, PBSpace.s16)
+            .background(PBColor.bgPrimary)
         }
+        .presentCustomerCenter(isPresented: $isCustomerCenterPresented)
         .overlay(alignment: .topLeading) {
             Color.clear
                 .frame(width: 1, height: 1)

@@ -109,7 +109,7 @@ extension AppRouter {
         toast(isProject ? "Project created" : "Group created")
     }
 
-    /// Pro → `route`; free → the paywall, which continues to `route` after the trial starts.
+    /// Pro → `route`; free → the paywall, which continues to `route` once Pro unlocks.
     func requirePro(_ route: Route) {
         open(isPro() ? route : .paywall(continueTo: route))
     }

@@ -155,19 +155,6 @@ extension LedgerStore {
 
     // MARK: Pro and settings
 
-    func startTrial(_ period: Entitlement.Period = .yearly) {
-        mutate { $0.startTrial(period, at: clock.now) }
-    }
-
-    func subscribe(_ period: Entitlement.Period) {
-        mutate { $0.subscribe(period, at: clock.now) }
-    }
-
-    /// Re-applies the saved entitlement (the purchase is simulated, so it's already here).
-    func restorePurchases() {
-        refresh()
-    }
-
     func setPro(_ isPro: Bool) {
         mutate { $0.setPro(isPro, at: clock.now) }
     }

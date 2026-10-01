@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		9864C1DD082A0F5107BD3C6D /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 2020BBCB7A14F5E98F58F85B /* RiveRuntime */; };
+		D4F6B8CA3B5E7A9CB13D4F68 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = B2D4F6A8193C5E7A9F1B2D46 /* RevenueCat */; };
+		E5A7C9DB4C6F8BADC24E5A79 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = C3E5A7B92A4D6F8BA02C3E57 /* RevenueCatUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				9864C1DD082A0F5107BD3C6D /* RiveRuntime in Frameworks */,
+				D4F6B8CA3B5E7A9CB13D4F68 /* RevenueCat in Frameworks */,
+				E5A7C9DB4C6F8BADC24E5A79 /* RevenueCatUI in Frameworks */,
 			);
 		};
 		70A19634C745CAA497AFCBCC /* Frameworks */ = {
@@ -110,6 +114,8 @@
 			name = paybak;
 			packageProductDependencies = (
 				2020BBCB7A14F5E98F58F85B /* RiveRuntime */,
+				B2D4F6A8193C5E7A9F1B2D46 /* RevenueCat */,
+				C3E5A7B92A4D6F8BA02C3E57 /* RevenueCatUI */,
 			);
 			productName = paybak;
 			productReference = 4F6137CB306D291A00F755CE /* paybak.app */;
@@ -191,6 +197,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				D28600CA87F881AB9C261502 /* XCRemoteSwiftPackageReference "rive-ios" */,
+				A1C3E5F7092B4D6F8E0A1C35 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4F6137CC306D291A00F755CE /* Products */;
@@ -566,6 +573,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		A1C3E5F7092B4D6F8E0A1C35 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = exactVersion;
+				version = 5.92.0;
+			};
+		};
 		D28600CA87F881AB9C261502 /* XCRemoteSwiftPackageReference "rive-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/rive-app/rive-ios";
@@ -581,6 +596,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D28600CA87F881AB9C261502 /* XCRemoteSwiftPackageReference "rive-ios" */;
 			productName = RiveRuntime;
+		};
+		B2D4F6A8193C5E7A9F1B2D46 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1C3E5F7092B4D6F8E0A1C35 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		C3E5A7B92A4D6F8BA02C3E57 /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1C3E5F7092B4D6F8E0A1C35 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

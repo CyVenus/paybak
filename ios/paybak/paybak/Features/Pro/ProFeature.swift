@@ -1,26 +1,7 @@
 import Foundation
+import RevenueCat
 
-/// The two Pro plans and their fixed ₹ copy (screens-settings §2 "Plans and prices"; a mock store, so
-/// the strings are literal). Yearly is the default and the only plan with the 7-day trial.
-enum ProPlan: CaseIterable {
-    case yearly
-    case monthly
-
-    var period: Entitlement.Period {
-        self == .yearly ? .yearly : .monthly
-    }
-
-    var name: String { self == .yearly ? "Yearly" : "Monthly" }
-    var price: String { self == .yearly ? "₹799/year" : "₹99/month" }
-    var detail: String { self == .yearly ? "₹67/month" : "Billed monthly" }
-    var badge: String? { self == .yearly ? "Save 33%" : nil }
-    var callToAction: String { self == .yearly ? "Start 7-day free trial" : "Subscribe for ₹99/month" }
-    var smallPrint: String {
-        self == .yearly ? "Then ₹799/year. Cancel anytime in Settings." : "Billed monthly. Cancel anytime in Settings."
-    }
-}
-
-/// What Pro unlocks, in the paywall's order.
+/// What Pro unlocks, in the order Welcome lists it.
 struct ProFeature: Identifiable {
     let icon: PBIcon
     let title: String
@@ -37,9 +18,22 @@ struct ProFeature: Identifiable {
     ]
 }
 
+extension EntitlementInfo {
+    /// The Welcome status line (§3 "Dynamic text") for a store subscription: the trial's end, the next
+    /// renewal, or the last day of a cancelled plan. Nil for a lifetime unlock (no expiry).
+    func statusLine(calendar: Calendar) -> String? {
+        guard let expirationDate else { return nil }
+        let day = Format.day(LocalDay(expirationDate, calendar: calendar))
+        if periodType == .trial {
+            return "Your free trial ends \(day)."
+        }
+        return willRenew ? "Renews \(day)." : "Pro until \(day)."
+    }
+}
+
 extension Entitlement {
-    /// The Welcome / status line (§3 "Dynamic text"), nil on the free plan: the trial's end while it
-    /// runs, otherwise the next renewal after `today` with the plan's price ("Renews Thu 7 Oct 2027.
+    /// The debug mock entitlement's status line, nil on the free plan: the trial's end while it runs,
+    /// otherwise the next renewal after `today` with the plan's price ("Renews Thu 7 Oct 2027.
     /// ₹799/year.", "Your subscription renews Fri 30 Oct. ₹99/month.").
     func statusLine(today: LocalDay, calendar: Calendar) -> String? {
         guard isPro else { return nil }
