@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
 
         val start =
             DebugLaunch.startTarget(intent, app, firstLaunch = savedInstanceState == null)
-                ?: StartTarget.Flow(Destination.Splash)
+                ?: StartTarget.Flow(onboardingStart(intent) ?: Destination.Splash)
         if (savedInstanceState == null) postLink(intent)
         setContent {
             RiveHost {
@@ -52,6 +52,13 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch { withContext(Dispatchers.Default) { app.ledger }.tick() }
     }
 
+    /** Where Sign out and Delete account restart the app, while onboarding isn't complete. */
+    private fun onboardingStart(intent: Intent): Destination? =
+        intent
+            .getStringExtra(EXTRA_ONBOARDING_AT)
+            ?.takeUnless { app.profileStore.profile.value.onboardingComplete }
+            ?.let(Destination::fromId)
+
     /** A notification's internal link (app-architecture §2.6); ignored during onboarding. */
     private fun postLink(intent: Intent) {
         val link = intent.getStringExtra(EXTRA_LINK) ?: return
@@ -61,5 +68,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         /** The intent extra every notification (and the debug `link` key) carries. */
         const val EXTRA_LINK = "link"
+
+        /** The onboarding screen id a restart opens at (see `restartIntoOnboarding`). */
+        const val EXTRA_ONBOARDING_AT = "onboardingAt"
     }
 }

@@ -37,8 +37,9 @@ import app.paybak.paybak.R
 import app.paybak.paybak.data.Currencies
 import app.paybak.paybak.data.UserProfile
 import app.paybak.paybak.data.ledger.collectSnapshot
-import app.paybak.paybak.feature.settings.openFrom
 import app.paybak.paybak.domain.model.SavedMethodKind
+import app.paybak.paybak.feature.settings.openFrom
+import app.paybak.paybak.navigation.Destination
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
 import app.paybak.paybak.navigation.LocalProfileStore
@@ -84,9 +85,7 @@ fun ProfileScreen(route: Route.Profile) {
     val titleHeight = with(LocalDensity.current) { PbSize.Tap.roundToPx() }
 
     Box(
-        Modifier.fillMaxSize()
-            .background(PbColors.Bg.Primary)
-            .testTag("screen.${route.info.id}"),
+        Modifier.fillMaxSize().background(PbColors.Bg.Primary).testTag("screen.${route.info.id}"),
         contentAlignment = Alignment.TopCenter,
     ) {
         Column(
@@ -126,7 +125,7 @@ fun ProfileScreen(route: Route.Profile) {
             onAction = {
                 signingOut = false
                 profileStore.update(UserProfile::signedOut)
-                context.restartIntoOnboarding()
+                context.restartIntoOnboarding(Destination.GetStarted)
             },
             testTag = "profile.signOutAlert",
         )
@@ -247,8 +246,6 @@ private fun SettingsCard(profile: UserProfile, isPro: Boolean, open: (Route) -> 
     }
 }
 
-/**
- * The line under the name (§2.2): the primary UPI ID, else the sign-in contact; null hides it.
- */
+/** The line under the name (§2.2): the primary UPI ID, else the sign-in contact; null hides it. */
 private val UserProfile.handle: String?
     get() = upiId.ifEmpty { contact }.ifEmpty { null }

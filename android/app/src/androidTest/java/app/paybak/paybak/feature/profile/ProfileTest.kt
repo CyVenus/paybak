@@ -100,13 +100,13 @@ class ProfileTest {
     }
 
     @Test
-    fun signingOutClearsTheSessionAndStartsOnboarding() {
+    fun signingOutClearsTheSessionAndShowsGetStarted() {
         launchPaybak("profile").use {
             compose.awaitScreen("profile")
             tag("profile.signOut").performClick()
             compose.awaitTag("profile.signOutAlert.action")
             tag("profile.signOutAlert.action").performClick()
-            compose.awaitScreen("welcome1", timeoutMillis = 20_000)
+            compose.awaitScreen("getStarted", timeoutMillis = 20_000)
             assertFalse(savedProfile.onboardingComplete)
             assertEquals("Arjun Mehta", savedProfile.name)
         }

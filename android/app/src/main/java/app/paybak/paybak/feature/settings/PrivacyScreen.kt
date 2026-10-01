@@ -27,6 +27,7 @@ import app.paybak.paybak.domain.calc.HomeTotals
 import app.paybak.paybak.domain.format.Money
 import app.paybak.paybak.domain.model.Discovery
 import app.paybak.paybak.feature.profile.restartIntoOnboarding
+import app.paybak.paybak.navigation.Destination
 import app.paybak.paybak.navigation.LocalLedger
 import app.paybak.paybak.navigation.LocalMainNavigator
 import app.paybak.paybak.navigation.Route
@@ -136,8 +137,7 @@ fun PrivacyScreen(route: Route.PrivacyData) {
                     modifier = Modifier.testTag("privacyData.deleteAccount"),
                     trailing = PbSettingTrailing.None,
                     onClick = {
-                        deleting =
-                            if (totals.isOpen) DeleteStep.Blocked else DeleteStep.Confirm
+                        deleting = if (totals.isOpen) DeleteStep.Blocked else DeleteStep.Confirm
                     },
                     icon = PbIcon.Delete,
                     tone = PbSettingTone.Destructive,
@@ -172,7 +172,7 @@ fun PrivacyScreen(route: Route.PrivacyData) {
                 onAction = {
                     deleting = null
                     (context.applicationContext as PaybakApplication).resetAccount()
-                    context.restartIntoOnboarding()
+                    context.restartIntoOnboarding(Destination.Welcome(1))
                 },
                 testTag = "privacyData.deleteAlert",
             )
