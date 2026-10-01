@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The six illustrations at their Figma slot sizes (the red outline is the slot; three artboards
 /// overhang it by 12 pt). Tap a character: its animation plays, the phone gives a light haptic, and
-/// the counter goes up. Allow ~2 s for the watermark pre-roll.
+/// the counter goes up.
 struct GalleryRivePage: View {
     private static let assets: [PaybakRiveAsset] = [.onboarding, .getStarted, .notifications, .allSet, .homeFirstDay, .homeAllSquare]
 

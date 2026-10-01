@@ -6,7 +6,7 @@ The six source files live in the platform projects (there is no other copy in th
 
 Runtimes (latest stable, Sep 2026): **rive-ios 6.28.0** (SPM: https://github.com/rive-app/rive-ios, product `RiveRuntime`) and **rive-android 11.12.1** (Maven: `app.rive:rive-android`).
 
-Every file also has three unrelated artboards (`Watermark`, `NuRiveBrandmark01`, `NuRiveWordmark01`, which are Rive's own logo). **Always load the main artboard by name.**
+The first exports also had three unrelated artboards (`Watermark`, `NuRiveBrandmark01`, `NuRiveWordmark01`, which are Rive's own logo); the clean re-exports of 2026-10-02 don't. **Always load the main artboard by name.**
 
 I inspected these with the official Rive WASM runtime (2.43) and headless Chrome. Every main artboard has one state machine with the same name, plus a view model that is the artboard's default and has one instance.
 
@@ -39,7 +39,9 @@ I inspected these with the official Rive WASM runtime (2.43) and headless Chrome
 - Background: artboards are transparent/white. The Get Started artboard draws its own grey rounded card, so don't draw a native card behind it.
 
 ## Watermark pre-roll (editor, verified; see rive-ios-api.md §1)
-All six files carry Rive's export watermark flag. Newer runtimes play a pre-roll of about 2 s on every new artboard instance: an opaque black box with a white "RIVE" wordmark. It runs on wall-clock time, and the illustration is frozen underneath until it ends.
+**Resolved 2026-10-02:** the six files were re-exported from a paid Rive plan without the watermark, so no runtime shows a pre-roll. To check a new export, `grep -c -a Watermark file.riv` must print 0. The notes below describe the first exports.
+
+The first exports carried Rive's export watermark flag. Newer runtimes play a pre-roll of about 2 s on every new artboard instance: an opaque black box with a white "RIVE" wordmark. It runs on wall-clock time, and the illustration is frozen underneath until it ends.
 - **rive-ios 6.28.0: shows it** (confirmed with iOS 27 simulator screenshots during the build; not kept).
 - **@rive-app/canvas-advanced 2.43 (web/WASM): shows it** (headless render stays solid black until about 2.5 s of real time have passed).
 - **rive-android 11.12.1: does NOT show it.** Checked on the Android emulator with a separate harness APK: the Get Started illustration was already drawing about 1.1 s after the activity started, with no black frame.

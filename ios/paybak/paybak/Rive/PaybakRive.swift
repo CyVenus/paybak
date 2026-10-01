@@ -5,9 +5,8 @@
 //  Everything is main-actor isolated (the target's default). Rive calls the auto-bind and trigger
 //  callbacks synchronously on the main thread.
 //
-//  Note: the six illustration .riv files carry Rive's export watermark, so rive-ios plays a ~2 s black
-//  "RIVE" pre-roll on every new artboard instance. The fix is clean re-exports, not code (the payment
-//  scene is already clean).
+//  Note: every .riv file must be a clean export. A watermarked one (it has a `Watermark` artboard) makes
+//  rive-ios play a ~2 s black "RIVE" pre-roll on every new artboard instance (rive-ios-api.md §1).
 
 import Combine
 import RiveRuntime
@@ -121,7 +120,6 @@ final class PaybakRiveController: ObservableObject {
 
     /// Rebuilds the artboard and state machine so the animation starts from its first frame.
     /// Auto-bind binds a new instance and `didBind` re-applies values and listeners.
-    /// A new artboard instance also replays the watermark pre-roll.
     func restart() {
         riveViewModel?.reset()
         if !isSuspended {

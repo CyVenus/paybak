@@ -10,7 +10,7 @@ Unless a path says otherwise, line references are to the source at tag 6.28.0, c
 
 ## 0. TL;DR
 
-1. **Read this first.** All six Paybak `.riv` files carry Rive's export watermark. With 6.28.0, every new artboard instance first plays a Rive pre-roll: a **black box (`0xFF000000`) with the white "RIVE" wordmark, for about 2.0–2.25 s**. The illustration starts only after that. It happens in the real app on the iOS 27 simulator (confirmed with simulator screenshots during the build; not kept), and it plays again on every `restart()`/`reset()`. App code can't and shouldn't turn it off. The fix is to **re-export the files without the watermark** from a Rive account/plan that allows it. Details in §1.
+1. **Resolved 2026-10-02:** the six files were re-exported without the watermark, so there is no pre-roll. What follows describes the first, watermarked exports. All six Paybak `.riv` files carried Rive's export watermark. With 6.28.0, every new artboard instance first plays a Rive pre-roll: a **black box (`0xFF000000`) with the white "RIVE" wordmark, for about 2.0–2.25 s**. The illustration starts only after that. It happens in the real app on the iOS 27 simulator (confirmed with simulator screenshots during the build; not kept), and it plays again on every `restart()`/`reset()`. App code can't and shouldn't turn it off. The fix is to **re-export the files without the watermark** from a Rive account/plan that allows it. Details in §1.
 2. Use the **legacy `RiveViewModel` API** (synchronous, stable): `RiveFile(data:loadCdn:)` → `RiveModel(riveFile:)` → `RiveViewModel(_:stateMachineName:fit:alignment:autoPlay:artboardName:)` → `RiveViewRepresentable(viewModel:)`. Then `riveModel.enableAutoBind { instance in … }`.
 3. **Auto-bind works on all six files.** It binds instance index 0, whether that instance is named `Default` or `Instance`. The callback runs synchronously, **once** if you enable it after `RiveViewModel.init`, **twice** if before, and **twice more on every `reset()`/`stop()`**. Each run hands you a **new instance object**.
 4. Number/bool: `instance.numberProperty(fromPath:)?.value = Float`, `instance.booleanProperty(fromPath:)?.value = Bool`. Trigger: `instance.triggerProperty(fromPath:)?.trigger()`. Listen: `triggerProperty(fromPath:)?.addListener { } -> UUID`, and `removeListener(uuid)`. Listeners run **on the main thread, synchronously, during the next advance**. They never run inside `trigger()` itself.
@@ -21,7 +21,9 @@ Unless a path says otherwise, line references are to the source at tag 6.28.0, c
 
 ---
 
-## 1. BLOCKER: the files are watermarked, so each illustration opens with a ~2 s black Rive pre-roll
+## 1. RESOLVED (2026-10-02): watermarked files open each illustration with a ~2 s black Rive pre-roll
+
+The clean re-exports have no watermark. This section explains what a watermarked file does, in case one comes back.
 
 **What the runtime does** (rive-runtime @ `43aa1025`, which is what 6.28.0 ships):
 - `File::artboardNamed/artboardAt/artboardDefault` call `attachWatermark(...)` on every artboard instance they create, when the file's manifest has the watermark flag (`src/file.cpp:1342-1411`). The watermark artboard is the file's own `Watermark` artboard, played through its state machine.

@@ -10,9 +10,8 @@ enum PaybakRiveFit {
 }
 
 /// One config per Paybak .riv file (Resources/Rive, copied flat into the bundle). Names were checked
-/// against the files with rive-ios 6.28.0 (rive.md). The illustration files also contain Rive's own
-/// artboards ("Watermark", "NuRiveBrandmark01", "NuRiveWordmark01"), so the main artboard is always
-/// loaded by name.
+/// against the files with rive-ios 6.28.0 (rive.md). A file can hold more than one artboard, so the
+/// main artboard is always loaded by name.
 struct PaybakRiveAsset: Identifiable {
     /// Bundle resource name without the .riv extension.
     let fileName: String
