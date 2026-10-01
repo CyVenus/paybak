@@ -173,8 +173,11 @@ p { margin: 0; }
 @keyframes nav-in { from { opacity: 0; transform: translateY(-12px); } }
 .nav--scrolled { background: rgba(245, 243, 238, 0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-color: var(--ink); padding-block: 10px; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-.logo { font-family: var(--hand); font-weight: 700; font-size: 2.1rem; line-height: 1; letter-spacing: 0; }
-.logo--big { font-size: 3.2rem; }
+/* Brand / Logo (Figma): mark + wordmark at the horizontal lockup's 28 : 20 : 8 proportions */
+.logo { --mark: 34px; display: inline-flex; align-items: center; gap: calc(var(--mark) * 0.2857); font-family: var(--sans); font-weight: 800; font-size: calc(var(--mark) * 0.7143); line-height: 1; letter-spacing: -0.03em; }
+.logo--big { --mark: 48px; }
+.app-mark { width: var(--mark); height: var(--mark); flex: none; display: block; }
+.logo-link { display: inline-flex; }
 .nav-links { display: flex; gap: 28px; font-weight: 600; font-size: 0.95rem; }
 .nav-links a { position: relative; }
 .nav-links a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 2px; background: var(--ink); transform: scaleX(0); transform-origin: right; transition: transform 0.45s var(--ease); }

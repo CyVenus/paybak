@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ApkButton from './ApkButton'
+import Logo from './Logo'
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
@@ -17,7 +18,7 @@ export default function Nav() {
   return (
     <header className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="wrap nav-inner">
-        <a href="#top" className="logo" onClick={() => setOpen(false)}>Paybak</a>
+        <a href="#top" className="logo-link" onClick={() => setOpen(false)}><Logo /></a>
         <nav className={`nav-links ${open ? 'is-open' : ''}`}>
           {links.map(([l, h]) => (
             <a key={h} href={h} onClick={() => setOpen(false)}>{l}</a>

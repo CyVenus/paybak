@@ -1,9 +1,11 @@
+import Logo from './Logo'
+
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="wrap footer-inner">
         <div>
-          <span className="logo logo--big">Paybak</span>
+          <Logo big />
           <p>Split. Track. Settle.<br />No awkward money talks anymore.</p>
         </div>
         <nav>
