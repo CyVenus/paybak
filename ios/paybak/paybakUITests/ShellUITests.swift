@@ -124,7 +124,7 @@ final class ShellUITests: XCTestCase {
         (.groupLeaveBlocked, "screen.groupSettings"), (.friendRohan, "screen.friend"), (.friendAnanyaGuest, "screen.friend"),
         (.addFriend, "screen.addFriend"), (.myQrCode, "screen.addFriend"),
         (.settleOwedBreakdown, "screen.owedBreakdown"), (.settleOweBreakdown, "screen.oweBreakdown"), (.settleUp, "screen.settleUp"),
-        (.settleRemind, "screen.remind"), (.settleRemindShare, "screen.remind"), (.settleNotReceived, "screen.notReceived"),
+        (.settleRemind, "screen.remind"), (.settleRemindShare, "ActivityListView"), (.settleNotReceived, "screen.notReceived"),
     ]
 
     private static let activityAndProjects: [(ScreenID, String)] = [

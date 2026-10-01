@@ -14,14 +14,15 @@ struct NotReceivedSheet: View {
     var body: some View {
         PBSheet {
             if let payment = ledgerStore.ledger.payment(paymentId) {
-                content(ledgerStore.books.notReceivedCopy(payment))
+                content(ledgerStore.books.notReceivedCopy(payment), isPending: payment.status == .pending)
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.notReceived")
     }
 
-    private func content(_ copy: NotReceivedCopy) -> some View {
+    /// `isPending` false: the claim was already answered (from another surface), so Send is off.
+    private func content(_ copy: NotReceivedCopy, isPending: Bool) -> some View {
         VStack(alignment: .leading, spacing: PBSpace.s24) {
             VStack(alignment: .leading, spacing: PBSpace.s8) {
                 Text(copy.title)
@@ -37,7 +38,7 @@ struct NotReceivedSheet: View {
                 .accessibilityIdentifier("notReceived.note")
             VStack(spacing: PBSpace.s12) {
                 PBButton("Send", fillsWidth: true, action: send)
-                    .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!isPending || note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityIdentifier("notReceived.send")
                 PBButton("Cancel", style: .secondary, fillsWidth: true, action: router.dismissSheet)
                     .accessibilityIdentifier("notReceived.cancel")

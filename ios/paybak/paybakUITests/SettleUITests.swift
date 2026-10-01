@@ -8,9 +8,11 @@ final class SettleUITests: XCTestCase {
     }
 
     @MainActor
-    func testBreakdownLeadsToThePlanAndSettleOpensRecordPayment() {
-        let app = XCUIApplication.launchPaybak(startScreen: .settleOwedBreakdown)
-        XCTAssertTrue(app.element("owedBreakdown.row.p-rohan").waitForExistence(timeout: 6))
+    func testHomeOwedCardLeadsToThePlanAndSettleOpensRecordPayment() {
+        let app = XCUIApplication.launchPaybak(startScreen: .homeActive)
+        XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 6))
+        app.buttons["home.balance.owed"].tap()
+        XCTAssertTrue(app.element("owedBreakdown.row.p-rohan").waitForExistence(timeout: 3))
         XCTAssertEqual(app.element("owedBreakdown.total").label, "+₹2,900, from 4 people")
         app.element("owedBreakdown.settleUp").tap()
         XCTAssertTrue(app.element("screen.settleUp").waitForExistence(timeout: 3))
@@ -52,18 +54,33 @@ final class SettleUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["ActivityListView"].waitForExistence(timeout: 5))
     }
 
-    /// Not received sends the note and removes the claim; what Esha owes stays.
+    /// Not received sends the note and removes Esha's claim from Home; what she owes stays.
     @MainActor
     func testNotReceivedKeepsTheBalance() {
-        let app = XCUIApplication.launchPaybak(startScreen: .settleNotReceived)
-        XCTAssertTrue(app.element("notReceived.send").waitForExistence(timeout: 6))
+        let app = XCUIApplication.launchPaybak(startScreen: .homeConfirmPayment)
+        XCTAssertTrue(app.screen(.homeConfirmPayment).waitForExistence(timeout: 6))
+        app.buttons["home.confirmCard.notReceived"].tap()
+        XCTAssertTrue(app.element("notReceived.send").waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Let Esha know you haven’t received ₹700?"].exists)
         XCTAssertTrue(app.staticTexts["Esha still owes you ₹700 until a payment is confirmed."].exists)
         app.element("notReceived.send").tap()
         XCTAssertTrue(app.element("screen.notReceived").waitForNonExistence(timeout: 3))
-        XCTAssertFalse(app.element("home.confirmCard").exists)
-        let owed = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", "+₹2,900")).firstMatch
-        XCTAssertTrue(owed.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["home.confirmCard.confirm"].exists)
+        XCTAssertTrue(app.element("home.balance.owed").label.contains("+₹2,900"))
+        XCTAssertTrue(app.element("home.balance.owed").label.contains("from 4 people"))
+    }
+
+    /// Remind from Home's Due soon row: the toast sits over the tab root.
+    @MainActor
+    func testRemindFromHomeSendsInPaybak() {
+        let app = XCUIApplication.launchPaybak(startScreen: .homeActive)
+        XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 6))
+        app.buttons["home.due.p-rohan.action"].tap()
+        XCTAssertTrue(app.element("remind.send").waitForExistence(timeout: 3))
+        app.element("remind.send").tap()
+        XCTAssertTrue(app.element(label: "Reminder sent to Rohan").waitForExistence(timeout: 3))
+        XCTAssertTrue(app.screen(.homeActive).exists)
     }
 
     /// The Remind sheet's editable message (a multi-line text field).
