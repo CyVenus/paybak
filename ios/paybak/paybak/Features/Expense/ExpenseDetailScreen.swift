@@ -245,15 +245,19 @@ struct ExpenseDetailScreen: View {
         .id(Self.commentsAnchor)
     }
 
-    /// The composer in the page: it shows the draft, and a tap pins the real one above the keyboard.
+    /// The composer in the page: it shows the draft (and sends it), and a tap on the field pins the
+    /// real one above the keyboard.
     private var inlineComposer: some View {
-        PBComposer(text: $comment, placeholder: "Add a comment", onSend: send)
+        let hasDraft = !comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return PBComposer(text: $comment, placeholder: "Add a comment", onSend: send)
             .accessibilityHidden(true)
             .overlay {
                 Button { isComposing = true } label: {
                     Color.clear.contentShape(.rect)
                 }
                 .buttonStyle(.plain)
+                // Leaves the draft's send button its own taps.
+                .padding(.trailing, hasDraft ? PBSize.buttonSm + PBSpace.s8 : 0)
                 .accessibilityLabel(comment.isEmpty ? "Add a comment" : comment)
                 .accessibilityIdentifier("expense.composer.field")
             }
