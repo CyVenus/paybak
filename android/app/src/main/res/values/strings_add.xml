@@ -13,6 +13,11 @@
     <string name="add_pick_date">Pick date</string>
     <string name="add_discard">Discard</string>
     <string name="add_keep_editing">Keep editing</string>
+    <!-- Under the amount of an expense filled from a scanned receipt (insights §4.5) -->
+    <plurals name="add_from_receipt">
+        <item quantity="one">From receipt · %d item</item>
+        <item quantity="other">From receipt · %d items</item>
+    </plurals>
     <string name="add_discard_message">Your changes won’t be saved.</string>
     <string name="add_discard_changes">Discard changes?</string>
     <string name="add_whats_it_for">What’s it for?</string>

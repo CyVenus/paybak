@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -35,6 +36,7 @@ import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.format.Money
 import app.paybak.paybak.domain.model.Category
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.SplitMode
 import app.paybak.paybak.feature.pickers.PeopleDirectory
 import app.paybak.paybak.ui.components.PbAmountField
 import app.paybak.paybak.ui.components.PbCard
@@ -118,9 +120,16 @@ fun AddExpenseFields(
         helper =
             form.rate
                 ?.takeIf { form.total > 0 }
-                ?.let {
-                    Money.approxLine(form.total, it.value, form.currency, it.to)
-                },
+                ?.let { Money.approxLine(form.total, it.value, form.currency, it.to) }
+                ?: form.itemized
+                    ?.takeIf { form.split.mode == SplitMode.Itemized }
+                    ?.let {
+                        pluralStringResource(
+                            R.plurals.add_from_receipt,
+                            it.items.size,
+                            it.items.size,
+                        )
+                    },
         allowDecimals = AmountEntry.allowsDecimals(form.currency),
         fieldModifier = Modifier.focusRequester(amountFocus),
         testTag = "addExpense",

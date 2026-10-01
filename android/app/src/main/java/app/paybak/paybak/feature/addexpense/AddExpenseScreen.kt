@@ -273,7 +273,10 @@ fun AddExpenseScreen(route: Route.AddExpense) {
                 when {
                     receipt != null ->
                         navigator.open(Route.PhotoViewer(PhotoRef(receipt.photo, receipt.asset)))
-                    snapshot.isPro -> navigator.open(Route.ScanReceipt(request("receipt")))
+                    snapshot.isPro ->
+                        navigator.open(
+                            Route.ScanReceipt(request("receipt"), personIds = form.people)
+                        )
                     else -> pickPhoto()
                 }
             }

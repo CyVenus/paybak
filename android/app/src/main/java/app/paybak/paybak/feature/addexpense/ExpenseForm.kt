@@ -99,6 +99,9 @@ data class ExpenseForm(
 
     /** A receipt scan's result: its amount, items and split, and the photo attached. */
     fun applying(result: RouteResult.Receipt, now: Instant): ExpenseForm {
+        val photo = result.result.photo?.let { Receipt(photo = it, addedAt = now) } ?: receipt
+        // An unreadable receipt ("Attach photo") only attaches the photo; the typed form stays.
+        if (result.result.scan == null) return copy(receipt = photo)
         val scanned = new(result.result.draft, currency, date)
         return scanned.copy(
             groupId = groupId,
@@ -106,7 +109,7 @@ data class ExpenseForm(
             notes = notes,
             repeat = repeat,
             title = scanned.title.ifEmpty { title },
-            receipt = result.result.photo?.let { Receipt(photo = it, addedAt = now) } ?: receipt,
+            receipt = photo,
         )
     }
 
