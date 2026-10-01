@@ -15,10 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.paybak.paybak.R
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.theme.PbColors
 import app.paybak.paybak.ui.theme.PbSpace
@@ -122,7 +125,14 @@ fun PbActivityRow(
                 actionTestTag,
                 onCard,
             )
-            if (unread) Box(Modifier.size(8.dp).background(PbColors.Bg.Inverse, CircleShape))
+            if (unread) {
+                val unreadLabel = stringResource(R.string.pb_unread)
+                Box(
+                    Modifier.size(8.dp)
+                        .background(PbColors.Bg.Inverse, CircleShape)
+                        .semantics { contentDescription = unreadLabel }
+                )
+            }
         }
         if (showDivider)
             PbDivider(Modifier.align(Alignment.BottomStart), inset = PbDividerInset.Leading)

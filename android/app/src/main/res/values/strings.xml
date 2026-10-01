@@ -37,6 +37,7 @@
     <string name="pb_take_photo">Take photo</string>
     <string name="pb_settle_up">Settle up</string>
     <string name="pb_all_settled">All settled</string>
+    <string name="pb_unread">Unread</string>
 
     <!-- App shell: tab bar, Add sheet, Activity header (app-architecture §2.3) -->
     <string name="shell_tab_home">Home</string>
