@@ -107,7 +107,10 @@ final class ActivityUITests: XCTestCase {
         XCTAssertEqual(bell.value as? String, "Unread")
         bell.tap()
         XCTAssertTrue(app.element("screen.notifications").waitForExistence(timeout: 3))
-        app.buttons["notifications.action"].tap()
+        let markAllRead = app.buttons["notifications.action"]
+        XCTAssertTrue(markAllRead.isEnabled)
+        markAllRead.tap()
+        XCTAssertFalse(markAllRead.isEnabled, "Nothing left to mark")
         app.buttons["notifications.back"].tap()
         XCTAssertTrue(bell.waitForExistence(timeout: 3))
         XCTAssertNotEqual(bell.value as? String, "Unread")

@@ -50,7 +50,7 @@ struct NotificationsScreen: View {
         .scrollIndicators(.hidden)
         .pbPinnedHeader {
             PBPushHeader("Notifications", trailing: .wideText("Mark all read", action: markAllRead),
-                         testIDPrefix: "notifications", onBack: router.back)
+                         isTrailingEnabled: store.snapshot.unreadCount > 0, testIDPrefix: "notifications", onBack: router.back)
         }
         .routeTestRoot("notifications")
     }
@@ -127,7 +127,6 @@ struct NotificationsScreen: View {
     }
 
     private func markAllRead() {
-        guard store.snapshot.unreadCount > 0 else { return }
         withAnimation(.easeOut(duration: 0.2)) {
             store.markAllInboxRead()
         }

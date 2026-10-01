@@ -4,8 +4,9 @@ import SwiftUI
 /// button, a centred Headline title (200 pt box) and a trailing action: a glass text capsule
 /// ("Save"), a glass icon button (Settings) or nothing. `.wideText` is for long actions ("Mark all
 /// read"): the capsule caps at 122 pt with 12 pt padding and the title box shrinks to 102 pt, so
-/// they never touch. Place it at the screen margins from the top safe area; on long scrolling
-/// screens pin it and give it a `bg/primary` fill. Test ids: `<prefix>.back`, `<prefix>.action`.
+/// they never touch. `isTrailingEnabled` grays out the action when it has nothing to do. Place it
+/// at the screen margins from the top safe area; on long scrolling screens pin it and give it a
+/// `bg/primary` fill. Test ids: `<prefix>.back`, `<prefix>.action`.
 struct PBPushHeader: View {
     enum Trailing {
         case none
@@ -16,12 +17,15 @@ struct PBPushHeader: View {
 
     var title: String?
     var trailing: Trailing = .none
+    var isTrailingEnabled = true
     var testIDPrefix: String?
     let onBack: () -> Void
 
-    init(_ title: String? = nil, trailing: Trailing = .none, testIDPrefix: String? = nil, onBack: @escaping () -> Void) {
+    init(_ title: String? = nil, trailing: Trailing = .none, isTrailingEnabled: Bool = true, testIDPrefix: String? = nil,
+         onBack: @escaping () -> Void) {
         self.title = title
         self.trailing = trailing
+        self.isTrailingEnabled = isTrailingEnabled
         self.testIDPrefix = testIDPrefix
         self.onBack = onBack
     }
@@ -32,6 +36,7 @@ struct PBPushHeader: View {
                 .accessibilityIdentifier(testID("back"))
             Spacer(minLength: 0)
             trailingView
+                .disabled(!isTrailingEnabled)
                 .accessibilityIdentifier(testID("action"))
         }
         .frame(height: PBSize.tap)
@@ -110,6 +115,7 @@ struct PBGlassTextButton: View {
         PBPushHeader("Edit avatar", trailing: .icon(.settings, accessibilityLabel: "Settings") {}) {}
         PBPushHeader("Edit avatar") {}
         PBPushHeader("Notifications", trailing: .wideText("Mark all read") {}) {}
+        PBPushHeader("Notifications", trailing: .wideText("Mark all read") {}, isTrailingEnabled: false) {}
     }
     .padding(PBLayout.screenMargin)
 }
