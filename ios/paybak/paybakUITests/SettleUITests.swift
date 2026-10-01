@@ -91,6 +91,23 @@ final class SettleUITests: XCTestCase {
         XCTAssertTrue(app.element("home.balance.owed").label.contains("from 4 people"))
     }
 
+    /// The same claim answered from the notifications inbox: Home drops Esha and adds what she paid.
+    @MainActor
+    func testConfirmFromTheInboxUpdatesHome() {
+        let app = XCUIApplication.launchPaybak(startScreen: .homeConfirmPayment)
+        XCTAssertTrue(app.screen(.homeConfirmPayment).waitForExistence(timeout: 6))
+        app.buttons["home.bell"].tap()
+        let confirm = app.buttons["notifications.claim.pay-esha-olive.confirm"]
+        XCTAssertTrue(confirm.waitForExistence(timeout: 3))
+        confirm.tap()
+        XCTAssertTrue(app.element(label: "Payment confirmed").waitForExistence(timeout: 3))
+        app.buttons["notifications.back"].tap()
+        XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 4))
+        XCTAssertFalse(app.buttons["home.confirmCard.confirm"].exists)
+        XCTAssertTrue(app.element("home.balance.owed").label.contains("+₹2,200"))
+        XCTAssertTrue(app.element("home.balance.owed").label.contains("from 3 people"))
+    }
+
     /// Remind from Home's Due soon row: the toast sits over the tab root.
     @MainActor
     func testRemindFromHomeSendsInPaybak() {
