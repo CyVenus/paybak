@@ -29,6 +29,9 @@ struct AddFriendTests {
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "mee").onPaybak.map(\.id) == ["p-meera"])
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "MEERA").invite.isEmpty)
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "@rohan").onPaybak.map(\.id) == ["p-rohan"])
+        // Only a whole @username finds a friend who isn't in the address book.
+        #expect(AddFriendLists(contacts: addressBook, people: people, query: "rohan").isEmpty)
+        #expect(AddFriendLists(contacts: addressBook, people: people, query: "@roh").isEmpty)
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "98765").invite.map(\.id) == ["p-ananya"])
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "anañya").invite.map(\.id) == ["p-ananya"])
         #expect(AddFriendLists(contacts: addressBook, people: people, query: "zzz").isEmpty)
@@ -39,7 +42,8 @@ struct AddFriendTests {
         #expect(lists.onPaybak.isEmpty)
         #expect(lists.invite.map(\.name) == ["sam@example.com"])
         #expect(lists.invite.first?.reach == "sam@example.com")
-        #expect(AddFriendLists(contacts: addressBook, people: people, query: "@sam").invite.first?.reach == nil)
+        // An unknown @username isn't a phone or email, so there's no one to invite.
+        #expect(AddFriendLists(contacts: addressBook, people: people, query: "@sam").isEmpty)
     }
 
     @Test func inviteLinks() {

@@ -70,27 +70,23 @@ final class ScanUITests: XCTestCase {
         XCTAssertEqual(app.buttons["scanReview.total"].value as? String, "₹2,350")
     }
 
-    /// A scanned expense's Split row goes back to Assign items with the assignment kept; giving the
-    /// brownie to Esha instead moves ₹276 of the split to her.
+    /// A scanned expense's Split row opens the split editor in Exact with the amounts the items came
+    /// to (You ₹989 · Esha ₹621 · Dev ₹690); Done keeps them as an exact split.
     @MainActor
-    func testSplitReopensAssignItems() {
+    func testSplitOpensTheEditorInExact() {
         let app = XCUIApplication.launchPaybak(startScreen: .scanAddExpense, pro: true)
         let split = app.buttons["addExpense.row.split"]
         XCTAssertTrue(split.waitForExistence(timeout: 5))
+        XCTAssertTrue(split.label.contains("Itemized · 3 people"), split.label)
         split.tap()
-        XCTAssertTrue(app.element("scanReceipt.state.assign").waitForExistence(timeout: 3))
-        XCTAssertTrue(app.element("scanAssign.status").staticTexts["All items assigned"].exists)
-        XCTAssertTrue(app.element("scanAssign.status").staticTexts["₹690"].exists)
-        app.element("scanAssign.item.3").buttons["You"].tap()
-        app.element("scanAssign.item.3").buttons["Esha"].tap()
-        XCTAssertTrue(app.element("scanAssign.status").staticTexts["₹713"].exists)
-        XCTAssertTrue(app.element("scanAssign.status").staticTexts["₹897"].exists)
-        app.buttons["scanAssign.continue"].tap()
+        let done = app.buttons["split.done"]
+        XCTAssertTrue(done.waitForExistence(timeout: 3))
+        XCTAssertTrue(done.isEnabled)
+        done.tap()
 
-        XCTAssertTrue(app.element("screen.addExpense").waitForExistence(timeout: 3))
-        XCTAssertTrue(app.element("addExpense.title").waitForExistence(timeout: 3))
+        XCTAssertTrue(split.waitForExistence(timeout: 3))
+        XCTAssertTrue(split.label.contains("Exact · 3 people"), split.label)
         XCTAssertEqual(app.element("addExpense.title").value as? String, "Lunch at Leopold Cafe")
-        XCTAssertTrue(app.buttons["addExpense.row.split"].label.contains("Itemized · 3 people"))
         XCTAssertTrue(app.buttons["addExpense.row.receipt"].label.contains("Attached"))
     }
 

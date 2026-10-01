@@ -44,7 +44,7 @@ final class RecurringUITests: XCTestCase {
         XCTAssertTrue(repeatRow.label.contains("Weekly"), repeatRow.label)
     }
 
-    /// A rule opens the Repeat sheet; Never asks before it stops the rule.
+    /// A rule opens the Repeat sheet; Never stops the rule at once, with "Wi-Fi won’t repeat".
     @MainActor
     func testStoppingARule() {
         let app = XCUIApplication.launchPaybak(startScreen: .recurringFlat302)
@@ -54,9 +54,7 @@ final class RecurringUITests: XCTestCase {
         XCTAssertTrue(app.element("screen.repeatRule").waitForExistence(timeout: 3))
         app.buttons["repeatSheet.freq.never"].tap()
         app.buttons["repeatSheet.done"].tap()
-        let stop = app.alerts.buttons["Stop"]
-        XCTAssertTrue(stop.waitForExistence(timeout: 3))
-        stop.tap()
+        XCTAssertTrue(app.element(label: "Wi-Fi won’t repeat").waitForExistence(timeout: 3))
         XCTAssertFalse(wifi.waitForExistence(timeout: 1))
         XCTAssertTrue(app.buttons["recurring.rule.r-rent"].exists)
     }

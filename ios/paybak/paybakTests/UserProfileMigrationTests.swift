@@ -32,4 +32,19 @@ struct UserProfileMigrationTests {
         #expect(profile.primaryPaymentMethod?.value == "b@okaxis")
         #expect(profile.paymentMethods.count == 1)
     }
+
+    /// As on Android: with a bank as the primary method, a Setup 3 UPI ID goes first as the new
+    /// primary method; clearing it leaves no primary method.
+    @Test func setupUPIIDBecomesPrimaryBesideABank() {
+        var profile = UserProfile()
+        profile.paymentMethods = [PaymentMethod(id: "pm-hdfc", kind: .bank, value: nil, bankName: "HDFC Bank", last4: "4821", primary: true)]
+        profile.upiID = "a@okaxis"
+        profile.syncPrimaryUPI()
+        #expect(profile.paymentMethods.map(\.id) == ["pm-upi", "pm-hdfc"])
+        #expect(profile.paymentMethods.map(\.primary) == [true, false])
+        profile.upiID = ""
+        profile.syncPrimaryUPI()
+        #expect(profile.paymentMethods.map(\.id) == ["pm-hdfc"])
+        #expect(profile.primaryPaymentMethod == nil)
+    }
 }

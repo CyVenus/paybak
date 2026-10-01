@@ -35,7 +35,8 @@ struct AssistantTests {
         let reply = DemoFixture.load().answer("When is Goa Trip due?", upi: upi)
         #expect(reply.text == "Your Goa Trip share of ₹1,400 is due Fri 2 Oct.")
         #expect(reply.chips.first == .settleUp("g-goa"))
-        #expect(DemoFixture.load().answer("When is Narnia due?", upi: upi).text == "I couldn’t find a group called Narnia.")
+        // A name that isn't one of your groups gets the suggestions again.
+        #expect(DemoFixture.load().answer("When is Narnia due?", upi: upi) == Books.fallback)
     }
 
     @Test func draftedReminder() {
@@ -76,9 +77,9 @@ struct AssistantTests {
     @Test func unevenSplitsAndUnknownNames() throws {
         let reply = DemoFixture.load().answer("add 1000 for pizza with esha, dev & zed", upi: upi)
         guard case .draft(let card) = try #require(reply.card) else { Issue.record("Expected a draft"); return }
-        #expect(card.eachLine == "About ₹333 each")
+        #expect(card.eachLine == "About ₹333.33 each")
         #expect(card.draft.category == .food)
-        #expect(reply.more == ["I couldn’t find Zed."])
+        #expect(reply.text == "Here’s what I’ll add. Nothing is saved until you tap Save. I couldn’t find Zed.")
         #expect(DemoFixture.load().answer("Add 600 for a cab", upi: upi).card == nil)
     }
 
@@ -91,7 +92,7 @@ struct AssistantTests {
 
     @Test func parsesTheExpenseGrammar() {
         #expect(AssistantParser.intent(of: "Rs 1,250.50 for the taxi, split with Esha & Dev in Goa Trip") == .expense(.init(
-            amount: "1250.50", what: "taxi", names: ["esha", "dev"], group: "goa trip"
+            amount: "1250.50", what: "taxi", names: ["Esha", "Dev"], group: "Goa Trip"
         )))
         #expect(AssistantParser.category(for: "Weekend groceries") == .food)
         #expect(AssistantParser.category(for: "wi-fi bill") == .bills)

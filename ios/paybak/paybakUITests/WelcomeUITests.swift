@@ -5,11 +5,11 @@ import XCTest
 /// The page dots read "Page N of 3" (VoiceOver adjusts them to change the step; XCUITest on iOS can't
 /// send that action, so the tests check the value it reads).
 final class WelcomeUITests: XCTestCase {
-    /// The headlines as displayed, with the line break where Figma wraps them.
+    /// The headlines as written: step 1 breaks where Figma does, the others wrap by themselves.
     private let headlines = [
         "Split any bill in\nseconds.",
-        "Know who owes what,\nand by when.",
-        "Settle up without the\nawkward chat.",
+        "Know who owes what, and by when.",
+        "Settle up without the awkward chat.",
     ]
 
     override func setUpWithError() throws {

@@ -102,12 +102,14 @@ final class ProjectsUITests: XCTestCase {
     func testConfirmedPaymentsArchiveTheClosedProject() {
         let app = XCUIApplication.launchPaybak(startScreen: .debugMenu, scenarios: ["closeDrone"])
         XCTAssertTrue(app.element("screen.debugMenu").waitForExistence(timeout: 6))
-        app.buttons["debugMenu.Members record their Build a Drone payments"].tap()
+        app.tapDebugRow("Rohan pays Dev ₹8,500")
         XCTAssertTrue(app.element("screen.debugMenu").waitForNonExistence(timeout: 3))
-        app.element("home.logo").press(forDuration: 1)
-        XCTAssertTrue(app.element("screen.debugMenu").waitForExistence(timeout: 3))
-        app.buttons["debugMenu.Confirm pending Build a Drone payments"].tap()
-        XCTAssertTrue(app.element("screen.debugMenu").waitForNonExistence(timeout: 3))
+        for row in ["Priya pays Dev ₹4,000", "Confirm pending project payments"] {
+            app.element("home.logo").press(forDuration: 1)
+            XCTAssertTrue(app.element("screen.debugMenu").waitForExistence(timeout: 3))
+            app.tapDebugRow(row)
+            XCTAssertTrue(app.element("screen.debugMenu").waitForNonExistence(timeout: 3))
+        }
         app.element("home.tab.groups").tap()
         app.element("groups.row.pj-drone").tap()
         XCTAssertTrue(app.element("project.state.archived").waitForExistence(timeout: 3))
@@ -121,6 +123,18 @@ private extension XCUIApplication {
     func revealSheetButton(_ button: XCUIElement) {
         element("screen.projectAddComponent").swipeUp()
         button.tap()
+    }
+
+    /// Scrolls the debug menu down to the row titled `title` (the module sections follow the long
+    /// Scenarios and Load screen lists), then taps it.
+    func tapDebugRow(_ title: String) {
+        let row = buttons["debugMenu.\(title)"]
+        var swipes = 0
+        while !(row.exists && row.isHittable), swipes < 60 {
+            element("screen.debugMenu").swipeUp(velocity: .slow)
+            swipes += 1
+        }
+        row.tap()
     }
 }
 

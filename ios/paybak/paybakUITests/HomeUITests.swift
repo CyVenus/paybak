@@ -45,7 +45,8 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.element(label: "Esha says she paid you ₹700").exists)
         XCTAssertTrue(app.element("home.balance.owed").label.contains("+₹2,900"))
         app.buttons["home.confirmCard.confirm"].tap()
-        XCTAssertTrue(app.element("toast").waitForExistence(timeout: 2))
+        // The toast follows the card's Confirmed state and its 1.05 s hold.
+        XCTAssertTrue(app.element("toast").waitForExistence(timeout: 4))
         XCTAssertEqual(app.element("toast").label, "Payment confirmed")
         XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 4))
         XCTAssertFalse(app.buttons["home.confirmCard.confirm"].exists)
@@ -126,7 +127,7 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.screen(.homeActive).waitForExistence(timeout: 5))
         app.element("home.logo").press(forDuration: 1)
         XCTAssertTrue(app.element("screen.debugMenu").waitForExistence(timeout: 3))
-        app.buttons["debugMenu.Show Home All settled"].tap()
+        tapDebugRow("Home: All settled", in: app)
         XCTAssertTrue(app.screen(.homeAllSettled).waitForExistence(timeout: 5))
         XCTAssertTrue(app.element(label: "You’re all square.").exists)
     }
@@ -139,5 +140,18 @@ final class HomeUITests: XCTestCase {
             if app.buttons[button].waitForExistence(timeout: 3), app.buttons[button].isHittable { return }
         }
         XCTFail("Swiping back didn't return to Home (\(button))")
+    }
+
+    /// Scrolls the debug menu down to the row titled `title` (the module sections follow the long
+    /// Scenarios and Load screen lists), then taps it.
+    @MainActor
+    private func tapDebugRow(_ title: String, in app: XCUIApplication) {
+        let row = app.buttons["debugMenu.\(title)"]
+        var swipes = 0
+        while !(row.exists && row.isHittable), swipes < 60 {
+            app.element("screen.debugMenu").swipeUp(velocity: .slow)
+            swipes += 1
+        }
+        row.tap()
     }
 }

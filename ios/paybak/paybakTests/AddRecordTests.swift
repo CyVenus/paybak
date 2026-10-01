@@ -25,11 +25,11 @@ struct AddRecordTests {
         #expect(MoneyInput.minor("2800", currency: "INR") == 280_000)
         #expect(MoneyInput.minor("2800.5", currency: "INR") == 280_050)
         #expect(MoneyInput.minor("1200", currency: "JPY") == 1200)
-        #expect(MoneyInput.text(280_050, currency: "INR") == "2800.5")
+        #expect(MoneyInput.text(280_050, currency: "INR") == "2800.50")
         #expect(MoneyInput.text(280_000, currency: "INR") == "2800")
         #expect(MoneyInput.basisPoints("33.33") == 3333)
         #expect(MoneyInput.percentText(2500) == "25")
-        #expect(MoneyInput.percentText(1250) == "12.5")
+        #expect(MoneyInput.percentText(1250) == "12.50")
         #expect(MoneyInput.grouped("2800", currency: "INR") == "2,800")
         #expect(MoneyInput.grouped("280000.5", currency: "INR") == "2,80,000.5")
         #expect(MoneyInput.grouped("280000.", currency: "USD") == "280,000.")
@@ -234,16 +234,27 @@ struct AddRecordTests {
     @MainActor
     @Test func groupFormShares() {
         let form = GroupForm(mode: .project, currency: "INR")
+        #expect(!form.isDirty)
         form.setMembers(["p-esha", "p-dev", "p-kabir"])
+        #expect(form.isDirty)
         #expect(form.equalShareText == "25%")
         form.setMembers(["p-esha", "p-dev"])
         #expect(form.equalShareText == "33.3%")
         #expect(!form.canCreate)
         form.name = "Weekend Trek"
+        // A new rule starts with empty fields: Percent must add up to 100 %.
         form.setRule(.percent)
-        #expect(form.contributionAddsUp)
-        form.shares[Person.me] = "50"
+        #expect(!form.contributionAddsUp)
+        form.shares = [Person.me: "50", "p-esha": "25", "p-dev": "25"]
+        #expect(form.canCreate)
+        form.shares[Person.me] = "40"
         #expect(!form.canCreate)
+        // Fixed needs an amount for everyone.
+        form.setRule(.fixed)
+        form.shares = [Person.me: "4000", "p-esha": "4000"]
+        #expect(!form.contributionAddsUp)
+        form.shares["p-dev"] = "2000"
+        #expect(form.canCreate)
         form.mode = .group
         form.type = .trip
         #expect(form.draft.icon == "plane")

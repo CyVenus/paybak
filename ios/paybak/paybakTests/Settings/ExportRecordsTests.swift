@@ -33,7 +33,7 @@ struct ExportRecordsTests {
         let titles = records.map(\.title)
         #expect(titles.contains("Dinner at Olive Garden"))
         #expect(titles.contains("Movie tickets"))
-        #expect(titles.contains { $0.hasPrefix("Priya paid you") })
+        #expect(titles.contains("Priya Sharma paid you"))
         #expect(records.allSatisfy { $0.groupName == "Without a group" })
         #expect(records.map(\.date) == records.map(\.date).sorted())
         let dinner = records.first { $0.title == "Dinner at Olive Garden" }
@@ -54,7 +54,7 @@ struct ExportRecordsTests {
         #expect(ExportCSV.plain(rupees(700), "INR") == "700.00")
         #expect(ExportCSV.plain(123_456, "INR") == "1234.56")
         #expect(ExportCSV.plain(-5, "INR") == "-0.05")
-        #expect(ExportCSV.plain(1500, "JPY") == "1500")
+        #expect(ExportCSV.plain(1500, "JPY") == "1500.00")
     }
 
     @Test @MainActor func deleteBlockedMessage() {
@@ -68,10 +68,11 @@ struct ExportRecordsTests {
     @Test @MainActor func exportFilesAreWritten() throws {
         let (start, end) = books.exportInterval(.thisMonth)
         let groups = Set(books.exportGroups(from: start, to: end).filter(\.hasRecords).map(\.id))
+        // Each export clears the earlier files first, so read the PDF before writing the CSV.
         let pdf = try Exporter.export(books, from: start, to: end, groups: groups, format: .pdf)
-        let csv = try Exporter.export(books, from: start, to: end, groups: groups, format: .csv)
         #expect(pdf.lastPathComponent == "Paybak records 1 Sep – 30 Sep 2026.pdf")
         #expect(try Data(contentsOf: pdf).starts(with: Data("%PDF".utf8)))
+        let csv = try Exporter.export(books, from: start, to: end, groups: groups, format: .csv)
         #expect(try String(contentsOf: csv, encoding: .utf8).contains("Dinner at Olive Garden"))
     }
 }

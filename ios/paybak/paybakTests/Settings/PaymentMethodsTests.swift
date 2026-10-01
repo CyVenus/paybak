@@ -61,7 +61,8 @@ struct PaymentMethodsTests {
         store.makePrimary("pm-hdfc")
         #expect(store.profile.primaryPaymentMethod?.id == "pm-hdfc")
         #expect(store.profile.upiID == "")
-        #expect(store.profile.handle == "arjun@okaxis")
+        // A UPI ID that isn't primary doesn't show under the name (as on Android).
+        #expect(store.profile.handle == "arjun@example.com")
         store.removePaymentMethod("pm-hdfc")
         #expect(store.profile.paymentMethods.map(\.primary) == [true])
         #expect(store.profile.upiID == "arjun@okaxis")
@@ -89,11 +90,14 @@ struct PaymentMethodsTests {
         #expect(monthly.statusLine(today: today, calendar: calendar) == "Your subscription renews Fri 30 Oct. ₹99/month.")
         // After the trial, the yearly plan renews a year after it ended.
         #expect(trial.statusLine(today: today.adding(days: 8), calendar: calendar)
-            == "Your subscription renews \(Format.day(DemoFixture.day(2027, 10, 7))). ₹799/year.")
+            == "Renews \(Format.day(DemoFixture.day(2027, 10, 7))). ₹799/year.")
+        #expect(Entitlement().statusLine(today: today, calendar: calendar) == nil)
     }
 
     @Test func currencySubtitle() {
         #expect(CurrencySettingsScreen.sentenceCase("Indian Rupee") == "Indian rupee")
         #expect(CurrencySettingsScreen.sentenceCase("Euro") == "Euro")
+        #expect(CurrencySettingsScreen.sentenceCase("US Dollar") == "US dollar")
+        #expect(CurrencySettingsScreen.sentenceCase("United Arab Emirates Dirham") == "United arab emirates dirham")
     }
 }

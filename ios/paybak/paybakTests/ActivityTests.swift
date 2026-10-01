@@ -38,12 +38,12 @@ struct ActivityTests {
             == .recordPayment(to: "p-kabir", amount: 140_000, context: .group("g-goa"), method: .upi))
     }
 
-    @Test func upcomingAlertsIncludeTheMonthEndSummaryAndTheGasDraft() {
+    /// The month-end summary is announced; a variable rule's new draft isn't (as on Android).
+    @Test func upcomingAlertsIncludeTheMonthEndSummaryButNoDrafts() {
         let alerts = DemoFixture.load("eshaClaimsPayment").upcomingAlerts(days: 31)
         let summary = alerts.first { if case .inbox(let item) = $0.content { item.type == .monthlySummary } else { false } }
         #expect(summary?.fireAt == DemoFixture.moment(2026, 10, 31, 20, 0))
-        let draft = alerts.first { if case .draft = $0.content { true } else { false } }
-        #expect(draft?.fireAt == DemoFixture.moment(2026, 10, 28, 9, 0))
+        #expect(!alerts.contains { if case .draft = $0.content { true } else { false } })
     }
 
     @Test func pushTogglesAndTheLimitFilterAlerts() {
@@ -88,7 +88,7 @@ struct ActivityTests {
         #expect(days.first?.header == "Today")
         #expect(days.first?.items.first?.title == "Reminder sent to Rohan")
         #expect(days.flatMap(\.items).allSatisfy { !$0.title.contains("Meera") })
-        #expect(books.activityLogTitle(.person("p-rohan")) == "Rohan · History")
+        #expect(books.activityLogTitle(.person("p-rohan")) == "Rohan Verma · History")
     }
 
     @Test func projectLogListsItsParts() {

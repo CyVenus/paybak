@@ -33,7 +33,8 @@ final class ActivityUITests: XCTestCase {
         let confirm = app.buttons["activity.claim.pay-esha-olive.confirm"]
         XCTAssertTrue(confirm.waitForExistence(timeout: 5))
         confirm.tap()
-        XCTAssertTrue(app.element("toast").waitForExistence(timeout: 2))
+        // The toast follows the card's Confirmed state and its 1.05 s hold.
+        XCTAssertTrue(app.element("toast").waitForExistence(timeout: 4))
         XCTAssertEqual(app.element("toast").label, "Payment confirmed")
         XCTAssertTrue(app.element("activity.row.payment:pay-esha-olive").waitForExistence(timeout: 4))
         XCTAssertFalse(confirm.exists)
@@ -59,7 +60,8 @@ final class ActivityUITests: XCTestCase {
         app.buttons["activity.recentlyDeleted"].tap()
         let row = app.element("recentlyDeleted.row.e-goa-villa")
         XCTAssertTrue(row.waitForExistence(timeout: 3))
-        XCTAssertTrue(row.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "30 days left")).firstMatch.exists)
+        // "30 days left" is held together with no-break spaces, as on Android.
+        XCTAssertTrue(row.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "30\u{00A0}days\u{00A0}left")).firstMatch.exists)
         row.buttons["Restore"].tap()
         XCTAssertTrue(app.element(label: "Expense restored").waitForExistence(timeout: 3))
         XCTAssertFalse(row.exists)

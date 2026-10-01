@@ -53,9 +53,18 @@ struct RecurringCopyTests {
         #expect(weekly.schedule == "Weekly on Mondays")
         #expect(weekly.nextLine(after: start) == "Next: Mon 5 Oct")
 
+        // Custom: every other week (Android's Frequency.Biweekly).
+        let biweekly = RepeatRule(frequency: .biweekly, anchorDate: DemoFixture.day(2026, 10, 5))
+        #expect(biweekly.schedule == "Every 2 weeks on Mondays")
+        #expect(biweekly.helper == "Paybak adds this expense every other Monday.")
+        var biweeklyDraft = biweekly
+        biweeklyDraft.variable = true
+        #expect(biweeklyDraft.helper == "Paybak adds a draft every other Monday and asks you for the amount.")
+
+        // The 31st reads as the 31st; a short month still uses its last day.
         let lastDay = RepeatRule(frequency: .monthly, anchorDate: DemoFixture.day(2026, 10, 31))
-        #expect(lastDay.dayOfMonthValue == "Last day")
-        #expect(lastDay.schedule == "Monthly on the last day")
+        #expect(lastDay.dayOfMonthValue == "31st")
+        #expect(lastDay.schedule == "Monthly on the 31st")
         #expect(lastDay.nextOccurrence(after: DemoFixture.day(2026, 10, 31)) == DemoFixture.day(2026, 11, 30))
 
         let yearly = RepeatRule(frequency: .yearly, anchorDate: DemoFixture.day(2026, 9, 28))

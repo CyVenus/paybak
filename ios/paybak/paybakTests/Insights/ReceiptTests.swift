@@ -95,7 +95,22 @@ struct ReceiptTests {
     @Test func aFutureReceiptDateIsToday() {
         var scan = leopold
         scan.date = DemoFixture.day(2027, 1, 5)
-        #expect(ReceiptReview(scan, today: DemoFixture.figmaDay).date == DemoFixture.figmaDay)
+        let review = ReceiptReview(scan, today: DemoFixture.figmaDay)
+        #expect(review.expenseDraft(order: [Person.me], currency: "INR", receipt: nil).date == DemoFixture.figmaDay)
+    }
+
+    /// Check receipt shows "Not found" for a merchant or date it couldn't read (as Android): the draft
+    /// then has no title (the form keeps its own) and today's date.
+    @Test func aMissingMerchantOrDateIsNotFound() {
+        var scan = leopold
+        scan.merchant = nil
+        scan.date = nil
+        let review = ReceiptReview(scan, today: DemoFixture.figmaDay)
+        #expect(review.merchantLine == "Not found")
+        #expect(review.dateLine == "Not found")
+        let draft = review.expenseDraft(order: [Person.me], currency: "INR", receipt: nil)
+        #expect(draft.title.isEmpty)
+        #expect(draft.date == DemoFixture.figmaDay)
     }
 
     @Test func titlesByMealTime() {

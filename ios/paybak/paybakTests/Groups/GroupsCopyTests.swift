@@ -51,11 +51,12 @@ struct GroupsCopyTests {
         #expect(members.map(\.trailing) == [.owe("₹1,400", label: "You owe"), .owed("₹10,100", label: "Gets back"), .owe("₹4,400", label: "Owes"),
                                             .owe("₹2,900", label: "Owes"), .owe("₹1,400", label: "Owes")])
         #expect(books.groupTotalFootnote(sheet) == nil)
+        // Newest date first; on one date, the newest added first (the villa was added after the scooters).
         #expect(sheet.expenses.map { books.groupExpenseSubtitle($0) } == [
             "Dev paid · Your share ₹500", "Dev paid · Your share ₹800", "Esha paid · Your share ₹1,000", "You paid · Your share ₹1,300",
-            "Priya paid · Your share ₹700", "Kabir paid · Your share ₹3,600",
+            "Kabir paid · Your share ₹3,600", "Priya paid · Your share ₹700",
         ])
-        #expect(sheet.expenses.map(\.title).last == "Villa (3 nights)")
+        #expect(sheet.expenses.map(\.title).last == "Scooter rentals")
         #expect(books.expenseDayLabel(sheet.expenses[0].date) == "Fri 25 Sep")
     }
 
