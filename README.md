@@ -59,6 +59,12 @@ Paybak Pro is a subscription sold through the [RevenueCat SDK](https://www.reven
 | Subscription management | [Customer Center](https://www.revenuecat.com/docs/tools/customer-center) |
 | Store | [RevenueCat Test Store](https://www.revenuecat.com/docs/test-and-launch/sandbox/test-store) in debug builds, so anyone can try the full purchase flow without an App Store or Google Play account |
 
+<p align="center">
+  <img src="docs/media/pro-paywall.png" width="220" alt="RevenueCat paywall">
+  <img src="docs/media/pro-test-store.png" width="220" alt="Test Store purchase">
+  <img src="docs/media/pro-customer-center.png" width="220" alt="Customer Center">
+</p>
+
 How it fits together:
 
 1. The SDK is configured once at launch with anonymous app user IDs (there is no login, because there is no backend).
@@ -70,8 +76,8 @@ Where the code lives:
 
 | | iOS | Android |
 | --- | --- | --- |
-| SDK config and API key | `ios/paybak/paybak/Purchases/RevenueCatConfig.swift` | `android/app/build.gradle.kts` (`REVENUECAT_API_KEY`) and `PaybakApplication.kt` |
-| Customer info and entitlement | `ios/paybak/paybak/Purchases/SubscriptionStore.swift` | `android/app/src/main/java/app/paybak/paybak/billing/` |
+| SDK config and API key | `ios/paybak/paybak/Purchases/RevenueCatConfig.swift` | `android/app/build.gradle.kts` (`REVENUECAT_API_KEY`) and `RevenueCatConfig` in `billing/SubscriptionRepository.kt` |
+| Customer info and entitlement | `ios/paybak/paybak/Purchases/SubscriptionStore.swift` | `android/app/src/main/java/app/paybak/paybak/billing/SubscriptionRepository.kt` |
 | Paywall | `ios/paybak/paybak/Features/Pro/PaywallScreen.swift` | `android/app/src/main/java/app/paybak/paybak/feature/pro/PaywallScreen.kt` |
 | Pro status and Customer Center | `ios/paybak/paybak/Features/Pro/ProWelcomeView.swift` | `android/app/src/main/java/app/paybak/paybak/feature/pro/ProWelcome.kt` |
 
@@ -143,7 +149,7 @@ Paybak is an entry in [RevenueCat Shipaton 2026](https://revenuecat-shipaton-202
 
 ## License and credits
 
-- Paybak is released under the [MIT License](LICENSE).
+- Paybak is released under the [MIT License](LICENSE). See also the [privacy policy](docs/privacy.md) and [terms](docs/terms.md), which the paywall links to.
 - [Manrope](https://github.com/googlefonts/manrope) font, © The Manrope Project Authors, [SIL Open Font License 1.1](docs/licenses/Manrope-OFL.txt).
 - Animations run on the [Rive](https://rive.app) runtime ([rive-ios](https://github.com/rive-app/rive-ios), [rive-android](https://github.com/rive-app/rive-android)).
 - Purchases by [RevenueCat](https://www.revenuecat.com) ([purchases-ios](https://github.com/RevenueCat/purchases-ios), [purchases-android](https://github.com/RevenueCat/purchases-android)).

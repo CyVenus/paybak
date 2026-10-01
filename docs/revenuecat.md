@@ -40,32 +40,41 @@ Debug builds use the **Test Store** API key. RevenueCat public API keys are desi
 
 The SDK **deliberately crashes a release build** that is configured with a Test Store key. So release builds read a separate store key, which is empty in this repo. When it's empty, the SDK isn't configured and the app simply stays on the free plan.
 
-**iOS**: `RevenueCatConfig.swift` and the app's `init()`:
+**iOS**: `Purchases/RevenueCatConfig.swift` holds the keys. `SubscriptionStore.configure()` runs first in `PaybakApp.init()`:
 
 ```swift
-#if DEBUG
-static let apiKey = "test_…"   // RevenueCat Test Store
-#else
-static let apiKey = ""         // your appl_ key for App Store builds
-#endif
+enum RevenueCatConfig {
+    #if DEBUG
+    static let apiKey = "test_…"   // RevenueCat Test Store
+    #else
+    static let apiKey = ""         // your appl_ key for App Store builds
+    #endif
+    static let entitlementID = "paybak_pro"
+}
 
-#if DEBUG
-Purchases.logLevel = .debug
-#endif
-Purchases.configure(withAPIKey: RevenueCatConfig.apiKey)
+static func configure() {
+    guard !RevenueCatConfig.apiKey.isEmpty else { return }   // Pro stays locked
+    #if DEBUG
+    Purchases.logLevel = .debug
+    #endif
+    Purchases.configure(withAPIKey: RevenueCatConfig.apiKey)
+}
 ```
 
-**Android**: `build.gradle.kts` and `PaybakApplication.onCreate()`:
+**Android**: `app/build.gradle.kts` sets the key per build type. `RevenueCatConfig.configure()` (in `billing/SubscriptionRepository.kt`) runs first in `PaybakApplication.onCreate()`:
 
 ```kotlin
 buildTypes {
     debug { buildConfigField("String", "REVENUECAT_API_KEY", "\"test_…\"") }
-    release { buildConfigField("String", "REVENUECAT_API_KEY", "\"\"") } // your goog_ key
+    // goog_ key from `revenuecat.playKey` in the untracked local.properties
+    release { buildConfigField("String", "REVENUECAT_API_KEY", "\"${localProperty("revenuecat.playKey")}\"") }
 }
 
-if (BuildConfig.DEBUG) Purchases.logLevel = LogLevel.DEBUG
-if (BuildConfig.REVENUECAT_API_KEY.isNotBlank()) {
-    Purchases.configure(PurchasesConfiguration.Builder(this, BuildConfig.REVENUECAT_API_KEY).build())
+fun configure(context: Context) {
+    val apiKey = BuildConfig.REVENUECAT_API_KEY
+    if (apiKey.isBlank()) return                     // Pro stays locked
+    if (BuildConfig.DEBUG) Purchases.logLevel = LogLevel.DEBUG
+    Purchases.configure(PurchasesConfiguration.Builder(context, apiKey).build())
 }
 ```
 
@@ -92,13 +101,26 @@ var isPro: Bool { proEntitlement?.isActive == true }
 **Android** (`SubscriptionRepository`, `StateFlow`-based):
 
 ```kotlin
-Purchases.sharedInstance.updatedCustomerInfoListener =
-    UpdatedCustomerInfoListener { info -> _customerInfo.value = info }
+val CustomerInfo.activePro: EntitlementInfo?
+    get() = entitlements[RevenueCatConfig.ENTITLEMENT_ID]?.takeIf { it.isActive }
 
-val isPro: StateFlow<Boolean> = customerInfo
-    .map { it?.entitlements?.get(ENTITLEMENT_ID)?.isActive == true }
-    .stateIn(scope, SharingStarted.Eagerly, false)
+init {
+    if (Purchases.isConfigured) {
+        val purchases = Purchases.sharedInstance
+        purchases.updatedCustomerInfoListener =
+            UpdatedCustomerInfoListener { customerInfoState.value = it }
+        scope.launch {
+            try { customerInfoState.value = purchases.awaitCustomerInfo() }
+            catch (e: PurchasesException) { Log.w(TAG, "Couldn't fetch customer info: ${e.error}") }
+        }
+    }
+}
+
+val proEntitlement = customerInfo.map { it?.activePro }.stateIn(scope, SharingStarted.Eagerly, null)
+val isPro = proEntitlement.map { it != null }.stateIn(scope, SharingStarted.Eagerly, false)
 ```
+
+Both platforms feed this value into the ledger store (`LedgerStore.hasStoreEntitlement` on iOS, the `storePro` flow on Android). As a result, every existing screen that reads `isPro` updates live.
 
 The stream and the listener fire with the SDK's cached value right away, and again after every purchase, restore, renewal or expiry. The UI never polls, and Pro survives relaunches offline because the SDK caches `CustomerInfo`.
 
@@ -121,14 +143,16 @@ PaywallView()
         if info.entitlements[RevenueCatConfig.entitlementID]?.isActive == true { showWelcome() }
         else { isNothingToRestorePresented = true }
     }
-    .onRequestedDismissal { router.dismissModal() }
+    // The paywall's ✕, and the SDK's own dismissal right after a purchase (Welcome replaces that)
+    .onRequestedDismissal { if showsWelcome != true { router.dismissModal() } }
 ```
 
 **Android:**
 
 ```kotlin
 Paywall(
-    PaywallOptions.Builder(dismissRequest = navigator::dismissModal)
+    // RevenueCatUI also asks to close right after a purchase: stay for the Welcome
+    PaywallOptions.Builder(dismissRequest = { if (!welcome) navigator.dismissModal() })
         .setShouldDisplayDismissButton(true)
         .setListener(object : PaywallListener {
             override fun onPurchaseCompleted(customerInfo: CustomerInfo, storeTransaction: StoreTransaction) { … }
@@ -169,7 +193,7 @@ Customer Center handles cancellation, plan changes, refunds (on iOS) and restore
 2. Create the `monthly` and `yearly` subscriptions in App Store Connect and Google Play Console, import them into RevenueCat, attach them to `paybak_pro`, and add them to the `$rc_monthly` / `$rc_annual` packages of the `default` offering.
 3. Put the platform public keys into the **release** configuration:
    - iOS: the `#else` branch of `RevenueCatConfig.apiKey` (`appl_…`)
-   - Android: the `release` `REVENUECAT_API_KEY` (`goog_…`)
+   - Android: `revenuecat.playKey=goog_…` in `android/local.properties` (untracked), which the `release` build reads
 4. Keep the Test Store key in debug builds for day-to-day testing. The SDK refuses to run a Test Store key in a release build, so it can't reach the stores by accident.
 
 ## Best practices we followed
