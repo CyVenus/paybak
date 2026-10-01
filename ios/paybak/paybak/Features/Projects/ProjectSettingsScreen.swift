@@ -89,6 +89,7 @@ struct ProjectSettingsScreen: View {
             VStack(spacing: 0) {
                 ForEach(members, id: \.self) { id in
                     memberRow(id, edit: current, count: members.count, currency: project.currency)
+                        .accessibilityElement(children: .contain)
                         .accessibilityIdentifier("projectSettings.member.\(id)")
                 }
                 PBSettingRow("Add member", icon: .userAdd, showsDivider: false) {

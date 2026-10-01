@@ -38,7 +38,7 @@ struct ProjectScreen: View {
                 addButton
             }
         }
-        .pbSheet(isPresented: Binding { sheet != nil } set: { if !$0 { sheet = nil } }) {
+        .pbSheet(isPresented: Binding { sheet != nil } set: { if !$0 { sheet = nil } }, detent: .fittedScrolling) {
             if let sheet, let page {
                 ComponentSheet(projectId: groupId, editing: editing(sheet), currency: page.project.currency) { self.sheet = nil }
             }
