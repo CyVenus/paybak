@@ -264,7 +264,11 @@ private fun ContributionSection(
                                     PbAmountEditor(
                                         value = current.typed[id].orEmpty(),
                                         onValueChange = { text ->
-                                            AmountEntry.accept(amountInput(text, true))?.let {
+                                            // Percent, or an amount in a currency with minor units.
+                                            val decimals =
+                                                current.rule == ContributionRule.Percent ||
+                                                    AmountEntry.allowsDecimals(currency)
+                                            AmountEntry.accept(amountInput(text, decimals))?.let {
                                                 update(
                                                     current.copy(typed = current.typed + (id to it))
                                                 )
