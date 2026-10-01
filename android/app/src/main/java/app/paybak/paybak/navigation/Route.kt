@@ -361,9 +361,14 @@ sealed interface Route {
             get() = modal("ask", Owner.LaneC, "screens-insights-ai §3")
     }
 
+    /**
+     * Scan receipt for the Add expense form that opened it; [personIds] are the people on that
+     * expense, who the items get assigned to (empty: just you, and Assign items lets you add more).
+     */
     @Serializable
     @SerialName("scanReceipt")
-    data class ScanReceipt(val request: PickRequest) : Route {
+    data class ScanReceipt(val request: PickRequest, val personIds: List<String> = emptyList()) :
+        Route {
         override val info
             get() = modal("scanReceipt", Owner.LaneC, "screens-insights-ai §4")
     }

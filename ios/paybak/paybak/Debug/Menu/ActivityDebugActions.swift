@@ -13,6 +13,11 @@ enum ActivityDebugActions {
             post("Fire the Kabir reminder now", type: .paymentReminder),
             post("Post the monthly summary now", type: .monthlySummary),
             post("Post Rohan’s overdue alert", type: .paymentOverdue),
+            DebugAction(title: "Deliver the next notification in 5 s", detail: "The nearest scheduled reminder or alert") { context in
+                let books = context.ledgerStore.books
+                guard let alert = books.upcomingAlerts(limit: 1).first else { return }
+                Task { await NotificationService.postEarly(alert, in: books, after: 5) }
+            },
         ]
     }
 
