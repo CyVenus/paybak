@@ -20,6 +20,26 @@ final class SettleUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["4 people owe you"].exists)
         app.element("settleUp.pay.p-kabir").tap()
         XCTAssertTrue(app.element("screen.recordPayment").waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["You owe Kabir ₹1,400 in Goa Trip"].exists)
+        XCTAssertTrue(app.buttons["recordPayment.method.upi"].isSelected)
+    }
+
+    /// A recorded payment waits for Kabir: the plan keeps his row as Pending, without Settle, and the
+    /// row opens the payment.
+    @MainActor
+    func testRecordedPaymentStaysPendingInThePlan() {
+        let app = XCUIApplication.launchPaybak(startScreen: .settleUp)
+        XCTAssertTrue(app.element("settleUp.pay.p-kabir").waitForExistence(timeout: 6))
+        app.element("settleUp.pay.p-kabir").tap()
+        XCTAssertTrue(app.buttons["recordPayment.action"].waitForExistence(timeout: 3))
+        app.buttons["recordPayment.action"].tap()
+        XCTAssertTrue(app.element("screen.payment").waitForExistence(timeout: 3))
+        app.buttons["paymentRecorded.back"].tap()
+        XCTAssertTrue(app.element("settleUp.row.p-kabir").waitForExistence(timeout: 3))
+        XCTAssertFalse(app.element("settleUp.pay.p-kabir").exists)
+        XCTAssertTrue(app.element("settleUp.row.p-kabir").label.contains("Pending"))
+        app.element("settleUp.row.p-kabir").tap()
+        XCTAssertTrue(app.element("screen.payment").waitForExistence(timeout: 3))
     }
 
     @MainActor
