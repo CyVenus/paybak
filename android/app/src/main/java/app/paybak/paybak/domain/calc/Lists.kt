@@ -119,6 +119,10 @@ data class DeletedRow(
 
 const val RETENTION_DAYS = 30L
 
+/** "Deleted by Priya", or "Deleted by you" mid-sentence (activity §5). */
+private fun LedgerView.deleter(personId: String?): String =
+    personId?.takeIf { it != ME }?.let(::first) ?: "you"
+
 fun LedgerView.recentlyDeleted(): List<DeletedRow> =
     ledger.expenses
         .filter { it.deletedAt != null }
@@ -135,7 +139,7 @@ fun LedgerView.recentlyDeleted(): List<DeletedRow> =
                         groupOf(expense)?.name,
                     )
                     .joinToString(" · "),
-                "Deleted by ${first(expense.deletedBy ?: ME)} on ${Dates.short(deletedOn)} · $left",
+                "Deleted by ${deleter(expense.deletedBy)} on ${Dates.short(deletedOn)} · $left",
                 left,
             )
         }

@@ -32,9 +32,11 @@ enum class PbRowSurface {
 
 /**
  * `Row / Activity` (`PBActivityRow`): an activity, timeline or notification row, at least 64 dp
- * tall. The title wraps to 2 lines and the subtitle to 3 (activity §3.5). The trailing column shows
+ * tall. The title wraps to 2 lines, the subtitle to 3 and the detail to 2 (activity §3.5, §5). The
+ * trailing column shows
  * the [amount] (black when [amountPrimary], grey otherwise), the [date], a status [badge] or a
- * small [action]; [unread] adds the 8 dp dot and [showDivider] a leading-inset hairline.
+ * small [action] (tagged [actionTestTag]); [unread] adds the 8 dp dot and [showDivider] a
+ * leading-inset hairline.
  *
  * @param leading The 40 dp circle: a category icon ([PbAvatarContent.Symbol]) or a person.
  * @param amountColor Overrides the amount's colour: the light grey "—" of a planned part.
@@ -56,6 +58,7 @@ fun PbActivityRow(
     badgeStyle: PbBadgeStyle? = null,
     action: String? = null,
     onAction: () -> Unit = {},
+    actionTestTag: String? = null,
     unread: Boolean = false,
     showDivider: Boolean = false,
     surface: PbRowSurface = PbRowSurface.Plain,
@@ -103,12 +106,22 @@ fun PbActivityRow(
                         detail,
                         style = PbTextStyles.Footnote,
                         color = PbColors.Text.Tertiary,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
-            Trailing(amount, amountColor, date, badge, badgeStyle, action, onAction, onCard)
+            Trailing(
+                amount,
+                amountColor,
+                date,
+                badge,
+                badgeStyle,
+                action,
+                onAction,
+                actionTestTag,
+                onCard,
+            )
             if (unread) Box(Modifier.size(8.dp).background(PbColors.Bg.Inverse, CircleShape))
         }
         if (showDivider)
@@ -125,6 +138,7 @@ private fun Trailing(
     badgeStyle: PbBadgeStyle?,
     action: String?,
     onAction: () -> Unit,
+    actionTestTag: String?,
     onCard: Boolean,
 ) {
     if (amount == null && date == null && badge == null && action == null) return
@@ -151,6 +165,7 @@ private fun Trailing(
             PbButton(
                 action,
                 onClick = onAction,
+                modifier = Modifier.partTag(actionTestTag),
                 style = if (onCard) PbButtonStyle.OnCard else PbButtonStyle.Secondary,
                 size = PbButtonSize.Small,
             )
