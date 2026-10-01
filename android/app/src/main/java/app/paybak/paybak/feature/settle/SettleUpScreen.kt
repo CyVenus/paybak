@@ -98,6 +98,7 @@ private fun PlanSection(title: String, rows: List<SettleUpRow>, view: LedgerView
                     onClick = { navigator.open(row.bodyRoute()) },
                     testTag = "settleUp",
                     actionTag = "${if (pays) "pay" else "remind"}.${row.friendId}",
+                    rowTag = "settleUp.row.${row.friendId}",
                 )
             }
         }

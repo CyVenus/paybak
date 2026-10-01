@@ -39,9 +39,10 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * `Row / Attention` (`PBAttentionRow`): a Due soon item on Home, 88 dp tall on a #F5F5F5 card.
  * [overdue] shows the red badge (money owed to you, Remind); otherwise the badge is white (Due Fri,
  * Settle). The [detail] after the title truncates so the row keeps its height (components-app
- * §8.2). A tap on the card opens the person or group; the button runs [onAction]. The button is
- * tagged "[testTag].[actionTag]". Settle up leaves out the [badge] of a debt with no due date and
- * the [action] of a payment waiting for its confirmation.
+ * §8.2). A tap on the card opens the person or group; the button runs [onAction]. The card is
+ * tagged [rowTag] (by default [testTag]) and the button "[testTag].[actionTag]". Settle up leaves
+ * out the [badge] of a debt with no due date and the [action] of a payment waiting for its
+ * confirmation.
  */
 @Composable
 fun PbAttentionRow(
@@ -57,6 +58,7 @@ fun PbAttentionRow(
     onClick: (() -> Unit)? = null,
     testTag: String? = null,
     actionTag: String? = action?.lowercase(),
+    rowTag: String? = testTag,
 ) {
     val press = rememberPressState(null)
     val fill =
@@ -67,7 +69,7 @@ fun PbAttentionRow(
     Row(
         modifier
             .fillMaxWidth()
-            .partTag(testTag)
+            .partTag(rowTag)
             .clip(PbShapes.Card)
             .background(fill)
             .then(
