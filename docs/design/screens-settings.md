@@ -143,7 +143,9 @@ Same as components-home.md §14/§15 (grabber 60 × 4 #CCCCCC-ish; ✕ 50 × 50 
 
 ## 2. `paywall`: Paybak Pro — Paywall (167:13003)
 
-**Purpose.** Sell Paybak Pro (a mock subscription; flow.md: "Pro purchase (mock trial/purchase flow that flips a local entitlement; no store products)"). **Container:** full-screen modal. Entry points: the Profile "Paybak Pro" row, and every locked feature (Export records, the Add expense Repeat row, Insights; plus the other Pro features listed on the paywall when they are opened on the free plan). Prototype entry from Privacy › Export records: `ON_CLICK → NAVIGATE paywall, MOVE_IN direction TOP (slides up from the bottom), 300 ms, EASE_OUT`. No tab bar, no push header.
+> **Shipped implementation:** both apps now sell Pro through the RevenueCat SDK. This route shows a RevenueCat Paywall for the `default` offering, and the entitlement is `paybak_pro` (Test Store in debug builds). The Figma layout below was the starting point for the dashboard paywall. See [`../revenuecat.md`](../revenuecat.md).
+
+**Purpose.** Sell Paybak Pro (originally a mock subscription; flow.md: "Pro purchase (mock trial/purchase flow that flips a local entitlement; no store products)"). **Container:** full-screen modal. Entry points: the Profile "Paybak Pro" row, and every locked feature (Export records, the Add expense Repeat row, Insights; plus the other Pro features listed on the paywall when they are opened on the free plan). Prototype entry from Privacy › Export records: `ON_CLICK → NAVIGATE paywall, MOVE_IN direction TOP (slides up from the bottom), 300 ms, EASE_OUT`. No tab bar, no push header.
 
 ### Designer notes (verbatim)
 - Section title: "Paybak Pro"
@@ -740,7 +742,7 @@ Every icon used on this page already exists in `assets/icons/` (checked against 
 1. **Not designed, proposed here**: Monthly small print and Welcome body; the "already Pro" paywall state; Restore purchases behaviour; tapping an existing payment method (Make primary / Copy / Remove); the "Show to friends" Off preview; the Bank account tab fields; UPI validation beyond "missing @"; the currency picker from Currency; the Muted friends screen; Last 3 months / All time ranges; Export file formats and contents; Delete account when nothing is owed; FAQ answers; Contact us address.
 2. **Support email** for "Contact us" doesn't exist in Figma: needs a real address (kept in one constant).
 3. **Check rows** are described as "single select" in the component, but every Check list on this page is multi-select (reminder schedule, export groups). Implemented as multi-select.
-4. **Paywall prices** are fixed ₹ strings (mock store). If real StoreKit/Play Billing is added later, use the store's localized prices.
+4. **Paywall prices** were fixed ₹ strings (mock store). Now that RevenueCat powers the paywall, prices come from the store products (see `docs/revenuecat.md`).
 5. **Legal links** on the paywall ("Terms", "Privacy") have no URLs yet (same as Get Started).
 6. The README §5.1 #6 proposal for the UPI error ("Enter a UPI ID like name@bank." with a period) is superseded by Figma: "Enter a UPI ID like name@bank" (no period, Caption/1, red alert icon).
 7. `Row / Currency` on the Currency screen shows the **code as the title** ("INR") and the **name as the subtitle** ("Indian rupee", lower-case r), the reverse of Setup 2 ("Indian Rupee" / "INR"). Follow each screen's copy.
