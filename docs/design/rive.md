@@ -44,3 +44,11 @@ All six files carry Rive's export watermark flag. Newer runtimes play a pre-roll
 - **@rive-app/canvas-advanced 2.43 (web/WASM): shows it** (headless render stays solid black until about 2.5 s of real time have passed).
 - **rive-android 11.12.1: does NOT show it.** Checked on the Android emulator with a separate harness APK: the Get Started illustration was already drawing about 1.1 s after the activity started, with no black frame.
 - Fix: re-export the six files without the watermark. That's a decision for the asset owner, and nothing in code changes once clean files are in place.
+
+## Payment scene (`paybak-payment.riv`, 2026-10-01)
+The payer's "payment approved" moment: when a friend confirms a payment you made, the scene plays full screen over whatever is open (iOS `PaymentApprovalPresenter`, Android `PaymentApprovedHost`). The files are `ios/paybak/paybak/Resources/Rive/paybak-payment.riv` and `android/app/src/main/res/raw/paybak_payment.riv`. Facts below come from parsing the file against the rive-runtime headers, then checking on the iOS 27 simulator.
+- **Artboard `main`** (402×874). It's built with **Rive layouts**: an opaque white fill, plus a layout that fills the artboard and holds the nested artboard `Palm Scene` (920×980), contained and bottom-aligned. Draw it with **Layout fit** at the view's size in points or dp. iOS `.layout` uses the automatic scale factor; Android needs `Fit.Layout(density)`, because its default scale factor is 1 px.
+- **State machine `State Machine 1`.** It plays the nested `Palm Scene`. There are **no inputs, view models, events or listeners**, so nothing to bind and no `reduceMotion`. The scene plays with Reduce Motion on too, by the user's choice.
+- **No watermark**, so there's no pre-roll.
+- **The coin sequence** runs hand-rise (126 frames), coin-drop (104), hand-grab (66), coin-shatter (88) and hand-lower (76): 460 frames at 60 fps ≈ **7.67 s**. It then loops; an idle bounce runs alongside it. The overlay closes after one pass.
+- **The coin-shatter** sends burst lines across the whole screen and flashes the scene black for a moment. The native headline therefore sits on a white rounded backing, which only shows during that flash.
