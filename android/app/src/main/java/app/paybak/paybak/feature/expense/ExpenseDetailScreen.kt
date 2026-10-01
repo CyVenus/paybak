@@ -238,8 +238,14 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                         Modifier.testTag("expense.addReceipt"),
                         icon = PbIcon.Camera,
                         onClick = {
-                            if (snapshot.isPro) navigator.open(Route.ScanReceipt(receiptRequest))
-                            else pickPhoto()
+                            if (snapshot.isPro) {
+                                // Everyone on the expense, so Assign items can continue (only the
+                                // photo is kept).
+                                val everyone = detail.expense.split.rows.map { it.personId }
+                                navigator.open(Route.ScanReceipt(receiptRequest, everyone))
+                            } else {
+                                pickPhoto()
+                            }
                         },
                         showDivider = false,
                     )
@@ -278,24 +284,27 @@ fun ExpenseDetailScreen(route: Route.Expense) {
                 }
             }
         }
-        PbCard {
-            if (detail.canFlag) {
+        // Flag and Delete show while the expense isn't deleted, like Edit.
+        if (detail.expense.deletedAt == null) {
+            PbCard {
+                if (detail.canFlag) {
+                    PbSettingRow(
+                        stringResource(R.string.add_flag_issue),
+                        Modifier.testTag("expense.flag"),
+                        icon = PbIcon.Flag,
+                        onClick = { flagging = true },
+                    )
+                }
                 PbSettingRow(
-                    stringResource(R.string.add_flag_issue),
-                    Modifier.testTag("expense.flag"),
-                    icon = PbIcon.Flag,
-                    onClick = { flagging = true },
+                    stringResource(R.string.add_delete_expense),
+                    Modifier.testTag("expense.delete"),
+                    icon = PbIcon.Delete,
+                    tone = PbSettingTone.Destructive,
+                    trailing = PbSettingTrailing.None,
+                    onClick = { deleting = true },
+                    showDivider = false,
                 )
             }
-            PbSettingRow(
-                stringResource(R.string.add_delete_expense),
-                Modifier.testTag("expense.delete"),
-                icon = PbIcon.Delete,
-                tone = PbSettingTone.Destructive,
-                trailing = PbSettingTrailing.None,
-                onClick = { deleting = true },
-                showDivider = false,
-            )
         }
     }
 
