@@ -20,4 +20,17 @@
     <string name="insights_locked_title">Insights are part of Paybak Pro</string>
     <string name="insights_locked_body">See monthly trends, spending by category, group and friend, and lent vs borrowed.</string>
     <string name="insights_see_pro">See Pro</string>
+
+    <!-- Ask Paybak (screens-insights-ai §3) -->
+    <string name="insights_ask_title">Ask Paybak</string>
+    <string name="insights_ask_greeting">What can I help with, %1$s?</string>
+    <string name="insights_ask_greeting_anonymous">What can I help with?</string>
+    <string name="insights_ask_intro">Ask about balances and due dates, or add an expense in plain words.</string>
+    <string name="insights_ask_try">Try asking</string>
+    <string name="insights_ask_privacy">Paybak only sees your own data.</string>
+    <string name="insights_ask_placeholder">Ask or add an expense</string>
+    <string name="insights_ask_no_dictation">Dictation isn’t available on this device</string>
+    <string name="insights_ask_remind">Remind %1$s</string>
+    <string name="insights_ask_see_insights">See Insights</string>
+    <string name="insights_ask_open">Open %1$s</string>
 </resources>
