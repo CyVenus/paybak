@@ -3,7 +3,7 @@ import SwiftUI
 /// Row / Setting (Figma 97:996): a settings or picker row inside a #F5F5F5 group. At least 56 pt
 /// (taller with a subtitle), 12/16 padding: an optional 24 pt icon, Headline title and Footnote
 /// subtitle, an optional inverse badge ("Pro", "Try free"), an optional Body value, then the trailing
-/// control. Destructive rows are red and never show a chevron. The divider starts at the title
+/// control. The title is one line unless `titleLineLimit` allows more (Help's FAQ rows wrap to two). Destructive rows are red and never show a chevron. The divider starts at the title
 /// (x 52, or 16 without an icon); hide it on a group's last row.
 ///
 /// Stack rows with no gap in `VStack(spacing: 0) { … }.pbCard(padding: 0)`, which clips the pressed
@@ -36,6 +36,7 @@ struct PBSettingRow: View {
     var trailing: Trailing = .chevron
     var tone: Tone = .default
     var showsDivider = true
+    var titleLineLimit = 1
     var action: (() -> Void)?
 
     init(
@@ -47,6 +48,7 @@ struct PBSettingRow: View {
         trailing: Trailing = .chevron,
         tone: Tone = .default,
         showsDivider: Bool = true,
+        titleLineLimit: Int = 1,
         action: (() -> Void)? = nil
     ) {
         self.title = title
@@ -57,6 +59,7 @@ struct PBSettingRow: View {
         self.trailing = trailing
         self.tone = tone
         self.showsDivider = showsDivider
+        self.titleLineLimit = titleLineLimit
         self.action = action
     }
 
@@ -100,7 +103,7 @@ struct PBSettingRow: View {
                 Text(title)
                     .textStyle(.headline)
                     .foregroundStyle(tone == .destructive ? PBColor.textDestructive : PBColor.textPrimary)
-                    .lineLimit(1)
+                    .lineLimit(titleLineLimit)
                 if let subtitle {
                     Text(subtitle)
                         .textStyle(.footnote)
@@ -171,6 +174,7 @@ struct PBSettingRow: View {
                 PBSettingRow("Reminders", icon: .bell, trailing: .toggle($isOn))
                 PBSettingRow("Remind after", value: "\(count) days", icon: .calendar, trailing: .stepper($count, in: 1...14))
                 PBSettingRow("Paybak Pro", icon: .crown, badge: "Try free") {}
+                PBSettingRow("How do payment confirmations work?", icon: .help, titleLineLimit: 2) {}
                 PBSettingRow("Sign out", icon: .logout, trailing: .none, tone: .destructive, showsDivider: false) {}
             }
             .pbCard(padding: 0)
