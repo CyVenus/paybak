@@ -16,6 +16,7 @@ enum class TimelineKind {
     ReminderSent,
     DraftCreated,
     LoanAdded,
+    ComponentChanged,
 }
 
 /**
@@ -165,8 +166,41 @@ fun LedgerView.timeline(): List<TimelineEvent> {
                 personId = other,
             )
     }
+    events += componentEvents()
     return events.filter { it.at <= now }.sortedByDescending { it.at }
 }
+
+/**
+ * A project part added, bought or done, in the projects you're in (§6.6 proposal, projects §3.7):
+ * "Dev bought GPS module" · "Build a Drone" · its actual cost.
+ */
+private fun LedgerView.componentEvents(): List<TimelineEvent> =
+    ledger.components.flatMap { part ->
+        val project = group(part.projectId)
+        if (project == null || ME !in project.memberIds) return@flatMap emptyList()
+        part.history.map { change ->
+            val verb =
+                when (change.kind) {
+                    "bought" -> "bought"
+                    "done" -> "finished"
+                    else -> "added"
+                }
+            TimelineEvent(
+                at = change.at,
+                kind = TimelineKind.ComponentChanged,
+                title = "${first(change.by)} $verb ${part.name}",
+                subtitle = project.name,
+                amount =
+                    part.actualCost
+                        ?.takeIf { change.kind != "added" }
+                        ?.let { Money.format(it, project.currency) },
+                primary = part.paidBy == ME,
+                ref = part.id,
+                personId = change.by,
+                groupId = project.id,
+            )
+        }
+    }
 
 /** The timeline grouped by day: Today, Yesterday, Mon 28 Sep, … */
 fun LedgerView.timelineDays(events: List<TimelineEvent> = timeline()): List<TimelineDay> =
