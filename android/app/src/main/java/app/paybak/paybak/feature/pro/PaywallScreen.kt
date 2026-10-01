@@ -28,6 +28,7 @@ import app.paybak.paybak.navigation.Route
 import app.paybak.paybak.service.HapticKind
 import app.paybak.paybak.service.rememberHaptics
 import com.revenuecat.purchases.CustomerInfo
+import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.models.StoreTransaction
 import com.revenuecat.purchases.ui.revenuecatui.Paywall
@@ -79,6 +80,12 @@ fun PaywallScreen(route: Route.Paywall) {
                             ),
                     onDone = navigator::finishPaywall,
                     onManage = if (storeEntitlement != null) ({ managing = true }) else null,
+                )
+            } else if (!Purchases.isConfigured) {
+                // A release build without a store key: RevenueCatUI can't run, so say so and close.
+                ProNotice(
+                    stringResource(R.string.settings_pro_unavailable),
+                    onDismiss = navigator::dismissModal,
                 )
             } else {
                 StorePaywall(
