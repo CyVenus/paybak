@@ -22,7 +22,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import app.paybak.paybak.ui.icons.PbIcon
 import app.paybak.paybak.ui.icons.PbIconImage
@@ -114,7 +116,13 @@ fun PbButton(
             contentAlignment = Alignment.Center,
             label = "PbButton label",
         ) { shownLabel ->
-            Text(text = shownLabel, style = size.textStyle, color = colors.content, maxLines = 1)
+            Text(
+                text = shownLabel,
+                color = colors.content,
+                maxLines = 1,
+                style = size.textStyle,
+                autoSize = shrinkToFit(size.textStyle),
+            )
         }
     }
 }
@@ -178,3 +186,7 @@ private fun PbButtonPreview() {
         )
     }
 }
+
+/** A label too long for its pill (an alert's half-width "Close project") shrinks before it clips. */
+private fun shrinkToFit(style: TextStyle) =
+    TextAutoSize.StepBased(minFontSize = 11.sp, maxFontSize = style.fontSize, stepSize = 0.5.sp)
