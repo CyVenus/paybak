@@ -8,8 +8,11 @@ import app.paybak.paybak.domain.actions.tick
 import app.paybak.paybak.domain.calc.Rates
 import app.paybak.paybak.domain.model.Ledger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -36,12 +39,20 @@ class LedgerRepository(
     private val ledgerState = MutableStateFlow(file.read())
     private val snapshotState = MutableStateFlow(snapshotOf(ledgerState.value))
     private val revisionState = MutableStateFlow(0)
+    private val changesFlow = MutableSharedFlow<LedgerChange>(extraBufferCapacity = CHANGE_BUFFER)
 
     val ledger: StateFlow<Ledger> = ledgerState.asStateFlow()
     val snapshot: StateFlow<LedgerSnapshot> = snapshotState.asStateFlow()
 
     /** Bumps after every change: observers such as the notification scheduler react to it. */
     val revision: StateFlow<Int> = revisionState.asStateFlow()
+
+    /**
+     * Every change [mutate] makes, with the ledger before and after (payment approvals, the debug
+     * auto-approver). [replace] swaps the whole ledger and isn't reported. Nothing is replayed, so
+     * collect it from the start, on a scope that lives as long as the app.
+     */
+    val changes: SharedFlow<LedgerChange> = changesFlow.asSharedFlow()
 
     val defaultCurrency: String
         get() = profile.value.defaultCurrency
@@ -68,8 +79,12 @@ class LedgerRepository(
      */
     @Synchronized
     fun mutate(change: (Ledger) -> Ledger) {
-        val next = change(ledgerState.value)
-        if (next != ledgerState.value) commit(next)
+        val before = ledgerState.value
+        val next = change(before)
+        if (next != before) {
+            commit(next)
+            changesFlow.tryEmit(LedgerChange(before, next))
+        }
     }
 
     /** [mutate] for actions that also return something, such as a new record's id. */
@@ -79,8 +94,11 @@ class LedgerRepository(
         return checkNotNull(outcome).second
     }
 
-    /** Swaps the whole ledger: demo loads, "Start an empty account", reset. */
-    fun replace(ledger: Ledger) = mutate { ledger }
+    /** Swaps the whole ledger: demo loads, "Start an empty account", reset. Not in [changes]. */
+    @Synchronized
+    fun replace(ledger: Ledger) {
+        if (ledger != ledgerState.value) commit(ledger)
+    }
 
     /**
      * Runs the scheduler up to now (launch, foreground, a moved clock, a new default currency) and
@@ -103,3 +121,9 @@ class LedgerRepository(
     private fun snapshotOf(ledger: Ledger) =
         LedgerSnapshot.of(ledger, defaultCurrency, clock.now(), clock.zone, storePro.value)
 }
+
+/** A change [LedgerRepository.mutate] made: the ledger [before] and [after] it. */
+data class LedgerChange(val before: Ledger, val after: Ledger)
+
+/** Changes a slow collector can fall behind by before the newest are dropped. */
+private const val CHANGE_BUFFER = 64
