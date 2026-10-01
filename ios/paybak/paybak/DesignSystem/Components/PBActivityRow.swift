@@ -23,6 +23,9 @@ struct PBActivityRow: View {
         case date(String)
         /// A status pill ("Pending", "Draft"); muted (white on a card) unless a style is given.
         case badge(String, style: PBBadge.Style? = nil)
+        /// An amount over a status pill (a project's parts: "₹7,500" over "Bought"). A placeholder
+        /// amount (a planned part's "—") is tertiary.
+        case amountBadge(String, badge: String, style: PBBadge.Style, isPlaceholder: Bool = false)
         /// A small button ("Restore").
         case action(String, perform: () -> Void)
         case none
@@ -126,6 +129,15 @@ struct PBActivityRow: View {
         case .badge(let text, let style):
             PBBadge(text, style: style ?? (surface == .onCard ? .onCard : .muted))
                 .fixedSize()
+        case .amountBadge(let amount, let badge, let style, let isPlaceholder):
+            VStack(alignment: .trailing, spacing: PBSpace.s2) {
+                Text(amount)
+                    .textStyle(.amountMedium)
+                    .foregroundStyle(isPlaceholder ? PBColor.textTertiary : PBColor.textPrimary)
+                    .lineLimit(1)
+                PBBadge(badge, style: style)
+            }
+            .fixedSize()
         case .action(let label, let perform):
             PBButton(label, style: surface == .onCard ? .onCard : .secondary, size: .small, action: perform)
         case .none:
@@ -152,6 +164,10 @@ struct PBActivityRow: View {
         PBActivityRow(leading: .icon(.food), title: "Snacks", subtitle: "₹300 · Goa Trip", detail: "Deleted by Priya on 24 Sep · 24 days left",
                       trailing: .action("Restore") {}, isUnread: true)
         VStack(spacing: 0) {
+            PBActivityRow(leading: .icon(.tag), title: "GPS module", subtitle: "Est. ₹6,000",
+                          trailing: .amountBadge("—", badge: "Planned", style: .mutedOnCard, isPlaceholder: true), surface: .onCard, showsDivider: true)
+            PBActivityRow(leading: .avatar(.art(.dev)), title: "Motors ×4", subtitle: "Dev · Est. ₹12,000",
+                          trailing: .amountBadge("₹12,000", badge: "Done", style: .inverse), surface: .onCard, showsDivider: true)
             PBActivityRow(leading: .avatar(.art(.rohan)), title: "You paid Rohan", subtitle: "UPI · Goa Trip",
                           trailing: .amount("−₹1,400", date: "Today", isIncoming: false), surface: .onCard, showsDivider: true)
             PBActivityRow(leading: .icon(.food), title: "Dinner at Olive Garden", subtitle: "You paid · 4 people",
