@@ -22,12 +22,12 @@ enum class Presentation {
 }
 
 /** Who builds a route's screen (app-architecture §6, §7.1). */
-enum class Owner(val label: String) {
-    M2("M2"),
-    LaneA("lane A"),
-    LaneB("lane B"),
-    LaneC("lane C"),
-    LaneD("lane D"),
+enum class Owner {
+    M2,
+    LaneA,
+    LaneB,
+    LaneC,
+    LaneD,
 }
 
 /** A route's id (its screen root is tagged `screen.<id>`), presentation, owner and spec. */
