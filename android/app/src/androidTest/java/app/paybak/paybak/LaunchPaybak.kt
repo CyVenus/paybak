@@ -18,6 +18,8 @@ import app.paybak.paybak.data.UserProfile
  * @param now Pins the clock (`yyyy-MM-ddTHH:mm`, local).
  * @param pro Overrides the plan last.
  * @param link Opens an internal link as a notification tap would.
+ * @param autoApprove Whether friends confirm the payments you record after 5 s (debug builds). Off
+ *   unless a test asks, so a payment you record stays pending.
  */
 fun launchPaybak(
     startScreen: String? = null,
@@ -27,11 +29,13 @@ fun launchPaybak(
     now: String? = null,
     pro: Boolean? = null,
     link: String? = null,
+    autoApprove: Boolean = false,
 ): ActivityScenario<MainActivity> {
     val intent =
         Intent(ApplicationProvider.getApplicationContext(), MainActivity::class.java)
             .putExtra("resetOnboarding", resetOnboarding)
             .putExtra("demoData", demoData)
+            .putExtra("autoApprove", autoApprove)
     startScreen?.let { intent.putExtra("startScreen", it) }
     if (scenarios.isNotEmpty()) intent.putExtra("scenario", scenarios.joinToString(","))
     now?.let { intent.putExtra("now", it) }

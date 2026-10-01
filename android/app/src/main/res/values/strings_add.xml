@@ -111,6 +111,8 @@
     <string name="add_one_photo">1 photo</string>
     <string name="add_add_photo">Add photo (optional)</string>
     <string name="add_toast_payment_recorded">Payment recorded</string>
+    <!-- The payer's payment-approved scene: the TalkBack action that closes it -->
+    <string name="payment_approved_close">Close</string>
     <string name="add_payment">Payment</string>
     <string name="add_payment_gone">This payment isn’t available any more.</string>
     <string name="add_confirm">Confirm</string>

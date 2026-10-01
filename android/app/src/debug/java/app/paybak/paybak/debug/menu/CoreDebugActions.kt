@@ -10,6 +10,7 @@ import app.paybak.paybak.data.ledger.actions.markNotReceived
 import app.paybak.paybak.data.ledger.actions.recordPayment
 import app.paybak.paybak.data.ledger.actions.removeFlag
 import app.paybak.paybak.data.ledger.actions.setPro
+import app.paybak.paybak.debug.AutoApprove
 import app.paybak.paybak.debug.DebugClock
 import app.paybak.paybak.debug.DebugLaunch
 import app.paybak.paybak.debug.DemoData
@@ -115,6 +116,14 @@ internal fun coreSections(context: DebugContext): List<DebugSection> {
         DebugSection(
             "Friend’s side",
             listOfNotNull(
+                AutoApprove.isOn(app).let { on ->
+                    DebugAction(
+                        "Auto-approve my payments",
+                        "Friends confirm after 5 s · Now: ${if (on) "On" else "Off"}",
+                    ) {
+                        AutoApprove.setOn(app, !on)
+                    }
+                },
                 DebugAction(
                         "Esha says she paid ₹700",
                         "A pending claim for Dinner at Olive Garden",

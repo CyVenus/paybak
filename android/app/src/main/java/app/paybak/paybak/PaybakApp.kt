@@ -60,6 +60,7 @@ fun PaybakApp(app: PaybakApplication, start: StartTarget) {
                         profileStore = app.profileStore,
                         mainStart = start.main,
                         links = app.links,
+                        approvals = app.paymentApprovals,
                         ledger = { app.ledger },
                     )
             }

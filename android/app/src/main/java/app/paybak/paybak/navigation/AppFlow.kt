@@ -25,6 +25,8 @@ import app.paybak.paybak.data.ledger.isPro
 import app.paybak.paybak.feature.launch.GetStartedScreen
 import app.paybak.paybak.feature.launch.SplashScreen
 import app.paybak.paybak.feature.launch.WelcomeScreen
+import app.paybak.paybak.feature.payments.PaymentApprovalQueue
+import app.paybak.paybak.feature.payments.PaymentApprovedHost
 import app.paybak.paybak.feature.setup.AllSetScreen
 import app.paybak.paybak.feature.setup.SetupScreen
 import app.paybak.paybak.feature.signin.SignInScreen
@@ -54,6 +56,7 @@ fun AppFlow(
     profileStore: ProfileStore,
     mainStart: MainState,
     links: DeepLinkInbox,
+    approvals: PaymentApprovalQueue,
     ledger: () -> LedgerRepository,
 ) {
     val profile by profileStore.profile.collectAsState()
@@ -152,7 +155,7 @@ fun AppFlow(
                 )
             }
 
-            Main -> MainRoot(mainStart, links, remember { ledger() })
+            Main -> MainRoot(mainStart, links, approvals, remember { ledger() })
         }
     }
 }
@@ -174,7 +177,12 @@ private fun transitionFor(transition: NavTransition): ContentTransform =
 
 /** The app after onboarding, with its navigator saved across recreation and process death. */
 @Composable
-private fun MainRoot(start: MainState, links: DeepLinkInbox, ledger: LedgerRepository) {
+private fun MainRoot(
+    start: MainState,
+    links: DeepLinkInbox,
+    approvals: PaymentApprovalQueue,
+    ledger: LedgerRepository,
+) {
     val isPro = { ledger.isPro }
     val navigator =
         rememberSaveable(
@@ -195,4 +203,5 @@ private fun MainRoot(start: MainState, links: DeepLinkInbox, ledger: LedgerRepos
     CompositionLocalProvider(LocalLedger provides ledger, LocalMainNavigator provides navigator) {
         MainHost(navigator)
     }
+    PaymentApprovedHost(approvals, ledger)
 }

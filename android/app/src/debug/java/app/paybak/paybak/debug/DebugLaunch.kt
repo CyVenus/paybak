@@ -23,6 +23,8 @@ import java.time.LocalDateTime
  * - `--es scenario a,b` applies seed scenarios after that; `--es now 2026-09-30T21:15` pins the
  *   clock; `--es pro YES|NO` (or `--ez pro`) overrides the plan last.
  * - `--es link paybak://…` opens an internal link, as a notification tap does (MainActivity).
+ * - `--ez autoApprove false` (or `--es autoApprove NO`) stops friends confirming your new payments
+ *   after 5 s until the process ends ([AutoApprove]; UI tests pass false).
  */
 object DebugLaunch {
     private const val TAG = "DebugLaunch"
@@ -33,6 +35,7 @@ object DebugLaunch {
     private const val EXTRA_SCENARIO = "scenario"
     private const val EXTRA_NOW = "now"
     private const val EXTRA_PRO = "pro"
+    private const val EXTRA_AUTO_APPROVE = "autoApprove"
     const val GALLERY_ID = "gallery"
 
     /** Screens before sign-in don't read the profile, so starting there doesn't seed it. */
@@ -43,6 +46,7 @@ object DebugLaunch {
      * [firstLaunch], not when the Activity is recreated.
      */
     fun startTarget(intent: Intent, app: PaybakApplication, firstLaunch: Boolean): StartTarget? {
+        flag(intent, EXTRA_AUTO_APPROVE)?.let { AutoApprove.launchOverride = it }
         if (firstLaunch && intent.getBooleanExtra(EXTRA_RESET_ONBOARDING, false)) {
             app.resetAccount()
             DebugClock.pin(app, null)

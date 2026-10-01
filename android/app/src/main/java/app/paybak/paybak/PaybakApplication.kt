@@ -7,8 +7,11 @@ import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.ledger.LedgerFile
 import app.paybak.paybak.data.ledger.LedgerRepository
 import app.paybak.paybak.data.ledger.actions.clear
+import app.paybak.paybak.debug.AutoApprove
 import app.paybak.paybak.domain.AppClock
 import app.paybak.paybak.domain.calc.Rates
+import app.paybak.paybak.domain.settle.PaymentApprovals
+import app.paybak.paybak.feature.payments.PaymentApprovalQueue
 import app.paybak.paybak.navigation.DeepLinkInbox
 import app.paybak.paybak.service.notifications.NotificationService
 import app.rive.RiveLog
@@ -47,6 +50,9 @@ class PaybakApplication : Application() {
     /** Links from notification taps, opened once the app shows. */
     val links = DeepLinkInbox()
 
+    /** Payments friends have just confirmed, waiting for the payment-approved scene. */
+    val paymentApprovals = PaymentApprovalQueue()
+
     /** Local notifications, kept in step with the ledger. */
     val notifications: NotificationService by lazy { NotificationService(this) }
 
@@ -61,10 +67,16 @@ class PaybakApplication : Application() {
         if (BuildConfig.DEBUG) {
             RiveLog.logger = RiveLog.LogcatLogger()
         }
-        // Reads the ledger off the main thread while the first screen starts, then keeps the
-        // notifications in step with it.
+        // Reads the ledger off the main thread while the first screen starts, then queues the
+        // payments friends confirm and keeps the notifications in step with it.
         appScope.launch {
             val ledger = withContext(Dispatchers.Default) { ledger }
+            launch {
+                ledger.changes.collect {
+                    paymentApprovals.add(PaymentApprovals.approved(it.before, it.after))
+                }
+            }
+            AutoApprove.install(this@PaybakApplication, ledger, appScope)
             ledger.revision.collect { notifications.sync(ledger.snapshot.value) }
         }
     }
@@ -73,6 +85,7 @@ class PaybakApplication : Application() {
     fun resetAccount() {
         profileStore.reset()
         ledger.clear()
+        paymentApprovals.clear()
     }
 
     private companion object {
