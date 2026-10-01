@@ -30,10 +30,10 @@ final class ProjectsUITests: XCTestCase {
         let add = app.buttons["addComponent.add"]
         XCTAssertTrue(add.waitForExistence(timeout: 3))
         XCTAssertFalse(add.isEnabled)
-        app.element("addComponent.name").tap()
+        app.textFields["addComponent.name"].tap()
         app.typeText("Spare propellers")
         XCTAssertTrue(add.isEnabled)
-        app.element("addComponent.estimate").tap()
+        app.textFields["addComponent.estimate"].tap()
         app.typeText("1500")
         XCTAssertTrue(app.element("addComponent.status.planned").isSelected)
         app.revealSheetButton(add)
@@ -46,11 +46,11 @@ final class ProjectsUITests: XCTestCase {
     @MainActor
     func testAnActualCostChangesSpentAndShares() {
         let app = XCUIApplication.launchPaybak(startScreen: .projectAddComponent)
-        let name = app.element("addComponent.name")
+        let name = app.textFields["addComponent.name"]
         XCTAssertTrue(name.waitForExistence(timeout: 3))
         name.tap()
         app.typeText("Gimbal")
-        app.element("addComponent.actual").tap()
+        app.textFields["addComponent.actual"].tap()
         app.typeText("4000")
         XCTAssertTrue(app.element("addComponent.status.bought").isSelected)
         app.revealSheetButton(app.buttons["addComponent.add"])
