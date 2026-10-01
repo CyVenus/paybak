@@ -36,7 +36,7 @@ final class ProjectsUITests: XCTestCase {
         app.element("addComponent.estimate").tap()
         app.typeText("1500")
         XCTAssertTrue(app.element("addComponent.status.planned").isSelected)
-        add.tap()
+        app.revealSheetButton(add)
         XCTAssertTrue(app.element(label: "Component added").waitForExistence(timeout: 3))
         let budget = app.element("project.budget").label
         XCTAssertTrue(budget.contains("₹52,000") && budget.contains("Planned items bring it to ₹59,500"), budget)
@@ -53,7 +53,7 @@ final class ProjectsUITests: XCTestCase {
         app.element("addComponent.actual").tap()
         app.typeText("4000")
         XCTAssertTrue(app.element("addComponent.status.bought").isSelected)
-        app.buttons["addComponent.add"].tap()
+        app.revealSheetButton(app.buttons["addComponent.add"])
         XCTAssertTrue(app.element("project.budget").waitForLabel(containing: "₹56,000"))
         XCTAssertEqual(app.element("project.shareRule").label, "Equal split · ₹14,000 each so far")
     }
@@ -90,6 +90,14 @@ final class ProjectsUITests: XCTestCase {
         XCTAssertTrue(app.element("project.state.archived").waitForExistence(timeout: 3))
         XCTAssertTrue(app.element("project.planNotice").label.contains("Everyone is settled"))
         XCTAssertTrue(app.element("project.members.p-rohan").label.contains("Settled"))
+    }
+}
+
+private extension XCUIApplication {
+    /// The keyboard covers the sheet's button: scroll the sheet up to it, then tap it.
+    func revealSheetButton(_ button: XCUIElement) {
+        element("screen.projectAddComponent").swipeUp()
+        button.tap()
     }
 }
 
