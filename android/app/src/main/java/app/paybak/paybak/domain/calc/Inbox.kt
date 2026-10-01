@@ -72,13 +72,17 @@ fun LedgerView.inboxText(item: InboxItem): Pair<String, String> {
     }
 }
 
-/** The internal link an inbox item (or its notification) opens. */
-fun inboxLink(item: InboxItem): String? {
+/**
+ * The internal link an inbox item (or its notification) opens. A payment reminder pays by UPI when
+ * the payee has a UPI ID, as the inbox row does.
+ */
+fun LedgerView.inboxLink(item: InboxItem): String? {
     val p = item.params
     return when (item.type) {
         InboxType.PaymentReminder ->
             "paybak://record-payment?to=${p.personId}&amount=${p.amount}" +
-                (p.groupId?.let { "&context=group:$it" } ?: "")
+                (p.groupId?.let { "&context=group:$it" } ?: "") +
+                (p.personId?.let(::person)?.upi?.let { "&method=upi" } ?: "")
         InboxType.MonthlySummary ->
             "paybak://insights?month=${p.year}-${(p.month ?: 1).toString().padStart(2, '0')}"
         InboxType.PaymentConfirmed,

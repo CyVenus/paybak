@@ -1,6 +1,7 @@
 package app.paybak.paybak.navigation
 
 import app.paybak.paybak.domain.model.ME
+import app.paybak.paybak.domain.model.PaymentMethod
 import java.time.YearMonth
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -116,7 +117,9 @@ class MainNavigatorTest {
     fun deepLinksOpenTheirScreens() {
         val navigator = MainNavigator()
         navigator.open(
-            DeepLink.parse("paybak://record-payment?to=p-kabir&amount=140000&context=group:g-goa")!!
+            DeepLink.parse(
+                "paybak://record-payment?to=p-kabir&amount=140000&context=group:g-goa&method=upi"
+            )!!
         )
         assertEquals(
             Route.RecordPayment(
@@ -124,6 +127,7 @@ class MainNavigatorTest {
                     fromId = ME,
                     toId = "p-kabir",
                     amount = 140_000,
+                    method = PaymentMethod.Upi,
                     groupId = "g-goa",
                 )
             ),

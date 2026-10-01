@@ -1,5 +1,6 @@
 package app.paybak.paybak.navigation
 
+import app.paybak.paybak.domain.model.PaymentMethod
 import java.net.URI
 import java.net.URLDecoder
 import java.time.YearMonth
@@ -13,7 +14,12 @@ sealed interface DeepLink {
     data class Claim(val paymentId: String, val notReceived: Boolean = false) : DeepLink
 
     /** Record payment prefilled for a debt you owe. */
-    data class RecordPayment(val toId: String, val amount: Long?, val groupId: String?) : DeepLink
+    data class RecordPayment(
+        val toId: String,
+        val amount: Long?,
+        val groupId: String?,
+        val method: PaymentMethod? = null,
+    ) : DeepLink
 
     data class Insights(val month: YearMonth) : DeepLink
 
@@ -51,6 +57,10 @@ sealed interface DeepLink {
                             toId = it,
                             amount = query["amount"]?.toLongOrNull(),
                             groupId = query["context"]?.removePrefix("group:"),
+                            method =
+                                PaymentMethod.entries.firstOrNull {
+                                    it.name.equals(query["method"], ignoreCase = true)
+                                },
                         )
                     }
                 "insights" ->

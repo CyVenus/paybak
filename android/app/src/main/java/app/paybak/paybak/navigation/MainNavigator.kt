@@ -259,6 +259,7 @@ class MainNavigator(state: MainState = MainState(), private val isPro: () -> Boo
                             fromId = ME,
                             toId = link.toId,
                             amount = link.amount,
+                            method = link.method,
                             groupId = link.groupId,
                         )
                     )

@@ -137,7 +137,7 @@ class ActivityAndInboxTest {
             inbox.filterNot { it.today }.take(3).map { listOf(it.title, it.body, it.item.read) },
         )
         assertEquals(
-            "paybak://record-payment?to=p-kabir&amount=140000&context=group:g-goa",
+            "paybak://record-payment?to=p-kabir&amount=140000&context=group:g-goa&method=upi",
             inbox.first().link,
         )
     }

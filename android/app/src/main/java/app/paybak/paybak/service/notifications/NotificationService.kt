@@ -118,7 +118,7 @@ class NotificationService(private val context: Context) {
     private fun post(view: LedgerView, item: InboxItem) {
         val (title, body) = view.inboxText(item)
         val notification =
-            builder(NotificationPlan.channel(item.type), inboxLink(item))
+            builder(NotificationPlan.channel(item.type), view.inboxLink(item))
                 .setContentTitle(title)
                 .setContentText(body)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
