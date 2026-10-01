@@ -26,6 +26,7 @@ fun LedgerView.exportDefaultTicks(start: LocalDate, end: LocalDate): Set<String>
         .forEach {
             group(it.projectId)?.name?.let(ticked::add)
         }
+    if (ledger.loans.any { inRange(it.date) }) ticked += WITHOUT_A_GROUP
     return ticked
 }
 

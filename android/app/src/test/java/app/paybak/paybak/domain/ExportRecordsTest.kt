@@ -1,5 +1,6 @@
 package app.paybak.paybak.domain
 
+import app.paybak.paybak.domain.settings.ExportPeriod
 import app.paybak.paybak.domain.settings.ExportRange
 import app.paybak.paybak.domain.settings.ExportType
 import app.paybak.paybak.domain.settings.NO_GROUP
@@ -9,6 +10,7 @@ import app.paybak.paybak.domain.settings.exportGroups
 import app.paybak.paybak.domain.settings.exportPeriod
 import app.paybak.paybak.domain.settings.exportRecords
 import app.paybak.paybak.domain.settings.plainAmount
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -44,6 +46,13 @@ class ExportRecordsTest {
             setOf("g-goa", "g-flat302", "pj-drone", NO_GROUP),
             view.exportDefaultSelection(view.exportPeriod(ExportRange.ThisMonth)),
         )
+    }
+
+    @Test
+    fun aLoanInRangeTicksWithoutAGroup() {
+        // Kabir's bike loan is the only record on 12 Jun.
+        val loanDay = LocalDate.of(2026, 6, 12)
+        assertEquals(setOf(NO_GROUP), view.exportDefaultSelection(ExportPeriod(loanDay, loanDay)))
     }
 
     @Test
