@@ -128,6 +128,8 @@ struct ScanRequest: Hashable, Codable {
     var id = RecordID.make()
     /// The people already on the expense (the Assign step offers them).
     var people: [PersonID] = []
+    /// A scanned expense's items: the modal opens straight on Assign items to change who had what.
+    var itemized: Itemized?
 }
 
 /// What a picker hands back to the screen that asked (§2.7).

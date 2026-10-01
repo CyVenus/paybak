@@ -1,4 +1,6 @@
 #if DEBUG
+import Foundation
+
 extension Scenario {
     /// Insights, Ask Paybak, receipt scanning and recurring ids (app-architecture §1.9).
     static let insights: [ScreenID: Scenario] = {
@@ -38,11 +40,12 @@ extension Scenario {
         let order = [Person.me, "p-esha", "p-dev"]
         let shares = Splits.itemized(items: items, total: 230_000, order: order).shares
         return ExpenseDraft(
-            title: "Leopold Cafe", category: .food, amount: 230_000, currency: "INR", date: day,
+            title: "Lunch at Leopold Cafe", category: .food, amount: 230_000, currency: "INR", date: day,
             payers: [Payer(personId: Person.me, amount: 230_000)], splitMode: .itemized,
             rows: order.map { SplitRow(personId: $0, included: true, value: shares[$0], share: shares[$0] ?? 0) },
             itemized: Itemized(items: items, lines: [.init(label: "GST 5%", amount: 10_000), .init(label: "Tip 10%", amount: 20_000)],
-                               subtotal: 200_000)
+                               subtotal: 200_000),
+            receipt: Receipt(asset: "art-receipt-full", addedBy: Person.me, addedAt: day.start(in: .current))
         )
     }
 

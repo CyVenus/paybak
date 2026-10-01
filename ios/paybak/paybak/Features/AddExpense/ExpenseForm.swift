@@ -138,19 +138,24 @@ final class ExpenseForm {
         amountText = MoneyInput.text(MoneyInput.minor(amountText, currency: code), currency: code).nonZero
     }
 
-    /// A read receipt's itemized draft (Pro scan).
+    /// A read receipt's itemized draft (Pro scan), or only its photo when it couldn't be read. A
+    /// reassignment (no title) keeps the form's title, category and date.
     func apply(_ result: ReceiptResult) {
         let scanned = result.draft
+        receipt = scanned.receipt ?? receipt
+        guard scanned.itemized != nil else { return }
         amountText = MoneyInput.text(scanned.amount, currency: scanned.currency)
         currency = scanned.currency
-        if !scanned.title.isEmpty { title = scanned.title }
-        category = scanned.category
+        if !scanned.title.isEmpty {
+            title = scanned.title
+            category = scanned.category
+            date = scanned.date
+        }
         people = scanned.rows.map(\.personId)
         excluded = []
         splitMode = .itemized
         splitValues = Dictionary(scanned.rows.map { ($0.personId, $0.share) }, uniquingKeysWith: { first, _ in first })
         itemized = scanned.itemized
-        receipt = scanned.receipt ?? receipt
     }
 
     private var savedPayers: [Payer] {
