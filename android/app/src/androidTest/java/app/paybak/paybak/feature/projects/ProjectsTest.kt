@@ -36,7 +36,10 @@ class ProjectsTest {
 
     private fun text(text: String) = compose.onNodeWithText(text)
 
-    /** Waits for [tag], scrolls it into view when it sits in a scrolling page, and taps it. */
+    /**
+     * Waits for [tag], scrolls it into view when it sits in a scrolling page or sheet (the keyboard
+     * can push the sheet's button out of view), and taps it.
+     */
     private fun tap(tag: String) {
         compose.awaitTag(tag)
         runCatching { tag(tag).performScrollTo() }
@@ -85,7 +88,8 @@ class ProjectsTest {
             tag("addComponent.add").assertIsNotEnabled()
             tag("addComponent.name").performTextReplacement("Spare propellers")
             tag("addComponent.estimate").performTextReplacement("2000")
-            tag("addComponent.add").assertIsEnabled().performClick()
+            tag("addComponent.add").assertIsEnabled()
+            tap("addComponent.add")
             awaitGone("addComponent.add")
             awaitText("Planned items bring it to ₹60,000")
             text("₹52,000").assertExists()
@@ -101,7 +105,8 @@ class ProjectsTest {
             compose.awaitTag("addComponent.add")
             tag("addComponent.name").performTextReplacement("Spare propellers")
             tag("addComponent.actual").performTextReplacement("4000")
-            tag("addComponent.add").assertIsEnabled().performClick()
+            tag("addComponent.add").assertIsEnabled()
+            tap("addComponent.add")
             awaitText("Equal split · ₹14,000 each so far")
             text("₹56,000").assertExists()
             assertEquals(ComponentStatus.Bought, drone().components.last().status)

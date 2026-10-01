@@ -83,6 +83,7 @@ fun ProjectSettingsScreen(route: Route.ProjectSettings) {
     val view = snapshot.view
     val projectId = route.groupId
     val project = view.group(projectId)?.takeIf { it.isProject }
+    val haptics = rememberHaptics()
     val start = rememberDebugStartScreen("projectCloseAlert")
     var closing by rememberSaveable { mutableStateOf(start != null) }
     var budget by rememberSaveable {
@@ -173,6 +174,7 @@ fun ProjectSettingsScreen(route: Route.ProjectSettings) {
             onCancel = { closing = false },
             onAction = {
                 closing = false
+                haptics.perform(HapticKind.Success)
                 ledger.closeProject(projectId)
                 navigator.back()
             },
@@ -216,7 +218,7 @@ private fun ContributionSection(
         Column(verticalArrangement = Arrangement.spacedBy(PbSpace.S8)) {
             PbSectionHeader(stringResource(R.string.projects_contribution_rule))
             PbSegmentedControl(
-                options = rules.map { stringResource(it.label()) },
+                options = rules.map { stringResource(it.labelRes()) },
                 selectedIndex = rules.indexOf(current.rule),
                 onSelect = { index ->
                     val rule = rules[index]
@@ -291,7 +293,7 @@ private fun ContributionSection(
     }
 }
 
-private fun ContributionRule.label(): Int =
+private fun ContributionRule.labelRes(): Int =
     when (this) {
         ContributionRule.Equal -> R.string.projects_rule_equal
         ContributionRule.Percent -> R.string.projects_rule_percent

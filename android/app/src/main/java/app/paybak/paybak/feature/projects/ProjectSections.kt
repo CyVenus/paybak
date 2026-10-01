@@ -149,7 +149,7 @@ internal fun ComponentsCard(
                 subtitle = row.subtitle,
                 amount = row.amount,
                 amountColor = if (planned) PbColors.Text.Tertiary else PbColors.Text.Primary,
-                badge = stringResource(row.component.status.label()),
+                badge = stringResource(row.component.status.labelRes()),
                 badgeStyle =
                     when (row.component.status) {
                         ComponentStatus.Planned -> PbBadgeStyle.MutedOnCard
@@ -165,7 +165,7 @@ internal fun ComponentsCard(
     }
 }
 
-internal fun ComponentStatus.label(): Int =
+internal fun ComponentStatus.labelRes(): Int =
     when (this) {
         ComponentStatus.Planned -> R.string.projects_status_planned
         ComponentStatus.Bought -> R.string.projects_status_bought

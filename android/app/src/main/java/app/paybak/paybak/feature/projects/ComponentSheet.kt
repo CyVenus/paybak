@@ -32,6 +32,8 @@ import app.paybak.paybak.domain.model.ME
 import app.paybak.paybak.domain.projects.ComponentForm
 import app.paybak.paybak.feature.pickers.PeopleDirectory
 import app.paybak.paybak.feature.pickers.rememberPhotoPicker
+import app.paybak.paybak.service.HapticKind
+import app.paybak.paybak.service.rememberHaptics
 import app.paybak.paybak.ui.components.PbButton
 import app.paybak.paybak.ui.components.PbCard
 import app.paybak.paybak.ui.components.PbPersonRow
@@ -101,6 +103,7 @@ internal fun ComponentSheet(
     onDismiss: () -> Unit,
 ) {
     val form = flow.form
+    val haptics = rememberHaptics()
     var after by remember { mutableStateOf<(() -> Unit)?>(null) }
     var pickingPayer by rememberSaveable { mutableStateOf(false) }
     val pickReceipt = rememberPhotoPicker { onChange(form.copy(receipt = it)) }
@@ -152,7 +155,10 @@ internal fun ComponentSheet(
                     testTag = "addComponent.actual",
                 )
             }
-            StatusPicker(form.status) { onChange(form.copy(status = it)) }
+            StatusPicker(form.status) {
+                haptics.perform(HapticKind.Selection)
+                onChange(form.copy(status = it))
+            }
             PbCard {
                 PbSettingRow(
                     stringResource(R.string.projects_paid_by),
@@ -181,6 +187,7 @@ internal fun ComponentSheet(
                     else R.string.projects_add_component
                 ),
                 onClick = {
+                    haptics.perform(HapticKind.Success)
                     after = onSave
                     dismiss()
                 },
@@ -250,7 +257,7 @@ private fun StatusPicker(status: ComponentStatus, onPick: (ComponentStatus) -> U
             color = PbColors.Text.Secondary,
         )
         PbSegmentedControl(
-            options = statuses.map { stringResource(it.label()) },
+            options = statuses.map { stringResource(it.labelRes()) },
             selectedIndex = statuses.indexOf(status),
             onSelect = { onPick(statuses[it]) },
             modifier = Modifier.fillMaxWidth(),
