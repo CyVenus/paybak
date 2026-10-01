@@ -32,14 +32,17 @@ nonisolated extension Books {
     }
 
     /// The next occurrence of a rule after `after` (§10): the anchor's weekday, day of month
-    /// (clamped) or day and month. An every-2-weeks rule takes the next anchor weekday, as Android's
-    /// `nextOccurrence` does.
+    /// (clamped) or day and month. Every 2 weeks steps 14 days from the anchor, so it lands on the
+    /// anchor's weekday every other week.
     static func nextOccurrence(_ rule: RecurringRule, after: LocalDay) -> LocalDay {
         let anchor = rule.anchorDate
         switch rule.frequency {
-        case .weekly, .biweekly:
+        case .weekly:
             let delta = ((anchor.weekday - after.weekday - 1) % 7 + 7) % 7 + 1
             return after.adding(days: delta)
+        case .biweekly:
+            let offset = (anchor.days(to: after) % 14 + 14) % 14
+            return after.adding(days: 14 - offset)
         case .yearly:
             let candidate = anchor.replacing(year: after.year)
             return candidate > after ? candidate : anchor.replacing(year: after.year + 1)

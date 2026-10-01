@@ -60,6 +60,11 @@ struct RecurringCopyTests {
         var biweeklyDraft = biweekly
         biweeklyDraft.variable = true
         #expect(biweeklyDraft.helper == "Paybak adds a draft every other Monday and asks you for the amount.")
+        // 14 days at a time from the anchor, never the Monday in between.
+        #expect(biweekly.nextLine(after: start) == "Next: Mon 5 Oct")
+        #expect(biweekly.nextOccurrence(after: DemoFixture.day(2026, 10, 5)) == DemoFixture.day(2026, 10, 19))
+        #expect(biweekly.nextOccurrence(after: DemoFixture.day(2026, 10, 12)) == DemoFixture.day(2026, 10, 19))
+        #expect(biweekly.nextOccurrence(after: DemoFixture.day(2026, 10, 19)) == DemoFixture.day(2026, 11, 2))
 
         // The 31st reads as the 31st; a short month still uses its last day.
         let lastDay = RepeatRule(frequency: .monthly, anchorDate: DemoFixture.day(2026, 10, 31))

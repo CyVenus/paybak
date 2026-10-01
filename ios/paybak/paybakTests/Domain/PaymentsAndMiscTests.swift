@@ -36,6 +36,21 @@ struct PaymentsAndMiscTests {
         #expect(DemoFixture.load("pro").ledger.settings.entitlement.plan == .pro)
     }
 
+    /// Every 2 weeks catches up on every other Monday only, 14 days apart from the anchor.
+    @Test func everyTwoWeeksCatchesUpEveryOtherWeek() {
+        var books = DemoFixture.load()
+        let monday = DemoFixture.day(2026, 9, 28)
+        books.ledger.recurringRules.append(RecurringRule(
+            id: "r-cleaner", groupId: "g-flat302", title: "Cleaner", category: .other, amount: rupees(600), currency: "INR",
+            variable: false, frequency: .biweekly, anchorDate: monday, startDate: monday, lastOccurrence: monday,
+            payerId: Person.me, split: .init(personIds: [Person.me, "p-meera", "p-kabir"]), createdAt: books.now,
+            createdBy: Person.me, active: true
+        ))
+        books.tick(until: books.now.addingTimeInterval(42 * 24 * 60 * 60))
+        #expect(books.ledger.expenses.filter { $0.recurringRuleId == "r-cleaner" }.map(\.date)
+            == [DemoFixture.day(2026, 10, 12), DemoFixture.day(2026, 10, 26), DemoFixture.day(2026, 11, 9)])
+    }
+
     @Test func exportTicks() {
         let books = DemoFixture.load()
         let (start, end) = (DemoFixture.day(2026, 9, 1), DemoFixture.day(2026, 9, 30))
