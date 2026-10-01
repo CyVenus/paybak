@@ -202,7 +202,10 @@ private struct ExpenseFormView: View {
             split: openSplit,
             group: openGroup,
             due: openDue,
-            quickDue: { chip in form.dueDate = chip?.day(from: books.today) },
+            quickDue: { chip in
+                Haptics.selection()
+                form.dueDate = chip?.day(from: books.today)
+            },
             repeatRule: openRepeat,
             receipt: openReceipt,
             notes: { open(.notes) },

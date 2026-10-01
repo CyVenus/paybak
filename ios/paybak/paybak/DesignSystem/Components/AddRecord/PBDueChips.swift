@@ -3,7 +3,8 @@ import SwiftUI
 /// The due-date quick chips under a Due row (add-expense §4.5, record-lend-group §4.4): Tomorrow ·
 /// This weekend · Next week · Pick date, white on the #F5F5F5 card, black when chosen. They wrap
 /// onto two rows and line up with the row titles (52 pt inset). Tapping the chosen chip again
-/// clears the date. Test ids: `<prefix>.tomorrow|weekend|nextWeek|pick`.
+/// clears the date. The chips are silent: Add expense ticks in its `onSelect` (Lend money doesn't), as
+/// on Android. Test ids: `<prefix>.tomorrow|weekend|nextWeek|pick`.
 struct PBDueChips: View {
     let selected: QuickDue?
     var testIDPrefix: String
@@ -14,7 +15,6 @@ struct PBDueChips: View {
         PBFlowLayout {
             ForEach(QuickDue.allCases, id: \.self) { chip in
                 chipButton(chip.title, isSelected: chip == selected) {
-                    Haptics.selection()
                     onSelect(chip == selected ? nil : chip)
                 }
                 .accessibilityIdentifier("\(testIDPrefix).\(chip.rawValue)")
@@ -28,7 +28,6 @@ struct PBDueChips: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// A date chip ticks (selection haptic); Pick date doesn't, as on Android.
     private func chipButton(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
