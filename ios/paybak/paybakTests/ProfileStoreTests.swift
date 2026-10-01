@@ -25,6 +25,15 @@ struct ProfileStoreTests {
         #expect(store.photo == nil)
     }
 
+    @Test func avatarIsTheProfileIconUntilThereAreInitials() {
+        let store = makeStore()
+        guard case .icon(.profile) = store.avatarContent else { Issue.record("Expected the profile icon"); return }
+        store.update { $0.name = "   " }
+        guard case .icon(.profile) = store.avatarContent else { Issue.record("Expected the profile icon"); return }
+        store.update { $0.name = "Arjun Mehta" }
+        guard case .initials("AM") = store.avatarContent else { Issue.record("Expected the initials"); return }
+    }
+
     @Test func savesEveryChange() {
         let store = makeStore()
         store.update {

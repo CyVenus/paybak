@@ -19,6 +19,6 @@ extension ProfileStore {
         default:
             break
         }
-        return profile.name.isEmpty ? .icon(.profile) : .initials(profile.initials)
+        return profile.initials.isEmpty ? .icon(.profile) : .initials(profile.initials)
     }
 }
