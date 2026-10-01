@@ -46,6 +46,30 @@ final class ScanUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["From receipt · 6 items"].exists)
     }
 
+    /// Check receipt: fixing an item in place re-checks it against the subtotal, and "Looks right"
+    /// waits until they agree; the GST line moves the total.
+    @MainActor
+    func testEditsAreCheckedAgainstTheSubtotal() {
+        let app = XCUIApplication.launchPaybak(startScreen: .scanReview, pro: true)
+        let biryani = app.buttons["scanReview.item.0"]
+        XCTAssertTrue(biryani.waitForExistence(timeout: 10))
+        biryani.tap()
+        let field = app.focusedTextField
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "330")
+        XCTAssertTrue(app.staticTexts["Items add up to ₹1,900, the subtotal is ₹2,000."].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["scanReview.confirm"].isEnabled)
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "430")
+        XCTAssertTrue(app.buttons["scanReview.confirm"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["scanReview.confirm"].isEnabled)
+
+        app.buttons["scanReview.tax.0"].tap()
+        let gst = app.focusedTextField
+        XCTAssertTrue(gst.waitForExistence(timeout: 3))
+        gst.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 3) + "150")
+        XCTAssertEqual(app.buttons["scanReview.total"].value as? String, "₹2,350")
+    }
+
     /// A scanned expense's Split row goes back to Assign items with the assignment kept; giving the
     /// brownie to Esha instead moves ₹276 of the split to her.
     @MainActor
@@ -81,5 +105,12 @@ final class ScanUITests: XCTestCase {
         XCTAssertTrue(app.element("screen.addExpense").waitForExistence(timeout: 5))
         XCTAssertFalse(app.element("scanReceipt.state.review").exists)
         XCTAssertFalse(app.staticTexts["From receipt · 6 items"].exists)
+    }
+}
+
+private extension XCUIApplication {
+    /// The inline amount field being edited.
+    var focusedTextField: XCUIElement {
+        textFields.matching(NSPredicate(format: "hasKeyboardFocus == true")).firstMatch
     }
 }

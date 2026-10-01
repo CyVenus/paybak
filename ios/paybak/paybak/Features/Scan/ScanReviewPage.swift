@@ -103,7 +103,7 @@ struct ScanReviewPage: View {
                 .accessibilityIdentifier("scanReview.subtotal")
             ForEach(review.charges.indices, id: \.self) { index in
                 ReceiptAmountRow(label: review.charges[index].label, amount: chargeBinding(index), currency: currency)
-                    .accessibilityIdentifier("scanReview.charge.\(index)")
+                    .accessibilityIdentifier(Self.chargeID(review.charges[index].label, index: index))
             }
             ReceiptAmountRow(label: "Total", amount: .constant(review.total), currency: currency, isTotal: true)
                 .accessibilityIdentifier("scanReview.total")
@@ -145,6 +145,12 @@ struct ScanReviewPage: View {
             secondary: .init("Attach photo", testID: "scanReview.attach", action: onAttach)
         )
         .padding(.top, PBSpace.s16)
+    }
+
+    /// `scanReview.tip`, or `scanReview.tax.<n>` for GST, service and the like.
+    private static func chargeID(_ label: String, index: Int) -> String {
+        let name = label.lowercased()
+        return name.hasPrefix("tip") || name.hasPrefix("gratuity") ? "scanReview.tip" : "scanReview.tax.\(index)"
     }
 
     // MARK: Editing
