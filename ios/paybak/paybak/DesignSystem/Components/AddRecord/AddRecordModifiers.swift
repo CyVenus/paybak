@@ -17,5 +17,6 @@ extension View {
         sheet(item: item) { item in
             PBSheetPresentation(detent: detent(item)) { content(item) }
         }
+        .pbSheetScrim(isShown: item.wrappedValue != nil)
     }
 }

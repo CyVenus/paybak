@@ -72,6 +72,7 @@ extension View {
                 RouteView(route: route)
             }
         }
+        .pbSheetScrim(isShown: route.wrappedValue != nil)
     }
 }
 

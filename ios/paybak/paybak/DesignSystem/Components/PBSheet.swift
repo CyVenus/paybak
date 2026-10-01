@@ -1,4 +1,6 @@
+import Combine
 import SwiftUI
+import UIKit
 
 /// Sheet / Container (Figma 118:1017, components-app.md §8.3): the body of every picker and form
 /// sheet. The system draws the sheet and its grabber (`.pbSheet(…)`); this lays out the header, a
@@ -71,44 +73,88 @@ extension View {
         sheet(isPresented: isPresented) {
             PBSheetPresentation(detent: detent, content: content)
         }
+        .pbSheetScrim(isShown: isPresented.wrappedValue)
+    }
+
+    /// Deepens the dimming behind a presented sheet to the Figma scrim (`color/bg/scrim`, 40 %).
+    /// iOS dims the presenting screen by 20 % black; this layer adds the rest (24 % of #0A0A0A).
+    /// Attach it to the screen that presents the sheet.
+    func pbSheetScrim(isShown: Bool) -> some View {
+        overlay {
+            PBPalette.gray900
+                .opacity(isShown ? 0.24 : 0)
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .animation(isShown ? .easeOut(duration: 0.3) : .easeIn(duration: 0.25), value: isShown)
+        }
     }
 }
 
 /// The system sheet's look for a `.pbSheet`: the detent (fitted to the content, or large), the
 /// grabber, white fill and 40 pt corners. Route sheets use it directly inside `.sheet(item:)`.
+///
+/// iOS lays a floating (Medium) sheet out at the full screen width, then scales it down into its
+/// frame 8 pt in from each edge, which would draw every row, text and control 4 % small. Fitted
+/// content is laid out at the floating frame's width instead and scaled back up by the same factor,
+/// so it lands at Figma's size. It runs into the sheet's home-indicator inset, so the sheet ends
+/// 28 pt below the content as in Figma. While the keyboard is up iOS attaches the sheet to the
+/// screen edges at full size, so the content goes back to its own size.
 struct PBSheetPresentation<Content: View>: View {
     let detent: PBSheetDetent
     let content: () -> Content
 
     /// The fitted height, measured from the content; a sensible start before the first layout.
     @State private var height: CGFloat = 320
-    /// The floating sheet's own bottom inset (the home-indicator area it keeps clear below the
-    /// detent). Medium sheets end 28 pt below their content, counting this inset. It keeps the
-    /// largest value seen: while another sheet stacks on top the inset passes through in-between
-    /// values, and following them would feed the height back into itself without end.
-    @State private var bottomInset: CGFloat = 0
+    /// The sheet's layout size (the screen width; the height left above the keyboard).
+    @State private var size = CGSize(width: 402, height: 874)
+    @State private var isKeyboardShown = false
+
+    /// The system's floating scale on iPhone: the inset frame's width over the layout width (1
+    /// while the keyboard has attached the sheet to the edges, and on iPad's form sheets).
+    private var scale: CGFloat {
+        guard !isKeyboardShown, size.width > 0, UIDevice.current.userInterfaceIdiom == .phone else { return 1 }
+        return (size.width - 2 * PBSpace.s8) / size.width
+    }
+
+    /// The detent that draws the sheet exactly as tall as the content, at `scale`. iOS adds the
+    /// home-indicator inset below a floating sheet's detent; the content already covers it. The
+    /// inset is the window's, which a keyboard or a stacked sheet never changes.
+    private var fittedDetent: PresentationDetent {
+        guard !isKeyboardShown else { return .height(height) }
+        let homeIndicator = UIApplication.shared.connectedScenes
+            .compactMap { ($0 as? UIWindowScene)?.keyWindow?.safeAreaInsets.bottom }
+            .first ?? 0
+        return .height(max(1, height / scale - homeIndicator))
+    }
 
     var body: some View {
         Group {
             switch detent {
             case .fitted:
                 content()
-                    .padding(.bottom, max(0, PBSpace.s28 - bottomInset))
+                    .padding(.bottom, PBSpace.s28)
                     .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: size.width * scale)
+                    .ignoresSafeArea(.container, edges: .bottom)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = max(bottomInset, $0) }
-                    .presentationDetents([.height(height)])
+                    .scaleEffect(1 / scale, anchor: .top)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .measuringSheetLayout(size: $size)
+                    .presentationDetents([fittedDetent])
             case .fittedScrolling:
                 ScrollView {
                     content()
-                        .padding(.bottom, max(0, PBSpace.s28 - bottomInset))
+                        .padding(.bottom, PBSpace.s28)
                         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 .scrollDismissesKeyboard(.interactively)
-                .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = max(bottomInset, $0) }
-                .presentationDetents([.height(height)])
+                .frame(width: size.width * scale, height: size.height * scale)
+                .scaleEffect(1 / scale, anchor: .top)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .measuringSheetLayout(size: $size)
+                .presentationDetents([fittedDetent])
             case .large:
                 content()
                     .frame(maxHeight: .infinity, alignment: .top)
@@ -118,6 +164,21 @@ struct PBSheetPresentation<Content: View>: View {
         .presentationDragIndicator(.visible)
         .presentationBackground(PBColor.bgPrimary)
         .presentationCornerRadius(PBRadius.sheet)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            isKeyboardShown = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            isKeyboardShown = false
+        }
+    }
+}
+
+private extension View {
+    /// Fills the sheet down to its bottom edge (over the home-indicator inset, above the keyboard)
+    /// and reports that size.
+    func measuringSheetLayout(size: Binding<CGSize>) -> some View {
+        ignoresSafeArea(.container, edges: .bottom)
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { size.wrappedValue = $0 }
     }
 }
 
