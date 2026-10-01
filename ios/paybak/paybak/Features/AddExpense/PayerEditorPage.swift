@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// "Multiple people" (add-expense §6.3): how much each person on the expense paid, on the split
-/// editor's Exact rows and Split Total footer. Done is enabled once the amounts add up to the
-/// total; one payer left becomes the single payer again.
+/// "Multiple people" (add-expense §6.3): how much you and each person on the expense paid, on the
+/// split editor's Exact rows and Split Total footer. Ticking someone focuses their amount. Done is
+/// enabled once the amounts add up to the total; whoever paid 0 drops out, and one payer left
+/// becomes the single payer again.
 struct PayerEditorPage: View {
     let form: ExpenseForm
 
@@ -12,6 +13,7 @@ struct PayerEditorPage: View {
     @State private var texts: [PersonID: String] = [:]
     @State private var paying: Set<PersonID> = []
     @State private var didLoad = false
+    @State private var focused: PersonID?
 
     private var entered: Int64 {
         paying.reduce(0) { $0 + MoneyInput.minor(texts[$1] ?? "", currency: form.currency) }
@@ -29,15 +31,17 @@ struct PayerEditorPage: View {
                     .frame(maxWidth: .infinity)
                     .lineLimit(1)
                 VStack(spacing: 0) {
-                    ForEach(form.people, id: \.self) { person in
-                        PBSplitRow(
+                    ForEach(choices, id: \.self) { person in
+                        SplitEditorRow(
                             name: store.books.firstName(person),
                             avatar: person == Person.me ? profileStore.avatarContent : store.ledger.person(person)?.avatarContent ?? .icon(.profile),
                             mode: .exact(textBinding(person)),
                             amount: "",
                             currency: form.currency,
                             isIncluded: Binding { paying.contains(person) } set: { setPaying(person, $0) },
-                            showsDivider: person != form.people.last
+                            showsDivider: person != choices.last,
+                            personId: person,
+                            focused: $focused
                         )
                         .accessibilityIdentifier("payers.row.\(person)")
                     }
@@ -70,6 +74,9 @@ struct PayerEditorPage: View {
         .routeTestRoot("addExpense")
     }
 
+    /// Who can have paid: you, then the others on the expense.
+    private var choices: [PersonID] { [Person.me] + form.others }
+
     private var summary: String {
         let total = Money.format(form.amount, form.currency)
         let title = form.title.trimmingCharacters(in: .whitespaces)
@@ -81,7 +88,7 @@ struct PayerEditorPage: View {
         didLoad = true
         let payers = form.payers.isEmpty ? [Payer(personId: form.payerId, amount: form.amount)] : form.payers
         paying = Set(payers.map(\.personId))
-        for person in form.people {
+        for person in choices {
             texts[person] = MoneyInput.text(payers.first { $0.personId == person }?.amount ?? 0, currency: form.currency)
         }
     }
@@ -97,16 +104,20 @@ struct PayerEditorPage: View {
     private func setPaying(_ person: PersonID, _ isPaying: Bool) {
         if isPaying {
             paying.insert(person)
+            texts[person] = "0"
+            focused = person
         } else {
             paying.remove(person)
             texts[person] = "0"
+            if focused == person { focused = nil }
         }
     }
 
     private func apply() {
-        let payers = form.people.filter(paying.contains).map {
+        let payers = choices.filter(paying.contains).map {
             Payer(personId: $0, amount: MoneyInput.minor(texts[$0] ?? "", currency: form.currency))
         }
+        .filter { $0.amount > 0 }
         if payers.count == 1 {
             form.payerId = payers[0].personId
             form.payers = []

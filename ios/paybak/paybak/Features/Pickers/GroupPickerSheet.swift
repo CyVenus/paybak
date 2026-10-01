@@ -28,7 +28,6 @@ struct GroupPickerSheet: View {
 
     private func row(_ title: String, icon: PBIcon, id: GroupID?, isLast: Bool) -> some View {
         PBSettingRow(title, icon: icon, trailing: request.selected == id ? .check : .unchecked, showsDivider: !isLast) {
-            Haptics.selection()
             router.complete(request.id, with: .group(id))
         }
         .accessibilityIdentifier("group.row.\(id ?? "none")")

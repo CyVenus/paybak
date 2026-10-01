@@ -64,7 +64,10 @@ struct SplitEditorPage: View {
                             mode: rowMode(person, editor: editor),
                             amount: Money.format(preview.shares[person, default: 0], form.currency),
                             currency: form.currency,
-                            isIncluded: Binding { editor.isIncluded(person) } set: { editor.setIncluded(person, $0) },
+                            isIncluded: Binding { editor.isIncluded(person) } set: {
+                                Haptics.selection()
+                                editor.setIncluded(person, $0)
+                            },
                             showsDivider: person != people.last,
                             personId: person,
                             focused: $focused
@@ -73,7 +76,7 @@ struct SplitEditorPage: View {
                     }
                 }
                 .pbCard(padding: 0)
-                if focused == nil {
+                if editor.mode == .equal || editor.mode == .shares {
                     Text("Uncheck someone to leave them out.")
                         .textStyle(.footnote)
                         .foregroundStyle(PBColor.textSecondary)
@@ -123,8 +126,9 @@ struct SplitEditorPage: View {
     }
 }
 
-/// One editor row, focusing its field when the page's focused person is this one.
-private struct SplitEditorRow: View {
+/// One editor row, focusing its field when the page's focused person is this one (the split and
+/// payer editors).
+struct SplitEditorRow: View {
     let name: String
     let avatar: PBAvatar.Content
     let mode: PBSplitRow.Mode

@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Check receipt (screens-insights-ai §4.3): what was read, every amount editable in place, the items
-/// checked against the subtotal, Add item, then "Looks right". When nothing could be read it offers
-/// Retake and Attach photo instead.
+/// Check receipt (screens-insights-ai §4.3): what was read (the merchant and date as read), every
+/// amount editable in place, the items checked against the subtotal, Add item (a "New item" line
+/// whose amount is typed in place; an item set to 0 goes), then "Looks right". When nothing could be
+/// read it offers Retake and Attach photo instead.
 struct ScanReviewPage: View {
     @Binding var review: ReceiptReview?
     let photo: UIImage?
@@ -12,13 +13,9 @@ struct ScanReviewPage: View {
     let onConfirm: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(AppRouter.self) private var router
     @Environment(LedgerStore.self) private var ledgerStore
-    @State private var dateRequest = RecordID.make()
-    @State private var isRenaming = false
-    @State private var isAddingItem = false
-    @State private var newName = ""
-    @State private var newAmount = ""
+    /// The line Add item just appended, opened for its amount.
+    @State private var newItem: Int?
 
     private var currency: String { ledgerStore.books.defaultCurrency }
 
@@ -28,6 +25,7 @@ struct ScanReviewPage: View {
                 if let review, !isUnreadable {
                     content(review)
                 } else {
+                    intro(found: "We couldn’t find any items.", showsHint: false)
                     unreadable
                 }
             }
@@ -50,50 +48,36 @@ struct ScanReviewPage: View {
             }
         }
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .onRouteResult(dateRequest) { result in
-            if case .day(let day?) = result { review?.date = day }
-        }
-        .alert("Merchant", isPresented: $isRenaming) {
-            TextField("Merchant", text: $newName)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") { rename() }
-        }
-        .alert("Add item", isPresented: $isAddingItem) {
-            TextField("Item", text: $newName)
-            TextField("Amount", text: $newAmount)
-                .keyboardType(.decimalPad)
-            Button("Cancel", role: .cancel) {}
-            Button("Add") { addItem() }
-        }
         .scanState("review")
+    }
+
+    /// The photo, "We found 6 items." (or that none were) and, once read, "Tap any value to fix it."
+    private func intro(found: String, showsHint: Bool) -> some View {
+        HStack(spacing: PBSpace.s16) {
+            PBReceiptThumbnail(photo: photo.map(Image.init(uiImage:)))
+            VStack(alignment: .leading, spacing: PBSpace.s2) {
+                Text(found)
+                    .textStyle(.headline)
+                    .foregroundStyle(PBColor.textPrimary)
+                if showsHint {
+                    Text("Tap any value to fix it.")
+                        .textStyle(.footnote)
+                        .foregroundStyle(PBColor.textSecondary)
+                }
+            }
+        }
+        .padding(.top, PBSpace.s16)
     }
 
     @ViewBuilder
     private func content(_ review: ReceiptReview) -> some View {
-        HStack(spacing: PBSpace.s16) {
-            PBReceiptThumbnail(photo: photo.map(Image.init(uiImage:)))
-            VStack(alignment: .leading, spacing: PBSpace.s2) {
-                Text(review.foundLine)
-                    .textStyle(.headline)
-                    .foregroundStyle(PBColor.textPrimary)
-                Text("Tap any value to fix it.")
-                    .textStyle(.footnote)
-                    .foregroundStyle(PBColor.textSecondary)
-            }
-        }
-        .padding(.top, PBSpace.s16)
+        intro(found: review.foundLine, showsHint: true)
 
         VStack(spacing: 0) {
-            PBSettingRow("Merchant", value: review.merchant, icon: .receipt, trailing: .none) {
-                newName = review.merchant
-                isRenaming = true
-            }
-            .accessibilityIdentifier("scanReview.merchant")
-            PBSettingRow("Date", value: review.dateLine, icon: .calendar, trailing: .none, showsDivider: false) {
-                dateRequest = RecordID.make()
-                router.open(.pickDate(DatePickRequest(id: dateRequest, selected: review.date, latest: ledgerStore.books.today)))
-            }
-            .accessibilityIdentifier("scanReview.date")
+            PBSettingRow("Merchant", value: review.merchantLine, icon: .receipt, trailing: .none)
+                .accessibilityIdentifier("scanReview.merchant")
+            PBSettingRow("Date", value: review.dateLine, icon: .calendar, trailing: .none, showsDivider: false)
+                .accessibilityIdentifier("scanReview.date")
         }
         .pbCard(padding: 0)
         .padding(.top, PBSpace.s24)
@@ -111,17 +95,14 @@ struct ScanReviewPage: View {
         .pbCard(padding: 0)
         .padding(.top, PBSpace.s16)
 
-        PBSectionHeader("Items", actionTitle: "Add item") {
-            newName = ""
-            newAmount = ""
-            isAddingItem = true
-        }
-        .accessibilityIdentifier("scanReview.addItem")
-        .padding(.top, PBSpace.s24)
+        PBSectionHeader("Items", actionTitle: "Add item", action: addItem)
+            .accessibilityIdentifier("scanReview.addItem")
+            .padding(.top, PBSpace.s24)
 
         VStack(spacing: 0) {
             ForEach(review.items.indices, id: \.self) { index in
-                ReceiptAmountRow(label: review.items[index].label, amount: itemBinding(index), currency: currency)
+                ReceiptAmountRow(label: review.items[index].label, amount: itemBinding(index), currency: currency,
+                                 startsEditing: index == newItem) { finishItem(index) }
                     .accessibilityIdentifier("scanReview.item.\(index)")
             }
         }
@@ -144,7 +125,7 @@ struct ScanReviewPage: View {
             primary: .init("Retake", testID: "scanReview.retake", action: onRetake),
             secondary: .init("Attach photo", testID: "scanReview.attach", action: onAttach)
         )
-        .padding(.top, PBSpace.s16)
+        .padding(.top, PBSpace.s24)
     }
 
     /// `scanReview.tip`, or `scanReview.tax.<n>` for GST, service and the like.
@@ -167,26 +148,31 @@ struct ScanReviewPage: View {
         Binding { review?.items[safe: index]?.amount ?? 0 } set: { review?.items[index].amount = $0 }
     }
 
-    private func rename() {
-        let name = newName.trimmingCharacters(in: .whitespaces)
-        if !name.isEmpty { review?.merchant = name }
+    /// "New item" at ₹0, its amount open for typing.
+    private func addItem() {
+        guard review != nil else { return }
+        review?.addItem("New item", amount: 0)
+        newItem = (review?.items.count ?? 1) - 1
     }
 
-    private func addItem() {
-        let name = newName.trimmingCharacters(in: .whitespaces)
-        let amount = MoneyInput.minor(newAmount, currency: currency)
-        guard !name.isEmpty, amount > 0 else { return }
-        review?.addItem(name, amount: amount)
+    /// An item left at 0 is taken off the receipt.
+    private func finishItem(_ index: Int) {
+        if newItem == index { newItem = nil }
+        guard review?.items[safe: index]?.amount == 0 else { return }
+        review?.items.remove(at: index)
+        review?.assignment.remove(at: index)
     }
 }
 
-/// A receipt line whose amount is fixed in place: grouped ("₹2,000") at rest, raw while typing,
-/// written back on every keystroke so the total follows.
+/// A receipt line whose amount is fixed in place: grouped ("₹2,000") at rest, raw while typing (empty
+/// for ₹0), written back on every keystroke so the total follows. `onCommit` runs when typing ends.
 private struct ReceiptAmountRow: View {
     let label: String
     @Binding var amount: Int64
     let currency: String
     var isTotal = false
+    var startsEditing = false
+    var onCommit: () -> Void = {}
 
     @State private var text = ""
     @State private var isEditing = false
@@ -195,9 +181,15 @@ private struct ReceiptAmountRow: View {
         PBReceiptLineRow(label: label, amount: $text, currency: currency, isTotal: isTotal,
                          isEditing: $isEditing)
             .allowsHitTesting(!isTotal)
-            .onAppear { text = grouped }
+            .onAppear {
+                text = grouped
+                if startsEditing { isEditing = true }
+            }
             .onChange(of: amount) { if !isEditing { text = grouped } }
-            .onChange(of: isEditing) { text = isEditing ? MoneyInput.text(amount, currency: currency) : grouped }
+            .onChange(of: isEditing) {
+                text = isEditing ? (amount == 0 ? "" : MoneyInput.text(amount, currency: currency)) : grouped
+                if !isEditing { onCommit() }
+            }
             .onChange(of: text) {
                 guard isEditing else { return }
                 amount = MoneyInput.minor(text.replacingOccurrences(of: ",", with: ""), currency: currency)

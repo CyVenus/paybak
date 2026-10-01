@@ -89,11 +89,14 @@ final class SplitEditorState {
         mode = newMode
     }
 
+    /// Amounts and percents keep 2 decimals; a percent above 100 becomes 100.
     func textBinding(_ person: PersonID) -> Binding<String> {
         Binding {
             self.texts[person] ?? ""
         } set: { raw in
-            self.texts[person] = PBAmountField.sanitize(raw, allowsDecimals: Money.info(self.currency).exponent > 0 || self.mode == .percent)
+            let text = PBAmountField.sanitize(raw, allowsDecimals: Money.info(self.currency).exponent > 0 || self.mode == .percent)
+            let whole = Int(text.prefix(while: { $0 != "." })) ?? 0
+            self.texts[person] = self.mode == .percent && whole > 100 ? "100" : text
         }
     }
 

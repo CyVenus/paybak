@@ -15,7 +15,7 @@ struct AddExpenseScreen: View {
     var body: some View {
         Group {
             if let form {
-                ExpenseFormView(form: form, focusAmount: args.focusAmount && args.editing == nil && form.amount == 0)
+                ExpenseFormView(form: form, focusAmount: args.focusAmount && args.editing == nil)
             } else {
                 PBColor.bgPrimary
             }
@@ -37,7 +37,8 @@ struct AddExpenseScreen: View {
         if draft.currency != books.defaultCurrency, draft.rate == nil {
             draft.rate = store.todayRate(for: draft.currency)
         }
-        return ExpenseForm(draft: draft, categoryChosen: args.draft.map { $0.category != .other } ?? false)
+        // A drafted amount comes with its category, even Other.
+        return ExpenseForm(draft: draft, categoryChosen: args.draft.map { $0.amount > 0 || $0.category != .other } ?? false)
     }
 }
 
@@ -73,7 +74,6 @@ private struct ExpenseFormView: View {
     @State private var splitEditorEdit: SplitEditorPage.Edit?
     @State private var showsPayerEditor = false
     @State private var showsDiscard = false
-    @State private var error: String?
     @State private var showsPhotoPicker = false
     @State private var pickedPhoto: PhotosPickerItem?
     @FocusState private var amountFocused: Bool
@@ -89,15 +89,16 @@ private struct ExpenseFormView: View {
                     text: $form.amountText,
                     currency: Currency(code: form.currency),
                     date: Format.dateChip(form.date, today: books.today),
-                    helper: receiptLine ?? rateLine,
+                    helper: rateLine ?? receiptLine,
                     testIDPrefix: "addExpense",
                     focus: $amountFocused,
                     onCurrencyTap: openCurrency,
                     onDateTap: openDate
                 )
-                ExpensePeopleStrip(people: form.others, onEdit: openPeople)
+                ExpensePeopleStrip(people: form.others, includesYou: form.people.contains(Person.me), onEdit: openPeople)
                 PBTextField(nil, text: $form.title, prompt: "What was it for?", focus: $titleFocused)
                     .submitLabel(.done)
+                    .onChange(of: form.title) { if form.title.count > 60 { form.title = String(form.title.prefix(60)) } }
                     .accessibilityIdentifier("addExpense.title")
                 ExpenseFormCard(form: form, split: split, isPro: store.isPro, actions: cardActions)
             }
@@ -149,18 +150,15 @@ private struct ExpenseFormView: View {
             testIDPrefix: "addExpense.discardAlert",
             onAction: router.dismissModal
         )
-        .alert("Couldn’t save", isPresented: Binding { error != nil } set: { if !$0 { error = nil } }) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(error ?? "")
-        }
         .photosPicker(isPresented: $showsPhotoPicker, selection: $pickedPhoto, matching: .images)
         .task(id: pickedPhoto) { await attach(pickedPhoto) }
         .onRouteResult(requests.people) { result in
             if case .people(let ids) = result { form.setPeople(ids) }
         }
         .onRouteResult(requests.currency) { result in
-            if case .currency(let code) = result { form.setCurrency(code, rate: store.todayRate(for: code)) }
+            if case .currency(let code) = result {
+                form.setCurrency(code, rate: store.todayRate(for: code), group: form.groupId.flatMap { store.ledger.group($0) })
+            }
         }
         .onRouteResult(requests.date) { result in
             if case .day(let day?) = result { form.date = day }
@@ -186,9 +184,9 @@ private struct ExpenseFormView: View {
         .routeTestRoot("addExpense")
     }
 
-    /// "From receipt · 6 items" on a scanned, itemized expense (insights §4.5).
+    /// "From receipt · 6 items" on an itemized expense (insights §4.5), under the rate line if any.
     private var receiptLine: String? {
-        guard form.receipt != nil, let count = form.itemized?.items.count else { return nil }
+        guard form.splitMode == .itemized, let count = form.itemized?.items.count else { return nil }
         return "From receipt · \(count) item\(count == 1 ? "" : "s")"
     }
 
@@ -234,20 +232,16 @@ private struct ExpenseFormView: View {
         router.open(.pickDate(DatePickRequest(id: requests.date, kind: .date, selected: form.date, latest: books.today)))
     }
 
+    /// The sheet opens on the due date, or tomorrow, and starts from tomorrow.
     private func openDue() {
         dismissKeyboard()
-        let start = form.dueDate ?? books.today.adding(days: 1)
-        router.open(.pickDate(DatePickRequest(id: requests.due, kind: .dueDate, selected: start, allowsNone: true, earliest: books.today)))
+        router.open(.pickDate(DatePickRequest(id: requests.due, kind: .dueDate, selected: form.dueDate, allowsNone: true)))
     }
 
-    /// A scanned receipt's split goes back to Assign items (insights §4.5); others open the editor.
+    /// The split editor; a scanned receipt's split opens in Exact with the amounts it came to.
     private func openSplit() {
         dismissKeyboard()
-        if form.splitMode == .itemized, let itemized = form.itemized {
-            router.open(.scanReceipt(ScanRequest(id: requests.receipt, people: form.people, itemized: itemized)))
-        } else {
-            showsSplitEditor = true
-        }
+        showsSplitEditor = true
     }
 
     private func openGroup() {
@@ -307,7 +301,7 @@ private struct ExpenseFormView: View {
             }
         } catch {
             Haptics.warning()
-            self.error = error.localizedDescription
+            router.toast(error.localizedDescription)
         }
     }
 

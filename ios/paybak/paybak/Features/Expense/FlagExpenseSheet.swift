@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Flag an issue (screens-activity §4.3-G, proposal): what looks wrong, then "Flag expense".
+/// Flag an issue (screens-activity §4.3-G, proposal): what looks wrong (up to 300 characters), then
+/// "Flag expense".
 struct FlagExpenseSheet: View {
     let onClose: () -> Void
     let onFlag: (String) -> Void
@@ -12,12 +13,13 @@ struct FlagExpenseSheet: View {
         PBSheet(title: "Flag an issue", testIDPrefix: "flag", onClose: onClose) {
             VStack(spacing: PBSpace.s16) {
                 PBTextArea(nil, text: $note, prompt: "What looks wrong?", focus: $isFocused)
+                    .onChange(of: note) { if note.count > 300 { note = String(note.prefix(300)) } }
+                    .accessibilityIdentifier("flag.note")
                 PBButton("Flag expense", fillsWidth: true) { onFlag(note.trimmingCharacters(in: .whitespacesAndNewlines)) }
                     .disabled(note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityIdentifier("flag.send")
             }
         }
-        .task { isFocused = true }
     }
 }
 

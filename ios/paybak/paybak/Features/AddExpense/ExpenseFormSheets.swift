@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Paid by (add-expense §6): you and the people on the expense; a tap sets the single payer and
-/// closes. "Multiple people" opens the payer editor.
+/// Paid by (add-expense §6): you, then the others on the expense (guests tagged); a tap sets the
+/// single payer and closes. "Multiple people" opens the payer editor.
 struct PaidBySheet: View {
     let form: ExpenseForm
     let onClose: () -> Void
@@ -13,15 +13,15 @@ struct PaidBySheet: View {
     var body: some View {
         PBSheet(title: "Paid by", testIDPrefix: "paidBy", onClose: onClose) {
             VStack(spacing: 0) {
-                ForEach(form.people, id: \.self) { id in
+                ForEach(choices, id: \.self) { id in
                     PBPersonRow(
                         name: id == Person.me ? "You" : store.ledger.person(id)?.name ?? "Someone",
                         avatar: id == Person.me ? profileStore.avatarContent : store.ledger.person(id)?.avatarContent ?? .icon(.profile),
                         subtitle: id == Person.me ? profileStore.profile.name : nil,
+                        tag: store.ledger.person(id)?.isGuest == true ? "Guest" : nil,
                         trailing: form.payers.isEmpty && form.payerId == id ? .check : .none,
-                        showsDivider: id != form.people.last
+                        showsDivider: id != choices.last
                     ) {
-                        Haptics.selection()
                         form.payers = []
                         form.payerId = id
                         onClose()
@@ -36,6 +36,9 @@ struct PaidBySheet: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("paidBy.sheet")
     }
+
+    /// Who can have paid: you, then the others on the expense.
+    private var choices: [PersonID] { [Person.me] + form.others }
 }
 
 /// Category (add-expense §8): the eight categories with their icons, searchable; a tap picks one
@@ -62,14 +65,14 @@ struct CategorySheet: View {
                     Text("No categories match “\(query)”")
                         .textStyle(.footnote)
                         .foregroundStyle(PBColor.textSecondary)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, PBSpace.s24)
+                        .padding(.top, PBSpace.s16)
                 } else {
                     VStack(spacing: 0) {
                         ForEach(matches, id: \.self) { category in
                             PBSettingRow(category.name, icon: category.pbIcon, trailing: category == selected ? .check : .unchecked,
                                          showsDivider: category != matches.last) {
-                                Haptics.selection()
                                 onSelect(category)
                             }
                             .accessibilityIdentifier("category.row.\(category.rawValue)")
@@ -103,7 +106,7 @@ struct NotesSheet: View {
     var body: some View {
         PBSheet(title: "Notes", testIDPrefix: "notes", onClose: onClose) {
             VStack(spacing: PBSpace.s16) {
-                PBTextArea(nil, text: $text, prompt: "Add a note for everyone on this expense", focus: $isFocused)
+                PBTextArea(nil, text: $text, prompt: "Anything to remember about it", focus: $isFocused)
                     .onChange(of: text) { if text.count > 500 { text = String(text.prefix(500)) } }
                     .accessibilityIdentifier("notes.field")
                 PBButton("Done", fillsWidth: true) {

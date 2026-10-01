@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// A group's recurring expenses (screens-insights-ai §5.2): the drafts that need an amount, then the
-/// rules with their schedule, payer, next date and amount. Add starts a monthly expense for the
-/// group; a rule opens the Repeat sheet to change its schedule or stop it.
+/// rules with their schedule, payer, next date and amount (or a line saying nothing repeats yet).
+/// Add starts a monthly expense for the group; a rule opens the Repeat sheet to change its schedule,
+/// and Never stops it at once ("Wi-Fi won’t repeat").
 struct RecurringScreen: View {
     let groupId: GroupID
 
@@ -10,7 +11,6 @@ struct RecurringScreen: View {
     @Environment(LedgerStore.self) private var ledgerStore
     @State private var editRequest = RecordID.make()
     @State private var editing: RuleID?
-    @State private var stopping: RecurringRule?
 
     var body: some View {
         let page = ledgerStore.books.recurringPage(groupId)
@@ -23,10 +23,8 @@ struct RecurringScreen: View {
                     drafts(page.drafts)
                         .padding(.top, PBSpace.s24)
                 }
-                if !page.rules.isEmpty {
-                    rules(page.rules)
-                        .padding(.top, PBSpace.s24)
-                }
+                rules(page.rules)
+                    .padding(.top, PBSpace.s24)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, PBLayout.screenMargin)
@@ -39,12 +37,6 @@ struct RecurringScreen: View {
         }
         .onRouteResult(editRequest) { result in
             if case .repeatRule(let rule) = result { update(with: rule) }
-        }
-        .alert("Stop repeating \(stopping?.title ?? "")?", isPresented: isStopAlertPresented, presenting: stopping) { rule in
-            Button("Keep", role: .cancel) {}
-            Button("Stop", role: .destructive) { try? ledgerStore.deleteRecurringRule(rule.id) }
-        } message: { rule in
-            Text("Paybak won’t add \(rule.title) to \(ledgerStore.books.groupName(groupId)) any more. Expenses it already added stay.")
         }
         .routeTestRoot("recurring")
     }
@@ -70,24 +62,35 @@ struct RecurringScreen: View {
     private func rules(_ rules: [RecurringPage.RuleRow]) -> some View {
         VStack(alignment: .leading, spacing: PBSpace.s8) {
             PBSectionHeader("Rules")
-            VStack(spacing: 0) {
-                ForEach(rules) { rule in
-                    Button { edit(rule.id) } label: {
-                        PBActivityRow(
-                            leading: .icon(PBIcon(rawValue: rule.icon) ?? .repeat), title: rule.title, subtitle: rule.subtitle,
-                            detail: rule.detail, trailing: .amount(rule.amount, date: nil, isIncoming: true), surface: .onCard,
-                            showsDivider: rule.id != rules.last?.id
-                        )
-                        .padding(.horizontal, PBSpace.s16)
-                    }
-                    .buttonStyle(PBRowButtonStyle(surface: .card))
-                    .accessibilityHint("Change how it repeats")
-                    .accessibilityIdentifier("recurring.rule.\(rule.id)")
-                }
+            if rules.isEmpty {
+                Text("Nothing repeats in \(ledgerStore.books.groupName(groupId)) yet. Add rent, bills or anything that comes back each month.")
+                    .textStyle(.footnote)
+                    .foregroundStyle(PBColor.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                ruleList(rules)
             }
-            .padding(.vertical, PBSpace.s4)
-            .pbCard(padding: 0)
         }
+    }
+
+    private func ruleList(_ rules: [RecurringPage.RuleRow]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(rules) { rule in
+                Button { edit(rule.id) } label: {
+                    PBActivityRow(
+                        leading: .icon(PBIcon(rawValue: rule.icon) ?? .repeat), title: rule.title, subtitle: rule.subtitle,
+                        detail: rule.detail, trailing: .amount(rule.amount, date: nil, isIncoming: true), surface: .onCard,
+                        showsDivider: rule.id != rules.last?.id
+                    )
+                    .padding(.horizontal, PBSpace.s16)
+                }
+                .buttonStyle(PBRowButtonStyle(surface: .card))
+                .accessibilityHint("Change how it repeats")
+                .accessibilityIdentifier("recurring.rule.\(rule.id)")
+            }
+        }
+        .padding(.vertical, PBSpace.s4)
+        .pbCard(padding: 0)
     }
 
     // MARK: Actions
@@ -108,28 +111,25 @@ struct RecurringScreen: View {
         guard let rule = ledgerStore.ledger.rule(id) else { return }
         editing = id
         editRequest = RecordID.make()
-        router.open(.repeatRule(RepeatRuleRequest(id: editRequest, current: rule.repeatRule, startDate: ledgerStore.books.today)))
+        // The sheet's next date counts from the rule's last occurrence.
+        router.open(.repeatRule(RepeatRuleRequest(id: editRequest, current: rule.repeatRule, startDate: rule.lastOccurrence ?? rule.startDate)))
     }
 
-    /// Never asks before stopping the rule; otherwise the schedule changes. A variable rule only turns
-    /// fixed when it has an amount to repeat (its latest entered one).
+    /// Never stops the rule ("Wi-Fi won’t repeat"); otherwise the schedule changes. A rule with no
+    /// amount of its own can only make drafts.
     private func update(with repeatRule: RepeatRule?) {
         guard let id = editing, let rule = ledgerStore.ledger.rule(id) else { return }
+        editing = nil
         guard let repeatRule else {
-            stopping = rule
+            try? ledgerStore.deleteRecurringRule(id)
+            router.toast("\(rule.title) won’t repeat")
             return
         }
-        let amount = rule.amount ?? ledgerStore.ledger.expenses.last { $0.recurringRuleId == id && $0.deletedAt == nil }?.amount
         try? ledgerStore.updateRecurringRule(id) { rule in
             rule.frequency = repeatRule.frequency
             rule.anchorDate = repeatRule.anchorDate
-            rule.variable = repeatRule.variable || amount == nil
-            rule.amount = rule.variable ? nil : amount
+            rule.variable = repeatRule.variable || rule.amount == nil
         }
-    }
-
-    private var isStopAlertPresented: Binding<Bool> {
-        Binding { stopping != nil } set: { if !$0 { stopping = nil } }
     }
 }
 
@@ -150,7 +150,6 @@ private struct DraftRowView: View {
                         .textStyle(.footnote)
                         .foregroundStyle(PBColor.textSecondary)
                 }
-                .lineLimit(1)
                 PBBadge("Draft", style: .onCard)
             }
             .frame(maxWidth: .infinity, alignment: .leading)

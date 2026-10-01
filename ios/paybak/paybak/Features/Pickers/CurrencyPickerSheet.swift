@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// The currency sheet (add-expense §9): Recent (the default currency, then recently used ones) and
-/// All currencies (the majors first, then every other ISO currency by name); search shows one flat
-/// list by name or code. A tap answers `.currency(code)` and closes.
+/// The currency sheet (add-expense §9): Recent (the default currency, then the ones on your recent
+/// records, then the current pick) and All currencies (the majors first, then every other ISO
+/// currency by name); search shows one flat list by name or code. A tap answers `.currency(code)`
+/// and closes.
 struct CurrencyPickerSheet: View {
     let request: CurrencyPickRequest
 
@@ -17,7 +18,7 @@ struct CurrencyPickerSheet: View {
         PBSheet(title: request.title, search: $query, searchPrompt: "Search currencies", testIDPrefix: "currency", onClose: router.dismissSheet) {
             ScrollView {
                 if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                    VStack(alignment: .leading, spacing: PBSpace.s24) {
+                    VStack(alignment: .leading, spacing: PBSpace.s24 - PBSpace.s4) {
                         section("Recent", codes: recent)
                         section("All currencies", codes: everything.filter { !recent.contains($0) })
                     }
@@ -27,8 +28,9 @@ struct CurrencyPickerSheet: View {
                         Text("No currencies match “\(query)”")
                             .textStyle(.footnote)
                             .foregroundStyle(PBColor.textSecondary)
+                            .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
-                            .padding(.top, PBSpace.s24)
+                            .padding(.top, PBSpace.s16)
                     } else {
                         rows(results.map(\.code))
                     }
@@ -40,7 +42,12 @@ struct CurrencyPickerSheet: View {
         .routeTestRoot("pickCurrency")
     }
 
-    private var recent: [String] { store.recentCurrencyCodes }
+    /// The default currency, the recent records' currencies, then the one picked now.
+    private var recent: [String] {
+        let codes = store.recentCurrencyCodes
+        guard let selected = request.selected, !codes.contains(selected) else { return codes }
+        return codes + [selected]
+    }
 
     private var everything: [String] { Self.allCodes }
 
@@ -66,7 +73,6 @@ struct CurrencyPickerSheet: View {
             ForEach(codes, id: \.self) { code in
                 let currency = Self.currency(code)
                 PBCurrencyRow(symbol: currency.tileText, title: currency.name, subtitle: code, isSelected: code == request.selected) {
-                    Haptics.selection()
                     router.complete(request.id, with: .currency(code))
                 }
                 .accessibilityIdentifier("currency.row.\(code)")

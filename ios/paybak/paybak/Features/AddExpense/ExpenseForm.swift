@@ -44,7 +44,9 @@ final class ExpenseForm {
         title = draft.title
         category = categoryChosen ? draft.category : nil
         groupId = draft.groupId
-        people = draft.rows.isEmpty ? [Person.me] : draft.rows.map(\.personId)
+        // A new expense lists you first; an edit keeps the saved rows' order.
+        let ids = draft.rows.isEmpty ? [Person.me] : draft.rows.map(\.personId)
+        people = editing == nil ? ids.filter { $0 == Person.me } + ids.filter { $0 != Person.me } : ids
         excluded = Set(draft.rows.filter { !$0.included }.map(\.personId))
         splitMode = draft.splitMode
         splitValues = Dictionary(draft.rows.compactMap { row in row.value.map { (row.personId, $0) } }, uniquingKeysWith: { first, _ in first })
@@ -96,13 +98,19 @@ final class ExpenseForm {
 
     // MARK: People
 
-    /// Split with's result: keeps the order people were added; newcomers join the split (0 in Exact
-    /// and Percent, 1 share in Shares); a removed payer resets the payer to you.
+    /// Split with's result: you first (on a new expense), then the others in the order they were
+    /// added; newcomers join the split (0 in Exact and Percent, 1 share in Shares); a removed payer
+    /// resets the payer to you. A receipt's items stay only while the people don't change.
     func setPeople(_ ids: [PersonID]) {
         let kept = people.filter(ids.contains)
         let added = ids.filter { !people.contains($0) }
-        people = kept + added
+        let ordered = kept + added
+        // An edit keeps the saved order, so an unchanged split isn't logged as changed.
+        let next = isEditing ? ordered : ordered.filter { $0 == Person.me } + ordered.filter { $0 != Person.me }
+        let changed = next != people
+        people = next
         excluded = excluded.filter(people.contains)
+        if excluded.count == people.count { excluded = [] }
         splitValues = splitValues.filter { people.contains($0.key) }
         for person in added {
             splitValues[person] = splitMode == .shares ? 1 : 0
@@ -113,7 +121,7 @@ final class ExpenseForm {
             payerId = payers[0].personId
             payers = []
         }
-        if splitMode == .itemized {
+        if splitMode == .itemized, changed {
             splitMode = .equal
             itemized = nil
         }
@@ -132,20 +140,25 @@ final class ExpenseForm {
         }
     }
 
-    func setCurrency(_ code: String, rate: Rate?) {
+    /// A currency other than the group's takes the expense out of the group.
+    func setCurrency(_ code: String, rate: Rate?, group: LedgerGroup? = nil) {
+        if let group, group.id == groupId, group.currency != code { groupId = nil }
         currency = code
         self.rate = rate
         amountText = MoneyInput.text(MoneyInput.minor(amountText, currency: code), currency: code).nonZero
     }
 
-    /// A read receipt's itemized draft (Pro scan), or only its photo when it couldn't be read. A
-    /// reassignment (no title) keeps the form's title, category and date.
+    /// A read receipt's itemized draft (Pro scan), or only its photo when it couldn't be read. The
+    /// scan is paid by you; a reassignment (no title) keeps the form's title, category and date.
     func apply(_ result: ReceiptResult) {
         let scanned = result.draft
         receipt = scanned.receipt ?? receipt
         guard scanned.itemized != nil else { return }
         amountText = MoneyInput.text(scanned.amount, currency: scanned.currency)
         currency = scanned.currency
+        rate = scanned.rate
+        payers = []
+        payerId = scanned.payers.first?.personId ?? Person.me
         if !scanned.title.isEmpty {
             title = scanned.title
             category = scanned.category

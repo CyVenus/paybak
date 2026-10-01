@@ -2,10 +2,14 @@ import SwiftUI
 
 /// Pick friends (or guests) (add-expense §5). Multi-select ("Split with", New group members) hands
 /// every change back live with `.people(ids)`, so Back, Done and the edge swipe all keep it; single
-/// select (Record payment From / To, Lend money) answers `.person(id)` and closes. Search matches
+/// select (Record payment From / To, Lend money) has no Done or ticks: a tap answers `.person(id)`
+/// and closes. The picked people stay as chips above the list while you search. Search matches
 /// names, usernames and contacts; no match offers to add the text as a guest.
 struct PeoplePickerScreen: View {
     let request: PeoplePickRequest
+    /// Back and Done for a picker pushed inside a flow's own pages (Assign items' "Add"); the router's
+    /// back otherwise.
+    var onClose: (() -> Void)?
 
     @Environment(AppRouter.self) private var router
     @Environment(LedgerStore.self) private var store
@@ -23,13 +27,13 @@ struct PeoplePickerScreen: View {
             VStack(alignment: .leading, spacing: PBSpace.s16) {
                 PBTextField(nil, text: $query, prompt: "Name, phone, email or @username", icon: .search, showsClearButton: true)
                     .accessibilityIdentifier("\(prefix).search")
-                if isMulti, !chips.isEmpty, query.isEmpty {
+                if isMulti, !chips.isEmpty {
                     selectedChips
                 }
-                if request.showsYou, query.isEmpty {
+                if request.showsYou, isQueryBlank {
                     youCard
                 }
-                if isMulti, query.isEmpty {
+                if isQueryBlank {
                     PBSheetRow(title: "Add a new friend", subtitle: nil, icon: .userAdd) { router.open(.addFriend) }
                         .accessibilityIdentifier("\(prefix).addFriend")
                 }
@@ -40,7 +44,11 @@ struct PeoplePickerScreen: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .pbPinnedHeader {
-            PBDoneHeader(title: request.title, testIDPrefix: prefix, onBack: router.back, onDone: router.back)
+            if isMulti {
+                PBDoneHeader(title: request.title, testIDPrefix: prefix, onBack: close, onDone: close)
+            } else {
+                PBPushHeader(request.title, testIDPrefix: prefix, onBack: close)
+            }
         }
         .onAppear(perform: load)
         .onChange(of: store.ledger.people.map(\.id)) { old, new in
@@ -77,7 +85,7 @@ struct PeoplePickerScreen: View {
             avatar: profileStore.avatarContent,
             subtitle: profileStore.profile.name,
             isOnCard: true,
-            trailing: isMulti ? .select(selection.contains(Person.me)) : (request.selected.first == Person.me ? .check : .none),
+            trailing: isMulti ? .select(selection.contains(Person.me)) : .none,
             showsDivider: false
         ) {
             pick(Person.me)
@@ -89,9 +97,9 @@ struct PeoplePickerScreen: View {
     @ViewBuilder
     private var friends: some View {
         let people = matches
-        if people.isEmpty, !query.trimmingCharacters(in: .whitespaces).isEmpty {
+        if people.isEmpty, !isQueryBlank {
             if request.allowsGuests {
-                PBSheetRow(title: guestRowTitle, subtitle: nil, icon: .userAdd, action: addGuest)
+                PBSheetRow(title: guestRowTitle, subtitle: nil, icon: .userAdd, showsChevron: false, action: addGuest)
                     .accessibilityIdentifier("\(prefix).addGuest")
             } else {
                 Text("No friends match “\(query)”")
@@ -101,9 +109,7 @@ struct PeoplePickerScreen: View {
             }
         } else if !people.isEmpty {
             VStack(alignment: .leading, spacing: PBSpace.s8) {
-                if query.isEmpty {
-                    PBSectionHeader("Friends")
-                }
+                PBSectionHeader("Friends")
                 VStack(spacing: 0) {
                     ForEach(people) { person in
                         PBPersonRow(
@@ -125,9 +131,10 @@ struct PeoplePickerScreen: View {
     }
 
     private func trailing(for id: PersonID) -> PBPersonRow.Trailing {
-        if isMulti { return .select(selection.contains(id)) }
-        return request.selected.first == id ? .check : .none
+        isMulti ? .select(selection.contains(id)) : .none
     }
+
+    private var isQueryBlank: Bool { query.trimmingCharacters(in: .whitespaces).isEmpty }
 
     /// Friends in the picker's order, filtered by the search.
     private var matches: [Person] {
@@ -141,9 +148,10 @@ struct PeoplePickerScreen: View {
         }
     }
 
+    /// An email ("a@b.co") or a phone number (7+ digits, spaces, dashes, an optional "+").
     private var looksLikeContact: Bool {
         let text = query.trimmingCharacters(in: .whitespaces)
-        return text.contains("@") && text.contains(".") || text.filter(\.isNumber).count >= 7
+        return text.wholeMatch(of: /\S+@\S+\.\S+/) != nil || text.wholeMatch(of: /\+?[\d\s-]{7,}/) != nil
     }
 
     private var guestRowTitle: String {
@@ -152,6 +160,10 @@ struct PeoplePickerScreen: View {
     }
 
     // MARK: Actions
+
+    private func close() {
+        if let onClose { onClose() } else { router.back() }
+    }
 
     /// Selected people first (as the caller listed them), then everyone in the order they were added.
     private func load() {
@@ -163,7 +175,6 @@ struct PeoplePickerScreen: View {
     }
 
     private func pick(_ id: PersonID) {
-        Haptics.selection()
         if isMulti {
             toggle(id)
         } else {

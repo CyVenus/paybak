@@ -81,7 +81,7 @@ struct ScanCameraView: View {
     }
 
     private var hintText: String {
-        if isReading { return "Reading…" }
+        if isReading { return "Reading the receipt…" }
         return camera.status == .denied ? "Allow camera access in Settings to scan receipts." : "Fit the whole receipt in the frame"
     }
 
@@ -102,6 +102,7 @@ struct ScanCameraView: View {
                 .accessibilityIdentifier("scan.upload")
                 Spacer()
             }
+            // The shutter gives its own light haptic, as Android's PbShutterButton does.
             PBShutterButton(action: onCapture)
                 .disabled(isReading || camera.status != .running)
                 .accessibilityIdentifier("scan.shutter")

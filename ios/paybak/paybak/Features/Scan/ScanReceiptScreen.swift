@@ -4,7 +4,7 @@ import SwiftUI
 /// Scan receipt (screens-insights-ai §4): the camera (live, or the bundled receipt on the simulator),
 /// then Check receipt and Assign items pushed inside this modal, ending in the Add expense form it
 /// was opened from, prefilled (`.receipt(result)`). Reading is Pro; a free user's photo is only
-/// attached. The form's Split row on a scanned expense opens straight on Assign items. Every page's
+/// attached. A request carrying a scanned expense's items opens straight on Assign items. Every page's
 /// test root is `screen.scanReceipt`, with `scanReceipt.state.<page>`.
 struct ScanReceiptScreen: View {
     let request: ScanRequest
@@ -21,6 +21,10 @@ struct ScanReceiptScreen: View {
     @State private var showsReview = false
     @State private var showsAssign = false
     @State private var pickedPhoto: PhotosPickerItem?
+    /// The people besides you, once Assign items' "Add" changed them.
+    @State private var others: [PersonID]?
+    @State private var peopleRequest = RecordID.make()
+    @State private var showsPeople = false
 
     var body: some View {
         if let itemized = request.itemized {
@@ -48,7 +52,7 @@ struct ScanReceiptScreen: View {
                 showsAssign = true
             }
             .navigationDestination(isPresented: $showsAssign) {
-                ScanAssignPage(review: $review, people: people, onBack: { showsAssign = false }, onContinue: finish)
+                assignPage
             }
         }
         .scanState("camera")
@@ -63,9 +67,43 @@ struct ScanReceiptScreen: View {
         }
     }
 
-    /// The people on the expense (you first), as the form passed them.
+    /// Assign items; scanned from a form with nobody but you, "Add" picks the people (Split with,
+    /// pushed inside this flow).
+    private var assignPage: some View {
+        ScanAssignPage(review: $review, people: people, addsPeople: startsAlone, onAddPeople: { showsPeople = true },
+                       onBack: { showsAssign = false }, onContinue: finish)
+            .navigationDestination(isPresented: $showsPeople) {
+                PeoplePickerScreen(request: PeoplePickRequest(id: peopleRequest, selected: Array(people.dropFirst())),
+                                   onClose: { showsPeople = false })
+                    .navigationBarHiddenKeepingSwipeBack()
+            }
+            .onRouteResult(peopleRequest) { result in
+                if case .people(let ids) = result { setOthers(ids) }
+            }
+    }
+
+    /// The people on the expense (you first), as the form passed them or as picked since.
     private var people: [PersonID] {
-        [Person.me] + request.people.filter { $0 != Person.me }
+        [Person.me] + (others ?? request.people.filter { $0 != Person.me })
+    }
+
+    /// The form had nobody but you on the expense.
+    private var startsAlone: Bool {
+        request.people.allSatisfy { $0 == Person.me }
+    }
+
+    /// You and the picked people are on the expense now; items lose anyone dropped.
+    private func setOthers(_ ids: [PersonID]) {
+        var next: [PersonID] = []
+        for id in ids where id != Person.me && !next.contains(id) {
+            next.append(id)
+        }
+        others = next
+        let everyone = Set([Person.me] + next)
+        if var current = review {
+            current.assignment = current.assignment.map { $0.filter(everyone.contains) }
+            review = current
+        }
     }
 
     // MARK: Reading
@@ -108,7 +146,6 @@ struct ScanReceiptScreen: View {
             review = nil
             isUnreadable = true
         }
-        Haptics.lightImpact()
         showsReview = true
     }
 

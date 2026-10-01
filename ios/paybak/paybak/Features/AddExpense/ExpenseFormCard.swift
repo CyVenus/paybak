@@ -29,11 +29,14 @@ struct ExpenseFormCard: View {
                 .accessibilityIdentifier("addExpense.row.category")
             PBSettingRow("Paid by", value: paidByValue, icon: .wallet, action: actions.paidBy)
                 .accessibilityIdentifier("addExpense.row.paidBy")
-            PBSettingRow("Split", value: split.formValue.text, icon: .split, action: actions.split)
+            // "Doesn’t add up" reads in red.
+            PBSettingRow("Split", value: split.formValue.text, icon: .split,
+                         valueColor: split.formValue.isError ? PBColor.textDestructive : PBColor.textSecondary,
+                         action: actions.split)
                 .accessibilityIdentifier("addExpense.row.split")
             PBSettingRow("Group", value: form.groupId.flatMap { store.ledger.group($0)?.name } ?? "No group", icon: .groups, action: actions.group)
                 .accessibilityIdentifier("addExpense.row.group")
-            PBSettingRow("Due", value: form.dueDate.map { Format.dayWithYear($0, today: actions.today) } ?? "None",
+            PBSettingRow("Due", value: form.dueDate.map(Format.day) ?? "None",
                          icon: .calendar, showsDivider: false, action: actions.due)
                 .accessibilityIdentifier("addExpense.row.due")
             PBDueChips(selected: QuickDue.matching(form.dueDate, today: actions.today), testIDPrefix: "addExpense.due",
@@ -57,6 +60,7 @@ struct ExpenseFormCard: View {
     private var repeatValue: String {
         switch form.repeatRule?.frequency {
         case .weekly: "Weekly"
+        case .biweekly: "Every 2 weeks"
         case .monthly: "Monthly"
         case .yearly: "Yearly"
         case nil: "Never"
@@ -72,31 +76,11 @@ struct ExpenseFormCard: View {
     @ViewBuilder
     private var receiptRow: some View {
         if form.receipt != nil {
-            Button(action: actions.receipt) {
-                HStack(spacing: PBSpace.s12) {
-                    PBIconView(.camera)
-                        .foregroundStyle(PBColor.iconPrimary)
-                    Text("Receipt")
-                        .textStyle(.headline)
-                        .foregroundStyle(PBColor.textPrimary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    ReceiptImage(receipt: form.receipt)
-                        .frame(width: 24.9, height: 32)
-                        .clipShape(.rect(cornerRadius: 4.4))
-                    Text("Attached")
-                        .textStyle(.body)
-                        .foregroundStyle(PBColor.textSecondary)
-                    PBIconView(.chevronRight, size: PBSize.iconMd)
-                        .foregroundStyle(PBColor.iconTertiary)
-                }
-                .padding(.vertical, PBSpace.s12)
-                .padding(.horizontal, PBSpace.s16)
-                .frame(minHeight: 56)
-                .overlay(alignment: .bottom) { PBDivider().padding(.leading, 52) }
-                .contentShape(.rect)
-            }
-            .buttonStyle(PBRowButtonStyle(surface: .card))
-            .accessibilityElement(children: .combine)
+            PBSettingRow("Receipt", value: "Attached", icon: .camera, valueLeading: AnyView(
+                ReceiptImage(receipt: form.receipt)
+                    .frame(width: 25, height: 32)
+                    .clipShape(.rect(cornerRadius: 4.4))
+            ), action: actions.receipt)
         } else {
             PBSettingRow("Add receipt", icon: .camera, action: actions.receipt)
         }

@@ -61,10 +61,10 @@ struct ExpenseDetailScreen: View {
         .routeTestRoot("expense")
     }
 
-    /// People on the expense can edit it while it isn't deleted.
+    /// Edit shows while the expense isn't deleted.
     private var canEdit: Bool {
         guard let expense = store.ledger.expense(expenseId) else { return false }
-        return !expense.isDeleted && expense.participantIds.contains(Person.me)
+        return !expense.isDeleted
     }
 
     private func content(_ detail: ExpenseDetail) -> some View {
@@ -146,6 +146,8 @@ struct ExpenseDetailScreen: View {
         let icon: PBIcon
         /// The row opens this group.
         var groupId: GroupID?
+        /// Owed reads black, owing grey, settled light grey.
+        var valueColor = PBColor.textSecondary
     }
 
     /// Your share · Due · Your {group} balance, each only when it applies.
@@ -159,12 +161,13 @@ struct ExpenseDetailScreen: View {
         }
         if let balance = detail.groupBalance, let groupId = detail.expense.groupId {
             let value = balance.net == 0 ? Money.format(0, balance.currency) : Money.format(balance.net, balance.currency, sign: .signed)
-            rows.append(ShareRow(id: "groupBalance", title: balance.title, value: value, icon: .groups, groupId: groupId))
+            let color = balance.net > 0 ? PBColor.textPrimary : balance.net < 0 ? PBColor.textSecondary : PBColor.textTertiary
+            rows.append(ShareRow(id: "groupBalance", title: balance.title, value: value, icon: .groups, groupId: groupId, valueColor: color))
         }
         return VStack(spacing: 0) {
             ForEach(rows) { row in
                 PBSettingRow(row.title, value: row.value, icon: row.icon, trailing: row.groupId == nil ? .none : .chevron,
-                             showsDivider: row.id != rows.last?.id,
+                             showsDivider: row.id != rows.last?.id, valueColor: row.valueColor,
                              action: row.groupId.map { id in { router.open(.group(id)) } })
                     .accessibilityIdentifier("expense.\(row.id)")
             }
@@ -180,8 +183,7 @@ struct ExpenseDetailScreen: View {
                     PBPersonRow(name: line.name, avatar: avatar(line.personId), subtitle: line.subtitle,
                                 tag: store.ledger.person(line.personId)?.isGuest == true ? "Guest" : nil,
                                 size: .compact, trailing: .amount(line.value),
-                                showsDivider: line.id != detail.splitLines.last?.id,
-                                action: line.personId == Person.me ? nil : { router.open(.friend(line.personId)) })
+                                showsDivider: line.id != detail.splitLines.last?.id)
                         .accessibilityIdentifier("expense.split.\(line.personId)")
                 }
             }
@@ -215,7 +217,7 @@ struct ExpenseDetailScreen: View {
                     .padding(PBSpace.s12)
                     .contentShape(.rect)
                 }
-                .buttonStyle(PBRowButtonStyle(surface: .card))
+                .buttonStyle(.plain)
                 .pbCard(padding: 0)
                 .accessibilityIdentifier("expense.receipt")
             } else {
@@ -295,10 +297,13 @@ struct ExpenseDetailScreen: View {
     }
 
     private var missing: some View {
-        Text("This expense is no longer here.")
-            .textStyle(.body)
-            .foregroundStyle(PBColor.textSecondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        ScrollView {
+            Text("This expense isn’t available any more.")
+                .textStyle(.body)
+                .foregroundStyle(PBColor.textSecondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .pbPushContent()
+        }
     }
 
     // MARK: Actions
@@ -316,7 +321,6 @@ struct ExpenseDetailScreen: View {
             try withAnimation(.easeOut(duration: 0.25)) {
                 try store.addComment(to: expenseId, text: text)
             }
-            Haptics.success()
             isComposerFocused = false
         } catch {
             Haptics.warning()
@@ -325,7 +329,6 @@ struct ExpenseDetailScreen: View {
 
     private func resolve() {
         try? store.resolveFlag(expenseId)
-        Haptics.success()
     }
 
     /// "{title} moves to Recently deleted for 30 days. {group} balances update for everyone."
