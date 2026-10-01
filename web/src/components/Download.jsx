@@ -1,4 +1,5 @@
 import ApkButton from './ApkButton'
+import IosLink from './IosLink'
 import { AndroidIcon, Sparks } from './Doodles'
 import { APK_VERSION, APK_SIZE } from '../config'
 
@@ -12,13 +13,13 @@ export default function Download() {
           <p>Download Paybak for Android and settle your first bill tonight.</p>
           <div className="cta-actions">
             <ApkButton invert>Download APK</ApkButton>
-            <span className="soon"> iOS · coming soon</span>
+            <IosLink />
           </div>
           <div className="cta-meta">
             <AndroidIcon />
             <span>{APK_VERSION}</span><i />
             <span>{APK_SIZE}</span><i />
-            <span>Android 8.0+</span>
+            <span>Android 7.0+</span>
           </div>
           <p className="cta-fine">Tip: allow “Install unknown apps” for your browser when prompted.</p>
         </div>

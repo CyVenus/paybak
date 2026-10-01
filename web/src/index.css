@@ -462,7 +462,10 @@ p { margin: 0; }
 .cta-sparks { position: absolute; top: 30px; right: 12%; width: 80px; }
 .cta-sparks path { stroke: var(--paper); }
 .cta-actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; }
-.soon { font-weight: 700; color: #8b877f; }
+.ios-link { position: relative; font-weight: 700; }
+.ios-link::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform 0.45s var(--ease); }
+.ios-link:hover::after, .ios-link:focus-visible::after { transform: scaleX(1); transform-origin: left; }
+.cta .ios-link { color: var(--paper); }
 .cta-meta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; font-size: 0.88rem; font-weight: 600; color: #bdb8ae; }
 .cta-meta i { width: 4px; height: 4px; border-radius: 50%; background: #666; }
 .cta-fine { font-size: 0.82rem !important; color: #7a766f !important; }

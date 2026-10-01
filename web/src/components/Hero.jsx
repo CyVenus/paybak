@@ -1,4 +1,5 @@
 import ApkButton from './ApkButton'
+import IosLink from './IosLink'
 import Phone from './Phone'
 import { HomeScreen } from './screens'
 import HandWord from './HandWord'
@@ -25,7 +26,7 @@ export default function Hero({ play = true }) {
             <div className="stack">
               {[0, 1, 2, 3, 4].map((v) => <Avatar key={v} v={v} size={34} />)}
             </div>
-            <span>Android {APK_VERSION} · Free · iOS coming soon</span>
+            <span>Android {APK_VERSION} · Free · <IosLink /></span>
           </div>
         </div>
 
