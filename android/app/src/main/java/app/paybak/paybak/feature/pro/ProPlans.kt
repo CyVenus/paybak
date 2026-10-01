@@ -5,6 +5,8 @@ import app.paybak.paybak.R
 import app.paybak.paybak.domain.model.Entitlement
 import app.paybak.paybak.domain.model.PlanPeriod
 import app.paybak.paybak.ui.icons.PbIcon
+import com.revenuecat.purchases.EntitlementInfo
+import com.revenuecat.purchases.PeriodType
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -26,21 +28,36 @@ internal enum class ProFeature(
 }
 
 /**
- * Where a Pro member stands, for the Welcome line (§3): a yearly trial ends on a day; a
- * subscription renews a whole number of years or months after it started (or its trial ended).
+ * Where a Pro member stands, for the Welcome line (§3): a trial ends on a day; a subscription
+ * renews on a day ([period] null when the store doesn't say which plan); a cancelled one ends.
  */
 internal sealed interface ProStatus {
     val day: LocalDate
 
     data class TrialEnds(override val day: LocalDate) : ProStatus
 
-    data class Renews(override val day: LocalDate, val period: PlanPeriod) : ProStatus
+    data class Renews(override val day: LocalDate, val period: PlanPeriod? = null) : ProStatus
+
+    data class Ends(override val day: LocalDate) : ProStatus
 }
 
 /**
- * The status of this entitlement, null on the free plan: the trial's end while it runs, otherwise
- * the next renewal after [today]. A subscription counts from its trial's end, else from [since];
- * [today] stands in for a missing start.
+ * The status of the store's Pro entitlement: its trial's end, its next renewal, or the day it
+ * lapses once cancelled. Null when it never expires.
+ */
+internal fun EntitlementInfo.status(zone: ZoneId): ProStatus? {
+    val day = expirationDate?.toInstant()?.atZone(zone)?.toLocalDate() ?: return null
+    return when {
+        periodType == PeriodType.TRIAL -> ProStatus.TrialEnds(day)
+        willRenew -> ProStatus.Renews(day)
+        else -> ProStatus.Ends(day)
+    }
+}
+
+/**
+ * The status of this simulated entitlement (debug builds), null on the free plan: the trial's end
+ * while it runs, otherwise the next renewal after [today]. A subscription counts from its trial's
+ * end, else from [since]; [today] stands in for a missing start.
  */
 internal fun Entitlement.status(today: LocalDate, zone: ZoneId): ProStatus? {
     if (!isPro) return null

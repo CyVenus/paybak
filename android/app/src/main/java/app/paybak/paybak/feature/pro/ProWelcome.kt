@@ -20,6 +20,7 @@ import app.paybak.paybak.feature.settings.SettingsSection
 import app.paybak.paybak.rive.PaybakRiveAsset
 import app.paybak.paybak.rive.PaybakRiveIllustration
 import app.paybak.paybak.ui.components.PbButton
+import app.paybak.paybak.ui.components.PbButtonStyle
 import app.paybak.paybak.ui.components.PbCard
 import app.paybak.paybak.ui.components.PbScreen
 import app.paybak.paybak.ui.components.PbSettingRow
@@ -35,22 +36,33 @@ private val IllustrationHeight = 200.dp
 
 /**
  * Paybak Pro — Welcome (screens-settings §3): the trial has started (or the member's plan
- * status), what's now unlocked, and Done. The whole screen sits inside the paywall route, so its
- * content is tagged `screen.proWelcome`.
+ * status), what's now unlocked, and Done. [onManage], when the store's entitlement is active, adds
+ * Manage subscription (RevenueCat's Customer Center). The whole screen sits inside the paywall
+ * route, so its content is tagged `screen.proWelcome`.
  */
 @Composable
-internal fun ProWelcome(status: ProStatus?, onDone: () -> Unit) {
+internal fun ProWelcome(status: ProStatus?, onDone: () -> Unit, onManage: (() -> Unit)? = null) {
     PbScreen(
         id = "paywall",
         footer = {
-            PbButton(
-                stringResource(R.string.settings_done),
-                onClick = onDone,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(bottom = PbSpace.S16)
-                        .testTag("proWelcome.done"),
-            )
+            Column(
+                Modifier.fillMaxWidth().padding(bottom = PbSpace.S16),
+                verticalArrangement = Arrangement.spacedBy(PbSpace.S12),
+            ) {
+                PbButton(
+                    stringResource(R.string.settings_done),
+                    onClick = onDone,
+                    modifier = Modifier.fillMaxWidth().testTag("proWelcome.done"),
+                )
+                onManage?.let {
+                    PbButton(
+                        stringResource(R.string.settings_pro_manage),
+                        onClick = it,
+                        modifier = Modifier.fillMaxWidth().testTag("proWelcome.manage"),
+                        style = PbButtonStyle.Secondary,
+                    )
+                }
+            }
         },
     ) {
         Column(
@@ -93,7 +105,7 @@ internal fun ProWelcome(status: ProStatus?, onDone: () -> Unit) {
     }
 }
 
-/** "Your free trial ends Wed 7 Oct. Then ₹799/year." and the renewal lines. */
+/** "Your free trial ends Wed 7 Oct.", the renewal lines and "Pro until …". */
 @Composable
 private fun statusLine(status: ProStatus): String {
     val day = Dates.day(status.day)
@@ -103,7 +115,9 @@ private fun statusLine(status: ProStatus): String {
             when (status.period) {
                 PlanPeriod.Yearly -> stringResource(R.string.settings_pro_renews_yearly, day)
                 PlanPeriod.Monthly -> stringResource(R.string.settings_pro_renews_monthly, day)
+                null -> stringResource(R.string.settings_pro_renews, day)
             }
+        is ProStatus.Ends -> stringResource(R.string.settings_pro_ends, day)
     }
 }
 

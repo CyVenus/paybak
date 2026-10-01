@@ -14,6 +14,7 @@ import app.paybak.paybak.navigation.Destination
 import app.paybak.paybak.navigation.LocalAppClock
 import app.paybak.paybak.navigation.LocalDebugStartScreen
 import app.paybak.paybak.navigation.LocalProfileStore
+import app.paybak.paybak.navigation.LocalSubscriptions
 import app.paybak.paybak.navigation.MainState
 import app.paybak.paybak.navigation.canonicalBackStack
 import app.paybak.paybak.navigation.rememberAppNavigator
@@ -46,6 +47,7 @@ fun PaybakApp(app: PaybakApplication, start: StartTarget) {
     CompositionLocalProvider(
         LocalProfileStore provides app.profileStore,
         LocalAppClock provides app.clock,
+        LocalSubscriptions provides app.subscriptions,
         LocalDebugStartScreen provides
             remember(debugScreen) { debugScreen?.let(::DebugStartScreen) },
     ) {

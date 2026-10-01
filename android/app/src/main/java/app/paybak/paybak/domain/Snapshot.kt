@@ -1,5 +1,6 @@
 package app.paybak.paybak.domain
 
+import app.paybak.paybak.BuildConfig
 import app.paybak.paybak.domain.calc.DeletedRow
 import app.paybak.paybak.domain.calc.FriendBalance
 import app.paybak.paybak.domain.calc.GroupSummary
@@ -28,12 +29,16 @@ import java.time.ZoneId
  * Parametrised queries (a group sheet, a friend page, a project report, Insights for a month …) are
  * functions of [view], which has the same data and caches.
  */
-class LedgerSnapshot private constructor(val view: LedgerView) {
+class LedgerSnapshot private constructor(val view: LedgerView, private val storePro: Boolean) {
     val ledger: Ledger
         get() = view.ledger
 
+    /**
+     * Pro is on: the store's entitlement is active (a trial counts). Debug builds also honour the
+     * ledger's simulated entitlement, which the debug menu, seed scenarios and UI tests set.
+     */
     val isPro: Boolean
-        get() = ledger.settings.entitlement.isPro
+        get() = storePro || (BuildConfig.DEBUG && ledger.settings.entitlement.isPro)
 
     private val events = view.timeline()
 
@@ -64,6 +69,7 @@ class LedgerSnapshot private constructor(val view: LedgerView) {
             defaultCurrency: String,
             now: Instant,
             zone: ZoneId,
-        ): LedgerSnapshot = LedgerSnapshot(LedgerView(ledger, defaultCurrency, now, zone))
+            storePro: Boolean = false,
+        ): LedgerSnapshot = LedgerSnapshot(LedgerView(ledger, defaultCurrency, now, zone), storePro)
     }
 }

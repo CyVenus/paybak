@@ -23,12 +23,14 @@ import kotlinx.coroutines.launch
  * the lanes' files in `lanes/`, which all go through [mutate]. Every change is saved at once.
  *
  * @param profile The profile: its currency is the default currency of every total.
+ * @param storePro Whether the store's Pro entitlement is active, for [LedgerSnapshot.isPro].
  */
 class LedgerRepository(
     private val file: LedgerFile,
     val clock: AppClock,
     private val profile: StateFlow<UserProfile>,
     val rates: Rates,
+    private val storePro: StateFlow<Boolean> = MutableStateFlow(false),
     scope: CoroutineScope,
 ) {
     private val ledgerState = MutableStateFlow(file.read())
@@ -45,11 +47,13 @@ class LedgerRepository(
         get() = profile.value.defaultCurrency
 
     init {
-        // A new default currency or a moved clock changes every total and date label.
+        // A new default currency or a moved clock changes every total and date label; a purchase,
+        // restore or expiry changes what Pro unlocks.
         scope.launch {
             merge(
                     profile.map { it.defaultCurrency }.distinctUntilChanged().drop(1),
                     clock.pinned.drop(1),
+                    storePro.drop(1),
                 )
                 .collect { tick() }
         }
@@ -97,5 +101,5 @@ class LedgerRepository(
     }
 
     private fun snapshotOf(ledger: Ledger) =
-        LedgerSnapshot.of(ledger, defaultCurrency, clock.now(), clock.zone)
+        LedgerSnapshot.of(ledger, defaultCurrency, clock.now(), clock.zone, storePro.value)
 }

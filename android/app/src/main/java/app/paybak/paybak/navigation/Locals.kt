@@ -6,6 +6,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
+import app.paybak.paybak.billing.SubscriptionRepository
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.ledger.LedgerRepository
 import app.paybak.paybak.domain.AppClock
@@ -17,6 +18,10 @@ val LocalMainNavigator =
 /** The ledger store. */
 val LocalLedger =
     staticCompositionLocalOf<LedgerRepository> { error("No LedgerRepository provided") }
+
+/** Paybak Pro from the store (RevenueCat). */
+val LocalSubscriptions =
+    staticCompositionLocalOf<SubscriptionRepository> { error("No SubscriptionRepository provided") }
 
 /** The app clock (real or pinned). */
 val LocalAppClock = staticCompositionLocalOf<AppClock> { error("No AppClock provided") }

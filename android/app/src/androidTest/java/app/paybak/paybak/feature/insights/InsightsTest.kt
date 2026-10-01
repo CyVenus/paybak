@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.paybak.paybak.awaitScreen
+import app.paybak.paybak.data.ledger.actions.setPro
 import app.paybak.paybak.launchPaybak
 import app.paybak.paybak.paybakApp
 import org.junit.Assert.assertTrue
@@ -18,14 +19,14 @@ class InsightsTest {
     private val robot = InsightsAiRobot(compose)
 
     @Test
-    fun theFreePlanSeesTheLockUntilTheTrialStarts() {
+    fun theFreePlanSeesTheLockUntilProUnlocks() {
         launchPaybak("insightsLocked").use {
             compose.awaitScreen("activity")
             robot.await("insights.locked")
             robot.tap("insights.notice.primary")
             compose.awaitScreen("paywall")
-            robot.tap("paywall.plan.yearly")
-            robot.tap("paywall.cta")
+            // The store purchase runs in RevenueCat's dialog; unlock Pro as it would.
+            paybakApp.ledger.setPro(true)
             robot.tap("proWelcome.done")
             robot.awaitGone("screen.paywall")
             robot.await("insights.total")

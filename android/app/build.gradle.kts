@@ -1,8 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
+
+/** A value from the untracked local.properties, blank when it isn't set. */
+fun localProperty(key: String): String =
+    Properties()
+        .apply { rootProject.file("local.properties").takeIf { it.exists() }?.reader()?.use(::load) }
+        .getProperty(key, "")
 
 android {
     namespace = "app.paybak.paybak"
@@ -21,10 +29,18 @@ android {
     }
 
     buildTypes {
+        debug {
+            // RevenueCat Test Store key: fake purchases, no Play account needed. The SDK refuses
+            // to run with a Test Store key in a release build.
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"test_ZodzFFhityYkLvLvsuepQmsAeqo\"")
+        }
         release {
             optimization {
                 enable = false
             }
+            // The RevenueCat Google Play public key (goog_…) from `revenuecat.playKey` in
+            // local.properties. Left blank, Purchases isn't configured and Pro stays locked.
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"${localProperty("revenuecat.playKey")}\"")
         }
     }
     compileOptions {
@@ -51,6 +67,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.rive.android)
+    implementation(libs.revenuecat.purchases)
+    implementation(libs.revenuecat.purchases.ui)
     implementation(libs.zxing.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.camera.camera2)

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import app.paybak.paybak.data.ledger.actions.setPro
 import app.paybak.paybak.debug.ScreenIds
 import app.paybak.paybak.debug.scenarios.Scenario
 import app.paybak.paybak.navigation.Route
@@ -122,7 +123,8 @@ class ShellTest {
             compose.awaitScreen("privacyData")
             tag("privacyData.export").performClick()
             compose.awaitScreen("paywall")
-            tag("paywall.cta").performClick()
+            // The store purchase runs in RevenueCat's dialog; unlock Pro as it would.
+            paybakApp.ledger.setPro(true)
             awaitTag("proWelcome.done")
             tag("proWelcome.done").performClick()
             compose.awaitScreen("privacyExport")

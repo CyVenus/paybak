@@ -1,6 +1,8 @@
 package app.paybak.paybak
 
 import android.app.Application
+import app.paybak.paybak.billing.RevenueCatConfig
+import app.paybak.paybak.billing.SubscriptionRepository
 import app.paybak.paybak.data.ProfileStore
 import app.paybak.paybak.data.ledger.LedgerFile
 import app.paybak.paybak.data.ledger.LedgerRepository
@@ -27,6 +29,9 @@ class PaybakApplication : Application() {
     /** The only source of "now" (real, or pinned by the debug hooks). */
     val clock: AppClock by lazy { AppClock() }
 
+    /** Paybak Pro from the store (RevenueCat): customer info and the Pro entitlement. */
+    val subscriptions: SubscriptionRepository by lazy { SubscriptionRepository(appScope) }
+
     /** The ledger: every record, read model and action (app-architecture §3). */
     val ledger: LedgerRepository by lazy {
         LedgerRepository(
@@ -34,6 +39,7 @@ class PaybakApplication : Application() {
             clock = clock,
             profile = profileStore.profile,
             rates = Rates.parse(assets.open(RATES_FILE).bufferedReader().use { it.readText() }),
+            storePro = subscriptions.isPro,
             scope = appScope,
         )
     }
@@ -46,6 +52,8 @@ class PaybakApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Before anything reads Pro: the store's entitlement decides it.
+        RevenueCatConfig.configure(this)
         // Loads the native Rive libraries. Required before any app.rive API, and not automatic:
         // the AAR removes its androidx.startup initializer. Without it every illustration stays
         // blank.

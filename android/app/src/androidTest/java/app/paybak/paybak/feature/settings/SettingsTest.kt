@@ -17,6 +17,7 @@ import app.paybak.paybak.launchPaybak
 import app.paybak.paybak.paybakApp
 import app.paybak.paybak.savedProfile
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -35,18 +36,21 @@ class SettingsTest {
         }
 
     @Test
-    fun theTrialStartsAndDoneContinuesToExport() {
-        launchPaybak("privacyData").use {
+    fun exportOpensTheStorePaywallForAFreeMember() {
+        launchPaybak("privacyData", pro = false).use {
             compose.awaitScreen("privacyData")
             tag("privacyData.export").performClick()
+            // RevenueCat's paywall (Test Store in debug builds); purchases go through its dialog.
             compose.awaitScreen("paywall")
-            tag("paywall.plan.monthly").performClick()
-            compose.onNodeWithText("Subscribe for ₹99/month").assertExists()
-            tag("paywall.plan.yearly").performClick()
-            tag("paywall.cta").performClick()
-            compose.awaitTag("proWelcome.body")
-            tag("proWelcome.body")
-                .assertTextContains("Your free trial ends Wed 7 Oct.", substring = true)
+            assertFalse(paybakApp.ledger.snapshot.value.isPro)
+        }
+    }
+
+    @Test
+    fun aProMemberSeesTheWelcomeAndDoneContinuesToExport() {
+        launchPaybak("proWelcome").use {
+            compose.awaitTag("screen.proWelcome")
+            tag("proWelcome.body").assertExists()
             tag("proWelcome.done").performClick()
             compose.awaitScreen("privacyExport")
             assertTrue(paybakApp.ledger.snapshot.value.isPro)

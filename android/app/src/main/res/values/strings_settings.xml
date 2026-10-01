@@ -5,8 +5,6 @@
     <string name="settings_ok">OK</string>
 
     <!-- Paybak Pro: paywall and welcome (screens-settings §2–3) -->
-    <string name="settings_pro_title">Paybak Pro</string>
-    <string name="settings_pro_subtitle">Smart tools on top of your free ledger.</string>
     <string name="settings_pro_ai">AI assistant</string>
     <string name="settings_pro_ai_detail">Ask about balances or add expenses by chat</string>
     <string name="settings_pro_scan">Receipt scanning</string>
@@ -17,25 +15,14 @@
     <string name="settings_pro_recurring_detail">Rent and bills that add themselves</string>
     <string name="settings_pro_export">PDF/CSV export</string>
     <string name="settings_pro_export_detail">Keep a clean copy of your records</string>
-    <string name="settings_plan_yearly">Yearly</string>
-    <string name="settings_plan_yearly_price">₹799/year</string>
-    <string name="settings_plan_yearly_detail">₹67/month</string>
-    <string name="settings_plan_yearly_badge">Save 33%</string>
-    <string name="settings_plan_monthly">Monthly</string>
-    <string name="settings_plan_monthly_price">₹99/month</string>
-    <string name="settings_plan_monthly_detail">Billed monthly</string>
-    <string name="settings_pro_start_trial">Start 7-day free trial</string>
-    <string name="settings_pro_subscribe_monthly">Subscribe for ₹99/month</string>
-    <string name="settings_pro_yearly_small_print">Then ₹799/year. Cancel anytime in Settings.</string>
-    <string name="settings_pro_monthly_small_print">Billed monthly. Cancel anytime in Settings.</string>
-    <string name="settings_pro_restore">Restore purchases</string>
-    <string name="settings_pro_terms">Terms</string>
-    <string name="settings_pro_privacy">Privacy</string>
     <string name="settings_pro_nothing_to_restore">No purchases to restore.</string>
     <string name="settings_pro_welcome_title">You’re on Paybak Pro</string>
-    <string name="settings_pro_trial_ends">Your free trial ends %1$s. Then ₹799/year.</string>
-    <string name="settings_pro_renews_yearly">Renews %1$s. ₹799/year.</string>
-    <string name="settings_pro_renews_monthly">Your subscription renews %1$s. ₹99/month.</string>
+    <string name="settings_pro_trial_ends">Your free trial ends %1$s.</string>
+    <string name="settings_pro_renews_yearly">Your yearly plan renews %1$s.</string>
+    <string name="settings_pro_renews_monthly">Your monthly plan renews %1$s.</string>
+    <string name="settings_pro_renews">Your subscription renews %1$s.</string>
+    <string name="settings_pro_ends">Pro until %1$s.</string>
+    <string name="settings_pro_manage">Manage subscription</string>
     <string name="settings_pro_unlocked">Now unlocked</string>
     <string name="settings_done">Done</string>
 
