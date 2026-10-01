@@ -40,8 +40,21 @@ private val leopoldDraft =
             ),
     )
 
+/** Lunch with Esha and Dev: the Add expense form the scan opens over, then the scan itself. */
+private val scanStack =
+    listOf(
+        Route.AddExpense(
+            AddExpenseArgs(
+                draft = ExpenseDraft.equal(listOf(ME, "p-esha", "p-dev")),
+                focusAmount = false,
+            )
+        ),
+        Route.ScanReceipt(DebugRequest, personIds = listOf(ME, "p-esha", "p-dev")),
+    )
+
 /** Cooking gas repeating monthly on the 28th, waiting for its amount each time (insights §5.3). */
-private val cookingGasRepeat = RepeatRule(Frequency.Monthly, LocalDate.of(2026, 9, 28), variable = true)
+private val cookingGasRepeat =
+    RepeatRule(Frequency.Monthly, LocalDate.of(2026, 9, 28), variable = true)
 
 /** The Cooking gas draft of Flat 302 the Repeat sheet opens over. */
 private val cookingGasDraft =
@@ -65,21 +78,9 @@ internal val InsightsScenarios: Map<String, Scenario> =
         "askStart" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
         "askAnswer" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
         "askConfirm" to Scenario(demo().pro(), stack = listOf(Route.Ask)),
-        "scanCamera" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
-        "scanReview" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
-        "scanAssign" to
-            Scenario(
-                demo().pro(),
-                stack = listOf(Route.AddExpense(), Route.ScanReceipt(DebugRequest)),
-            ),
+        "scanCamera" to Scenario(demo().pro(), stack = scanStack),
+        "scanReview" to Scenario(demo().pro(), stack = scanStack),
+        "scanAssign" to Scenario(demo().pro(), stack = scanStack),
         "scanAddExpense" to
             Scenario(
                 demo().pro(),

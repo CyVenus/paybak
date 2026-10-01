@@ -62,4 +62,43 @@
     <string name="insights_split">Split</string>
     <string name="insights_split_equally">Equally · %1$d people</string>
     <string name="insights_date">Date</string>
+
+    <!-- Scan receipt (screens-insights-ai §4) -->
+    <string name="insights_scan_title">Scan receipt</string>
+    <string name="insights_scan_flash">Flash</string>
+    <string name="insights_scan_hint">Fit the whole receipt in the frame</string>
+    <string name="insights_scan_allow_camera">Allow camera access in Settings to scan receipts.</string>
+    <string name="insights_scan_reading">Reading the receipt…</string>
+    <string name="insights_scan_upload">Upload photo</string>
+    <string name="insights_scan_review_title">Check receipt</string>
+    <plurals name="insights_scan_found">
+        <item quantity="one">We found %1$d item.</item>
+        <item quantity="other">We found %1$d items.</item>
+    </plurals>
+    <string name="insights_scan_found_nothing">We couldn’t find any items.</string>
+    <string name="insights_scan_tap_to_fix">Tap any value to fix it.</string>
+    <string name="insights_scan_merchant">Merchant</string>
+    <string name="insights_scan_not_found">Not found</string>
+    <string name="insights_scan_subtotal">Subtotal</string>
+    <string name="insights_scan_total">Total</string>
+    <string name="insights_scan_items">Items</string>
+    <string name="insights_scan_add_item">Add item</string>
+    <string name="insights_scan_items_mismatch">Items add up to %1$s, the subtotal is %2$s.</string>
+    <string name="insights_scan_looks_right">Looks right</string>
+    <string name="insights_scan_unreadable_title">Couldn’t read this receipt</string>
+    <string name="insights_scan_unreadable_body">Try again in better light, or attach the photo to the expense as it is.</string>
+    <string name="insights_scan_retake">Retake</string>
+    <string name="insights_scan_attach">Attach photo</string>
+    <string name="insights_scan_assign_title">Assign items</string>
+    <string name="insights_scan_assign_helper">Tap who had each item. Tax and tip are split in proportion.</string>
+    <string name="insights_scan_with_you_and">With you and</string>
+    <string name="insights_scan_add_people">Add</string>
+    <string name="insights_scan_shared">Shared by %1$d · %2$s each</string>
+    <string name="insights_scan_all_assigned">All items assigned</string>
+    <plurals name="insights_scan_items_left">
+        <item quantity="one">%1$d item left</item>
+        <item quantity="other">%1$d items left</item>
+    </plurals>
+    <string name="insights_scan_includes_tax">Includes GST and tip</string>
+    <string name="insights_scan_continue">Continue</string>
 </resources>
