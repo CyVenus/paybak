@@ -5,6 +5,7 @@ import app.paybak.paybak.domain.calc.GroupSummary
 import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.calc.ObligationKind
 import app.paybak.paybak.domain.calc.friendPage
+import app.paybak.paybak.domain.calc.membersLabel
 import app.paybak.paybak.domain.calc.projectReport
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.format.Money
@@ -73,7 +74,7 @@ fun LedgerView.groupListRow(summary: GroupSummary): GroupListRow {
  * The due date shows while your balance there is open.
  */
 fun LedgerView.groupSubtitle(group: Group, open: Boolean): String {
-    val members = "${group.memberIds.size} members"
+    val members = membersLabel(group.memberIds.size)
     if (group.isProject) {
         val closed = group.project?.closedAt?.takeIf { group.isArchived }
         return if (closed != null) "Project · Closed ${Dates.short(localDate(closed))}"

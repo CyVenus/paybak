@@ -1,6 +1,10 @@
 package app.paybak.paybak.domain.groups
 
 import app.paybak.paybak.domain.Demo
+import app.paybak.paybak.domain.actions.ActionContext
+import app.paybak.paybak.domain.actions.addGroup
+import app.paybak.paybak.domain.model.GroupDraft
+import app.paybak.paybak.domain.model.GroupType
 import app.paybak.paybak.domain.model.ME
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -110,6 +114,15 @@ class GroupPageTest {
             assertNull(settle)
             assertTrue(showsDisabledAction)
         }
+    }
+
+    @Test
+    fun aOneMemberGroupSaysMember() {
+        val ctx = ActionContext(view.now, view.zone, view.defaultCurrency)
+        val (ledger, id) = view.ledger.addGroup(GroupDraft("Solo", type = GroupType.Trip), ctx)
+        val solo = ctx.view(ledger)
+        assertEquals("Trip · 1 member · INR", solo.groupPage(id)!!.subtitle)
+        assertEquals("1 member", solo.groupSubtitle(ledger.group(id)!!, open = false))
     }
 
     @Test

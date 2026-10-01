@@ -46,7 +46,7 @@ fun LedgerView.groupSheet(groupId: String): GroupSheet? {
     val titleRow =
         listOfNotNull(
                 range,
-                "${group.memberIds.size} members",
+                membersLabel(group.memberIds.size),
                 "${Money.format(spent, group.currency)} spent",
             )
             .joinToString(" · ")
@@ -108,6 +108,9 @@ fun LedgerView.simplifyFootnote(group: Group, plan: List<Transfer>): String? {
     val each = if (debtors.size > 1) "each pay" else if (debtors.first() == "You") "pay" else "pays"
     return "Simplify debts is on. $who $each ${first(creditors.single())} directly."
 }
+
+/** "1 member", "5 members". */
+fun membersLabel(count: Int): String = "$count member" + if (count == 1) "" else "s"
 
 /** "A", "A and B", "A, B and C". */
 fun joinNames(names: List<String>): String =

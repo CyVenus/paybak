@@ -4,6 +4,7 @@ import app.paybak.paybak.domain.calc.GroupSheet
 import app.paybak.paybak.domain.calc.LedgerView
 import app.paybak.paybak.domain.calc.groupSheet
 import app.paybak.paybak.domain.calc.joinNames
+import app.paybak.paybak.domain.calc.membersLabel
 import app.paybak.paybak.domain.calc.recurring
 import app.paybak.paybak.domain.format.Dates
 import app.paybak.paybak.domain.format.Money
@@ -76,7 +77,7 @@ data class GroupPage(
 fun LedgerView.groupPage(groupId: String): GroupPage? {
     val sheet = groupSheet(groupId) ?: return null
     val group = sheet.group
-    val members = "${group.memberIds.size} members"
+    val members = membersLabel(group.memberIds.size)
     val subtitle =
         when {
             sheet.expenses.isEmpty() ->
