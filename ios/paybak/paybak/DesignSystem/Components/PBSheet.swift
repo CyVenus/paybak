@@ -80,7 +80,9 @@ struct PBSheetPresentation<Content: View>: View {
     /// The fitted height, measured from the content; a sensible start before the first layout.
     @State private var height: CGFloat = 320
     /// The floating sheet's own bottom inset (the home-indicator area it keeps clear below the
-    /// detent). Medium sheets end 28 pt below their content, counting this inset.
+    /// detent). Medium sheets end 28 pt below their content, counting this inset. It keeps the
+    /// largest value seen: while another sheet stacks on top the inset passes through in-between
+    /// values, and following them would feed the height back into itself without end.
     @State private var bottomInset: CGFloat = 0
 
     var body: some View {
@@ -92,7 +94,7 @@ struct PBSheetPresentation<Content: View>: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
                     .frame(maxHeight: .infinity, alignment: .top)
-                    .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = $0 }
+                    .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.bottom } action: { bottomInset = max(bottomInset, $0) }
                     .presentationDetents([.height(height)])
             case .large:
                 content()
