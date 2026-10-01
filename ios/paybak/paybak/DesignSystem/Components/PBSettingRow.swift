@@ -37,6 +37,10 @@ struct PBSettingRow: View {
     var tone: Tone = .default
     var showsDivider = true
     var titleLineLimit = 1
+    /// The value's colour: `text/secondary`, or red for a value that needs fixing ("Doesn’t add up").
+    var valueColor = PBColor.textSecondary
+    /// Drawn just before the value, e.g. an attached photo's thumbnail ("Cover photo" · ▢ · "Added").
+    var valueLeading: AnyView?
     var action: (() -> Void)?
 
     init(
@@ -49,6 +53,8 @@ struct PBSettingRow: View {
         tone: Tone = .default,
         showsDivider: Bool = true,
         titleLineLimit: Int = 1,
+        valueColor: Color = PBColor.textSecondary,
+        valueLeading: AnyView? = nil,
         action: (() -> Void)? = nil
     ) {
         self.title = title
@@ -60,6 +66,8 @@ struct PBSettingRow: View {
         self.tone = tone
         self.showsDivider = showsDivider
         self.titleLineLimit = titleLineLimit
+        self.valueColor = valueColor
+        self.valueLeading = valueLeading
         self.action = action
     }
 
@@ -114,11 +122,14 @@ struct PBSettingRow: View {
             if let badge {
                 PBBadge(badge, style: .inverse)
             }
+            if let valueLeading {
+                valueLeading
+            }
             if let value {
                 // The value keeps its width; a long title truncates first.
                 Text(value)
                     .textStyle(.body)
-                    .foregroundStyle(PBColor.textSecondary)
+                    .foregroundStyle(valueColor)
                     .lineLimit(1)
                     .layoutPriority(1)
             }

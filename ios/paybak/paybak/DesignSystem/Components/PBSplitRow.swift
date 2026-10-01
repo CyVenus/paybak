@@ -6,7 +6,9 @@ import SwiftUI
 /// - Exact: a 96 pt field with the amount.
 /// - Percent: the field shows the percentage; the amount is the Footnote under the name.
 /// - Shares: a 48 pt field with the share count plus the system stepper; amount under the name.
-/// Excluded people show ₹0 / 0% / 0 in gray and can't be edited. The divider starts at the name.
+/// Tapping the row anywhere outside the field and stepper includes or excludes the person (pressed:
+/// `bg/card-pressed`). Excluded people show ₹0 / 0% / 0 in gray and can't be edited; a tap on their
+/// field includes them again. The divider starts at the name.
 /// Pass `focus` to focus the value field from code (a start state, dismissing on a tap outside).
 struct PBSplitRow: View {
     enum Mode {
@@ -29,17 +31,45 @@ struct PBSplitRow: View {
     var showsDivider = true
     var focus: FocusState<Bool>.Binding?
 
+    @State private var isPressed = false
+    @Environment(\.pbPreviewInteraction) private var previewInteraction
+
     var body: some View {
-        Group {
-            if isEqually {
-                Button { isIncluded.toggle() } label: { row }
-                    .buttonStyle(PBRowButtonStyle(surface: .white))
-                    .accessibilityElement(children: .combine)
-                    .accessibilityValue(isIncluded ? "Included" : "Excluded")
-                    .accessibilityAddTraits(isIncluded ? .isSelected : [])
-            } else {
-                row
+        HStack(spacing: PBSpace.s12) {
+            Button { isIncluded.toggle() } label: {
+                HStack(spacing: PBSpace.s12) {
+                    PBSelectCircle(isOn: isIncluded)
+                    PBAvatar(avatar, diameter: PBSize.avatarSm, isOnCard: true)
+                    names
+                    if isEqually {
+                        trailing
+                    }
+                }
+                .padding(.vertical, PBSpace.s8)
+                .padding(.leading, PBSpace.s16)
+                .padding(.trailing, isEqually ? PBSpace.s16 : 0)
+                .frame(maxWidth: .infinity, minHeight: 64, alignment: .leading)
+                .contentShape(.rect)
             }
+            .buttonStyle(PressReportingStyle(isPressed: $isPressed))
+            .accessibilityElement(children: .combine)
+            .accessibilityValue(isIncluded ? "Included" : "Excluded")
+            .accessibilityAddTraits(isIncluded ? .isSelected : [])
+            if !isEqually {
+                // The field and the stepper take their own taps; an excluded person's don't, so a
+                // tap there includes them again, like the rest of the row.
+                trailing
+                    .allowsHitTesting(isIncluded)
+                    .padding(.trailing, PBSpace.s16)
+                    .frame(minHeight: 64)
+                    .contentShape(.rect)
+                    .gesture(TapGesture().onEnded { isIncluded = true }, isEnabled: !isIncluded)
+            }
+        }
+        .background {
+            PBColor.bgCardPressed
+                .opacity(isPressed || previewInteraction == .pressed ? 1 : 0)
+                .animation(.easeOut(duration: 0.1), value: isPressed)
         }
         .overlay(alignment: .bottom) {
             if showsDivider {
@@ -48,47 +78,19 @@ struct PBSplitRow: View {
         }
     }
 
-    private var row: some View {
-        HStack(spacing: PBSpace.s12) {
-            if isEqually {
-                PBSelectCircle(isOn: isIncluded)
-            } else {
-                selectButton
+    private var names: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(name)
+                .textStyle(.headline)
+                .foregroundStyle(isIncluded ? PBColor.textPrimary : PBColor.textTertiary)
+                .lineLimit(1)
+            if showsAmountUnderName {
+                Text(isIncluded ? amount : zero)
+                    .textStyle(.footnote)
+                    .foregroundStyle(isIncluded ? PBColor.textSecondary : PBColor.textTertiary)
             }
-            PBAvatar(avatar, diameter: PBSize.avatarSm, isOnCard: true)
-            VStack(alignment: .leading, spacing: 0) {
-                Text(name)
-                    .textStyle(.headline)
-                    .foregroundStyle(isIncluded ? PBColor.textPrimary : PBColor.textTertiary)
-                    .lineLimit(1)
-                if showsAmountUnderName {
-                    Text(isIncluded ? amount : zero)
-                        .textStyle(.footnote)
-                        .foregroundStyle(isIncluded ? PBColor.textSecondary : PBColor.textTertiary)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            trailing
         }
-        .padding(.vertical, PBSpace.s8)
-        .padding(.horizontal, PBSpace.s16)
-        .frame(minHeight: 64)
-        .contentShape(.rect)
-    }
-
-    /// In the other modes the field takes taps, so only the circle toggles inclusion.
-    private var selectButton: some View {
-        Button { isIncluded.toggle() } label: {
-            PBSelectCircle(isOn: isIncluded)
-                .frame(width: PBSize.tap, height: PBSize.tap)
-                .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, -(PBSize.tap - PBSize.iconLg) / 2)
-        .accessibilityLabel(name)
-        .accessibilityValue(isIncluded ? "Included" : "Excluded")
-        .accessibilityAddTraits(isIncluded ? .isSelected : [])
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var isEqually: Bool {
@@ -96,8 +98,8 @@ struct PBSplitRow: View {
         return false
     }
 
-    /// An excluded person's share: "₹0".
-    private var zero: String { Money.info(currency).symbol + "0" }
+    /// An excluded person's share: "₹0" ("AED 0").
+    private var zero: String { PBAmountField.prefix(currency) + "0" }
 
     private var showsAmountUnderName: Bool {
         switch mode {
@@ -153,6 +155,18 @@ struct PBSplitRow: View {
             get: { String(count.wrappedValue) },
             set: { count.wrappedValue = min(99, Int($0.filter(\.isWholeNumber)) ?? 0) }
         )
+    }
+}
+
+/// Reports the press so the whole row, field included, takes the pressed fill.
+private struct PressReportingStyle: ButtonStyle {
+    @Binding var isPressed: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .onChange(of: configuration.isPressed, initial: true) { _, pressed in
+                isPressed = pressed
+            }
     }
 }
 

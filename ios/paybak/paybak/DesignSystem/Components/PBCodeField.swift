@@ -66,7 +66,7 @@ struct PBCodeField: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Verification code, \(Self.length) digits")
+        .accessibilityLabel("Verification code")
         .accessibilityValue(code.isEmpty ? "Empty" : code.map(String.init).joined(separator: " "))
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { focus.wrappedValue = true }

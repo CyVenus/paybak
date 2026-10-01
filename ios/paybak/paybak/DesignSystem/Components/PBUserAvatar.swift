@@ -30,12 +30,12 @@ extension Person {
 }
 
 extension ExpenseCategory {
-    var pbIcon: PBIcon { PBIcon(rawValue: icon) ?? .tag }
+    var pbIcon: PBIcon { PBIcon(key: icon) }
 }
 
 extension LedgerGroup {
-    /// The group's stored icon (`plane`, `home`, `drone` …).
-    var pbIcon: PBIcon { PBIcon(rawValue: icon) ?? .groups }
+    /// The group's stored icon (`plane`, `home`, `drone` …); the tag for an unknown key.
+    var pbIcon: PBIcon { PBIcon(key: icon) }
 }
 
 #Preview("PBUserAvatar") {

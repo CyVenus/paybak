@@ -2,8 +2,9 @@ import SwiftUI
 
 /// Text that wraps where Figma wraps it. iOS moves a word down rather than leave one word alone on
 /// the last line; Figma doesn't, so copy that ends with a lone word in Figma is written with `\n`
-/// at Figma's break. Where that line doesn't fit (narrow screens, larger text), the copy wraps
-/// naturally instead. Colour it with `.foregroundStyle` as usual.
+/// at Figma's break. Copy that fits on one line (a wider phone) stays on one line, as Android wraps
+/// it; where Figma's first line doesn't fit either (narrow screens, larger text), the copy wraps
+/// naturally. Colour it with `.foregroundStyle` as usual.
 struct FigmaWrappedText: View {
     /// The copy, with `\n` where Figma breaks the line.
     let text: String
@@ -15,10 +16,14 @@ struct FigmaWrappedText: View {
     }
 
     var body: some View {
+        let unbroken = text.replacing("\n", with: " ")
         ViewThatFits(in: .horizontal) {
+            Text(unbroken)
+                .textStyle(style)
+                .lineLimit(1)
             Text(text)
                 .textStyle(style)
-            Text(text.replacing("\n", with: " "))
+            Text(unbroken)
                 .textStyle(style)
         }
     }

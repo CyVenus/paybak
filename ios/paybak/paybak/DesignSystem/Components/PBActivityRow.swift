@@ -1,10 +1,10 @@
 import SwiftUI
 
 /// Row / Activity (Figma 13:477, components-home §10, activity §9): a timeline or recent-activity row,
-/// 64 tall at least. A category icon or a person's avatar in a 40 pt circle; a title (1 line, 2 on the
-/// timeline), a subtitle of up to 2 lines (3 for notification bodies) and an optional detail line of
-/// up to 2; then the amount and date, a date alone, a status badge, or a small action. Money in is black, money out gray with "−". Plain rows sit on
-/// white (#F5F5F5 circle); On Card rows sit inside a #F5F5F5 card (white circle).
+/// 64 tall at least. A category icon or a person's avatar in a 40 pt circle; a title of up to 2
+/// lines, a subtitle of up to 3 and an optional detail line of up to 2; then the amount and date, a
+/// date alone, a status badge, or a small action. Money in is black, money out gray with "−". Plain
+/// rows sit on white (#F5F5F5 circle); On Card rows sit inside a #F5F5F5 card (white circle).
 struct PBActivityRow: View {
     enum Leading {
         case icon(PBIcon)
@@ -37,10 +37,10 @@ struct PBActivityRow: View {
     var detail: String?
     var trailing: Trailing = .none
     var surface: Surface = .plain
-    /// Timeline titles wrap to 2 lines.
-    var titleLines = 1
-    /// Notification bodies wrap to 3 lines; timeline subtitles to 2.
-    var subtitleLines = 2
+    /// Titles wrap to 2 lines.
+    var titleLines = 2
+    /// Subtitles (notification bodies, timeline details) wrap to 3 lines.
+    var subtitleLines = 3
     var isUnread = false
     var showsDivider = false
 

@@ -2,8 +2,8 @@ import SwiftUI
 
 /// Row / Assign Item (Figma 147:2532): one receipt item on Assign items, on white with no side
 /// padding. The Headline item and Amount/Medium price, an optional "Shared by 3 · ₹80 each" caption,
-/// then one avatar chip per person; a chip is black when that person had the item and tapping it
-/// toggles them. A full-width divider underneath.
+/// then one avatar chip per person, wrapping when there are many; a chip is black when that person
+/// had the item and tapping it toggles them. A full-width divider underneath.
 struct PBAssignItemRow: View {
     struct Person: Identifiable {
         let id: String
@@ -40,7 +40,8 @@ struct PBAssignItemRow: View {
                     .foregroundStyle(PBColor.textPrimary)
             }
             .accessibilityElement(children: .combine)
-            HStack(spacing: PBSpace.s8) {
+            // Many people wrap onto more rows of chips.
+            PBFlowLayout {
                 ForEach(people) { person in
                     PBCategoryChip(person.name, leading: .avatar(person.avatar), isSelected: selected.contains(person.id)) {
                         onToggle(person.id)

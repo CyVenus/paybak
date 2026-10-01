@@ -85,7 +85,7 @@ struct PBTextField: View {
         HStack(spacing: PBSpace.s12) {
             if let icon {
                 PBIconView(icon, size: PBSize.iconMd)
-                    .foregroundStyle(PBColor.iconSecondary)
+                    .foregroundStyle(isEnabled ? PBColor.iconSecondary : PBColor.iconTertiary)
             }
             TextField(label ?? prompt, text: $text, prompt: Text(prompt).foregroundStyle(promptColor))
                 .font(PBTextStyle.body.font)
@@ -123,14 +123,16 @@ struct PBTextField: View {
                 .frame(width: PBSize.tap, height: PBSize.tap)
                 .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PBDimButtonStyle())
         .padding(.horizontal, -(PBSize.tap - PBSize.iconMd) / 2)
-        .accessibilityLabel("Clear text")
+        .accessibilityLabel("Clear")
     }
 
+    /// Disabled fields have no ring, even with an error.
     private var ringColor: Color? {
+        guard isEnabled else { return nil }
         if error != nil { return PBColor.borderDestructive }
-        return isFocused && isEnabled ? PBColor.borderStrong : nil
+        return isFocused ? PBColor.borderStrong : nil
     }
 
     private var promptColor: Color { isEnabled ? PBColor.textTertiary : PBColor.textDisabled }

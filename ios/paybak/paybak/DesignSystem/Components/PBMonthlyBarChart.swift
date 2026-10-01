@@ -3,7 +3,8 @@ import SwiftUI
 /// Chart / Monthly Bars (Figma 143:2157): six months of your share. 32 pt columns spread across the
 /// width: bars grow up from a zero baseline in a 120 pt plot (the tallest month fills it), with
 /// round tops, over a Footnote month label. The current (last) month is black with a
-/// `text/primary` label; the others are `chart/bar` gray. No axes, no gridlines.
+/// `text/primary` label; the others are `chart/bar` gray. No axes, no gridlines. New values grow
+/// the bars (0.3 s ease-out).
 struct PBMonthlyBarChart: View {
     struct Month: Identifiable {
         /// "Apr".
@@ -21,6 +22,8 @@ struct PBMonthlyBarChart: View {
     private let plotHeight: CGFloat = 120
     private let barWidth: CGFloat = 32
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         let peak = months.map(\.value).max() ?? 0
         HStack(alignment: .bottom, spacing: 0) {
@@ -36,6 +39,7 @@ struct PBMonthlyBarChart: View {
             UnevenRoundedRectangle(topLeadingRadius: barWidth / 2, topTrailingRadius: barWidth / 2)
                 .fill(isCurrent ? PBColor.chartFill : PBColor.chartBar)
                 .frame(width: barWidth, height: max(0, height))
+                .animation(reduceMotion ? nil : .timingCurve(0, 0, 0.58, 1, duration: 0.3), value: height)
                 .frame(height: plotHeight, alignment: .bottom)
                 .clipped()
             Text(month.label)

@@ -74,7 +74,7 @@ struct PBCategoryChip: View {
                 .frame(width: PBSize.tap, height: PBSize.tap)
                 .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PBDimButtonStyle())
         // The 16 pt icon keeps its place 16 pt from the chip's end; the 44 pt target overhangs.
         .padding(.trailing, PBSpace.s16 - (PBSize.tap - PBSize.iconSm) / 2)
         .accessibilityLabel("Remove \(label)")

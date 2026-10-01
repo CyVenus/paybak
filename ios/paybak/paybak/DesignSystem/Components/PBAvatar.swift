@@ -49,12 +49,14 @@ struct PBAvatar: View {
         .accessibilityHidden(true)
     }
 
+    /// Profile's 120 pt circle draws Title/1, as Android's Profile does.
     private var initialsStyle: PBTextStyle {
         switch diameter {
         case ...PBSize.avatarXs: .caption2
         case ...PBSize.avatarSm: .caption1
         case ..<PBSize.avatarLg: .headline
-        default: .title3
+        case ..<120: .title3
+        default: .title1
         }
     }
 
@@ -69,21 +71,47 @@ struct PBAvatar: View {
     }
 }
 
-/// Avatar / Stack (Figma 11:417): 2–4 overlapping 32 pt art avatars, each with a 2 pt white ring;
-/// later avatars sit on top of earlier ones.
+/// Avatar / Stack (Figma 11:417): 2–4 overlapping 32 pt avatars, each with a 2 pt white ring;
+/// later avatars sit on top of earlier ones. Any avatar can be in it: a Peep head, a guest's
+/// initials, or the user's own (photo, character or preset). Decorative for VoiceOver.
 struct PBAvatarStack: View {
-    let heads: [PBPeepHead]
+    enum Member {
+        case content(PBAvatar.Content)
+        /// The current user, as `PBUserAvatar` draws them.
+        case user
+    }
+
+    let members: [Member]
+
+    init(heads: [PBPeepHead]) {
+        members = heads.map { .content(.art($0)) }
+    }
+
+    init(members: [Member]) {
+        self.members = members
+    }
 
     var body: some View {
         HStack(spacing: -PBSpace.s8) {
-            ForEach(heads) { head in
-                PBAvatar(.art(head), diameter: PBSize.avatarSm)
+            ForEach(members.indices, id: \.self) { index in
+                avatar(members[index])
                     .background {
                         Circle()
                             .fill(PBColor.bgPrimary)
                             .padding(-2)
                     }
             }
+        }
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func avatar(_ member: Member) -> some View {
+        switch member {
+        case .content(let content):
+            PBAvatar(content, diameter: PBSize.avatarSm)
+        case .user:
+            PBUserAvatar(diameter: PBSize.avatarSm)
         }
     }
 }

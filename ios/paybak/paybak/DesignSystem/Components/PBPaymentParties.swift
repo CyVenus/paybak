@@ -46,7 +46,9 @@ struct PBPaymentParties: View {
             }
             .contentShape(.rect)
         }
-        .buttonStyle(.plain)
+        // Pressed lays the 6 % overlay over the tile, in its 14 pt corners.
+        .buttonStyle(PBRowButtonStyle(surface: .card))
+        .clipShape(.rect(cornerRadius: PBRadius.tile))
         .accessibilityElement(children: .combine)
         .accessibilityHint("Choose a person")
     }

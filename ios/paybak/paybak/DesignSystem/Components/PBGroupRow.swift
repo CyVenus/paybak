@@ -5,7 +5,8 @@ import SwiftUI
 /// (Plane, Home, People, Tag; Drone or Package for projects), the Headline name and Footnote
 /// subtitle, and the balance on the right: "−₹1,400 / You owe", "+₹1,400 / You’re owed" or a status
 /// ("Settled", "You’re settled"). Projects add a small budget bar with "₹52,000 of ₹60,000" and
-/// "₹8,000 left" under the text. Archived groups are gray and read-only. The divider starts at 52.
+/// "₹8,000 left" under the text (red after the budget point when over budget). Archived groups are
+/// gray and read "Read-only" whatever the balance. The divider starts at 52.
 struct PBGroupRow: View {
     enum Balance {
         case owe(String)
@@ -14,12 +15,14 @@ struct PBGroupRow: View {
     }
 
     struct Budget {
-        /// Spent ÷ budget, 0…1.
+        /// Spent ÷ budget, 0…1; over budget, budget ÷ spent (where the red starts).
         let progress: Double
         /// "₹52,000 of ₹60,000".
         let spent: String
-        /// "₹8,000 left".
+        /// "₹8,000 left", or "₹2,000 over".
         let left: String
+        /// Over budget: the fill stops square at `progress` and red runs to the end.
+        var isOver = false
     }
 
     let name: String
@@ -63,11 +66,12 @@ struct PBGroupRow: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 trailing
             }
-            if let budget, !isArchived {
+            if let budget {
                 HStack(spacing: PBSpace.s12) {
                     Color.clear.frame(width: PBSize.avatarMd, height: 0)
                     VStack(spacing: PBSpace.s8) {
-                        PBProgressBar(value: budget.progress, accessibilityLabel: "Budget used")
+                        PBProgressBar(value: budget.progress, overFrom: budget.isOver ? budget.progress : nil,
+                                      accessibilityLabel: "Budget used")
                         HStack {
                             Text(budget.spent).textStyle(.footnote)
                             Spacer(minLength: PBSpace.s8)

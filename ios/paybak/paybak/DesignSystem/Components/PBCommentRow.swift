@@ -18,10 +18,12 @@ struct PBCommentRow: View {
                         .textStyle(.headline)
                         .foregroundStyle(PBColor.textPrimary)
                         .lineLimit(1)
+                    // A long name truncates; the date keeps its width.
                     Text(date)
                         .textStyle(.footnote)
                         .foregroundStyle(PBColor.textTertiary)
                         .lineLimit(1)
+                        .layoutPriority(1)
                 }
                 Text(text)
                     .textStyle(.body)

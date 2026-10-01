@@ -14,7 +14,10 @@ struct PBDraftExpenseCard: View {
     let paidLine: String
     /// "Split equally with Esha and Dev".
     let splitLine: String
-    let members: [PBPeepHead]
+    var members: [PBPeepHead] = []
+    /// The split's 2–4 avatars (you first) as any avatars: your photo or character, a friend's head
+    /// or initials. Overrides `members`.
+    var memberAvatars: [PBAvatarStack.Member]?
     /// "₹200 each".
     let eachLine: String
     let isSaved: Bool
@@ -48,8 +51,7 @@ struct PBDraftExpenseCard: View {
                         .textStyle(.subheadline)
                         .foregroundStyle(PBColor.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    PBAvatarStack(heads: Array(members.prefix(4)))
-                        .accessibilityHidden(true)
+                    PBAvatarStack(members: Array((memberAvatars ?? members.map { PBAvatarStack.Member.content(.art($0)) }).prefix(4)))
                 }
                 Text(eachLine)
                     .textStyle(.subheadline)

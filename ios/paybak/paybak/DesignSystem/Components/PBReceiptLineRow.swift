@@ -15,7 +15,8 @@ struct PBReceiptLineRow: View {
     @FocusState private var isFocused: Bool
 
     private var style: PBTextStyle { isTotal ? .headline : .body }
-    private var atRest: String { Money.info(currency).symbol + amount }
+    /// "₹2,000", "AED 1,800", as `Money.format` writes amounts.
+    private var atRest: String { PBAmountField.prefix(currency) + amount }
 
     var body: some View {
         HStack(spacing: PBSpace.s12) {
@@ -35,7 +36,7 @@ struct PBReceiptLineRow: View {
                         .frame(minHeight: PBSize.tap)
                         .contentShape(.rect)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PBDimButtonStyle())
                 .accessibilityLabel(label)
                 .accessibilityValue(atRest)
                 .accessibilityHint("Edit the amount")

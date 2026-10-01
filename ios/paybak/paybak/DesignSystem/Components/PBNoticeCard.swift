@@ -18,7 +18,7 @@ struct PBNoticeCard: View {
         let label: String
         let action: () -> Void
 
-        /// A leading icon (the single large button only, e.g. Share on "Send invite").
+        /// A leading icon, e.g. Share on "Send invite".
         var icon: PBIcon?
         var testID: String?
 
@@ -105,9 +105,10 @@ struct PBNoticeCard: View {
     private func actions(_ primary: Action) -> some View {
         if let secondary {
             HStack(spacing: PBSpace.s8) {
-                PBButton(primary.label, size: .small, fillsWidth: true, action: primary.action)
+                PBButton(primary.label, size: .small, icon: primary.icon, fillsWidth: true, action: primary.action)
                     .accessibilityIdentifier(primary.testID ?? "")
-                PBButton(secondary.label, style: .onCard, size: .small, fillsWidth: true, action: secondary.action)
+                PBButton(secondary.label, style: .onCard, size: .small, icon: secondary.icon, fillsWidth: true,
+                         action: secondary.action)
                     .accessibilityIdentifier(secondary.testID ?? "")
             }
         } else {

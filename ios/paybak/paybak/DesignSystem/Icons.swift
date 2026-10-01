@@ -76,6 +76,29 @@ enum PBIcon: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+extension PBIcon {
+    /// The icon for a stored icon key (categories, group types and projects: `plane`, `home`,
+    /// `drone` …); the tag for anything else.
+    init(key: String) {
+        self = switch key {
+        case "food": .food
+        case "car": .car
+        case "bed": .bed
+        case "ticket": .ticket
+        case "home": .home
+        case "bolt": .bolt
+        case "shopping-bag": .shoppingBag
+        case "plane": .plane
+        case "people": .people
+        case "drone": .drone
+        case "package": .package
+        case "wifi", "wi-fi": .wiFi
+        case "flame": .flame
+        default: .tag
+        }
+    }
+}
+
 /// Draws an icon at `size` by scaling the whole 24 × 24 artwork, so the stroke scales with it exactly
 /// like Figma (24 → 1.5, 20 → 1.25, 16 → 1.0, 14 → 0.875). Tint it with `.foregroundStyle`.
 /// Icons are decorative; the control that contains one carries the accessibility label.

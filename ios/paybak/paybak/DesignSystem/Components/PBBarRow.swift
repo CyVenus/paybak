@@ -27,9 +27,11 @@ struct PBBarRow: View {
                             .textStyle(.headline)
                             .foregroundStyle(PBColor.textPrimary)
                         if let caption {
+                            // A long title truncates; the caption keeps its width.
                             Text(caption)
                                 .textStyle(.footnote)
                                 .foregroundStyle(PBColor.textSecondary)
+                                .layoutPriority(1)
                         }
                     }
                     .lineLimit(1)

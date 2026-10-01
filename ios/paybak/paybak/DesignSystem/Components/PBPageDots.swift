@@ -21,9 +21,9 @@ struct PBPageDots: View {
                 .id(reduceMotion ? active : 0)
                 .transition(.opacity)
         }
-        // Figma has instant variant swaps; the 0.25 s grow and the 0.2 s Reduce Motion fade are our
-        // suggestions (components-core.md §4.1, screens-launch.md §2.5).
-        .animation(.easeInOut(duration: reduceMotion ? 0.2 : 0.25), value: active)
+        // The active dot grows and the previous one shrinks over 0.3 s on the Figma ease-in-out
+        // curve (screens-launch.md §2.5); Reduce Motion fades the row in 0.2 s instead.
+        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .timingCurve(0.42, 0, 0.58, 1, duration: 0.3), value: active)
         .padding(.vertical, accessibilitySlop)
         .contentShape(.accessibility, .rect)
         .accessibilityElement()

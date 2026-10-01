@@ -53,12 +53,18 @@ struct PBButton: View {
                 Text(title)
                     .textStyle(size.textStyle)
                     .lineLimit(1)
-                    // Two alert pills share 260 pt; "Cancel payment" shrinks a little instead of truncating.
-                    .minimumScaleFactor(fillsWidth ? 0.8 : 1)
+                    // A label too long for its pill (an alert's half-width "Close project") shrinks,
+                    // down to 11 pt, before it clips.
+                    .minimumScaleFactor(Self.minimumLabelSize / size.textStyle.size)
+                    // A new label ("Continue" → "Get started") crossfades in place.
+                    .contentTransition(.opacity)
             }
+            .animation(.easeInOut(duration: 0.2), value: title)
         }
         .buttonStyle(PBPillButtonStyle(style: style, size: size, fillsWidth: fillsWidth))
     }
+
+    private static let minimumLabelSize: CGFloat = 11
 }
 
 /// The pill shape, fills and label colours per style and state. Pressed changes only the fill.
@@ -75,9 +81,7 @@ private struct PBPillButtonStyle: ButtonStyle {
         let colors = style.colors(isPressed: isPressed, isEnabled: isEnabled)
         configuration.label
             .foregroundStyle(colors.label)
-            // A full-width pill takes its width from the layout, so a long label may use more of it
-            // (Figma lets "Record payment" fit a 175 pt half-width button).
-            .padding(.horizontal, fillsWidth ? PBSpace.s16 : size.horizontalPadding)
+            .padding(.horizontal, size.horizontalPadding)
             .frame(maxWidth: fillsWidth ? .infinity : nil)
             .frame(height: size.height)
             .background(colors.fill, in: .capsule)

@@ -80,10 +80,12 @@ struct PBPersonRow: View {
             PBAvatar(avatar, diameter: isCompact ? PBSize.avatarSm : PBSize.avatarMd, isOnCard: surfaceIsCard)
             VStack(alignment: .leading, spacing: PBSpace.s2) {
                 HStack(spacing: PBSpace.s8) {
+                    // At most 200 pt (180 on Compact), so a tag beside a long name stays in view.
                     Text(name)
                         .textStyle(.headline)
                         .foregroundStyle(PBColor.textPrimary)
                         .lineLimit(1)
+                        .pbMaxWidth(isCompact ? 180 : 200)
                     if let tag {
                         PBBadge(tag, style: surfaceIsCard ? .onCard : .muted)
                     }
@@ -155,7 +157,7 @@ struct PBPersonRow: View {
                     .frame(width: PBSize.tap, height: PBSize.tap)
                     .contentShape(.rect)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PBDimButtonStyle())
             .padding(.horizontal, -(PBSize.tap - PBSize.iconMd) / 2)
             .accessibilityLabel("Remove \(name)")
         case .button(let label, let action):

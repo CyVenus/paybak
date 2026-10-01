@@ -39,7 +39,7 @@ struct PBCodeDigit: View {
         }
         .frame(maxWidth: 48)
         .frame(height: 56)
-        .animation(.easeOut(duration: 0.12), value: state)
+        .animation(.easeOut(duration: 0.15), value: state)
     }
 
     private var ring: Color? {

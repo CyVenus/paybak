@@ -14,6 +14,7 @@ struct PBDueChips: View {
         PBFlowLayout {
             ForEach(QuickDue.allCases, id: \.self) { chip in
                 chipButton(chip.title, isSelected: chip == selected) {
+                    Haptics.selection()
                     onSelect(chip == selected ? nil : chip)
                 }
                 .accessibilityIdentifier("\(testIDPrefix).\(chip.rawValue)")
@@ -27,11 +28,9 @@ struct PBDueChips: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// A date chip ticks (selection haptic); Pick date doesn't, as on Android.
     private func chipButton(_ title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button {
-            Haptics.selection()
-            action()
-        } label: {
+        Button(action: action) {
             Text(title)
                 .textStyle(.buttonSmall)
                 .lineLimit(1)

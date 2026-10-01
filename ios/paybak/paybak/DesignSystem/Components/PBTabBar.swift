@@ -54,6 +54,7 @@ struct PBTabItem: View {
             }
             .frame(width: 68, height: 52)
             .background(isActive ? PBColor.bgSelected : .clear, in: .capsule)
+            .animation(.easeOut(duration: 0.15), value: isActive)
             .contentShape(.capsule)
         }
         .buttonStyle(PBTabItemStyle())

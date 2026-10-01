@@ -64,6 +64,7 @@ struct PBProgressBar: View {
         }
         .frame(height: size.height)
         .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: value)
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.3), value: projected)
         .accessibilityElement()
         .accessibilityLabel(accessibilityLabel)
         .accessibilityValue("\(Int((clamped(value) * 100).rounded())) percent")

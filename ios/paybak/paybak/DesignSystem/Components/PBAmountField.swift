@@ -83,13 +83,14 @@ struct PBAmountField: View {
                 .opacity(0)
                 .accessibilityHidden(true)
             HStack(alignment: .top, spacing: PBSpace.s2) {
-                Text(text.isEmpty ? currency.symbol + "0" : Self.display(text, currency: currency))
+                Text(text.isEmpty ? Self.prefix(currency.code) + "0" : Self.display(text, currency: currency))
                     .textStyle(.amountDisplay)
                     .foregroundStyle(text.isEmpty ? PBColor.textTertiary : PBColor.textPrimary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)
                 if isFocused {
-                    BlinkingCaret()
+                    // Typing moves the caret, so it shows again on every change.
+                    PBCaret(height: 56, restartKey: text)
                         .padding(.top, PBSpace.s4)
                 }
             }
@@ -116,48 +117,31 @@ struct PBAmountField: View {
 
 extension PBAmountField {
     /// Keeps digits and one decimal point with at most two decimals, and at most nine whole digits.
+    /// Leading zeros go, so a lone "0" is empty ("05" → "5", "0" → ""; "0.5" stays).
     static func sanitize(_ raw: String, allowsDecimals: Bool) -> String {
         let allowed = raw.filter { $0.isASCII && ($0.isWholeNumber || (allowsDecimals && $0 == ".")) }
         let parts = allowed.split(separator: ".", maxSplits: 1, omittingEmptySubsequences: false)
         var whole = String(parts[0].prefix(9))
-        // No leading zeros ("007" → "7").
-        while whole.count > 1, whole.hasPrefix("0") { whole.removeFirst() }
+        while whole.hasPrefix("0") { whole.removeFirst() }
         guard parts.count > 1 else { return whole }
         let fraction = parts[1].filter(\.isWholeNumber).prefix(2)
         return (whole.isEmpty ? "0" : whole) + "." + fraction
     }
 
-    /// The raw input with the currency symbol and its grouping: Indian grouping for INR
-    /// ("₹1,00,000"), thousands elsewhere ("$100,000"). Decimals show only as typed.
+    /// The raw input with the currency's prefix and grouping: Indian grouping for INR
+    /// ("₹1,00,000"), thousands elsewhere ("$100,000", "AED 1,200"). Decimals show only as typed.
     static func display(_ raw: String, currency: Currency) -> String {
         let parts = raw.split(separator: ".", omittingEmptySubsequences: false)
-        let whole = Int(parts.first ?? "") ?? 0
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: currency.code == "INR" ? "en_IN" : "en_US")
-        let grouped = formatter.string(from: NSNumber(value: whole)) ?? String(whole)
+        let whole = UInt64(parts.first ?? "") ?? 0
         let fraction = parts.count > 1 ? "." + parts[1] : ""
-        return currency.symbol + grouped + fraction
+        return prefix(currency.code) + Money.groupDigits(whole, code: currency.code) + fraction
     }
-}
 
-/// The 2 × 56 caret: blinks about once a second, steady with Reduce Motion.
-private struct BlinkingCaret: View {
-    @State private var isVisible = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        Rectangle()
-            .fill(PBColor.textPrimary)
-            .frame(width: 2, height: 56)
-            .opacity(isVisible ? 1 : 0)
-            .task {
-                guard !reduceMotion else { return }
-                while !Task.isCancelled {
-                    try? await Task.sleep(for: .milliseconds(530))
-                    isVisible.toggle()
-                }
-            }
+    /// What goes before an amount being typed: the symbol ("₹", "S$"), or a longer symbol and a
+    /// space ("AED "), as `Money.format` writes amounts.
+    static func prefix(_ code: String) -> String {
+        let symbol = Money.info(code).symbol
+        return symbol.count <= 2 ? symbol : symbol + " "
     }
 }
 
