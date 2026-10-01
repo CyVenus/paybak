@@ -97,7 +97,7 @@ internal fun ScanReview(
                     PbAmountEditor(
                         text,
                         onValueChange = { typed -> AmountEntry.accept(typed)?.let { text = it } },
-                        prefix = Money.currency(currency).symbol,
+                        prefix = AmountEntry.prefix(currency),
                         currency = currency,
                         onDone = ::commit,
                         decimal = AmountEntry.allowsDecimals(currency),
