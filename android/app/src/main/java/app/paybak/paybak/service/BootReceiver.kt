@@ -3,11 +3,12 @@ package app.paybak.paybak.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import app.paybak.paybak.service.notifications.tickAndNotify
 
-/**
- * Reschedules the pending local notifications after a reboot. STUB owned by lane A (M6): declared
- * in the manifest by M2.
- */
+/** A reboot clears alarms: catch up with `tick` and schedule the next one (domain.md §10.1). */
 class BootReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) = Unit
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        tickAndNotify(context)
+    }
 }
