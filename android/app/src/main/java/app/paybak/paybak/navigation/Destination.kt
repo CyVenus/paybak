@@ -75,17 +75,23 @@ sealed interface Destination {
         const val WELCOME_STEPS = 3
         const val SETUP_STEPS = 4
 
-        /** Every root, in flow order. */
-        val all: List<Destination> = buildList {
-            add(Splash)
-            (1..WELCOME_STEPS).forEach { add(Welcome(it)) }
-            add(GetStarted)
-            add(SignIn)
-            add(Verify())
-            add(Verify(rejectedCode = Verify.FIGMA_WRONG_CODE))
-            (1..SETUP_STEPS).forEach { add(Setup(it)) }
-            add(AllSet)
-            add(Main)
+        /**
+         * Every root, in flow order. Built on first use: a launch loads [Splash] first, which
+         * initializes this interface while Splash itself isn't ready, so an eager list would hold
+         * null in its place.
+         */
+        val all: List<Destination> by lazy {
+            buildList {
+                add(Splash)
+                (1..WELCOME_STEPS).forEach { add(Welcome(it)) }
+                add(GetStarted)
+                add(SignIn)
+                add(Verify())
+                add(Verify(rejectedCode = Verify.FIGMA_WRONG_CODE))
+                (1..SETUP_STEPS).forEach { add(Setup(it)) }
+                add(AllSet)
+                add(Main)
+            }
         }
 
         fun fromId(id: String): Destination? = all.firstOrNull { it.id == id }

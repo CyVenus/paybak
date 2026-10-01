@@ -1,6 +1,8 @@
 package app.paybak.paybak.navigation
 
 import androidx.compose.runtime.saveable.SaverScope
+import java.io.File
+import java.net.URLClassLoader
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
@@ -27,6 +29,26 @@ class AppNavigatorTest {
             )
         assertEquals(ids, Destination.all.map(Destination::id))
         ids.forEach { id -> assertEquals(id, Destination.fromId(id)?.id) }
+    }
+
+    /**
+     * A normal launch touches [Destination.Splash] before anything asks for [Destination.all]; the
+     * list must still hold Splash, or restoring a saved stack after a configuration change crashes.
+     * A fresh class loader makes Splash the first class to load, whatever ran before.
+     */
+    @Test
+    fun everyRootIsListedWhenSplashLoadsFirst() {
+        val classPath =
+            System.getProperty("java.class.path").split(File.pathSeparator).map {
+                File(it).toURI().toURL()
+            }
+        URLClassLoader(classPath.toTypedArray(), null).use { fresh ->
+            val name = Destination::class.java.name
+            Class.forName("$name\$Splash", true, fresh)
+            val companion = Class.forName(name, true, fresh).getField("Companion").get(null)
+            val all = companion.javaClass.getMethod("getAll").invoke(companion) as List<*>
+            assertFalse(null in all)
+        }
     }
 
     @Test
