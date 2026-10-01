@@ -1,4 +1,6 @@
 #if DEBUG
+import Foundation
+
 extension Scenario {
     /// Insights, Ask Paybak, receipt scanning and recurring ids (app-architecture §1.9).
     static let insights: [ScreenID: Scenario] = {
@@ -19,7 +21,7 @@ extension Scenario {
             .recurringFlat302: Scenario(seeds: pro(), tab: .groups, stack: [.group("g-flat302"), .recurring("g-flat302")]),
             .recurringRepeat: Scenario(seeds: pro(), modals: [Layer(
                 root: .addExpense(AddExpenseArgs(draft: cookingGasDraft(on: figma), focusAmount: false)),
-                sheet: .repeatRule(RepeatRuleRequest(current: RepeatRule(frequency: .monthly, anchorDate: figma), startDate: figma))
+                sheet: .repeatRule(RepeatRuleRequest(current: cookingGasRule(on: figma), startDate: figma))
             )]),
             .recurringEnterAmount: Scenario(seeds: pro(), modals: [Layer(root: .enterDraftAmount("d-gas-09"))]),
         ]
@@ -38,18 +40,24 @@ extension Scenario {
         let order = [Person.me, "p-esha", "p-dev"]
         let shares = Splits.itemized(items: items, total: 230_000, order: order).shares
         return ExpenseDraft(
-            title: "Leopold Cafe", category: .food, amount: 230_000, currency: "INR", date: day,
+            title: "Lunch at Leopold Cafe", category: .food, amount: 230_000, currency: "INR", date: day,
             payers: [Payer(personId: Person.me, amount: 230_000)], splitMode: .itemized,
             rows: order.map { SplitRow(personId: $0, included: true, value: shares[$0], share: shares[$0] ?? 0) },
             itemized: Itemized(items: items, lines: [.init(label: "GST 5%", amount: 10_000), .init(label: "Tip 10%", amount: 20_000)],
-                               subtotal: 200_000)
+                               subtotal: 200_000),
+            receipt: Receipt(asset: "art-receipt-full", addedBy: Person.me, addedAt: day.start(in: .current))
         )
     }
 
     /// Cooking gas for Flat 302, the Repeat sheet's example.
     static func cookingGasDraft(on day: LocalDay) -> ExpenseDraft {
         ExpenseDraft(groupId: "g-flat302", title: "Cooking gas", category: .bills, currency: "INR", date: day,
-                     rows: [Person.me, "p-meera", "p-kabir"].map { SplitRow(personId: $0) })
+                     rows: [Person.me, "p-meera", "p-kabir"].map { SplitRow(personId: $0) }, repeatRule: cookingGasRule(on: day))
+    }
+
+    /// Monthly on the 28th, amount changing each time (insights §5.3).
+    static func cookingGasRule(on day: LocalDay) -> RepeatRule {
+        RepeatRule(frequency: .monthly, anchorDate: day.adding(days: -2), variable: true)
     }
 }
 #endif

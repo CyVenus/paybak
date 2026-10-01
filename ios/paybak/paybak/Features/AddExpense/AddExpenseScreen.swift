@@ -89,7 +89,7 @@ private struct ExpenseFormView: View {
                     text: $form.amountText,
                     currency: Currency(code: form.currency),
                     date: Format.dateChip(form.date, today: books.today),
-                    helper: rateLine,
+                    helper: receiptLine ?? rateLine,
                     testIDPrefix: "addExpense",
                     focus: $amountFocused,
                     onCurrencyTap: openCurrency,
@@ -186,6 +186,12 @@ private struct ExpenseFormView: View {
         .routeTestRoot("addExpense")
     }
 
+    /// "From receipt · 6 items" on a scanned, itemized expense (insights §4.5).
+    private var receiptLine: String? {
+        guard form.receipt != nil, let count = form.itemized?.items.count else { return nil }
+        return "From receipt · \(count) item\(count == 1 ? "" : "s")"
+    }
+
     private var rateLine: String? {
         guard let rate = form.rate, form.amount > 0 else { return nil }
         return Money.approximateLine(form.amount, currency: form.currency, rate: rate)
@@ -195,7 +201,7 @@ private struct ExpenseFormView: View {
         ExpenseFormCard.Actions(
             category: { open(.category) },
             paidBy: { open(.paidBy) },
-            split: { dismissKeyboard(); showsSplitEditor = true },
+            split: openSplit,
             group: openGroup,
             due: openDue,
             quickDue: { chip in form.dueDate = chip?.day(from: books.today) },
@@ -232,6 +238,16 @@ private struct ExpenseFormView: View {
         dismissKeyboard()
         let start = form.dueDate ?? books.today.adding(days: 1)
         router.open(.pickDate(DatePickRequest(id: requests.due, kind: .dueDate, selected: start, allowsNone: true, earliest: books.today)))
+    }
+
+    /// A scanned receipt's split goes back to Assign items (insights §4.5); others open the editor.
+    private func openSplit() {
+        dismissKeyboard()
+        if form.splitMode == .itemized, let itemized = form.itemized {
+            router.open(.scanReceipt(ScanRequest(id: requests.receipt, people: form.people, itemized: itemized)))
+        } else {
+            showsSplitEditor = true
+        }
     }
 
     private func openGroup() {

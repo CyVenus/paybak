@@ -18,15 +18,16 @@ struct PBChatBubble<Attachment: View>: View {
     var body: some View {
         switch role {
         case .user:
-            Text(text)
-                .textStyle(.body)
-                .foregroundStyle(PBColor.textInverse)
-                .textSelection(.enabled)
-                .padding(.vertical, PBSpace.s12)
-                .padding(.horizontal, PBSpace.s16)
-                .background(PBColor.bgInverse, in: .rect(cornerRadius: PBRadius.card))
-                .frame(maxWidth: 280, alignment: .trailing)
-                .frame(maxWidth: .infinity, alignment: .trailing)
+            // A short message hugs its text; one that wraps fills the 280 pt bubble, as Figma does.
+            ViewThatFits(in: .horizontal) {
+                userText.fixedSize()
+                userText.frame(width: 248, alignment: .leading)
+            }
+            .padding(.vertical, PBSpace.s12)
+            .padding(.horizontal, PBSpace.s16)
+            .background(PBColor.bgInverse, in: .rect(cornerRadius: PBRadius.card))
+            .frame(maxWidth: 280, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .trailing)
         case .assistant:
             VStack(alignment: .leading, spacing: PBSpace.s12) {
                 HStack(alignment: .top, spacing: PBSpace.s8) {
@@ -44,6 +45,14 @@ struct PBChatBubble<Attachment: View>: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    private var userText: some View {
+        Text(text)
+            .textStyle(.body)
+            .foregroundStyle(PBColor.textInverse)
+            .textSelection(.enabled)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 

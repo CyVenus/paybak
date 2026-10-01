@@ -1,19 +1,22 @@
 import SwiftUI
 
-/// The Activity tab (screens-activity §3, M2): the fixed header with the Timeline | Insights
-/// segments, over the timeline (lane A's `ActivityTimelineView`) or Insights (lane C's
+/// The Activity tab (screens-activity §3, M2): the header with the Timeline | Insights segments,
+/// fixed over the timeline (lane A's `ActivityTimelineView`), or scrolling inside Insights (lane C's
 /// `InsightsView`). The segment lives in the router so deep links and "See all" can pick it.
 struct ActivityTabScreen: View {
     @Environment(AppRouter.self) private var router
 
     var body: some View {
         VStack(spacing: 0) {
-            ActivityHeader()
-                .padding(.horizontal, PBLayout.screenMargin)
-                .phoneContentWidth()
             switch router.activitySegment {
-            case .timeline: ActivityTimelineView()
-            case .insights: InsightsView()
+            case .timeline:
+                ActivityHeader()
+                    .padding(.horizontal, PBLayout.screenMargin)
+                    .phoneContentWidth()
+                ActivityTimelineView()
+            case .insights:
+                // The header scrolls with the report and collapses (insights §2.4).
+                InsightsView()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

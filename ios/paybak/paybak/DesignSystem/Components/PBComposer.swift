@@ -39,16 +39,17 @@ struct PBComposer: View {
     private var focus: FocusState<Bool>.Binding { externalFocus ?? $ownFocus }
     private var trimmed: String { text.trimmingCharacters(in: .whitespacesAndNewlines) }
 
+    // One view in both states, so pinning on focus keeps the same text field (and its focus).
     var body: some View {
-        if isPinned {
-            field
-                .padding(.vertical, PBSpace.s8)
-                .padding(.horizontal, PBLayout.screenMargin)
-                .background(PBColor.bgPrimary)
-                .overlay(alignment: .top) { PBDivider() }
-        } else {
-            field
-        }
+        field
+            .padding(.vertical, isPinned ? PBSpace.s8 : 0)
+            .padding(.horizontal, isPinned ? PBLayout.screenMargin : 0)
+            .background(isPinned ? PBColor.bgPrimary : .clear)
+            .overlay(alignment: .top) {
+                if isPinned {
+                    PBDivider()
+                }
+            }
     }
 
     private var field: some View {
