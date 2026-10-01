@@ -1,4 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the projects module (app-architecture §7.1): names start with "projects_". Only its lane edits this file. -->
 <resources>
+    <!-- Project detail (screens-projects §3–§8) -->
+    <string name="projects_settings">Project settings</string>
+    <string name="projects_archived">Archived</string>
+    <string name="projects_components">Components</string>
+    <string name="projects_no_components">No components yet. Add the first part below.</string>
+    <string name="projects_paid_vs_share">Paid vs fair share</string>
+    <string name="projects_history">History</string>
+    <string name="projects_who_owes_whom">Who owes whom</string>
+    <string name="projects_final_plan">Final settle-up plan</string>
+    <string name="projects_members">Members</string>
+    <string name="projects_add_component">Add component</string>
+    <string name="projects_settled">Settled</string>
+    <string name="projects_status_planned">Planned</string>
+    <string name="projects_status_bought">Bought</string>
+    <string name="projects_status_done">Done</string>
+    <string name="projects_toast_added">Component added</string>
+    <string name="projects_toast_archived">Project archived</string>
+
+    <!-- Add / Edit component sheet (§5, §1.5) -->
+    <string name="projects_edit_component">Edit component</string>
+    <string name="projects_name">Name</string>
+    <string name="projects_name_placeholder">e.g. Spare propellers</string>
+    <string name="projects_estimated_cost">Estimated cost</string>
+    <string name="projects_actual_cost">Actual cost</string>
+    <string name="projects_actual_helper">Add it once it’s bought</string>
+    <string name="projects_status">Status</string>
+    <string name="projects_paid_by">Paid by</string>
+    <string name="projects_you">You</string>
+    <string name="projects_add_receipt">Add receipt</string>
+    <string name="projects_photo_added">Photo added</string>
+    <string name="projects_shares_footnote">Shares update as soon as an actual cost is added.</string>
+    <string name="projects_save_changes">Save changes</string>
+    <string name="projects_delete_component">Delete component</string>
+    <string name="projects_delete_title">Delete %1$s?</string>
+    <string name="projects_delete_message">Its cost comes off the project.</string>
+    <string name="projects_delete">Delete</string>
+    <string name="projects_discard_title">Discard this component?</string>
+    <string name="projects_discard_message">What you typed won’t be saved.</string>
+    <string name="projects_discard_changes_title">Discard changes?</string>
+    <string name="projects_discard_changes_message">Your changes to this component won’t be saved.</string>
+    <string name="projects_keep_editing">Keep editing</string>
+    <string name="projects_discard">Discard</string>
+    <string name="projects_cancel">Cancel</string>
+
+    <!-- Project settings (§6) -->
+    <string name="projects_contribution_rule">Contribution rule</string>
+    <string name="projects_rule_equal">Equal</string>
+    <string name="projects_rule_percent">Percent</string>
+    <string name="projects_rule_fixed">Fixed</string>
+    <string name="projects_add_member">Add member</string>
+    <string name="projects_add_members">Add members</string>
+    <string name="projects_budget">Budget</string>
+    <string name="projects_budget_helper">You’ll see a warning if spending goes over.</string>
+    <string name="projects_pool">Collect money upfront</string>
+    <string name="projects_pool_helper">When on, members pay into a pool first and purchases come out of it.</string>
+    <string name="projects_close">Close project</string>
+    <string name="projects_close_title">Close %1$s?</string>
+    <string name="projects_close_message">Components lock and everyone sees the final plan.</string>
 </resources>

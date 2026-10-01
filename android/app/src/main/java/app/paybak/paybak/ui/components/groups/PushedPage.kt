@@ -44,8 +44,8 @@ import app.paybak.paybak.ui.theme.PbTextStyles
  * A pushed page as screens-groups §1.6 builds it: the Push Header pinned over a white band that
  * runs from the top edge to its bottom, and the content scrolling under the band, starting
  * [contentTop] below the header (16 dp; the Settle up pages use 24). The root is tagged
- * `screen.[id]`; the header's parts "[id].back" and "[id].action". The keyboard lifts the end of
- * the content, so a focused field can scroll into view.
+ * `screen.[id]`; the header's parts "[id].back" and "[id].[actionTag]". The keyboard lifts the end
+ * of the content, so a focused field can scroll into view.
  *
  * @param overlay Drawn over everything, e.g. a local sheet.
  */
@@ -56,6 +56,7 @@ fun PbPushedPage(
     modifier: Modifier = Modifier,
     title: String? = null,
     action: PbHeaderAction? = null,
+    actionTag: String = "action",
     scrollState: ScrollState = rememberScrollState(),
     contentTop: Dp = PbSpace.S16,
     overlay: @Composable BoxScope.() -> Unit = {},
@@ -90,6 +91,7 @@ fun PbPushedPage(
                     modifier = Modifier.padding(horizontal = PbLayout.ScreenMargin),
                     action = action,
                     testTag = id,
+                    actionTag = actionTag,
                 )
             }
         }
