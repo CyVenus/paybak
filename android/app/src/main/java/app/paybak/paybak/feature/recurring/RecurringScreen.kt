@@ -122,6 +122,7 @@ fun RecurringScreen(route: Route.Recurring) {
                                         ExpenseDraft.equal(group.memberIds)
                                             .copy(
                                                 groupId = group.id,
+                                                currency = group.currency,
                                                 repeat = RepeatRule(Frequency.Monthly, today),
                                             )
                                 )
