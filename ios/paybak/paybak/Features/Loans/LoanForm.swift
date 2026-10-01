@@ -5,7 +5,24 @@ import Observation
 /// and either installments (count, frequency, first due) or a single due date.
 @Observable
 final class LoanForm {
+    /// Everything the form holds, to tell whether it changed since it opened (Discard asks first).
+    struct Snapshot: Equatable {
+        var direction: LendMoneyArgs.Direction
+        var amountText: String
+        var currency: String
+        var person: PersonID?
+        var reason: String
+        var date: LocalDay
+        var hasInstallments: Bool
+        var count: Int
+        var frequency: Loan.Frequency
+        var pickedFirstDue: LocalDay?
+        var dueDate: LocalDay?
+    }
+
     static let countRange = 2...24
+    /// The longest reason the Reason sheet takes.
+    static let maxReason = 60
 
     let editing: LoanID?
     var direction: LendMoneyArgs.Direction
@@ -22,7 +39,7 @@ final class LoanForm {
     var pickedFirstDue: LocalDay?
     var dueDate: LocalDay?
 
-    @ObservationIgnored private var initial: LoanDraft?
+    @ObservationIgnored private var initial: Snapshot?
 
     init(editing: LoanID? = nil, direction: LendMoneyArgs.Direction, amount: Int64?, currency: String, rate: Rate?, person: PersonID?,
          reason: String, date: LocalDay, installments: Loan.Installments?, dueDate: LocalDay?) {
@@ -34,12 +51,18 @@ final class LoanForm {
         self.person = person
         self.reason = reason
         self.date = date
-        hasInstallments = installments != nil || dueDate == nil
+        // A new loan starts with installments on; an edited one as it was saved.
+        hasInstallments = editing == nil || installments != nil
         count = installments?.count ?? 3
         frequency = installments?.frequency ?? .monthly
         pickedFirstDue = installments?.firstDue
         self.dueDate = dueDate
-        initial = draft
+        initial = snapshot
+    }
+
+    var snapshot: Snapshot {
+        Snapshot(direction: direction, amountText: amountText, currency: currency, person: person, reason: reason, date: date,
+                 hasInstallments: hasInstallments, count: count, frequency: frequency, pickedFirstDue: pickedFirstDue, dueDate: dueDate)
     }
 
     var amount: Int64 { MoneyInput.minor(amountText, currency: currency) }
@@ -53,7 +76,8 @@ final class LoanForm {
 
     var canSave: Bool { amount > 0 && person != nil }
 
-    var isDirty: Bool { draft != initial }
+    /// Anything changed since the form opened (an amount typed before choosing the person too).
+    var isDirty: Bool { snapshot != initial }
 
     var draft: LoanDraft? {
         guard let person else { return nil }

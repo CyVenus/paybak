@@ -50,7 +50,7 @@ struct NewGroupScreen: View {
                     settingsCard(form)
                 }
             }
-            .padding(.bottom, PBSpace.s32)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
@@ -70,9 +70,11 @@ struct NewGroupScreen: View {
         .onRouteResult(requests.people) { if case .people(let ids) = $0 { form.setMembers(ids) } }
         .onRouteResult(requests.currency) { if case .currency(let code) = $0 { form.currency = code } }
         .onStartScreen([.newGroup, .newGroupProject]) { _ in
+            // The Figma prefill (06-17, 06-18) is where the form starts, so closing it doesn't ask.
             form.name = "Weekend Trek"
             form.type = .trip
             form.setMembers(["p-esha", "p-dev", "p-kabir"])
+            form.markUnchanged()
         }
         .routeTestRoot("newGroup")
     }
@@ -105,9 +107,15 @@ struct NewGroupScreen: View {
         return VStack(alignment: .leading, spacing: PBLayout.sectionGap) {
             VStack(alignment: .leading, spacing: PBSpace.s16) {
                 nameField(form)
-                PBTextField("Description", text: $form.details, prompt: "What’s it for?")
+                PBTextField("Description", text: Binding {
+                    form.details
+                } set: {
+                    form.details = String($0.prefix(GroupForm.maxDescription))
+                }, prompt: "What’s it for?")
+                    .textInputAutocapitalization(.sentences)
                     .accessibilityIdentifier("newGroup.description")
-                PBSettingRow("Add cover photo", value: form.coverPhoto == nil ? nil : "Photo added", icon: .camera, showsDivider: false) {
+                PBSettingRow(form.coverPhoto == nil ? "Add cover photo" : "Cover photo", value: form.coverPhoto == nil ? nil : "Added",
+                             icon: .camera, showsDivider: false, valueLeading: coverThumbnail(form.coverPhoto)) {
                     showsPhotoPicker = true
                 }
                 .pbCard(padding: 0)
@@ -117,7 +125,7 @@ struct NewGroupScreen: View {
                 form.budgetText
             } set: {
                 form.budgetText = PBAmountField.sanitize($0, allowsDecimals: Money.info(form.currency).exponent > 0)
-            }, prompt: "\(Money.info(form.currency).symbol)0", helper: "Optional. Spending is tracked against it.")
+            }, prompt: budgetPlaceholder(form.currency), helper: "Optional. Spending is tracked against it.")
                 .keyboardType(.decimalPad)
                 .accessibilityIdentifier("newGroup.budget")
             VStack(alignment: .leading, spacing: PBSpace.s8) {
@@ -139,10 +147,31 @@ struct NewGroupScreen: View {
     }
 
     private func nameField(_ form: GroupForm) -> some View {
-        @Bindable var form = form
-        return PBTextField("Name", text: $form.name, prompt: form.isProject ? "Build a Drone" : "Weekend Trek")
+        PBTextField("Name", text: Binding {
+            form.name
+        } set: {
+            form.name = String($0.prefix(GroupForm.maxName))
+        }, prompt: form.isProject ? "e.g. Build a Drone" : "e.g. Weekend Trek")
+            .textInputAutocapitalization(.words)
             .submitLabel(.done)
             .accessibilityIdentifier("newGroup.name")
+    }
+
+    /// The picked cover as a 32 pt thumbnail before "Added".
+    private func coverThumbnail(_ file: String?) -> AnyView? {
+        guard let image = file.flatMap({ PhotoFiles.image(.file($0)) }) else { return nil }
+        return AnyView(
+            image.resizable()
+                .scaledToFill()
+                .frame(width: 32, height: 32)
+                .clipShape(.rect(cornerRadius: PBRadius.sm))
+        )
+    }
+
+    /// "₹0", "$0"; a longer symbol keeps a space ("AED 0").
+    private func budgetPlaceholder(_ currency: String) -> String {
+        let symbol = Money.info(currency).symbol
+        return symbol.count <= 2 ? "\(symbol)0" : "\(symbol) 0"
     }
 
     private func settingsCard(_ form: GroupForm) -> some View {

@@ -101,7 +101,7 @@ struct BalanceBreakdownView: View {
     private func personRow(_ row: BreakdownRowCopy, showsDivider: Bool) -> some View {
         PBPersonRow(
             name: row.name,
-            avatar: ledgerStore.ledger.person(row.id)?.avatarContent ?? .icon(.profile),
+            avatar: ledgerStore.ledger.person(row.id)?.avatarContent ?? .initials(String(row.name.prefix(1))),
             subtitle: row.subtitle,
             isOnCard: true,
             trailing: .amount(row.amount, direction: direction == .owed ? .owed : .owe, label: row.dueLabel, overdue: row.overdue),

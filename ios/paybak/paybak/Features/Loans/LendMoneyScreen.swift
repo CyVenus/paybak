@@ -50,7 +50,6 @@ private struct LoanFormView: View {
                                    firstDue: RecordID.make(), due: RecordID.make())
     @State private var sheet: LoanSheet?
     @State private var showsDiscard = false
-    @State private var error: String?
     @FocusState private var amountFocused: Bool
 
     private var books: Books { store.books }
@@ -64,7 +63,7 @@ private struct LoanFormView: View {
                     Haptics.selection()
                     form.direction = $0 == 0 ? .lent : .borrowed
                 })
-                PBAmountField(text: $form.amountText, currency: Currency(code: form.currency), helper: rateLine,
+                PBAmountField(text: $form.amountText, currency: Currency(code: form.currency),
                               testIDPrefix: "lendMoney", focus: $amountFocused, onCurrencyTap: openCurrency)
                 VStack(alignment: .leading, spacing: PBLayout.sectionGap) {
                     detailsCard
@@ -79,7 +78,7 @@ private struct LoanFormView: View {
                     }
                 }
             }
-            .padding(.bottom, PBSpace.s32)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
@@ -105,11 +104,6 @@ private struct LoanFormView: View {
         .pbAlert(isPresented: $showsDiscard, title: form.editing == nil ? "Discard this loan?" : "Discard changes?",
                  message: "Your changes won’t be saved.", cancelLabel: "Keep editing", actionLabel: "Discard",
                  testIDPrefix: "lendMoney.discardAlert", onAction: router.dismissModal)
-        .alert("Couldn’t save", isPresented: Binding { error != nil } set: { if !$0 { error = nil } }) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(error ?? "")
-        }
         .onRouteResult(requests.person) { if case .person(let id) = $0 { form.person = id } }
         .onRouteResult(requests.currency) { result in
             guard case .currency(let code) = result else { return }
@@ -132,7 +126,7 @@ private struct LoanFormView: View {
                 .accessibilityIdentifier("lendMoney.person")
             PBSettingRow("Reason", value: form.reason.isEmpty ? "Optional" : form.reason, icon: .receipt) { open(.reason) }
                 .accessibilityIdentifier("lendMoney.reason")
-            PBSettingRow("Date", value: Format.dayWithYear(form.date, today: books.today), icon: .calendar, showsDivider: false, action: openDate)
+            PBSettingRow("Date", value: Format.day(form.date), icon: .calendar, showsDivider: false, action: openDate)
                 .accessibilityIdentifier("lendMoney.date")
         }
         .pbCard(padding: 0)
@@ -147,11 +141,11 @@ private struct LoanFormView: View {
                 InstallmentCountRow(count: $form.count)
                 PBSettingRow("Repeats", value: form.frequency.title, icon: .repeat) { open(.repeats) }
                     .accessibilityIdentifier("lendMoney.repeats")
-                PBSettingRow("First due", value: Format.dayWithYear(form.firstDue, today: books.today), icon: .calendar,
+                PBSettingRow("First due", value: Format.day(form.firstDue), icon: .calendar,
                              showsDivider: false, action: openFirstDue)
                     .accessibilityIdentifier("lendMoney.firstDue")
             } else {
-                PBSettingRow("Due", value: form.dueDate.map { Format.dayWithYear($0, today: books.today) } ?? "None",
+                PBSettingRow("Due", value: form.dueDate.map(Format.day) ?? "None",
                              icon: .calendar, showsDivider: false, action: openDue)
                     .accessibilityIdentifier("lendMoney.due")
                 PBDueChips(selected: QuickDue.matching(form.dueDate, today: books.today), testIDPrefix: "lendMoney.due",
@@ -165,11 +159,6 @@ private struct LoanFormView: View {
         form.person.flatMap { store.ledger.person($0)?.firstName }
     }
 
-    private var rateLine: String? {
-        guard let rate = form.rate, form.amount > 0 else { return nil }
-        return Money.approximateLine(form.amount, currency: form.currency, rate: rate)
-    }
-
     // MARK: Actions
 
     private func open(_ local: LoanSheet) {
@@ -179,8 +168,8 @@ private struct LoanFormView: View {
 
     private func pickPerson() {
         amountFocused = false
-        router.open(.pickPeople(PeoplePickRequest(id: requests.person, mode: .single, selected: form.person.map { [$0] } ?? [],
-                                                  title: form.isLent ? "Lent to" : "Borrowed from", showsYou: false)))
+        router.open(.pickPeople(PeoplePickRequest(id: requests.person, mode: .single, title: form.isLent ? "Lent to" : "Borrowed from",
+                                                  showsYou: false)))
     }
 
     private func openCurrency() {
@@ -200,8 +189,7 @@ private struct LoanFormView: View {
 
     private func openDue() {
         amountFocused = false
-        router.open(.pickDate(DatePickRequest(id: requests.due, kind: .dueDate, selected: form.dueDate ?? books.today.adding(days: 1),
-                                              allowsNone: true, earliest: books.today)))
+        router.open(.pickDate(DatePickRequest(id: requests.due, kind: .dueDate, selected: form.dueDate, allowsNone: true)))
     }
 
     private func close() {
@@ -223,7 +211,7 @@ private struct LoanFormView: View {
             Haptics.success()
         } catch {
             Haptics.warning()
-            self.error = error.localizedDescription
+            router.toast(error.localizedDescription)
         }
     }
 

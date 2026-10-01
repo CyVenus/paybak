@@ -24,6 +24,7 @@ struct SettleUpScreen: View {
                 section(Books.owersHeader(plan.get.count), rows: plan.get)
             }
             .padding(.top, PBSpace.s8)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .pbPinnedHeader {
@@ -53,7 +54,7 @@ struct SettleUpScreen: View {
         let person = ledgerStore.ledger.person(row.friend)
         let isPending = row.pendingPayment != nil
         return PBAttentionRow(
-            avatar: person?.avatarContent ?? .icon(.profile),
+            avatar: person?.avatarContent ?? .initials(String(row.name.prefix(1))),
             title: row.name,
             detail: row.context,
             amount: row.amount,
@@ -67,7 +68,7 @@ struct SettleUpScreen: View {
                     router.open(.recordPayment(.paying(row.friend, amount: row.amountMinor, currency: row.currency,
                                                        context: row.item?.paymentContext, in: ledgerStore.ledger)))
                 } else {
-                    router.open(.remind(personId: row.friend, context: row.item?.reminderContext))
+                    router.open(.remind(personId: row.friend, context: row.onlyItem?.reminderContext))
                 }
             },
             onTap: { router.open(row.pendingPayment.map(Route.payment) ?? .friend(row.friend)) }

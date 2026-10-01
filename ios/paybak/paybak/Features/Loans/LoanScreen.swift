@@ -18,10 +18,13 @@ struct LoanScreen: View {
             if let detail {
                 content(detail)
             } else {
-                Text("This loan is no longer here.")
-                    .textStyle(.body)
-                    .foregroundStyle(PBColor.textSecondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ScrollView {
+                    Text("This loan isn’t available any more.")
+                        .textStyle(.body)
+                        .foregroundStyle(PBColor.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .pbPushContent()
+                }
             }
         }
         .pbPinnedHeader {

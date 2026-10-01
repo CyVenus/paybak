@@ -78,7 +78,7 @@ struct GroupSummaryRow: View {
     }
 
     private func budget(_ budget: GroupRowCopy.Budget) -> PBGroupRow.Budget {
-        PBGroupRow.Budget(progress: budget.progress, spent: budget.spent, left: budget.left)
+        PBGroupRow.Budget(progress: budget.progress, spent: budget.spent, left: budget.left, isOver: budget.isOver)
     }
 }
 

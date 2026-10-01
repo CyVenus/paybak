@@ -19,6 +19,7 @@ struct FriendScreen: View {
         ScrollView {
             if let person = ledgerStore.ledger.person(personId), let page = books.friendPage(personId) {
                 content(person, page: page, books: books)
+                    .padding(.bottom, PBSpace.s24)
                     .pbPushContent()
             }
         }
@@ -39,7 +40,7 @@ struct FriendScreen: View {
         return VStack(alignment: .leading, spacing: PBSpace.s24) {
             if person.isGuest {
                 title
-                VStack(spacing: balance == nil ? PBSpace.s32 : PBSpace.s16) {
+                VStack(spacing: balance == nil ? PBSpace.s32 : PBSpace.s24) {
                     inviteNotice(person)
                     if let balance {
                         balanceBlock(balance, person: person, page: page, books: books)
@@ -79,7 +80,7 @@ struct FriendScreen: View {
             VStack(spacing: PBSpace.s12) {
                 PBBalanceCard(kind: kind(copy.tone), label: copy.label, amount: copy.amount, caption: copy.caption,
                               badge: copy.overdue.map { ($0, .overdue) }, testIDPrefix: "friend")
-                actions(copy, person: person, net: page.balance.net)
+                actions(copy, person: person, balance: page.balance)
             }
             if copy.tone == .owed, let reminder = page.lastReminder {
                 Text(books.lastReminderText(reminder) + ".")
@@ -90,9 +91,12 @@ struct FriendScreen: View {
         }
     }
 
+    /// Remind + Record payment while they owe you, Settle up while you owe. A payment is filed under
+    /// the one open item between you, when the net comes from just one.
     @ViewBuilder
-    private func actions(_ copy: FriendBalanceCopy, person: Person, net: Int64) -> some View {
-        let amount = abs(net)
+    private func actions(_ copy: FriendBalanceCopy, person: Person, balance: FriendBalance) -> some View {
+        let amount = abs(balance.net)
+        let context: PaymentContext? = balance.items.count == 1 ? balance.items[0].paymentContext : nil
         switch copy.tone {
         case .owed:
             HStack(spacing: PBSpace.s12) {
@@ -102,13 +106,13 @@ struct FriendScreen: View {
                 .accessibilityIdentifier("friend.remind")
                 PBButton("Record payment", style: .secondary, fillsWidth: true) {
                     router.open(.recordPayment(RecordPaymentArgs(from: person.id, to: Person.me, amount: amount,
-                                                                 currency: currency, context: copy.lead?.paymentContext)))
+                                                                 currency: currency, context: context)))
                 }
                 .accessibilityIdentifier("friend.recordPayment")
             }
         case .owe:
             PBButton("Settle up", fillsWidth: true) {
-                router.open(.recordPayment(.paying(person.id, amount: amount, currency: currency, context: copy.lead?.paymentContext,
+                router.open(.recordPayment(.paying(person.id, amount: amount, currency: currency, context: context,
                                                    in: ledgerStore.ledger)))
             }
             .accessibilityIdentifier("friend.settleUp")
@@ -185,6 +189,7 @@ struct FriendScreen: View {
         }
     }
 
+    /// A category icon for an expense, money in or out for a payment or a loan.
     private func historyRow(_ row: FriendHistoryRow) -> some View {
         let leading: PBActivityRow.Leading = switch row.leading {
         case .icon(let icon): .icon(PBIcon(rawValue: icon) ?? .receipt)

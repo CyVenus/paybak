@@ -15,6 +15,7 @@ struct GroupDetailScreen: View {
         ScrollView {
             if let sheet = books.groupSheet(groupId) {
                 content(sheet, books: books)
+                    .padding(.bottom, PBSpace.s24)
                     .pbPushContent()
             }
         }
@@ -35,7 +36,7 @@ struct GroupDetailScreen: View {
         VStack(alignment: .leading, spacing: PBSpace.s24) {
             VStack(spacing: PBSpace.s16) {
                 PBTitleHeader(title: sheet.group.name, leading: .icon(sheet.group.pbIcon), subtitle: books.groupHeaderSubtitle(sheet),
-                              members: members(sheet.group))
+                              memberAvatars: memberAvatars(sheet.group, books: books))
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("group.title")
                 balanceCard(books.groupBalanceCopy(sheet))
@@ -57,21 +58,23 @@ struct GroupDetailScreen: View {
 
     // MARK: Header and balance
 
-    /// Up to four member heads (Figma draws no "+N"); guests without art are left out.
-    private func members(_ group: LedgerGroup) -> [PBPeepHead] {
-        group.memberIds.compactMap { id in
-            if id == Person.me {
-                if case .art(let head) = profileStore.avatarContent { return head }
-                return nil
-            }
-            return ledgerStore.ledger.person(id)?.avatar.flatMap(PBPeepHead.init(rawValue:))
+    /// The first four members, you first (Figma draws no "+N"): your own avatar, a friend's, or a
+    /// guest's initial.
+    private func memberAvatars(_ group: LedgerGroup, books: Books) -> [PBAvatarStack.Member] {
+        let youFirst = group.memberIds.filter { $0 == Person.me } + group.memberIds.filter { $0 != Person.me }
+        return youFirst.prefix(4).map { id -> PBAvatarStack.Member in
+            if id == Person.me { return .user }
+            return .content(ledgerStore.ledger.person(id)?.avatarContent ?? .initials(String(books.firstName(id).prefix(1))))
         }
     }
 
+    /// Settle up shows while you owe (your one payment, or the plan), while you're owed (the group's
+    /// plan) and, disabled, on a new group with nothing in it yet.
     private func balanceCard(_ copy: GroupBalanceCopy) -> some View {
-        PBBalanceCard(kind: kind(copy.tone), label: "Your balance", amount: copy.amount, caption: copy.caption,
-                      onSettleUp: copy.showsSettleUp ? { settle(copy.settle) } : nil, isSettleUpEnabled: copy.settle != nil,
-                      testIDPrefix: "group")
+        let target: SettleTarget? = copy.settle ?? (copy.tone == .owed ? SettleTarget.plan(groupId) : nil)
+        return PBBalanceCard(kind: kind(copy.tone), label: "Your balance", amount: copy.amount, caption: copy.caption,
+                             onSettleUp: copy.showsSettleUp || target != nil ? { settle(target) } : nil, isSettleUpEnabled: target != nil,
+                             testIDPrefix: "group")
     }
 
     private func settle(_ target: SettleTarget?) {

@@ -5,10 +5,29 @@ import Observation
 /// and currency carry over between Group and Project.
 @Observable
 final class GroupForm {
+    /// Everything the form holds, to tell whether it changed since it opened (Discard asks first).
+    struct Snapshot: Equatable {
+        var mode: NewGroupMode
+        var name: String
+        var type: LedgerGroup.GroupType?
+        var members: [PersonID]
+        var currency: String
+        var simplifyDebts: Bool
+        var details: String
+        var coverPhoto: String?
+        var budgetText: String
+        var rule: Contribution.Rule
+        var shares: [PersonID: String]
+    }
+
+    /// The longest name and description the fields take.
+    static let maxName = 40
+    static let maxDescription = 120
+
     var mode: NewGroupMode
     var name = ""
     var type: LedgerGroup.GroupType?
-    /// Everyone but you, in the order they were added.
+    /// Everyone but you, in the order the people picker gives them.
     var members: [PersonID] = []
     var currency: String
     var simplifyDebts = true
@@ -19,9 +38,22 @@ final class GroupForm {
     /// Percent or Fixed values as typed, per person (you included).
     var shares: [PersonID: String] = [:]
 
+    @ObservationIgnored private var initial: Snapshot?
+
     init(mode: NewGroupMode, currency: String) {
         self.mode = mode
         self.currency = currency
+        markUnchanged()
+    }
+
+    /// The state Discard compares against: as opened (or as a debug start screen prefilled it).
+    func markUnchanged() {
+        initial = snapshot
+    }
+
+    var snapshot: Snapshot {
+        Snapshot(mode: mode, name: name, type: type, members: members, currency: currency, simplifyDebts: simplifyDebts,
+                 details: details, coverPhoto: coverPhoto, budgetText: budgetText, rule: rule, shares: shares)
     }
 
     var isProject: Bool { mode == .project }
@@ -31,11 +63,16 @@ final class GroupForm {
 
     var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
 
-    var isDirty: Bool { !trimmedName.isEmpty || !members.isEmpty || type != nil || !details.isEmpty || coverPhoto != nil || !budgetText.isEmpty }
+    /// Anything changed since the form opened, the Group | Project switch included.
+    var isDirty: Bool { snapshot != initial }
 
-    /// Percent shares must add up to 100 % (Fixed and Equal always work).
+    /// Percent shares must add up to 100 %; Fixed needs an amount for everyone.
     var contributionAddsUp: Bool {
-        rule != .percent || everyone.reduce(0) { $0 + MoneyInput.basisPoints(shares[$1] ?? "") } == 10_000
+        switch rule {
+        case .equal: true
+        case .percent: everyone.reduce(0) { $0 + MoneyInput.basisPoints(shares[$1] ?? "") } == 10_000
+        case .fixed: everyone.allSatisfy { MoneyInput.minor(shares[$0] ?? "", currency: currency) > 0 }
+        }
     }
 
     var canCreate: Bool { !trimmedName.isEmpty && (!isProject || contributionAddsUp) }
@@ -44,7 +81,7 @@ final class GroupForm {
     var equalShareText: String {
         let count = everyone.count
         let (whole, tenths) = ((1000 + count / 2) / count).quotientAndRemainder(dividingBy: 10)
-        return 1000 % count == 0 && tenths == 0 ? "\(whole)%" : "\(whole).\(tenths)%"
+        return tenths == 0 ? "\(whole)%" : "\(whole).\(tenths)%"
     }
 
     /// The helper under Contribution.
@@ -56,21 +93,16 @@ final class GroupForm {
         }
     }
 
+    /// The people picked, in the picker's order (you're always first, so you're left out here).
     func setMembers(_ ids: [PersonID]) {
-        let others = ids.filter { $0 != Person.me }
-        members = members.filter(others.contains) + others.filter { !members.contains($0) }
+        members = ids.filter { $0 != Person.me }
     }
 
-    /// Switching to Percent or Fixed starts from an equal split so the fields add up.
+    /// A new rule starts with empty fields.
     func setRule(_ newRule: Contribution.Rule) {
         guard newRule != rule else { return }
         rule = newRule
         shares = [:]
-        guard newRule == .percent else { return }
-        let (each, extra) = Int64(10_000).quotientAndRemainder(dividingBy: Int64(everyone.count))
-        for (index, person) in everyone.enumerated() {
-            shares[person] = MoneyInput.percentText(each + (Int64(index) < extra ? 1 : 0))
-        }
     }
 
     var draft: GroupDraft {
@@ -82,14 +114,22 @@ final class GroupForm {
             name: trimmedName,
             currency: currency,
             memberIds: everyone,
-            simplifyDebts: isProject ? true : simplifyDebts,
+            simplifyDebts: simplifyDebts,
             project: isProject ? ProjectInfo(
-                description: details.isEmpty ? nil : details,
+                description: trimmedDetails.isEmpty ? nil : trimmedDetails,
                 coverPhoto: coverPhoto,
-                budget: budgetText.isEmpty ? nil : MoneyInput.minor(budgetText, currency: currency),
+                budget: budget,
                 contribution: contribution
             ) : nil
         )
+    }
+
+    private var trimmedDetails: String { details.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    /// No budget unless it's more than zero.
+    private var budget: Int64? {
+        let minor = MoneyInput.minor(budgetText, currency: currency)
+        return minor > 0 ? minor : nil
     }
 
     private var contribution: Contribution {

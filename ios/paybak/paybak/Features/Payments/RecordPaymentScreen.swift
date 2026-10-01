@@ -25,6 +25,9 @@ struct RecordPaymentScreen: View {
         }
     }
 
+    /// Edit: the payment as recorded. New: prefilled by the route (a Settle up row, a friend page, a
+    /// loan's repayment), else from the debt you owe most recently (record-lend-group §2.4); then the
+    /// currency and open amount follow what it's for.
     private func makeForm() -> PaymentForm {
         let books = store.books
         if let id = args.editing, let payment = store.ledger.payment(id) {
@@ -36,21 +39,29 @@ struct RecordPaymentScreen: View {
         var to = args.to
         var amount = args.amount
         var context = args.context.map { PaymentFor($0) }
+        var amountEdited = args.amount != nil
         if from == nil, to == nil, let debt = books.suggestedPayment() {
+            let debtContext = PaymentFor(debt)
+            let owed = -books.contextBalance(with: debt.creditor, for: debtContext)
             from = Person.me
             to = debt.creditor
-            amount = debt.amount
-            context = PaymentFor(debt)
+            amount = owed > 0 ? owed : debt.amount
+            context = debtContext
+            amountEdited = true
         }
-        let friend = from == Person.me ? to : from
-        let resolved = context ?? friend.flatMap { books.paymentContexts(with: $0).first } ?? .direct(expense: nil)
-        if amount == nil, let friend {
-            let balance = books.openBalance(with: friend, for: resolved)
-            amount = balance == 0 ? nil : abs(balance)
-        }
+        // One side is always you: you paid, unless the route says the money came to you.
+        let youPaid = from.map { $0 == Person.me } ?? (to != Person.me)
+        let other = youPaid ? to : from
+        let friend = other == Person.me ? nil : other
         let currency = args.currency ?? books.defaultCurrency
-        return PaymentForm(from: from ?? Person.me, to: to, amount: amount, currency: currency, rate: store.todayRate(for: currency),
-                           method: args.method ?? .cash, context: resolved, date: books.today)
+        let form = PaymentForm(from: youPaid ? Person.me : friend, to: youPaid ? friend : Person.me, amount: amount, currency: currency,
+                               rate: store.todayRate(for: currency), method: args.method ?? .cash,
+                               context: context ?? .direct(expense: nil), date: books.today)
+        form.amountEdited = amountEdited
+        // An amount the route gives in its own currency stays in that currency.
+        if args.amount == nil || args.currency == nil { form.refill(in: store) }
+        form.markUnchanged()
+        return form
     }
 }
 
@@ -65,7 +76,6 @@ private struct PaymentFormView: View {
     @State private var showsDiscard = false
     @State private var showsPhotoPicker = false
     @State private var pickedPhoto: PhotosPickerItem?
-    @State private var error: String?
     @FocusState private var amountFocused: Bool
 
     private var books: Books { store.books }
@@ -80,25 +90,22 @@ private struct PaymentFormView: View {
                                   testIDPrefix: "recordPayment", focus: $amountFocused, onCurrencyTap: openCurrency)
                         .onChange(of: form.amountText) { if amountFocused { form.amountEdited = true } }
                 }
-                VStack(alignment: .leading, spacing: PBSpace.s16) {
-                    methodPicker
-                    if form.method == .upi, let upi = payeeUPI {
-                        UPIPayeeCard(name: payeeName, avatar: party(form.to).avatar, upi: upi) {
-                            UIPasteboard.general.string = upi
-                            router.toast("UPI ID copied")
-                        }
-                        .transition(.opacity)
+                methodPicker
+                if form.method == .upi, let upi = payeeUPI {
+                    UPIPayeeCard(name: payeeName, avatar: party(form.to).avatar, upi: upi) {
+                        UIPasteboard.general.string = upi
+                        router.toast("UPI ID copied")
                     }
+                    .transition(.opacity)
                 }
-                .animation(.easeOut(duration: 0.2), value: form.method)
                 VStack(alignment: .leading, spacing: PBSpace.s12) {
                     VStack(spacing: 0) {
-                        PBSettingRow("For", value: books.paymentForName(form.context) ?? "No group", icon: .groups) {
+                        PBSettingRow("For", value: books.paymentForLabel(form.context) ?? "None", icon: .groups) {
                             amountFocused = false
                             showsFor = true
                         }
                         .accessibilityIdentifier("recordPayment.for")
-                        PBSettingRow("Date", value: Format.dayWithYear(form.date, today: books.today), icon: .calendar, action: openDate)
+                        PBSettingRow("Date", value: Format.day(form.date), icon: .calendar, action: openDate)
                             .accessibilityIdentifier("recordPayment.date")
                         PBSettingRow("Proof", value: form.proof == nil ? "Add photo (optional)" : "1 photo", icon: .camera,
                                      showsDivider: false, action: openProof)
@@ -114,7 +121,8 @@ private struct PaymentFormView: View {
                     }
                 }
             }
-            .padding(.bottom, PBSpace.s32)
+            .animation(.easeOut(duration: 0.2), value: form.method)
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
@@ -123,8 +131,7 @@ private struct PaymentFormView: View {
                           testIDPrefix: "recordPayment", onClose: close, onAction: save)
         }
         .pbSheet(isPresented: $showsFor) {
-            PaymentForSheet(contexts: form.friend.map { books.paymentContexts(with: $0) } ?? [.direct(expense: nil)],
-                            selected: form.context, onClose: { showsFor = false }) { context in
+            PaymentForSheet(friend: form.friend, selected: form.context, onClose: { showsFor = false }) { context in
                 showsFor = false
                 setContext(context)
             }
@@ -132,58 +139,60 @@ private struct PaymentFormView: View {
         .pbAlert(isPresented: $showsDiscard, title: form.editing == nil ? "Discard this payment?" : "Discard changes?",
                  message: "Your changes won’t be saved.", cancelLabel: "Keep editing", actionLabel: "Discard",
                  testIDPrefix: "recordPayment.discardAlert", onAction: router.dismissModal)
-        .alert("Couldn’t save", isPresented: Binding { error != nil } set: { if !$0 { error = nil } }) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(error ?? "")
-        }
         .photosPicker(isPresented: $showsPhotoPicker, selection: $pickedPhoto, matching: .images)
         .task(id: pickedPhoto) {
             guard let item = pickedPhoto, let data = try? await item.loadTransferable(type: Data.self) else { return }
             form.proof = PhotoFiles.save(data) ?? form.proof
             pickedPhoto = nil
         }
-        .onRouteResult(requests.from) { if case .person(let id) = $0 { form.setFrom(id); refreshAmount() } }
-        .onRouteResult(requests.to) { if case .person(let id) = $0 { form.setTo(id); refreshAmount() } }
+        .onRouteResult(requests.from) { if case .person(let id) = $0 { picked(id, tappedFrom: true) } }
+        .onRouteResult(requests.to) { if case .person(let id) = $0 { picked(id, tappedFrom: false) } }
         .onRouteResult(requests.currency) { result in
             guard case .currency(let code) = result else { return }
             form.currency = code
             form.rate = store.todayRate(for: code)
+            // A currency of your own leaves the group or loan, and keeps the amount as typed.
+            if case .direct = form.context {} else { form.context = .direct(expense: nil) }
+            form.amountEdited = true
         }
         .onRouteResult(requests.date) { if case .day(let day?) = $0 { form.date = day } }
         .task {
-            if form.amountText.isEmpty, form.editing == nil { amountFocused = true }
+            if form.friend == nil, form.editing == nil { amountFocused = true }
         }
         .routeTestRoot("recordPayment")
     }
 
     // MARK: Pieces
 
+    /// Cash · UPI · Bank · Card · Other, single choice; the row scrolls sideways when it doesn't fit.
     private var methodPicker: some View {
         VStack(alignment: .leading, spacing: PBSpace.s4) {
             Text("Method")
                 .textStyle(.subheadline)
                 .foregroundStyle(PBColor.textSecondary)
-            HStack(spacing: PBSpace.s6) {
-                ForEach(PaymentMethodKind.allCases, id: \.self) { method in
-                    PBCategoryChip(method.label, isSelected: form.method == method) {
-                        Haptics.selection()
-                        form.method = method
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: PBSpace.s6) {
+                    ForEach(PaymentMethodKind.allCases, id: \.self) { method in
+                        PBCategoryChip(method.label, isSelected: form.method == method) {
+                            Haptics.selection()
+                            form.method = method
+                        }
+                        .accessibilityIdentifier("recordPayment.method.\(method.rawValue)")
                     }
-                    .accessibilityIdentifier("recordPayment.method.\(method.rawValue)")
                 }
             }
+            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
         }
     }
 
     private func party(_ id: PersonID?) -> PBPaymentParties.Party {
-        guard let id else { return .init(name: "Choose", avatar: .icon(.profile)) }
+        guard let id else { return .init(name: "Choose", avatar: .icon(.userAdd)) }
         if id == Person.me { return .init(name: "You", avatar: profileStore.avatarContent) }
         let person = store.ledger.person(id)
         return .init(name: person?.firstName ?? "Someone", avatar: person?.avatarContent ?? .icon(.profile))
     }
 
-    /// The receiver's UPI ID (yours when someone paid you).
+    /// The receiver's UPI ID: the friend's when you pay them, yours when they paid you.
     private var payeeUPI: String? {
         guard let to = form.to else { return nil }
         let upi = to == Person.me ? profileStore.profile.upiID : store.ledger.person(to)?.upi
@@ -195,10 +204,11 @@ private struct PaymentFormView: View {
         return to == Person.me ? profileStore.profile.name : store.ledger.person(to)?.name ?? ""
     }
 
-    /// "You owe Meera ₹450 in Flat 302"; for another currency, the amount at today's rate.
+    /// In another currency than what it's for, the amount at today's rate; otherwise what's open
+    /// there: "You owe Meera ₹450 in Flat 302", "Dev owes you ₹6,000 for Laptop repair".
     private var helper: String? {
-        if let rate = form.rate, form.amount > 0 {
-            return Money.approximateLine(form.amount, currency: form.currency, rate: rate)
+        if form.currency != PaymentForm.currency(of: form.context, in: books), form.amount > 0 {
+            return form.rate.map { Money.approximateLine(form.amount, currency: form.currency, rate: $0) }
         }
         return form.friend.flatMap { books.openBalanceHelper(with: $0, for: form.context) }
     }
@@ -214,9 +224,14 @@ private struct PaymentFormView: View {
 
     private func pick(_ side: Side) {
         amountFocused = false
-        let current = side == .from ? form.from : form.to
         router.open(.pickPeople(PeoplePickRequest(id: side == .from ? requests.from : requests.to, mode: .single,
-                                                  selected: current.map { [$0] } ?? [], title: side == .from ? "From" : "To")))
+                                                  title: "Choose someone")))
+    }
+
+    /// Someone picked for From or To: the friend and the direction, then the open amount between you.
+    private func picked(_ person: PersonID, tappedFrom: Bool) {
+        form.pick(person, tappedFrom: tappedFrom)
+        form.refill(in: store)
     }
 
     private func openCurrency() {
@@ -226,7 +241,7 @@ private struct PaymentFormView: View {
 
     private func openDate() {
         amountFocused = false
-        router.open(.pickDate(DatePickRequest(id: requests.date, kind: .date, selected: form.date, latest: books.today)))
+        router.open(.pickDate(DatePickRequest(id: requests.date, kind: .date, selected: form.date)))
     }
 
     private func openProof() {
@@ -238,22 +253,11 @@ private struct PaymentFormView: View {
         }
     }
 
-    /// A new person or context: file it where you have something open, and prefill that balance
-    /// unless the amount was typed.
-    private func refreshAmount() {
-        guard let friend = form.friend else { return }
-        let contexts = books.paymentContexts(with: friend)
-        if !contexts.contains(form.context) {
-            form.context = contexts.first { books.openBalance(with: friend, for: $0) != 0 } ?? contexts.last ?? .direct(expense: nil)
-        }
-        setContext(form.context)
-    }
-
+    /// A group, a loan or nothing (directly between you): its currency, and its open amount unless
+    /// the amount was typed.
     private func setContext(_ context: PaymentFor) {
         form.context = context
-        guard !form.amountEdited, let friend = form.friend else { return }
-        let balance = books.openBalance(with: friend, for: context)
-        if balance != 0 { form.amountText = MoneyInput.text(abs(balance), currency: form.currency) }
+        form.refill(in: store)
     }
 
     private func close() {
@@ -275,7 +279,7 @@ private struct PaymentFormView: View {
             Haptics.success()
         } catch {
             Haptics.warning()
-            self.error = error.localizedDescription
+            router.toast(error.localizedDescription)
         }
     }
 }

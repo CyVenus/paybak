@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Not received (settle §8): instead of silently rejecting a friend's claim, you send them an
 /// editable note. The claim leaves your Confirm cards, and what they owe stays until a payment is
-/// confirmed. The sheet has no header: the question is its title.
+/// confirmed. The sheet has no header: the question is its title. Once the claim was answered
+/// elsewhere (confirmed, or cancelled by the payer) the sheet closes.
 struct NotReceivedSheet: View {
     let paymentId: PaymentID
 
@@ -12,17 +13,26 @@ struct NotReceivedSheet: View {
     @FocusState private var isNoteFocused: Bool
 
     var body: some View {
+        let claim = waitingClaim
         PBSheet {
-            if let payment = ledgerStore.ledger.payment(paymentId) {
-                content(ledgerStore.books.notReceivedCopy(payment), isPending: payment.status == .pending)
+            if let claim {
+                content(ledgerStore.books.notReceivedCopy(claim))
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("screen.notReceived")
+        .onChange(of: claim == nil, initial: true) { _, isGone in
+            if isGone { router.dismissSheet() }
+        }
     }
 
-    /// `isPending` false: the claim was already answered (from another surface), so Send is off.
-    private func content(_ copy: NotReceivedCopy, isPending: Bool) -> some View {
+    /// The claim while it still waits for your answer: a pending payment to you.
+    private var waitingClaim: Payment? {
+        guard let payment = ledgerStore.ledger.payment(paymentId), payment.toId == Person.me, payment.status == .pending else { return nil }
+        return payment
+    }
+
+    private func content(_ copy: NotReceivedCopy) -> some View {
         VStack(alignment: .leading, spacing: PBSpace.s24) {
             VStack(alignment: .leading, spacing: PBSpace.s8) {
                 Text(copy.title)
@@ -38,7 +48,6 @@ struct NotReceivedSheet: View {
                 .accessibilityIdentifier("notReceived.note")
             VStack(spacing: PBSpace.s12) {
                 PBButton("Send", fillsWidth: true, action: send)
-                    .disabled(!isPending || note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .accessibilityIdentifier("notReceived.send")
                 PBButton("Cancel", style: .secondary, fillsWidth: true, action: router.dismissSheet)
                     .accessibilityIdentifier("notReceived.cancel")
@@ -54,7 +63,7 @@ struct NotReceivedSheet: View {
     private func send() {
         isNoteFocused = false
         do {
-            try ledgerStore.markNotReceived(paymentId, note: note)
+            try ledgerStore.markNotReceived(paymentId, note: note.trimmingCharacters(in: .whitespacesAndNewlines))
             router.dismissSheet()
         } catch {
             router.toast(error.localizedDescription)

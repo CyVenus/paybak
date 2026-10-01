@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The payment detail (record-lend-group §3, settle §5): payer → receiver hero, the status notice
-/// (pending, not received, confirmed; gray, never red), the detail rows and Cancel payment. A
-/// claim sent to you shows Confirm / Not received instead.
+/// (pending, not received, confirmed; gray, never red), the detail rows and Cancel payment. The
+/// payer's own pending payment has Edit and Cancel payment; a claim sent to you shows Confirm / Not
+/// received instead.
 struct PaymentDetailScreen: View {
     let paymentId: PaymentID
 
@@ -17,10 +18,13 @@ struct PaymentDetailScreen: View {
             if let detail {
                 content(detail)
             } else {
-                Text("This payment is no longer here.")
-                    .textStyle(.body)
-                    .foregroundStyle(PBColor.textSecondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ScrollView {
+                    Text("This payment isn’t available any more.")
+                        .textStyle(.body)
+                        .foregroundStyle(PBColor.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .pbPushContent()
+                }
             }
         }
         .pbPinnedHeader {
@@ -35,21 +39,24 @@ struct PaymentDetailScreen: View {
     }
 
     private func content(_ detail: PaymentDetail) -> some View {
-        ScrollView {
+        let payment = detail.payment
+        let rows = detail.rows
+        return ScrollView {
             VStack(alignment: .leading, spacing: PBLayout.sectionGap) {
-                PBAmountHero(leading: .pair(from: avatar(detail.payment.fromId), to: avatar(detail.payment.toId)),
+                PBAmountHero(leading: .pair(from: avatar(payment.fromId), to: avatar(payment.toId)),
                              title: detail.title, amount: detail.amount, meta: detail.meta)
-                notice(detail.notice)
+                notice(detail)
                     .accessibilityIdentifier("paymentRecorded.status")
                 VStack(alignment: .leading, spacing: PBSpace.s8) {
                     VStack(spacing: 0) {
-                        ForEach(detail.rows, id: \.title) { row in
-                            PBSettingRow(row.title, value: row.value, trailing: row.title == "Proof" && detail.payment.proof != nil ? .chevron : .none,
-                                         showsDivider: row.title != detail.rows.last?.title,
-                                         action: row.title == "Proof" ? detail.payment.proof.map { name in { router.open(.photoViewer(.file(name))) } } : nil)
+                        ForEach(rows, id: \.title) { row in
+                            PBSettingRow(row.title, value: row.value, trailing: row.title == "Proof" && payment.proof != nil ? .chevron : .none,
+                                         showsDivider: row.title != rows.last?.title,
+                                         action: row.title == "Proof" ? payment.proof.map { name in { router.open(.photoViewer(.file(name))) } } : nil)
                         }
                     }
                     .pbCard(padding: 0)
+                    .accessibilityIdentifier("paymentRecorded.details")
                     if let footnote = detail.footnote {
                         Text(footnote)
                             .textStyle(.footnote)
@@ -70,23 +77,25 @@ struct PaymentDetailScreen: View {
         }
     }
 
+    /// Pending: the payer waits for the other side; the receiver confirms once the money has arrived
+    /// (or says Not received).
     @ViewBuilder
-    private func notice(_ notice: PaymentDetail.Notice) -> some View {
-        switch notice {
+    private func notice(_ detail: PaymentDetail) -> some View {
+        switch detail.notice {
         case .awaitingThem(let name):
             PBNoticeCard(icon: .activity, title: "Pending confirmation", message: "Waiting for \(name) to confirm")
-        case .awaitingYou(let name):
-            PBNoticeCard(icon: .activity, title: "Waiting for you",
-                         message: "\(name) says this payment was made. Confirm once it’s reached you.",
+        case .awaitingYou:
+            PBNoticeCard(icon: .activity, title: "Pending confirmation", message: "Confirm once the money has arrived",
                          primary: .init("Confirm", action: confirm),
                          secondary: .init("Not received") { router.open(.notReceived(paymentId)) })
         case .notReceived(let name, let note):
             PBNoticeCard(icon: .flag, title: "Not received",
-                         message: ["\(name) says they haven’t received it", note].compactMap(\.self).joined(separator: "\n"))
+                         message: ["\(name) says they haven’t received it", note]
+                            .compactMap(\.self).filter { !$0.isEmpty }.joined(separator: "\n"))
         case .confirmed(let text):
             PBNoticeCard(icon: .checkCircle, title: "Confirmed", message: text)
         case .cancelled:
-            PBNoticeCard(icon: .close, title: "Cancelled", message: "This payment doesn’t count anywhere.")
+            PBNoticeCard(icon: .activity, title: "Cancelled", message: "You cancelled this payment")
         }
     }
 

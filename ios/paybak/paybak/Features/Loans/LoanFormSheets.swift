@@ -17,7 +17,12 @@ struct LoanReasonSheet: View {
     var body: some View {
         PBSheet(title: "Reason", testIDPrefix: "loanReason", onClose: onClose) {
             VStack(spacing: PBSpace.s16) {
-                PBTextField(nil, text: $text, prompt: "What’s it for?", focus: $isFocused)
+                PBTextField(nil, text: Binding {
+                    text
+                } set: {
+                    text = String($0.prefix(LoanForm.maxReason))
+                }, prompt: "What’s it for?", focus: $isFocused)
+                    .textInputAutocapitalization(.sentences)
                     .submitLabel(.done)
                     .onSubmit(done)
                     .accessibilityIdentifier("loanReason.field")
@@ -29,7 +34,7 @@ struct LoanReasonSheet: View {
     }
 
     private func done() {
-        onDone(String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(60)))
+        onDone(String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(LoanForm.maxReason)))
     }
 }
 

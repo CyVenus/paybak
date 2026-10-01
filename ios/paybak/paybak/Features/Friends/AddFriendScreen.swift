@@ -36,6 +36,7 @@ struct AddFriendScreen: View {
                         .accessibilityIdentifier("addFriend.noMatch")
                 }
             }
+            .padding(.bottom, PBSpace.s24)
             .pbPushContent()
         }
         .scrollDismissesKeyboard(.interactively)
@@ -84,10 +85,9 @@ struct AddFriendScreen: View {
                 ForEach(rows) { row in
                     let avatar: PBAvatar.Content = row.avatar.flatMap(PBPeepHead.init(rawValue:)).map { .art($0) }
                         ?? .initials(Person.initials(of: row.name))
-                    PBPersonRow(name: row.name, avatar: avatar, subtitle: "@\(row.username)",
+                    PBPersonRow(name: row.name, avatar: avatar, subtitle: row.username.isEmpty ? nil : "@\(row.username)",
                                 trailing: row.friendId == nil ? .button("Add") { add(row) } : .status("Added"),
-                                showsDivider: row.id != rows.last?.id,
-                                action: row.friendId.map { id in { router.open(.friend(id)) } })
+                                showsDivider: row.id != rows.last?.id, action: tapAction(row))
                         .pbFlushRow()
                         .accessibilityIdentifier("addFriend.onPaybak.\(row.id)")
                 }
@@ -116,6 +116,12 @@ struct AddFriendScreen: View {
 
     // MARK: Actions
 
+    /// The row opens a friend's page, or adds someone who isn't one yet.
+    private func tapAction(_ row: AddFriendLists.OnPaybakRow) -> () -> Void {
+        if let id = row.friendId { return { router.open(.friend(id)) } }
+        return { add(row) }
+    }
+
     private func add(_ row: AddFriendLists.OnPaybakRow) {
         guard let contact = row.contact else { return }
         ledgerStore.addFriend(contact)
@@ -125,7 +131,6 @@ struct AddFriendScreen: View {
     /// A guest friend opens their page; anyone else is added as a guest first.
     private func invite(_ row: AddFriendLists.InviteRow) {
         let id = row.guestId ?? ledgerStore.addGuest(name: row.name, contact: row.reach)
-        query = ""
         router.open(.friend(id))
     }
 

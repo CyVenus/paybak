@@ -14,7 +14,6 @@ struct GroupSettingsScreen: View {
     @State private var isBlockShown = false
     @State private var isLeaveConfirmShown = false
     @State private var isRenaming = false
-    @State private var newName = ""
     @State private var scrollPosition = ScrollPosition()
     /// One request id per picker, so each result lands in the right row.
     @State private var settleByRequest = DatePickRequest(kind: .dueDate, allowsNone: true)
@@ -25,6 +24,7 @@ struct GroupSettingsScreen: View {
         ScrollView {
             if let group = ledgerStore.ledger.group(groupId) {
                 content(group)
+                    .padding(.bottom, PBSpace.s24)
                     .pbPushContent()
             }
         }
@@ -39,10 +39,11 @@ struct GroupSettingsScreen: View {
         .pbAlert(isPresented: $isLeaveConfirmShown, title: "Leave \(ledgerStore.ledger.group(groupId)?.name ?? "group")?",
                  message: "You’ll stop seeing this group. Its history stays with the other members.",
                  cancelLabel: "Cancel", actionLabel: "Leave", testIDPrefix: "groupSettings.leaveConfirm", onAction: leaveGroup)
-        .alert("Rename group", isPresented: $isRenaming) {
-            TextField("Name", text: $newName)
-            Button("Cancel", role: .cancel) {}
-            Button("Save", action: rename)
+        .pbSheet(isPresented: $isRenaming) {
+            RenameGroupSheet(name: ledgerStore.ledger.group(groupId)?.name ?? "", onClose: { isRenaming = false }) { name in
+                rename(name)
+                isRenaming = false
+            }
         }
         .onRouteResult(settleByRequest.id) { result in
             guard case .day(let day) = result else { return }
@@ -69,7 +70,6 @@ struct GroupSettingsScreen: View {
         return VStack(alignment: .leading, spacing: PBSpace.s24) {
             VStack(spacing: 0) {
                 PBSettingRow("Name", value: group.name, icon: group.pbIcon) {
-                    newName = group.name
                     isRenaming = true
                 }
                 .accessibilityIdentifier("groupSettings.name")
@@ -84,7 +84,7 @@ struct GroupSettingsScreen: View {
             VStack(alignment: .leading, spacing: PBSpace.s8) {
                 VStack(spacing: 0) {
                     PBSettingRow("Currency", value: currencyValue(group.currency), icon: .exchange) {
-                        currencyRequest = CurrencyPickRequest(selected: group.currency, title: "Currency")
+                        currencyRequest = CurrencyPickRequest(selected: group.currency, title: "Group currency")
                         router.open(.pickCurrency(currencyRequest))
                     }
                     .accessibilityIdentifier("groupSettings.currency")
@@ -107,7 +107,8 @@ struct GroupSettingsScreen: View {
     }
 
     private func members(_ group: LedgerGroup) -> some View {
-        VStack(alignment: .leading, spacing: PBSpace.s4) {
+        let members = group.memberIds.filter { $0 == Person.me } + group.memberIds.filter { $0 != Person.me }
+        return VStack(alignment: .leading, spacing: PBSpace.s4) {
             PBSectionHeader("Members", actionTitle: "Add") {
                 membersRequest = PeoplePickRequest(selected: group.memberIds.filter { $0 != Person.me }, title: "Add members", showsYou: false)
                 router.open(.pickPeople(membersRequest))
@@ -115,8 +116,8 @@ struct GroupSettingsScreen: View {
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("groupSettings.addMember")
             VStack(spacing: 0) {
-                ForEach(group.memberIds, id: \.self) { id in
-                    memberRow(id, showsDivider: id != group.memberIds.last)
+                ForEach(members, id: \.self) { id in
+                    memberRow(id, showsDivider: id != members.last)
                         .accessibilityIdentifier("groupSettings.member.\(id)")
                 }
             }
@@ -138,10 +139,9 @@ struct GroupSettingsScreen: View {
         }
     }
 
-    /// The UPI ID, else "@username"; a guest's phone or email.
+    /// The UPI ID, else "@username", else their phone or email (a guest's).
     private func memberSubtitle(_ person: Person) -> String? {
-        if person.isGuest { return person.contact }
-        return person.upi ?? person.username.map { "@\($0)" }
+        person.upi ?? person.username.map { "@\($0)" } ?? person.contact
     }
 
     /// "INR ₹" · "AED" (a code whose symbol is the code shows once).
@@ -158,7 +158,7 @@ struct GroupSettingsScreen: View {
         }
     }
 
-    private func rename() {
+    private func rename(_ newName: String) {
         let name = newName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }
         try? ledgerStore.updateGroup(groupId) { $0.name = name }
