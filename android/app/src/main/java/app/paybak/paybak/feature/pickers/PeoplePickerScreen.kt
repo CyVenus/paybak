@@ -133,9 +133,7 @@ fun PeoplePickerScreen(route: Route.PickPeople) {
                 }
             }
         }
-        val matches = friends.filter {
-            matchesSearch(it.name, it.username, it.contact, query = query)
-        }
+        val matches = friends.filter { matchesPerson(it.name, it.username, it.contact, query) }
         if (query.isBlank()) {
             if (route.includesYou) {
                 PbCard {

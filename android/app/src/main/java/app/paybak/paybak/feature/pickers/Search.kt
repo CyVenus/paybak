@@ -16,3 +16,10 @@ fun matchesSearch(vararg texts: String?, query: String): Boolean {
     val needle = query.folded()
     return needle.isEmpty() || texts.any { it != null && needle in it.folded() }
 }
+
+/**
+ * The people picker's search: a name, username or contact containing [query]. A leading "@"
+ * ("@priya") searches usernames, which are kept without it.
+ */
+fun matchesPerson(name: String?, username: String?, contact: String?, query: String): Boolean =
+    matchesSearch(name, username, contact, query = query.trim().removePrefix("@"))
