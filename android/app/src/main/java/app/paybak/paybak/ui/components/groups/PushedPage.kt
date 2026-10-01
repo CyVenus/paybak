@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import app.paybak.paybak.ui.components.PbHeaderAction
 import app.paybak.paybak.ui.components.PbPushHeader
 import app.paybak.paybak.ui.icons.PbIcon
@@ -41,10 +42,10 @@ import app.paybak.paybak.ui.theme.PbTextStyles
 
 /**
  * A pushed page as screens-groups §1.6 builds it: the Push Header pinned over a white band that
- * runs from the top edge to its bottom, and the content scrolling under the band, starting 16 dp
- * below the header. The root is tagged `screen.[id]`; the header's parts "[id].back" and
- * "[id].action". The keyboard lifts the end of the content, so a focused field can scroll into
- * view.
+ * runs from the top edge to its bottom, and the content scrolling under the band, starting
+ * [contentTop] below the header (16 dp; the Settle up pages use 24). The root is tagged
+ * `screen.[id]`; the header's parts "[id].back" and "[id].[actionTag]". The keyboard lifts the end
+ * of the content, so a focused field can scroll into view.
  *
  * @param overlay Drawn over everything, e.g. a local sheet.
  */
@@ -55,7 +56,9 @@ fun PbPushedPage(
     modifier: Modifier = Modifier,
     title: String? = null,
     action: PbHeaderAction? = null,
+    actionTag: String = "action",
     scrollState: ScrollState = rememberScrollState(),
+    contentTop: Dp = PbSpace.S16,
     overlay: @Composable BoxScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -75,7 +78,7 @@ fun PbPushedPage(
                     .padding(
                         start = PbLayout.ScreenMargin,
                         end = PbLayout.ScreenMargin,
-                        top = PbSize.Tap + PbSpace.S16,
+                        top = PbSize.Tap + contentTop,
                         bottom = PbSpace.S24,
                     ),
                 content = content,
@@ -88,6 +91,7 @@ fun PbPushedPage(
                     modifier = Modifier.padding(horizontal = PbLayout.ScreenMargin),
                     action = action,
                     testTag = id,
+                    actionTag = actionTag,
                 )
             }
         }

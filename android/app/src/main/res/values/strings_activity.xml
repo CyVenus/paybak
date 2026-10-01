@@ -1,4 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Strings of the activity module (app-architecture §7.1): names start with "activity_". Only its lane edits this file. -->
 <resources>
+    <!-- Timeline (screens-activity §3) -->
+    <string name="activity_empty_title">No activity yet.</string>
+    <string name="activity_empty_body">Expenses, payments and changes will show up here.</string>
+
+    <!-- Activity log (a person, group, project or category; proposal) -->
+    <string name="activity_log_title">%1$s · History</string>
+    <string name="activity_log_empty">Nothing here yet.</string>
+
+    <!-- Recently deleted (§5) -->
+    <string name="activity_deleted_helper">Deleted items are kept for 30 days.</string>
+    <string name="activity_deleted_empty">Nothing here.</string>
+    <string name="activity_restore">Restore</string>
+    <string name="activity_toast_restored">Expense restored</string>
+
+    <!-- Notifications inbox (§6) -->
+    <string name="activity_notifications_title">Notifications</string>
+    <string name="activity_mark_all_read">Mark all read</string>
+    <string name="activity_earlier">Earlier</string>
+    <string name="activity_overdue">Overdue</string>
+    <string name="activity_notifications_empty">You’re all caught up.</string>
+
+    <!-- Local notifications (§7) -->
+    <string name="activity_channel_payments">Payments to confirm</string>
+    <string name="activity_channel_reminders">Reminders</string>
+    <string name="activity_channel_summaries">Summaries</string>
+    <string name="activity_channel_activity">Activity</string>
+    <string name="activity_push_claim_title">Payment to confirm</string>
+    <string name="activity_push_claim_body">%1$s says %2$s paid you %3$s for %4$s.</string>
 </resources>

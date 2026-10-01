@@ -4,17 +4,20 @@ import SwiftUI
 /// #F5F5F5 card, 88 tall. The person's art (or a group icon) in a white 40 pt circle; the title with
 /// its detail, which truncates so the row keeps its height; a status pill (red only when overdue);
 /// then the amount over a small white action ("Remind" for money owed to you, "Settle" for money you
-/// owe). Tapping the row outside the action opens what it's about.
-/// Test ids: `<testID>` for the row, `<testID>.action` for the button.
+/// owe). Tapping the row outside the action opens what it's about. Settle up drops the action on a
+/// payment waiting for its receiver, and the pill when there's no due date.
+/// Test ids: `<testID>` for the row, `actionTestID` (default `<testID>.action`) for the button.
 struct PBAttentionRow: View {
     let avatar: PBAvatar.Content
     let title: String
     let detail: String
     let amount: String
-    let badge: String
+    let badge: String?
     var isOverdue = false
-    let actionTitle: String
+    /// Nil: no action (the amount keeps its place).
+    let actionTitle: String?
     var testID: String?
+    var actionTestID: String?
     let onAction: () -> Void
     var onTap: () -> Void = {}
 
@@ -33,7 +36,9 @@ struct PBAttentionRow: View {
                             .foregroundStyle(PBColor.textSecondary)
                     }
                     .lineLimit(1)
-                    PBBadge(badge, style: isOverdue ? .overdue : .onCard)
+                    if let badge {
+                        PBBadge(badge, style: isOverdue ? .overdue : .onCard)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 VStack(alignment: .trailing, spacing: PBSpace.s6) {
@@ -43,8 +48,12 @@ struct PBAttentionRow: View {
                         .lineLimit(1)
                     // Reserves the action's place; the live button sits on top (a button can't
                     // live inside another button's label).
-                    actionButton
-                        .hidden()
+                    if let actionTitle {
+                        actionButton(actionTitle)
+                            .hidden()
+                    } else {
+                        Color.clear.frame(width: 0, height: PBSize.buttonSm)
+                    }
                 }
                 .fixedSize()
             }
@@ -55,16 +64,18 @@ struct PBAttentionRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier(testID ?? "")
         .overlay(alignment: .bottomTrailing) {
-            actionButton
-                .accessibilityIdentifier(testID.map { "\($0).action" } ?? "")
-                .accessibilityLabel("\(actionTitle) \(title)")
-                .padding(.bottom, PBSpace.s12)
-                .padding(.trailing, PBLayout.cardPadding)
+            if let actionTitle {
+                actionButton(actionTitle)
+                    .accessibilityIdentifier(actionTestID ?? testID.map { "\($0).action" } ?? "")
+                    .accessibilityLabel("\(actionTitle) \(title)")
+                    .padding(.bottom, PBSpace.s12)
+                    .padding(.trailing, PBLayout.cardPadding)
+            }
         }
     }
 
-    private var actionButton: some View {
-        PBButton(actionTitle, style: .onCard, size: .small, action: onAction)
+    private func actionButton(_ title: String) -> some View {
+        PBButton(title, style: .onCard, size: .small, action: onAction)
     }
 }
 
@@ -90,6 +101,8 @@ private struct PBAttentionRowStyle: ButtonStyle {
         PBAttentionRow(avatar: .art(.dev), title: "Dev", detail: "Groceries for the whole weekend trip", amount: "₹12,700",
                        badge: "Due tomorrow", actionTitle: "Remind", onAction: {})
             .pbPreviewInteraction(.pressed)
+        PBAttentionRow(avatar: .art(.kabir), title: "Kabir", detail: "Goa Trip", amount: "₹1,400",
+                       badge: "Pending", actionTitle: nil, onAction: {})
     }
     .padding(PBLayout.screenMargin)
 }

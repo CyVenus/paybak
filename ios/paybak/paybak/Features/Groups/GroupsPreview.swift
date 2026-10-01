@@ -1,8 +1,8 @@
 #if DEBUG
 import SwiftUI
 
-/// Previews of the Groups & Friends screens: the demo at the Figma date in throwaway stores, with a
-/// router and a navigation stack so pushes work.
+/// Previews of lane B's screens (Groups, Friends, Settle up): the demo at the Figma date in throwaway
+/// stores, with a router and a navigation stack so pushes work.
 struct GroupsPreview<Content: View>: View {
     var scenarios = Scenario.demo
     @ViewBuilder let content: Content
